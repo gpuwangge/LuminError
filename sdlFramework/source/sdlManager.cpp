@@ -210,3 +210,12 @@ void CSDLManager::eventHandle(){
 
     SDL_Delay(1);//delay 1ms. otherwise it could run millians of times per second
 }
+
+
+extern "C" void* CreateInstance(){ return new CSDLManager();}
+extern "C" void DestroyInstance(void *p){ 
+    if(p) {
+        //static_cast< *>(p)->Shutdown();
+        delete static_cast<CSDLManager*>(p);
+    } 
+}

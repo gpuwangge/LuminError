@@ -18,9 +18,11 @@
 #include "camera.hpp"
 #include "instance.h"
 
+#include "ISDLCore.h"
+
 class CApplication;
 
-class CSDLManager final{
+class CSDLManager final : public LESDL::ISDLCore{
 public:
     CSDLManager(){};
     ~CSDLManager(){};
@@ -45,12 +47,17 @@ public:
     //float previous_mouse_y = 0;
     //bool bFirstPersonMouseRotate = false;
 
-    void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle);
-    void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions);
-    void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface);
-    //void createFonts(int fontSize);
+    bool IsRunning() override {return bStillRunning;}
+    void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle) override;
+    void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) override;
+    void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
+    void eventHandle() override;
 
-    void eventHandle();
+    void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
+    void SetApplication(LEApplication::IApplication* pApplication) override {}
 };
+
+extern "C" void* CreateInstance();
+extern "C" void DestroyInstance(void *p);
 
 #endif

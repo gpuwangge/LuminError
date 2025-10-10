@@ -28,6 +28,8 @@ CApplication::CApplication(){
 
 #ifndef ANDROID
 void CApplication::Run(std::string exampleName){ //Entrance Function
+    LoadSDLCore();
+
     CContext::Init();
 
     /**************** 
@@ -36,8 +38,9 @@ void CApplication::Run(std::string exampleName){ //Entrance Function
     *****************/
     m_sampleName.erase(0, 1);
 #ifdef SDL
-    sdlManager.m_pApp = this;
-    sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
+   // sdlManager.m_pApp = this;
+    //sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
+    pSdlcore->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 #else
     glfwManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 #endif
@@ -53,7 +56,8 @@ void CApplication::Run(std::string exampleName){ //Entrance Function
     *****************/
     std::vector<const char*> requiredInstanceExtensions;
 #ifdef SDL
-    sdlManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
+    //sdlManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
+    pSdlcore->queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
 #else    
     glfwManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
 #endif
@@ -71,7 +75,8 @@ void CApplication::Run(std::string exampleName){ //Entrance Function
     * Only third party(glfw or sdl) knows what kind of surface can be attached to its window.
     *****************/
 #ifdef SDL   
-    sdlManager.createSurface(IN instance, OUT surface);
+    //sdlManager.createSurface(IN instance, OUT surface);
+    pSdlcore->createSurface(IN instance, OUT surface);
 #else  
     glfwManager.createSurface(IN instance, OUT surface);
 #endif
@@ -122,8 +127,10 @@ void CApplication::Run(std::string exampleName){ //Entrance Function
     //std::cout<<"Total Initialization cost: "<<durationInitializationTime<<" milliseconds"<<std::endl;
 
 #ifdef SDL   
-    while(sdlManager.bStillRunning) {
-        sdlManager.eventHandle();
+    //while(sdlManager.bStillRunning) {
+    while(pSdlcore->IsRunning()){
+        //sdlManager.eventHandle();
+        pSdlcore->eventHandle();
         if(!NeedToPause) UpdateRecordRender();
         if(NeedToExit) break;
     }
@@ -687,10 +694,6 @@ void CApplication::CleanUp(){
     CContext::Quit();
 
     //std::cout<<"End Cleanup()."<<std::endl;
-}
-
-CApplication::~CApplication(){
-    CleanUp();
 }
 
 /*************
@@ -1460,8 +1463,8 @@ void CApplication::ReadCameras(){
     //     config["MainCamera"]["camera_target_position"][2].as<float>());
 
 #ifdef SDL
-    sdlManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
-    sdlManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
+    //sdlManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
+    //sdlManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
 #else    
     glfwManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
     glfwManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
@@ -1529,10 +1532,56 @@ void CApplication::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
 }
 
 
+void CApplication::LoadSDLCore(){
+    std::string sdlName = "sdlcore.dll"; //libsdl-vulkan-framework.dll
+    hSdlcore = LoadLibraryA(sdlName.c_str()); 
+    if(!hSdlcore) { 
+        std::cerr << "DLL load failed! Plugin Name = " << sdlName << std::endl; 
+        return; 
+    }
+
+    using CreateInstanceFunc = void*(*)();
+    auto CreateInstance_Plugin =  (CreateInstanceFunc)GetProcAddress(hSdlcore, "CreateInstance");
+    if(!CreateInstance_Plugin) { 
+        std::cerr << "GetProcAddress failed! (CreateInstance_Plugin)" << std::endl;
+        FreeLibrary(hSdlcore);
+        return;
+    }
+    
+    pSdlcore = static_cast<LESDL::ISDLCore*>(CreateInstance_Plugin());
+    pSdlcore->greet(); //test p_person
+    pSdlcore->SetApplication(this);
+}
+
+void CApplication::Shutdown(){
+    std::cout<<"Application::Shutdown()"<<std::endl;
+    if (pSdlcore) {
+        using DestroyInstanceFunc = void(*)(void*);
+        auto DestroyInstance_Plugin =  (DestroyInstanceFunc)GetProcAddress(hSdlcore, "DestroyInstance");
+        if(!DestroyInstance_Plugin) { 
+            std::cerr << "GetProcAddress failed! (DestroyInstance_Plugin)" << std::endl;
+            FreeLibrary(hSdlcore);
+            return;
+        }
+
+        DestroyInstance_Plugin(pSdlcore);
+        pSdlcore = nullptr;
+    }
+}
+
+CApplication::~CApplication(){
+    std::cout<<"~Application()"<<std::endl;
+    CleanUp();
+    if (hSdlcore) {
+        FreeLibrary(hSdlcore);
+        hSdlcore = nullptr;
+    }
+}
+
 extern "C" void* CreateInstance(){ return new CApplication();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
-        //static_cast<CApplication*>(p)->Shutdown();
+        static_cast<CApplication*>(p)->Shutdown();
         delete static_cast<CApplication*>(p);
     } 
 }

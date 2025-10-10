@@ -20,7 +20,8 @@
 #include "timer.h"
 #include "controlNode.h"
 
-#include "../interface/IApplication.h"
+#include <windows.h>
+#include "IApplication.h"
 
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x
@@ -31,13 +32,9 @@
 #endif
 #include "../../thirdParty/yaml-cpp/yaml.h"
 
-#ifndef ANDROID
-    #ifndef SDL
-        #include "..\\..\\glfwFramework\\include\\glfwManager.h"
-    #else
-        #include "..\\..\\sdlFramework\\include\\sdlManager.h"
-    #endif
-#endif
+
+//#include "..\\..\\sdlFramework\\include\\sdlManager.h"
+#include "ISDLCore.h"
 
 //Decide not to use macro
 // #define START_GRAPHICS_RECORD(descriptorIdx) { \
@@ -114,7 +111,7 @@ public:
     
 
 
-    CSDLManager sdlManager;
+    //CSDLManager sdlManager;
 
     void Run(std::string exampleName) override;
     void Greet() override {std::cout<<"test greet"<<std::endl;}
@@ -328,6 +325,11 @@ public:
         std::unique_ptr<std::vector<std::string>> ComputeShader;
         CRenderer::RenderModes RenderMode = CRenderer::GRAPHICS;
     }appInfo;
+
+    HMODULE hSdlcore;
+    LESDL::ISDLCore *pSdlcore = NULL;
+    void LoadSDLCore();
+    void Shutdown();
 };
 
 

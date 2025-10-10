@@ -32,7 +32,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 add_subdirectory(interface)
-
 add_subdirectory(sdlframework)
 add_subdirectory(vulkanFramework)
 #link_libraries(vulkan-framework sdl-vulkan-framework vulkan-1 SDL3 SDL3_ttf yaml-cpp)
