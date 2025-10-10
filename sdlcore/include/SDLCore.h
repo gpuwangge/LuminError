@@ -14,18 +14,21 @@
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "common.h"
-#include "camera.hpp"
-#include "instance.h"
+#include "../../application/include/common.h"
+#include "../../application/include/camera.hpp"
+#include "../../application/include/instance.h"
+// #include "common.h"
+// #include "camera.hpp"
+// #include "instance.h"
 
 #include "ISDLCore.h"
 
 class CApplication;
 
-class CSDLManager final : public LESDL::ISDLCore{
+class SDLCore final : public LESDL::ISDLCore{
 public:
-    CSDLManager(){};
-    ~CSDLManager(){};
+    SDLCore(){};
+    ~SDLCore(){};
 
     CApplication *m_pApp;
 

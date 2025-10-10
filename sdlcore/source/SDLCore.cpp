@@ -1,7 +1,7 @@
-#include "../include/sdlManager.h"
-#include "../../vulkanFramework/include/application.h"
+#include "../include/SDLCore.h"
+#include "../../application/include/application.h"
 
-void CSDLManager::createWindow(int &windowWidth, int &windowHeight, std::string windowTitle){
+void SDLCore::createWindow(int &windowWidth, int &windowHeight, std::string windowTitle){
     if(!SDL_Init(SDL_INIT_VIDEO)) 
         std::cout << "Could not initialize SDL." << std::endl;
     
@@ -31,7 +31,7 @@ void CSDLManager::createWindow(int &windowWidth, int &windowHeight, std::string 
     SDL_SetWindowPosition(window, horizontal/2, 50);
 }
 
-void CSDLManager::queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions){
+void SDLCore::queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions){
 	Uint32 count_instance_extensions = 0;
     const char * const *instance_extensions = SDL_Vulkan_GetInstanceExtensions(&count_instance_extensions);
     //std::vector<const char*> requiredInstanceExtensions;
@@ -39,7 +39,7 @@ void CSDLManager::queryRequiredInstanceExtensions(std::vector<const char*> &requ
     for(int i = 0; i < count_instance_extensions; i++) requiredInstanceExtensions[i] = instance_extensions[i];
 }
 
-void CSDLManager::createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface){
+void SDLCore::createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface){
     if(!SDL_Vulkan_CreateSurface(window, instance->getHandle(), NULL, &surface)) {
         std::cout << "Could not create a Vulkan surface." << std::endl;
         //return 1;
@@ -79,7 +79,7 @@ void CSDLManager::createFonts(int fontSize){
     
 }*/
 
-void CSDLManager::eventHandle(){
+void SDLCore::eventHandle(){
     int ref_diff_x = 0, ref_diff_y = 0;  
     SDL_Event event;
     while(SDL_PollEvent(&event)) {
@@ -212,10 +212,10 @@ void CSDLManager::eventHandle(){
 }
 
 
-extern "C" void* CreateInstance(){ return new CSDLManager();}
+extern "C" void* CreateInstance(){ return new SDLCore();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
         //static_cast< *>(p)->Shutdown();
-        delete static_cast<CSDLManager*>(p);
+        delete static_cast<SDLCore*>(p);
     } 
 }

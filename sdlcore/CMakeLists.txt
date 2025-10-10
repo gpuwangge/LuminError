@@ -3,7 +3,7 @@ project(sdlcore)
 include_directories(
     $ENV{VULKAN_SDK}/Include
     $ENV{INCLUDE}
-    ${PROJECT_SOURCE_DIR}/vulkanFramework/include
+    ${PROJECT_SOURCE_DIR}/application/include
     ${PROJECT_SOURCE_DIR}/thirdparty)
 
 link_directories(
