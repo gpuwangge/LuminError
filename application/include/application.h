@@ -67,10 +67,10 @@ inline std::string to_string_prec(double value, int prec = 1) {
     return oss.str();
 }
 
-class CApplication : public LEApplication::IApplication{
+class Application : public LEApplication::IApplication{
 public:
-    CApplication();
-    ~CApplication();
+    Application();
+    ~Application();
 
     CLogManager logManager;
 
@@ -206,39 +206,6 @@ public:
         }
     };
 
-    // struct AttachmentInfo{
-    //     bool bAttachmentDepthLight;
-    //     bool bAttachmentDepthCamera;
-    //     bool bAttachmentColorResovle;
-    //     bool bAttachmentColorPresent;
-    // };
-    // struct UniformInfo{
-    //     bool b_uniform_graphics_custom = false;
-    //     bool b_uniform_graphics_mvp = false;
-    //     bool b_uniform_graphics_text_mvp = false;
-    //     bool b_uniform_graphics_vp = false;
-    //     bool b_uniform_graphics_lighting = false;
-    //     bool b_uniform_graphics_depth_image_sampler = false;
-    //     bool b_uniform_graphics_lightdepth_image_sampler = false;
-    //     bool b_uniform_graphics_lightdepth_image_sampler_hardware = false;
-    //     bool b_uniform_compute_custom = false;
-    //     bool b_uniform_compute_storage = false;
-    //     bool b_uniform_compute_swapchain_storage = false;
-    //     bool b_uniform_compute_texture_storage = false;
-    //     struct GraphicsCustomInfo{
-    //         VkDeviceSize Size = 0;
-    //         VkDescriptorSetLayoutBinding Binding;
-    //     }GraphicsCustom;
-    //     struct ComputeCustomInfo{
-    //         VkDeviceSize Size = 0;
-    //         VkDescriptorSetLayoutBinding Binding;
-    //     }ComputeCustom;
-    //     struct ComputeStorageBufferInfo{
-    //         VkDeviceSize Size = 0;
-    //         VkBufferUsageFlags Usage;
-    //     }ComputeStorageBuffer;
-    // };
-
     struct UniformConfig {
         bool b_uniform_graphics_custom = false;
         bool b_uniform_graphics_mvp = false;
@@ -330,6 +297,15 @@ public:
     LESDL::ISDLCore *pSdlcore = NULL;
     void LoadSDLCore();
     void Shutdown();
+
+    //AppInfo* GetAppInfo() override {return &appInfo;}
+    bool Get_feature_graphics_enable_controls() override {return appInfo.Feature.feature_graphics_enable_controls;}
+    bool Get_feature_graphics_show_all_metric_controls() override {return appInfo.Feature.feature_graphics_show_all_metric_controls;}
+    bool Get_feature_graphics_show_performance_control() override {return appInfo.Feature.feature_graphics_show_performance_control;}
+    void Set_feature_graphics_enable_controls(bool value) override {appInfo.Feature.feature_graphics_enable_controls = value;}
+    void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo.Feature.feature_graphics_show_all_metric_controls = value;}
+    void Set_feature_graphics_show_performance_control(bool value) override {appInfo.Feature.feature_graphics_show_performance_control = value;}
+    std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() override { return controlNodes;}
 };
 
 

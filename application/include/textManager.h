@@ -7,7 +7,7 @@
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
 //We want application to include object.h instead
-class CApplication;
+class Application;
 class CRenderer;
 class CTextImageManager;
 class CModelManager;
@@ -65,7 +65,7 @@ public:
     void SetTextContent(std::string text_content = "");
     //void SetHighlightedChar(int index){m_highlightedIndex = index;}
     void AdvanceHighlightedChar();
-    void Register(CApplication *p_app);
+    void Register(Application *p_app);
     void Update(float deltaTime, int currentFrame, Camera &mainCamera);
     void Draw();
 };

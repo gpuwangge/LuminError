@@ -9,7 +9,7 @@
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
 //We want application to include object.h instead
-class CApplication;
+class Application;
 class CControlNode;
 
 class CObject : public CEntity {
@@ -63,7 +63,7 @@ public:
     void Update(float deltaTime, int currentFrame, Camera &mainCamera);
 
     bool bRegistered = false;
-    void Register(CApplication *p_app);
+    void Register(Application *p_app);
 
     bool bVisible = true;
 

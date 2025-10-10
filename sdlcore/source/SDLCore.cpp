@@ -125,26 +125,28 @@ void SDLCore::eventHandle(){
                         */
                         break;
                     case SDLK_P:
-                        /*
-                        if(!m_pApp->appInfo.Feature.feature_graphics_enable_controls) break;
-                        if(!m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls) {
-                            m_pApp->appInfo.Feature.feature_graphics_show_performance_control = !m_pApp->appInfo.Feature.feature_graphics_show_performance_control;
-                            m_pApp->controlNodes[0]->bVisible = m_pApp->appInfo.Feature.feature_graphics_show_performance_control;
+                        if(!pApplication_->Get_feature_graphics_enable_controls()) break;
+                        if(!pApplication_->Get_feature_graphics_show_all_metric_controls()) {
+                            bool bvalue = pApplication_->Get_feature_graphics_show_performance_control();
+                            pApplication_->Set_feature_graphics_show_performance_control(!bvalue);
+                            pApplication_->GetControlNodes()[0]->bVisible = pApplication_->Get_feature_graphics_show_performance_control(); 
                         }else{
-                            m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls = false;
-                            for(int i = 1; i < m_pApp->controlNodes.size(); i++) m_pApp->controlNodes[i]->bVisible = false;
+                            pApplication_->Set_feature_graphics_show_all_metric_controls(false);
+                            for(int i = 1; i < pApplication_->GetControlNodes().size(); i++) pApplication_->GetControlNodes()[i]->bVisible = false;
 
-                            m_pApp->appInfo.Feature.feature_graphics_show_performance_control = true;
-                            m_pApp->controlNodes[0]->bVisible = true;
-                        }*/
+                            pApplication_->Set_feature_graphics_show_performance_control(true);
+                            pApplication_->GetControlNodes()[0]->bVisible = true;
+                        }
                         break;
-                    case SDLK_H:/*
-                        if(!m_pApp->appInfo.Feature.feature_graphics_enable_controls) break;
-                        m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls = !m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls;
-                        m_pApp->appInfo.Feature.feature_graphics_show_performance_control = m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls;
-                        for(int i = 0; i < m_pApp->controlNodes.size(); i++) m_pApp->controlNodes[i]->bVisible = m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls;
-                        */
+                    case SDLK_H:
+                    {
+                        if(!pApplication_->Get_feature_graphics_enable_controls()) break;
+                        bool bvalue = pApplication_->Get_feature_graphics_show_all_metric_controls();
+                        pApplication_->Set_feature_graphics_show_all_metric_controls(!bvalue);
+                        pApplication_->Set_feature_graphics_show_performance_control(!bvalue);
+                        for(int i = 0; i < pApplication_->GetControlNodes().size(); i++) pApplication_->GetControlNodes()[i]->bVisible = pApplication_->Get_feature_graphics_show_all_metric_controls();
                         break;
+                    }
                     case SDLK_ESCAPE:
                         bStillRunning = false;
                         break; 

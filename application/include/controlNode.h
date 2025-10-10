@@ -5,7 +5,7 @@
 #include "object.h"
 #include "textManager.h"
 
-class CApplication;
+class Application;
 
 /******************
 * ControlNode
@@ -28,7 +28,7 @@ public:
     }
     ~CControlNode(){}
 
-    CApplication *m_pApp;
+    Application *m_pApp;
     bool bVisible = true;
     int m_object_count = 0;
     int m_textbox_count = 0;
@@ -39,7 +39,7 @@ public:
     std::vector<CObject*> m_pObjects;
     std::vector<CTextbox*> m_pTextboxes;
 
-    void Register(CApplication *p_app);
+    void Register(Application *p_app);
     virtual void RegisterObject(int startIndex);
     virtual void RegisterTextbox(int startIndex);
     virtual void Update();

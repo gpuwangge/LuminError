@@ -1,19 +1,19 @@
 #include "../include/application.h"
 //static class members must be defined outside. 
 //otherwise invoke 'undefined reference' error when linking
-Camera CApplication::mainCamera;
+Camera Application::mainCamera;
 //Camera CApplication::lightCameras[2];
 //std::vector<Camera> CApplication::lightCameras;
-bool CApplication::NeedToExit = false;
-bool CApplication::NeedToPause = false;
+bool Application::NeedToExit = false;
+bool Application::NeedToPause = false;
 //bool CApplication::PrintFPS = false;
 //int CApplication::focusObjectId = 0;
-std::vector<CObject> CApplication::objects;
+std::vector<CObject> Application::objects;
 //std::vector<CTextBox> CApplication::textBoxes;
-std::vector<CLight> CApplication::lights;
+std::vector<CLight> Application::lights;
 
 
-CApplication::CApplication(){
+Application::Application(){
     //debugger = new CDebugger("../logs/application.log");
 
     //NeedToExit = false;
@@ -27,7 +27,7 @@ CApplication::CApplication(){
 }
 
 #ifndef ANDROID
-void CApplication::Run(std::string exampleName){ //Entrance Function
+void Application::Run(std::string exampleName){ //Entrance Function
     LoadSDLCore();
 
     CContext::Init();
@@ -156,7 +156,7 @@ void CApplication::Run(std::string exampleName){ //Entrance Function
 }
 #endif
 
-void CApplication::initialize(){
+void Application::initialize(){
     bool bVerboseInitialization = false;
     TimePoint T0 = now();
 
@@ -440,7 +440,7 @@ void CApplication::initialize(){
     // PRINT("Test two floats:  %f, %f!", 1.2, 2.3);    
 }
 
-void CApplication::update(){
+void Application::update(){
     static TimePoint startTimePoint = now();
     static TimePoint lastTimePoint = now();
     TimePoint currentTimePoint = now();
@@ -504,15 +504,15 @@ void CApplication::update(){
     // }
 }
 
-void CApplication::recordGraphicsCommandBuffer_renderpassMainscene(){
+void Application::recordGraphicsCommandBuffer_renderpassMainscene(){
     for(int i = 0; i < objects.size(); i++) objects[i].Draw();
 	textManager.Draw();
 }
-void CApplication::recordGraphicsCommandBuffer_renderpassShadowmap(int renderpassIndex){}
-void CApplication::recordComputeCommandBuffer(){}
-void CApplication::postUpdate(){}
+void Application::recordGraphicsCommandBuffer_renderpassShadowmap(int renderpassIndex){}
+void Application::recordComputeCommandBuffer(){}
+void Application::postUpdate(){}
 
-void CApplication::UpdateRecordRender(){
+void Application::UpdateRecordRender(){
     update();
 
     /**************************
@@ -652,7 +652,7 @@ void CApplication::UpdateRecordRender(){
 
 
 #ifndef ANDROID
-void CApplication::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
+void Application::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr) {
         func(instance, debugMessenger, pAllocator);
@@ -660,7 +660,7 @@ void CApplication::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUti
 }
 #endif
 
-void CApplication::CleanUp(){
+void Application::CleanUp(){
     //std::cout<<"Begin Cleanup()..."<<std::endl;
 
     //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;
@@ -701,12 +701,12 @@ void CApplication::CleanUp(){
  *******/
 
  
-void CApplication::ReadControls(){
+void Application::ReadControls(){
     for (const auto& control : config["Controls"])
         if (control["UIContainer"]) appInfo.ControlUIContainer.loadFromYaml(control["UIContainer"]);
 }
 
-void CApplication::ReadFeatures(){
+void Application::ReadFeatures(){
     if (config["Features"]) appInfo.Feature.loadFromYaml(config["Features"]);
 
     if(appInfo.Feature.b_feature_graphics_push_constant){
@@ -720,7 +720,7 @@ void CApplication::ReadFeatures(){
     renderProcess.skyboxID = appInfo.Feature.feature_graphics_pipeline_skybox_id;
 }
 
-void CApplication::ReadUniforms(){
+void Application::ReadUniforms(){
     auto uniformsNode = config["Uniforms"];
 
     // Graphics
@@ -799,7 +799,7 @@ void CApplication::ReadUniforms(){
 
 }
 
-void CApplication::ReadResources(){
+void Application::ReadResources(){
     for (const auto& resource : config["Resources"]) {
         if (resource["Fonts"]) {
             for (const auto& font : resource["Fonts"]) {
@@ -992,7 +992,7 @@ void CApplication::ReadResources(){
     //std::cout<<"Application: Read Resources Done."<<std::endl;
 }
 
-void CApplication::ReadAttachments(){
+void Application::ReadAttachments(){
     bool bShadowmapAttachmentDepthLight = config["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"] ? config["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"].as<bool>() : false;
     bool bMainSceneAttachmentDepthLight = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"].as<bool>() : false;
     bool bMainSceneAttachmentDepthCamera = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"].as<bool>()  : false;
@@ -1040,7 +1040,7 @@ void CApplication::ReadAttachments(){
     //std::cout<<"Application: Read Attachments Done."<<std::endl;
 }
 
-void CApplication::ReadSubpasses(){
+void Application::ReadSubpasses(){
     renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = config["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"] ? config["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"].as<bool>() : false;
     renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"].as<bool>() : false;
     renderProcess.bEnableMainSceneRenderpassSubpassDraw = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"].as<bool>() : true; //need at least one subpass, even for compute sample
@@ -1072,7 +1072,7 @@ void CApplication::ReadSubpasses(){
     //std::cout<<"Application: Read Subpasses Done."<<std::endl;
 }
 
-void CApplication::CreateUniformDescriptors(bool b_uniform_graphics, bool b_uniform_compute){
+void Application::CreateUniformDescriptors(bool b_uniform_graphics, bool b_uniform_compute){
     //UNIFORM STEP 1/3 (Pool)
     CGraphicsDescriptorManager::createDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
     CComputeDescriptorManager::createDescriptorPool();
@@ -1107,7 +1107,7 @@ void CApplication::CreateUniformDescriptors(bool b_uniform_graphics, bool b_unif
     }
 }
 
-void CApplication::CreatePipelines(){
+void Application::CreatePipelines(){
     bool bPipelineVerbose = false;
 
     /****************************
@@ -1259,7 +1259,7 @@ void CApplication::CreatePipelines(){
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 }
 
-void CApplication::ReadRegisterObjects(){
+void Application::ReadRegisterObjects(){
     if (config["Objects"]) {
         //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
         for (const auto& obj : config["Objects"]) {
@@ -1294,7 +1294,7 @@ void CApplication::ReadRegisterObjects(){
                 std::cout<<"WARNING: Trying to register a registered Object id("<<object_id<<")!"<<std::endl;
                 continue;
             }
-            objects[object_id].Register((CApplication*)this);
+            objects[object_id].Register((Application*)this);
             objects[object_id].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
 
             //std::cout<<"ObjectId:("<<object_id<<") Name:("<<objects[object_id].Name<<") Length:("<<objects[object_id].Length.x<<","<<objects[object_id].Length.y<<","<<objects[object_id].Length.z<<")"
@@ -1326,7 +1326,7 @@ void CApplication::ReadRegisterObjects(){
 
 }
 
-void CApplication::ReadRegisterTextboxes(){
+void Application::ReadRegisterTextboxes(){
     //std::cout<<"Begin Read Textboxes"<<std::endl;
     if (config["Textboxes"]) {
         for (const auto& tb : config["Textboxes"]) {
@@ -1363,7 +1363,7 @@ void CApplication::ReadRegisterTextboxes(){
                 std::cout<<"WARNING: Trying to register a registered Textbox id("<<textbox_id<<")!"<<std::endl;
                 continue;
             }
-            textManager.m_textBoxes[textbox_id].Register((CApplication*)this);
+            textManager.m_textBoxes[textbox_id].Register((Application*)this);
 
             //std::cout<<"TextboxId:("<<id<<") Name:("<<textBoxes[id].GetName()<<") Position:("<<textBoxes[id].GetPosition().x<<","<<textBoxes[id].GetPosition().y<<","<<textBoxes[id].GetPosition().z<<")"<<std::endl;
         }
@@ -1392,7 +1392,7 @@ void CApplication::ReadRegisterTextboxes(){
     
 }
 
-void CApplication::ReadLightings(){
+void Application::ReadLightings(){
     if (config["Lights"]) {
         for (const auto& light : config["Lights"]) {
             int id = light["light_id"] ? light["light_id"].as<int>() : 0;
@@ -1426,7 +1426,7 @@ void CApplication::ReadLightings(){
     }
 }
 
-void CApplication::ReadCameras(){
+void Application::ReadCameras(){
     mainCamera.cameraType = (Camera::CameraType)(config["MainCamera"]["camera_mode"] ? config["MainCamera"]["camera_mode"].as<int>() : 0);
     mainCamera.SetPosition(
         config["MainCamera"]["camera_position"][0].as<float>(), 
@@ -1520,7 +1520,7 @@ void CApplication::ReadCameras(){
 
 }
 
-void CApplication::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
+void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     //CSupervisor::Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     dsSets.push_back(computeDescriptorManager.descriptorSets);
@@ -1532,7 +1532,7 @@ void CApplication::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
 }
 
 
-void CApplication::LoadSDLCore(){
+void Application::LoadSDLCore(){
     std::string sdlName = "sdlcore.dll"; //libsdl-vulkan-framework.dll
     hSdlcore = LoadLibraryA(sdlName.c_str()); 
     if(!hSdlcore) { 
@@ -1553,7 +1553,7 @@ void CApplication::LoadSDLCore(){
     pSdlcore->SetApplication(this);
 }
 
-void CApplication::Shutdown(){
+void Application::Shutdown(){
     std::cout<<"Application::Shutdown()"<<std::endl;
     if (pSdlcore) {
         using DestroyInstanceFunc = void(*)(void*);
@@ -1569,7 +1569,7 @@ void CApplication::Shutdown(){
     }
 }
 
-CApplication::~CApplication(){
+Application::~Application(){
     std::cout<<"~Application()"<<std::endl;
     CleanUp();
     if (hSdlcore) {
@@ -1578,10 +1578,10 @@ CApplication::~CApplication(){
     }
 }
 
-extern "C" void* CreateInstance(){ return new CApplication();}
+extern "C" void* CreateInstance(){ return new Application();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
-        static_cast<CApplication*>(p)->Shutdown();
-        delete static_cast<CApplication*>(p);
+        static_cast<Application*>(p)->Shutdown();
+        delete static_cast<Application*>(p);
     } 
 }

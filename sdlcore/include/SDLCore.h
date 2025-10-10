@@ -30,7 +30,7 @@ public:
     SDLCore(){};
     ~SDLCore(){};
 
-    CApplication *m_pApp;
+    //CApplication *m_pApp;
 
     //GLFWwindow * window;
     SDL_Window* window;
@@ -57,7 +57,10 @@ public:
     void eventHandle() override;
 
     void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
-    void SetApplication(LEApplication::IApplication* pApplication) override {}
+    LEApplication::IApplication* pApplication_;
+    void SetApplication(LEApplication::IApplication* pApplication) override {pApplication_ = pApplication;}
+
+    
 };
 
 extern "C" void* CreateInstance();
