@@ -19,9 +19,6 @@ link_directories(
     ${PROJECT_SOURCE_DIR}/thirdparty #put SDL3.dll, SDL3_ttf.dll and glfw3.dll in thirdparty/
     ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp/lib) 
 
-add_subdirectory(sdlframework)
-add_subdirectory(vulkanFramework)
-link_libraries(vulkan-framework sdl-vulkan-framework vulkan-1 SDL3 SDL3_ttf yaml-cpp)
 
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin) #this is required in Windows, all dll/exe goes here
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin) #this is not required in windows
@@ -32,13 +29,19 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-# set(SAMPLE_NAME simpleTriangle)
-# add_executable(${SAMPLE_NAME} samples/${SAMPLE_NAME}.cpp)
-
-add_executable(mainbinary vulkanFramework/include/main.cpp)
 
 
 add_subdirectory(interface)
+
+add_subdirectory(sdlframework)
+add_subdirectory(vulkanFramework)
+#link_libraries(vulkan-framework sdl-vulkan-framework vulkan-1 SDL3 SDL3_ttf yaml-cpp)
+
+# set(SAMPLE_NAME simpleTriangle)
+# add_executable(${SAMPLE_NAME} samples/${SAMPLE_NAME}.cpp)
+
+# add_executable(mainbinary vulkanFramework/include/main.cpp) use launcher to replace this
+
 #add_subdirectory(application)
 #add_subdirectory(sdl_core)
 #add_subdirectory(example)

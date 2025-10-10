@@ -27,7 +27,7 @@ CApplication::CApplication(){
 }
 
 #ifndef ANDROID
-void CApplication::run(){ //Entrance Function
+void CApplication::Run(std::string exampleName){ //Entrance Function
     CContext::Init();
 
     /**************** 
@@ -1526,4 +1526,13 @@ void CApplication::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
 
     //std::cout<<"Record Compute command buffer. "<<std::endl;
     renderer.Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+}
+
+
+extern "C" void* CreateInstance(){ return new CApplication();}
+extern "C" void DestroyInstance(void *p){ 
+    if(p) {
+        //static_cast<CApplication*>(p)->Shutdown();
+        delete static_cast<CApplication*>(p);
+    } 
 }

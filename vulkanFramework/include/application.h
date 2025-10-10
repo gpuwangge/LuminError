@@ -20,6 +20,8 @@
 #include "timer.h"
 #include "controlNode.h"
 
+#include "../interface/IApplication.h"
+
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -68,7 +70,7 @@ inline std::string to_string_prec(double value, int prec = 1) {
     return oss.str();
 }
 
-class CApplication{
+class CApplication : public LEApplication::IApplication{
 public:
     CApplication();
     ~CApplication();
@@ -110,14 +112,12 @@ public:
 
     void UpdateRecordRender();
     
-#ifndef ANDROID
-    #ifndef SDL
-        CGLFWManager glfwManager;
-    #else
-        CSDLManager sdlManager;
-    #endif
-    void run();
-#endif
+
+
+    CSDLManager sdlManager;
+
+    void Run(std::string exampleName) override;
+    void Greet() override {std::cout<<"test greet"<<std::endl;}
 
     //for static class member. But can not define and init them in the header file!
     static Camera mainCamera; 
@@ -331,5 +331,7 @@ public:
 };
 
 
+extern "C" void* CreateInstance();
+extern "C" void DestroyInstance(void *p);
 
 #endif
