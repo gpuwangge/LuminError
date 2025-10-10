@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "windows-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/VulkanSDK/GLFW/include",
+                "C:/VulkanSDK",
+                "C:/VulkanSDK/GLM",
+                "${VULKAN_SDK}/Include"
+            ],
+            "compilerPath": "C:\\mingw64\\bin\\gcc.exe",
+            "cStandard": "${default}",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64",
+            "compilerArgs": [
+                ""
+            ],
+            "defines": [
+            "SDL"
+            ]
+        }
+    ],
+    "version": 4
+}

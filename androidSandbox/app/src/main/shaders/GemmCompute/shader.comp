@@ -1,0 +1,40 @@
+#version 450 core
+
+const int DIM = 16;
+
+layout (local_size_x = DIM, local_size_y = DIM, local_size_z = 1) in; 
+
+layout (set = 0, binding = 0) readonly buffer BufferInput{
+    uint M;
+    uint N;
+    uint K;
+    float MatA[DIM*DIM];
+    float MatB[DIM*DIM];
+    float MatC[DIM*DIM];
+} inBuf;
+
+layout (set = 0, binding = 1) buffer BufferOutput{
+    uint M;
+    uint N;
+    uint K;
+    float MatA[DIM*DIM];
+    float MatB[DIM*DIM];
+    float MatC[DIM*DIM];
+} outBuf;
+
+
+void main(){
+    const uint globalRow = gl_GlobalInvocationID.x;
+    const uint globalCol = gl_GlobalInvocationID.y;
+
+    float acc = 0;
+    for(uint k = 0; k < inBuf.K; k++) {
+        //sum += sbuf_input.MatA[row * sbuf_input.K + i] * sbuf_input.MatB[i * sbuf_input.K + col];
+        acc += inBuf.MatA[k*inBuf.M + globalRow] * inBuf.MatB[globalCol*inBuf.K + k];
+    }
+ 
+    //sbuf_output.MatC[row * sbuf_input.K + col] = sum;
+    outBuf.MatC[globalCol*inBuf.M + globalRow] = acc;
+}
+
+

@@ -1,0 +1,38 @@
+#version 460 
+layout (local_size_x = 2, local_size_y = 1, local_size_z = 1) in;
+
+//const int _14 = gl_WorkGroupSize.x;
+//const int _15 = gl_WorkGroupSize.y;
+//const int _16 = gl_WorkGroupSize.z;
+//const vec3 _17 = uvec3(_14, _15, _16); 
+//const highp vec3 _17 = gl_NumWorkGroups;
+const float[11] _102 = float[11](0.05, 0.05, 0.1, 0.1, 0.1, 0.2, 0.1, 0.1, 0.1, 0.05, 0.05);
+
+//layout (set = 0, binding = 0) uniform mediump sampler2D in_sampler;
+//layout (set = 0, binding = 1, rgba32f) uniform writeonly image2D out_image;
+layout (set = 0, binding = 0, rgba8) uniform readonly image2D inputTexture; 
+layout (set = 0, binding = 1, rgba8) uniform writeonly image2D outputImage; //rgba32f
+
+void main(){
+    //uvec3 wgSize = gl_WorkGroupID;
+    //uvec3 dispatchSize = uvec3(gl_NumWorkGroups);
+    //uvec3 localInvocateID = uvec3(gl_LocalInvocationID);
+    //uvec3 globalInvocateID = uvec3(gl_GlobalInvocationID);
+    //uint localIndex = gl_LocalInvocationIndex;
+
+	//vec4 pixel = imageLoad(textureImage, ivec2(gl_GlobalInvocationID.xy)).rgba; 
+    //vec2 maxOffset = vec2(textureSize(in_sampler, 0)) + vec2(5.0);
+	vec2 maxOffset = vec2(0,0);
+    vec4 blurColor = vec4(0.0);
+    for(int i = -5; i <=5; i++){
+        //vec2 fetch = clamp(vec2(gl_GlobalInvocationID.xy) + vec2(0.0, float(i)), vec2(0.0), maxOffset);
+		vec2 fetch = vec2(gl_GlobalInvocationID.xy) + vec2(0.0, float(i));
+        //blurColor += (texelFetch(in_sampler, ivec2(fetch), 0) * _102[i+5]);
+		blurColor += (imageLoad(inputTexture, ivec2(fetch)).rgba * _102[i+5]); 
+    }
+	//blurColor = vec4(1,0,0,1);
+	imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), blurColor);
+}
+
+
+

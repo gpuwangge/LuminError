@@ -1,0 +1,51 @@
+#version 450 core
+
+const int DIM = 3;
+
+layout (local_size_x = DIM, local_size_y = DIM, local_size_z = 1) in; 
+
+layout (set = 0, binding = 0) buffer BufferInput{
+    uint P;
+    uint Q;
+    float Mat[DIM*DIM];
+} inBuf;
+
+layout (set = 0, binding = 1) buffer BufferOutput{
+    float Mat[DIM*DIM];
+} outBuf;
+
+////////////////////
+#define TRANSPOSEX 16
+#define TRANSPOSEY 16
+////////////////////
+
+void main(){
+    // Thread identifiers
+    const uint tx = gl_LocalInvocationID.x;
+    const uint ty = gl_LocalInvocationID.y;
+    const uint ID0 = gl_GlobalInvocationID.x*TRANSPOSEX + tx; // 0..P
+    const uint ID1 = gl_GlobalInvocationID.y*TRANSPOSEY + ty; // 0..Q
+
+    // Set-up the local memory for shuffling
+    float tbuffer[TRANSPOSEX][TRANSPOSEY]; //__local
+
+    // Swap the x and y coordinates to perform the rotation (coalesced)
+    if (ID0 < inBuf.P && ID1 < inBuf.Q) {
+        tbuffer[ty][tx] = inBuf.Mat[ID1*inBuf.P + ID0];
+    }
+
+    // Synchronise all threads
+    //barrier(CLK_LOCAL_MEM_FENCE);//TODO
+
+    // We don't have to swap the x and y thread indices here,
+    // because that's already done in the local memory
+    const uint newID0 = gl_GlobalInvocationID.y*TRANSPOSEY + tx;
+    const uint newID1 = gl_GlobalInvocationID.x*TRANSPOSEX + ty;
+
+    // Store the transposed result (coalesced)
+    if (newID0 < inBuf.Q && newID1 < inBuf.P) {
+        outBuf.Mat[newID1*inBuf.Q + newID0] = tbuffer[tx][ty];
+    }
+}
+
+
