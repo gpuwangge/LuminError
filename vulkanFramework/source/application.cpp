@@ -497,7 +497,10 @@ void CApplication::update(){
     // }
 }
 
-void CApplication::recordGraphicsCommandBuffer_renderpassMainscene(){}
+void CApplication::recordGraphicsCommandBuffer_renderpassMainscene(){
+    for(int i = 0; i < objects.size(); i++) objects[i].Draw();
+	textManager.Draw();
+}
 void CApplication::recordGraphicsCommandBuffer_renderpassShadowmap(int renderpassIndex){}
 void CApplication::recordComputeCommandBuffer(){}
 void CApplication::postUpdate(){}

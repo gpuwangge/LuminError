@@ -31,21 +31,19 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-if(SINGLE)
-    set(SAMPLE_NAME gemmCompute)
-    add_executable(${SAMPLE_NAME} samples/${SAMPLE_NAME}.cpp)
-else()
-    file(WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "
-")
-    
-    aux_source_directory(${PROJECT_SOURCE_DIR}/samples SRC)
-    foreach(sampleFile IN LISTS SRC)
-        get_filename_component(sampleName ${sampleFile} NAME_WE)
-        add_executable(${sampleName} ${sampleFile})
-        file(APPEND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "start /wait ${sampleName}
-")
-    endforeach()
-endif()
+
+# set(SAMPLE_NAME simpleTriangle)
+# add_executable(${SAMPLE_NAME} samples/${SAMPLE_NAME}.cpp)
+
+add_executable(mainbinary vulkanFramework/include/main.cpp)
+
+
+add_subdirectory(interface)
+#add_subdirectory(application)
+#add_subdirectory(sdl_core)
+#add_subdirectory(example)
+add_subdirectory(launcher)
+
 
 file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)

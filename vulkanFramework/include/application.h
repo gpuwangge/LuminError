@@ -143,7 +143,7 @@ public:
     int frameCount = 0;
     double totalInitTime = 0;
 
-    std::string m_sampleName;
+    std::string m_sampleName = "CSimpleTriangle";
     YAML::Node config;
 
     std::vector<std::unique_ptr<CControlNode>> controlNodes;  
