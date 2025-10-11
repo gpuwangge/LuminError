@@ -217,7 +217,7 @@ void SDLCore::eventHandle(){
 extern "C" void* CreateInstance(){ return new SDLCore();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
-        //static_cast< *>(p)->Shutdown();
         delete static_cast<SDLCore*>(p);
+        std::cout<<"- Destroy Instance SDLCore."<<std::endl;
     } 
 }

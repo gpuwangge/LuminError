@@ -26,7 +26,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) #all lib goes here
 add_subdirectory(interface)
 add_subdirectory(sdlcore)
 add_subdirectory(application)
-#add_subdirectory(example)
+add_subdirectory(example)
 add_subdirectory(launcher)
 
 file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)

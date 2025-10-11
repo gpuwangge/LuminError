@@ -15,39 +15,42 @@ int main(int argc, char* argv[]) {
     // }
 
 
-    HMODULE dll = LoadLibraryA("application.dll"); //Windows.h
-    if(!dll) { 
+    HMODULE handle_application = LoadLibraryA("application.dll"); //Windows.h
+    if(!handle_application) { 
         std::cerr << "DLL load failed! DLL Name = application.dll" << std::endl; //Windows.h
         return -1; 
     }
 
     using CreateAppFunc = LEApplication::IApplication*(*)();
-    auto CreateInstance =  (CreateAppFunc)GetProcAddress(dll, "CreateInstance");
+    auto CreateInstance =  (CreateAppFunc)GetProcAddress(handle_application, "CreateInstance");
     if(!CreateInstance) { 
         std::cerr << "GetProcAddress failed! (CreateInstance)" << std::endl;
-        FreeLibrary(dll);
+        FreeLibrary(handle_application);
+        std::cout<<"FreeLibrary: Application"<<std::endl;
         return -1;
     }
     using DestroyAppFunc = void(*)(void*);
-    auto DestroyInstance =  (DestroyAppFunc)GetProcAddress(dll, "DestroyInstance");
+    auto DestroyInstance =  (DestroyAppFunc)GetProcAddress(handle_application, "DestroyInstance");
     if(!DestroyInstance) { 
         std::cerr << "GetProcAddress failed! (DestroyInstance)" << std::endl;
-        FreeLibrary(dll);
+        FreeLibrary(handle_application);
+        std::cout<<"FreeLibrary: Application"<<std::endl;
         return -1;
     }
 
-    LEApplication::IApplication* p = (LEApplication::IApplication*)CreateInstance();
+    LEApplication::IApplication* instance_application = (LEApplication::IApplication*)CreateInstance();
     try {
-        if(argc > 1) p->Run(argv[1]);
-        else p->Run();
+        if(argc > 1) instance_application->Run(argv[1]);
+        else instance_application->Run();
     } catch (const std::exception& e) {
         std::cerr << "Exception in Application::Run(): " << e.what() << std::endl;
     } catch (...) {
         std::cerr << "Unknown exception in Application::Run()" << std::endl;
     }
     
-    DestroyInstance(p);
-    FreeLibrary(dll);
+    DestroyInstance(instance_application);
+    FreeLibrary(handle_application);
+    std::cout<<"- FreeLibrary: Application."<<std::endl;
 
     return 0;
 }

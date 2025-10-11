@@ -28,7 +28,16 @@ Application::Application(){
 
 #ifndef ANDROID
 void Application::Run(std::string exampleName){ //Entrance Function
-    LoadSDLCore();
+    void* pVoid = nullptr;
+    LoadModuleInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
+    instance_sdlcore = static_cast<LESDL::ISDLCore*>(pVoid);
+    instance_sdlcore->greet();
+    instance_sdlcore->SetApplication(this);
+
+    LoadModuleInstance(handle_module_example, pVoid, exampleName);
+    instance_example = static_cast<LEExample::IExample*>(pVoid);
+    instance_example->Update();
+
 
     CContext::Init();
 
@@ -40,7 +49,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
 #ifdef SDL
    // sdlManager.m_pApp = this;
     //sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
-    pSdlcore->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
+    instance_sdlcore->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 #else
     glfwManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 #endif
@@ -57,7 +66,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     std::vector<const char*> requiredInstanceExtensions;
 #ifdef SDL
     //sdlManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
-    pSdlcore->queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
+    instance_sdlcore->queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
 #else    
     glfwManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
 #endif
@@ -76,7 +85,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     *****************/
 #ifdef SDL   
     //sdlManager.createSurface(IN instance, OUT surface);
-    pSdlcore->createSurface(IN instance, OUT surface);
+    instance_sdlcore->createSurface(IN instance, OUT surface);
 #else  
     glfwManager.createSurface(IN instance, OUT surface);
 #endif
@@ -126,11 +135,9 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //auto durationInitializationTime = std::chrono::duration<float, std::chrono::seconds::period>(endInitializeTime - startInitialzeTime).count() * 1000;
     //std::cout<<"Total Initialization cost: "<<durationInitializationTime<<" milliseconds"<<std::endl;
 
-#ifdef SDL   
-    //while(sdlManager.bStillRunning) {
-    while(pSdlcore->IsRunning()){
-        //sdlManager.eventHandle();
-        pSdlcore->eventHandle();
+#ifdef SDL
+    while(instance_sdlcore->IsRunning()){
+        instance_sdlcore->eventHandle();
         if(!NeedToPause) UpdateRecordRender();
         if(NeedToExit) break;
     }
@@ -1532,56 +1539,73 @@ void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGr
 }
 
 
-void Application::LoadSDLCore(){
-    std::string sdlName = "sdlcore.dll"; //libsdl-vulkan-framework.dll
-    hSdlcore = LoadLibraryA(sdlName.c_str()); 
-    if(!hSdlcore) { 
-        std::cerr << "DLL load failed! Plugin Name = " << sdlName << std::endl; 
+void Application::LoadModuleInstance(HMODULE &handle, void* &instance, const std::string moduleName){
+    handle = LoadLibraryA(moduleName.c_str()); 
+    if(!handle) { 
+        std::cerr << "Module load failed! Module Name = " << moduleName << std::endl; 
         return; 
     }
 
     using CreateInstanceFunc = void*(*)();
-    auto CreateInstance_Plugin =  (CreateInstanceFunc)GetProcAddress(hSdlcore, "CreateInstance");
-    if(!CreateInstance_Plugin) { 
-        std::cerr << "GetProcAddress failed! (CreateInstance_Plugin)" << std::endl;
-        FreeLibrary(hSdlcore);
+    auto CreateInstance_Module =  (CreateInstanceFunc)GetProcAddress(handle, "CreateInstance");
+    if(!CreateInstance_Module) { 
+        std::cerr << "GetProcAddress failed! (CreateInstance_Module) Module Name = " << moduleName << std::endl;
+        FreeLibrary(handle);
+        instance = nullptr;
         return;
     }
     
-    pSdlcore = static_cast<LESDL::ISDLCore*>(CreateInstance_Plugin());
-    pSdlcore->greet(); //test p_person
-    pSdlcore->SetApplication(this);
+    instance = CreateInstance_Module();
+    if (!instance) {
+        std::cerr << "CreateInstance failed!" << std::endl;
+        FreeLibrary(handle);
+        handle = nullptr;
+        return;
+    }
+
 }
 
-void Application::Shutdown(){
-    std::cout<<"Application::Shutdown()"<<std::endl;
-    if (pSdlcore) {
+void Application::DestroyInstance(HMODULE handle, void* instance){
+    if (instance) {
         using DestroyInstanceFunc = void(*)(void*);
-        auto DestroyInstance_Plugin =  (DestroyInstanceFunc)GetProcAddress(hSdlcore, "DestroyInstance");
-        if(!DestroyInstance_Plugin) { 
-            std::cerr << "GetProcAddress failed! (DestroyInstance_Plugin)" << std::endl;
-            FreeLibrary(hSdlcore);
+        auto DestroyInstance =  (DestroyInstanceFunc)GetProcAddress(handle, "DestroyInstance");
+        if(!DestroyInstance) { 
+            std::cerr << "GetProcAddress failed! (DestroyInstance)" << std::endl;
+            FreeLibrary(handle);
             return;
         }
-
-        DestroyInstance_Plugin(pSdlcore);
-        pSdlcore = nullptr;
+        DestroyInstance(instance);
+        instance = nullptr;
     }
 }
 
 Application::~Application(){
-    std::cout<<"~Application()"<<std::endl;
     CleanUp();
-    if (hSdlcore) {
-        FreeLibrary(hSdlcore);
-        hSdlcore = nullptr;
+
+    if (handle_module_sdlcore) {
+        std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
+        FreeLibrary(handle_module_sdlcore);
+        handle_module_sdlcore = nullptr;
+    }
+
+    if (handle_module_example) {
+        std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
+        FreeLibrary(handle_module_example);
+        handle_module_example = nullptr;
     }
 }
 
 extern "C" void* CreateInstance(){ return new Application();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
-        static_cast<Application*>(p)->Shutdown();
+        //void *pVoid = static_cast<Application*>(p)->instance_sdlcore;
+        static_cast<Application*>(p)->DestroyInstance(
+            static_cast<Application*>(p)->handle_module_sdlcore,
+            static_cast<Application*>(p)->instance_sdlcore);
+        static_cast<Application*>(p)->DestroyInstance(
+            static_cast<Application*>(p)->handle_module_example,
+            static_cast<Application*>(p)->instance_example);
         delete static_cast<Application*>(p);
+        std::cout<<"- Destroy Instance Application."<<std::endl;
     } 
 }

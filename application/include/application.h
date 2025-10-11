@@ -293,10 +293,12 @@ public:
         CRenderer::RenderModes RenderMode = CRenderer::GRAPHICS;
     }appInfo;
 
-    HMODULE hSdlcore;
-    LESDL::ISDLCore *pSdlcore = NULL;
-    void LoadSDLCore();
-    void Shutdown();
+    HMODULE handle_module_sdlcore;
+    LESDL::ISDLCore *instance_sdlcore = NULL;
+    HMODULE handle_module_example;
+    LEExample::IExample *instance_example = NULL;
+    void LoadModuleInstance(HMODULE &handle, void* &instance, const std::string moduleName);
+    void DestroyInstance(HMODULE handle, void* instance);
 
     //AppInfo* GetAppInfo() override {return &appInfo;}
     bool Get_feature_graphics_enable_controls() override {return appInfo.Feature.feature_graphics_enable_controls;}
