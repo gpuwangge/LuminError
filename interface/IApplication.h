@@ -22,6 +22,7 @@ namespace LEApplication{
         //virtual std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() = 0;
         virtual int GetControlNodeSize() = 0;
         virtual void SetControlNodeVisible(int nodeId, bool value) = 0;
+        virtual void* GetInstanceHandle() = 0; //return type is VkInstance
         
 
         //Expose functions for Example to use

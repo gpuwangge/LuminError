@@ -299,6 +299,7 @@ public:
     //std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() override { return controlNodes;}
     int GetControlNodeSize() override { return controlNodes.size();}
     void SetControlNodeVisible(int nodeId, bool value) override { controlNodes[nodeId]->bVisible = value;}
+    void* GetInstanceHandle() override {return instance->getHandle();}
 
     //Expose functions for Example to use
     //std::vector<CObject>& GetObjects() override { return objects; }

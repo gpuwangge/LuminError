@@ -14,13 +14,6 @@
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-// #include "../../application/include/common.h"
-// #include "../../application/include/camera.hpp"
- #include "../../application/include/instance.h"
-// #include "common.h"
-// #include "camera.hpp"
-// #include "instance.h"
-
 #include "ICommon.h"
 #include "ISDLCore.h"
 
@@ -32,9 +25,6 @@ public:
     SDLCore(){};
     ~SDLCore(){};
 
-    //CApplication *m_pApp;
-
-    //GLFWwindow * window;
     SDL_Window* window;
     int m_windowWidth, m_windowHeight;
     int m_windowCenterX, m_windowCenterY;
@@ -62,7 +52,7 @@ public:
     LEApplication::IApplication* game;
     void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
 
-    
+
 };
 
 extern "C" void* CreateInstance();

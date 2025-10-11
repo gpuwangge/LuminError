@@ -1,6 +1,9 @@
 #include "../include/SDLCore.h"
 #include "IApplication.h"
 
+const uint32_t WINDOW_WIDTH = 800; //1024;//1080;
+const uint32_t WINDOW_HEIGHT = 800; //1280;//2400;
+
 void SDLCore::createWindow(int &windowWidth, int &windowHeight, std::string windowTitle){
     if(!SDL_Init(SDL_INIT_VIDEO)) 
         std::cout << "Could not initialize SDL." << std::endl;
@@ -40,7 +43,8 @@ void SDLCore::queryRequiredInstanceExtensions(std::vector<const char*> &required
 }
 
 void SDLCore::createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface){
-    if(!SDL_Vulkan_CreateSurface(window, instance->getHandle(), NULL, &surface)) {
+    //if(!SDL_Vulkan_CreateSurface(window, instance->getHandle(), NULL, &surface)) {
+    if(!SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(game->GetInstanceHandle()), NULL, &surface)) {
         std::cout << "Could not create a Vulkan surface." << std::endl;
         //return 1;
     }
