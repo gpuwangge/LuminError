@@ -4,6 +4,7 @@
 namespace LEApplication{
     class IApplication;
 }
+class CInstance;
 
 namespace LESDL{
     struct ISDLCore {

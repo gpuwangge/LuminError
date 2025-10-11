@@ -116,10 +116,7 @@ public:
 
     //void Initialize();
     void Update(float deltaTime, int currentFrame, Camera &mainCamera);
-    void Draw(){
-        //m_textBoxes[0].Draw();
-        for(auto& textBox : m_textBoxes){textBox.Draw();}
-    };
+    void Draw();
 
 };
 

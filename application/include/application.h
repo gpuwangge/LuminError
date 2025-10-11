@@ -296,11 +296,17 @@ public:
     void Set_feature_graphics_enable_controls(bool value) override {appInfo.Feature.feature_graphics_enable_controls = value;}
     void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo.Feature.feature_graphics_show_all_metric_controls = value;}
     void Set_feature_graphics_show_performance_control(bool value) override {appInfo.Feature.feature_graphics_show_performance_control = value;}
-    std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() override { return controlNodes;}
+    //std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() override { return controlNodes;}
+    int GetControlNodeSize() override { return controlNodes.size();}
+    void SetControlNodeVisible(int nodeId, bool value) override { controlNodes[nodeId]->bVisible = value;}
 
     //Expose functions for Example to use
-    std::vector<CObject>& GetObjects() override { return objects; }
-    CTextManager& GetTextManager() override { return textManager;}
+    //std::vector<CObject>& GetObjects() override { return objects; }
+    //CTextManager& GetTextManager() override { return textManager;}
+    int GetObjectSize() override { return objects.size();}
+    void DrawObject(int objectId) override {objects[objectId].Draw();}
+    void DrawTexts() override {textManager.Draw();}
+    
 
 };
 

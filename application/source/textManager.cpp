@@ -540,5 +540,11 @@ void CTextManager::Update(float deltaTime, int currentFrame, Camera &mainCamera)
     }
 }
 
+void CTextManager::Draw(){
+    //m_textBoxes[0].Draw();
+    for(auto& textBox : m_textBoxes){textBox.Draw();}
+};
+
+
 
 

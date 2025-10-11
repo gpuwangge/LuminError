@@ -1,5 +1,5 @@
 #include "../include/SDLCore.h"
-#include "../../application/include/application.h"
+#include "IApplication.h"
 
 void SDLCore::createWindow(int &windowWidth, int &windowHeight, std::string windowTitle){
     if(!SDL_Init(SDL_INIT_VIDEO)) 
@@ -129,13 +129,14 @@ void SDLCore::eventHandle(){
                         if(!game->Get_feature_graphics_show_all_metric_controls()) {
                             bool bvalue = game->Get_feature_graphics_show_performance_control();
                             game->Set_feature_graphics_show_performance_control(!bvalue);
-                            game->GetControlNodes()[0]->bVisible = game->Get_feature_graphics_show_performance_control(); 
+                            //game->GetControlNodes()[0]->bVisible = game->Get_feature_graphics_show_performance_control(); 
+                            game->SetControlNodeVisible(0, game->Get_feature_graphics_show_performance_control());
                         }else{
                             game->Set_feature_graphics_show_all_metric_controls(false);
-                            for(int i = 1; i < game->GetControlNodes().size(); i++) game->GetControlNodes()[i]->bVisible = false;
+                            for(int i = 1; i < game->GetControlNodeSize(); i++) game->SetControlNodeVisible(i, false);
 
                             game->Set_feature_graphics_show_performance_control(true);
-                            game->GetControlNodes()[0]->bVisible = true;
+                            game->SetControlNodeVisible(0, true);
                         }
                         break;
                     case SDLK_H:
@@ -144,7 +145,7 @@ void SDLCore::eventHandle(){
                         bool bvalue = game->Get_feature_graphics_show_all_metric_controls();
                         game->Set_feature_graphics_show_all_metric_controls(!bvalue);
                         game->Set_feature_graphics_show_performance_control(!bvalue);
-                        for(int i = 0; i < game->GetControlNodes().size(); i++) game->GetControlNodes()[i]->bVisible = game->Get_feature_graphics_show_all_metric_controls();
+                        for(int i = 0; i < game->GetControlNodeSize(); i++) game->SetControlNodeVisible(i, game->Get_feature_graphics_show_all_metric_controls());
                         break;
                     }
                     case SDLK_ESCAPE:

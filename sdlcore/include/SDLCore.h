@@ -14,16 +14,18 @@
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "../../application/include/common.h"
-#include "../../application/include/camera.hpp"
-#include "../../application/include/instance.h"
+// #include "../../application/include/common.h"
+// #include "../../application/include/camera.hpp"
+ #include "../../application/include/instance.h"
 // #include "common.h"
 // #include "camera.hpp"
 // #include "instance.h"
 
+#include "ICommon.h"
 #include "ISDLCore.h"
 
 class CApplication;
+class CInstance;
 
 class SDLCore final : public LESDL::ISDLCore{
 public:
