@@ -32,22 +32,8 @@
 #endif
 #include "../../thirdParty/yaml-cpp/yaml.h"
 
-
-//#include "..\\..\\sdlFramework\\include\\sdlManager.h"
 #include "ISDLCore.h"
 
-//Decide not to use macro
-// #define START_GRAPHICS_RECORD(descriptorIdx) { \
-//     renderer.StartRecordGraphicsCommandBuffer(renderProcess.graphicsPipeline, renderProcess.graphicsPipelineLayout, \
-//     renderProcess.renderPass,   \
-//     swapchain.swapChainFramebuffers,swapchain.swapChainExtent,   \
-//     descriptors[descriptorIdx].descriptorSets,  \
-//     clearValues);}
-// #define END_GRAPHICS_RECORD renderer.EndRecordGraphicsCommandBuffer();
-
-//Decide not to use macro
-//#define START_COMPUTE_RECORD(descriptorIdx) renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout, descriptors[descriptorIdx].descriptorSets);
-//#define END_COMPUTE_RECORD renderer.EndRecordComputeCommandBuffer();
 
  /******************
 * Utility Functions
@@ -107,13 +93,6 @@ public:
 
     void CleanUp();
 
-    void UpdateRecordRender();
-    
-
-
-    //CSDLManager sdlManager;
-
-    void Run(std::string exampleName) override;
     void Greet() override {std::cout<<"test greet"<<std::endl;}
 
     //for static class member. But can not define and init them in the header file!
@@ -144,18 +123,6 @@ public:
     YAML::Node config;
 
     std::vector<std::unique_ptr<CControlNode>> controlNodes;  
-
-    /******************
-    * Core Functions
-    ******************/
-    /*Virtual function: base and derived class will implement. If drived class not implement, call base's verson*/
-    virtual void initialize(); //use this to call sample initialization
-    //void initialize(); //base: create sync object, destroy shader resource
-    virtual void update(); //base: update time, frame id, camera and ubo
-    virtual void recordGraphicsCommandBuffer_renderpassMainscene();
-    virtual void recordGraphicsCommandBuffer_renderpassShadowmap(int renderpassIndex);
-    virtual void recordComputeCommandBuffer();
-    virtual void postUpdate();
 
     /*Pure virtual function(=0): base class not implment, derived class must implement*/
     //NA
@@ -293,14 +260,35 @@ public:
         CRenderer::RenderModes RenderMode = CRenderer::GRAPHICS;
     }appInfo;
 
+
+
+
+    //Functions to call example functions
+    /******************
+    * Core Functions
+    ******************/
+    void Run(std::string exampleName) override;
+    void UpdateRecordRender();
+
+
+    void Initialize(); //use this to call sample initialization
+    void Update(); //base: update time, frame id, camera and ubo
+    void PostUpdate();
+    void RecordGraphicsCommandBuffer_RenderpassMainscene();
+    void RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex);
+    void RecordComputeCommandBuffer();
+    
+    
+
+    //Module Related
     HMODULE handle_module_sdlcore;
     LESDL::ISDLCore *instance_sdlcore = NULL;
     HMODULE handle_module_example;
     LEExample::IExample *instance_example = NULL;
-    void LoadModuleInstance(HMODULE &handle, void* &instance, const std::string moduleName);
+    void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
     void DestroyInstance(HMODULE handle, void* instance);
 
-    //AppInfo* GetAppInfo() override {return &appInfo;}
+    //Expose functions for SDL Core to use
     bool Get_feature_graphics_enable_controls() override {return appInfo.Feature.feature_graphics_enable_controls;}
     bool Get_feature_graphics_show_all_metric_controls() override {return appInfo.Feature.feature_graphics_show_all_metric_controls;}
     bool Get_feature_graphics_show_performance_control() override {return appInfo.Feature.feature_graphics_show_performance_control;}
@@ -308,6 +296,11 @@ public:
     void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo.Feature.feature_graphics_show_all_metric_controls = value;}
     void Set_feature_graphics_show_performance_control(bool value) override {appInfo.Feature.feature_graphics_show_performance_control = value;}
     std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() override { return controlNodes;}
+
+    //Expose functions for Example to use
+    std::vector<CObject>& GetObjects() override { return objects; }
+    CTextManager& GetTextManager() override { return textManager;}
+
 };
 
 

@@ -15,10 +15,10 @@ function(add_example EXAMPLENAME)
     target_link_libraries(${EXAMPLENAME} leinterface)
 
     add_custom_command(TARGET ${EXAMPLENAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${DLLEXAMPLENAMENAME}.dll <<<<<<<<<<<<<<<<<<"
+        COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${EXAMPLENAME}.dll <<<<<<<<<<<<<<<<<<"
     )
 endfunction()
 
 # 调用函数生成两个 DLL
-add_example("example001")
+add_example("SimpleTriangle")
 add_example("example002")

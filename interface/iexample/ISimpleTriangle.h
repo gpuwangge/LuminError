@@ -2,9 +2,9 @@
 #include "../IExample.h"
 
 namespace LEExample{
-    class IExample002 : public IExample {
+    class ISimpleTriangle : public IExample {
     public:
-        virtual ~IExample002() = default;
+        virtual ~ISimpleTriangle() = default;
         void Initialize() {}
         void Update() {}
         void PostUpdate() {}

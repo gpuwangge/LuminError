@@ -29,12 +29,12 @@ Application::Application(){
 #ifndef ANDROID
 void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
-    LoadModuleInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
+    LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
     instance_sdlcore = static_cast<LESDL::ISDLCore*>(pVoid);
     instance_sdlcore->greet();
     instance_sdlcore->SetApplication(this);
 
-    LoadModuleInstance(handle_module_example, pVoid, exampleName);
+    LoadModuleAndInstance(handle_module_example, pVoid, exampleName);
     instance_example = static_cast<LEExample::IExample*>(pVoid);
     instance_example->Update();
 
@@ -126,7 +126,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //auto startInitialzeTime = std::chrono::high_resolution_clock::now();
 
     TimePoint T0 = now();
-    initialize();
+    Initialize();
     TimePoint T1 = now();
     totalInitTime = printElapsed("Application: Total Initialization cost", T0, T1);
     //if(textManager.m_textBoxes.size() > 3) textManager.m_textBoxes[3].SetTextContent("Init:" + to_string_prec(totalInitTime) + " ms");
@@ -163,7 +163,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
 }
 #endif
 
-void Application::initialize(){
+void Application::Initialize(){
     bool bVerboseInitialization = false;
     TimePoint T0 = now();
 
@@ -420,10 +420,12 @@ void Application::initialize(){
     }
 
     /****************************
-    * 10 Create Sync Objects and Clean up Shaders
+    * 10 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
     renderer.CreateSyncObjects(swapchain.swapchainImageSize);
     shaderManager.Destroy();
+
+    instance_example->Initialize();
 
     TimePoint T13 = now();
     if(bVerboseInitialization){
@@ -447,7 +449,9 @@ void Application::initialize(){
     // PRINT("Test two floats:  %f, %f!", 1.2, 2.3);    
 }
 
-void Application::update(){
+void Application::Update(){
+    instance_example->Update();
+
     static TimePoint startTimePoint = now();
     static TimePoint lastTimePoint = now();
     TimePoint currentTimePoint = now();
@@ -511,16 +515,20 @@ void Application::update(){
     // }
 }
 
-void Application::recordGraphicsCommandBuffer_renderpassMainscene(){
+void Application::PostUpdate(){ instance_example->PostUpdate();}
+
+void Application::RecordGraphicsCommandBuffer_RenderpassMainscene(){
+    instance_example->Record();
+    instance_example->RecordGraphicsCommandBuffer_RenderpassMainscene();
     for(int i = 0; i < objects.size(); i++) objects[i].Draw();
-	textManager.Draw();
+	    textManager.Draw();
 }
-void Application::recordGraphicsCommandBuffer_renderpassShadowmap(int renderpassIndex){}
-void Application::recordComputeCommandBuffer(){}
-void Application::postUpdate(){}
+void Application::RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex){instance_example->RecordGraphicsCommandBuffer_RenderpassShadowmap(renderpassIndex);}
+void Application::RecordComputeCommandBuffer(){instance_example->RecordComputeCommandBuffer();}
+
 
 void Application::UpdateRecordRender(){
-    update();
+    Update();
 
     /**************************
      * 
@@ -543,7 +551,7 @@ void Application::UpdateRecordRender(){
                 renderProcess.renderPass_mainscene, 
                 swapchain.framebuffers_mainscene,swapchain.swapChainExtent, 
                 renderProcess.clearValues);
-            recordGraphicsCommandBuffer_renderpassMainscene();
+            RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer.EndRecordGraphicsCommandBuffer();
 
             renderer.SubmitGraphics();
@@ -565,7 +573,7 @@ void Application::UpdateRecordRender(){
                 renderer.BeginRenderPass(renderProcess.renderPass_shadowmap, swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, renderProcess.clearValues_shadowmap, true);
                 renderer.SetViewport(swapchain.swapChainExtent);
                 renderer.SetScissor(swapchain.swapChainExtent);
-                recordGraphicsCommandBuffer_renderpassShadowmap(i);
+                RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
                 renderer.EndRenderPass();
             }
 
@@ -573,7 +581,7 @@ void Application::UpdateRecordRender(){
             renderer.BeginRenderPass(renderProcess.renderPass_mainscene, swapchain.framebuffers_mainscene, swapchain.swapChainExtent, renderProcess.clearValues, false);
             renderer.SetViewport(swapchain.swapChainExtent);
             renderer.SetScissor(swapchain.swapChainExtent);
-            recordGraphicsCommandBuffer_renderpassMainscene();
+            RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer.EndRenderPass();
 
 	        renderer.EndCommandBuffer(renderer.graphicsCmdId);
@@ -594,7 +602,7 @@ void Application::UpdateRecordRender(){
             //std::cout<<"Application: vkResetCommandBuffer"<<std::endl;
 
             renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-            recordComputeCommandBuffer();
+            RecordComputeCommandBuffer();
             renderer.EndRecordComputeCommandBuffer();
             //std::cout<<"Application: recordComputeCommandBuffer()"<<std::endl;
 
@@ -633,14 +641,14 @@ void Application::UpdateRecordRender(){
             vkResetCommandBuffer(renderer.commandBuffers[renderer.computeCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
             
             renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-            recordComputeCommandBuffer();
+            RecordComputeCommandBuffer();
             renderer.EndRecordComputeCommandBuffer();
 
             renderer.StartRecordGraphicsCommandBuffer(
                 renderProcess.renderPass_mainscene,
                 swapchain.framebuffers_mainscene, swapchain.swapChainExtent,
                 renderProcess.clearValues);
-            recordGraphicsCommandBuffer_renderpassMainscene();
+            RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer.EndRecordGraphicsCommandBuffer();
             
             renderer.SubmitCompute(); 
@@ -652,7 +660,7 @@ void Application::UpdateRecordRender(){
         break;
     }
 
-    postUpdate();
+    PostUpdate();
 
     renderer.Update(); //update currentFrame    
 }
@@ -1539,7 +1547,7 @@ void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGr
 }
 
 
-void Application::LoadModuleInstance(HMODULE &handle, void* &instance, const std::string moduleName){
+void Application::LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName){
     handle = LoadLibraryA(moduleName.c_str()); 
     if(!handle) { 
         std::cerr << "Module load failed! Module Name = " << moduleName << std::endl; 
@@ -1547,15 +1555,15 @@ void Application::LoadModuleInstance(HMODULE &handle, void* &instance, const std
     }
 
     using CreateInstanceFunc = void*(*)();
-    auto CreateInstance_Module =  (CreateInstanceFunc)GetProcAddress(handle, "CreateInstance");
-    if(!CreateInstance_Module) { 
+    auto CreateInstance =  (CreateInstanceFunc)GetProcAddress(handle, "CreateInstance");
+    if(!CreateInstance) { 
         std::cerr << "GetProcAddress failed! (CreateInstance_Module) Module Name = " << moduleName << std::endl;
         FreeLibrary(handle);
         instance = nullptr;
         return;
     }
     
-    instance = CreateInstance_Module();
+    instance = CreateInstance();
     if (!instance) {
         std::cerr << "CreateInstance failed!" << std::endl;
         FreeLibrary(handle);
@@ -1594,6 +1602,9 @@ Application::~Application(){
         handle_module_example = nullptr;
     }
 }
+
+
+
 
 extern "C" void* CreateInstance(){ return new Application();}
 extern "C" void DestroyInstance(void *p){ 

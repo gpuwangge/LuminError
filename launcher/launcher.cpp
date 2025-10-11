@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     HMODULE handle_application = LoadLibraryA("application.dll"); //Windows.h
     if(!handle_application) { 
-        std::cerr << "DLL load failed! DLL Name = application.dll" << std::endl; //Windows.h
+        std::cerr << "Module load failed! Module Name = application.dll" << std::endl; //Windows.h
         return -1; 
     }
 
