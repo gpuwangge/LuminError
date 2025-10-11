@@ -14,8 +14,11 @@
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "ICommon.h"
 #include "ISDLCore.h"
+
+#include <memory>
+#include <vector>
+#include <iostream>
 
 class CApplication;
 class CInstance;

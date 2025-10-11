@@ -1,6 +1,6 @@
-#include "ICommon.h"
 #include "ISimpleTriangle.h"
 #include "IApplication.h"
+#include <iostream>
 
 namespace LEExample{
     struct SimpleTriangle : public ISimpleTriangle {

@@ -1,5 +1,5 @@
 #pragma once
-#include "ICommon.h"
+#include <string>
 
 class CControlNode;
 class CObject;

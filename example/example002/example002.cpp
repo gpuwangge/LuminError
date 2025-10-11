@@ -1,5 +1,6 @@
-#include "ICommon.h"
 #include "IExample002.h"
+
+#include <iostream>
 
 namespace LEExample{
     struct Example002 : public IExample002 {

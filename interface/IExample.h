@@ -1,5 +1,4 @@
 #pragma once
-#include "ICommon.h"
 
 namespace LEApplication{
     class IApplication;
