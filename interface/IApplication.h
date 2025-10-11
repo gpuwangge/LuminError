@@ -1,6 +1,5 @@
 #pragma once
 #include "ICommon.h"
-#include "IExample.h"
 
 class CControlNode;
 class CObject;

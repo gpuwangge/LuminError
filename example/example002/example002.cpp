@@ -3,6 +3,9 @@
 
 namespace LEExample{
     struct Example002 : public IExample002 {
+        LEApplication::IApplication* game;
+        void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
+        
         void Update() override{
             std::cout<<"Example002::Update()"<<std::endl;
         }

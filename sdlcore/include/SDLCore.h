@@ -57,8 +57,8 @@ public:
     void eventHandle() override;
 
     void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
-    LEApplication::IApplication* pApplication_;
-    void SetApplication(LEApplication::IApplication* pApplication) override {pApplication_ = pApplication;}
+    LEApplication::IApplication* game;
+    void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
 
     
 };

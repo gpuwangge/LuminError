@@ -125,26 +125,26 @@ void SDLCore::eventHandle(){
                         */
                         break;
                     case SDLK_P:
-                        if(!pApplication_->Get_feature_graphics_enable_controls()) break;
-                        if(!pApplication_->Get_feature_graphics_show_all_metric_controls()) {
-                            bool bvalue = pApplication_->Get_feature_graphics_show_performance_control();
-                            pApplication_->Set_feature_graphics_show_performance_control(!bvalue);
-                            pApplication_->GetControlNodes()[0]->bVisible = pApplication_->Get_feature_graphics_show_performance_control(); 
+                        if(!game->Get_feature_graphics_enable_controls()) break;
+                        if(!game->Get_feature_graphics_show_all_metric_controls()) {
+                            bool bvalue = game->Get_feature_graphics_show_performance_control();
+                            game->Set_feature_graphics_show_performance_control(!bvalue);
+                            game->GetControlNodes()[0]->bVisible = game->Get_feature_graphics_show_performance_control(); 
                         }else{
-                            pApplication_->Set_feature_graphics_show_all_metric_controls(false);
-                            for(int i = 1; i < pApplication_->GetControlNodes().size(); i++) pApplication_->GetControlNodes()[i]->bVisible = false;
+                            game->Set_feature_graphics_show_all_metric_controls(false);
+                            for(int i = 1; i < game->GetControlNodes().size(); i++) game->GetControlNodes()[i]->bVisible = false;
 
-                            pApplication_->Set_feature_graphics_show_performance_control(true);
-                            pApplication_->GetControlNodes()[0]->bVisible = true;
+                            game->Set_feature_graphics_show_performance_control(true);
+                            game->GetControlNodes()[0]->bVisible = true;
                         }
                         break;
                     case SDLK_H:
                     {
-                        if(!pApplication_->Get_feature_graphics_enable_controls()) break;
-                        bool bvalue = pApplication_->Get_feature_graphics_show_all_metric_controls();
-                        pApplication_->Set_feature_graphics_show_all_metric_controls(!bvalue);
-                        pApplication_->Set_feature_graphics_show_performance_control(!bvalue);
-                        for(int i = 0; i < pApplication_->GetControlNodes().size(); i++) pApplication_->GetControlNodes()[i]->bVisible = pApplication_->Get_feature_graphics_show_all_metric_controls();
+                        if(!game->Get_feature_graphics_enable_controls()) break;
+                        bool bvalue = game->Get_feature_graphics_show_all_metric_controls();
+                        game->Set_feature_graphics_show_all_metric_controls(!bvalue);
+                        game->Set_feature_graphics_show_performance_control(!bvalue);
+                        for(int i = 0; i < game->GetControlNodes().size(); i++) game->GetControlNodes()[i]->bVisible = game->Get_feature_graphics_show_all_metric_controls();
                         break;
                     }
                     case SDLK_ESCAPE:

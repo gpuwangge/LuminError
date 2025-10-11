@@ -1,8 +1,14 @@
 #include "ICommon.h"
 #include "ISimpleTriangle.h"
+#include "IApplication.h"
+#include "../../application/include/application.h"
+#include "../../application/include/textManager.h"
 
 namespace LEExample{
     struct SimpleTriangle : public ISimpleTriangle {
+        LEApplication::IApplication* game;
+        void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
+
         void Update() override{
             //std::cout<<"SimpleTriangle::Update()"<<std::endl; 
         }
@@ -11,6 +17,8 @@ namespace LEExample{
             
             //for(int i = 0; i < objects.size(); i++) objects[i].Draw();
 	        //    textManager.Draw();
+            CTextManager test = game->GetTextManager();
+            //test.Draw(); //ISSUE: cant find Draw's implementation
         }
     };
 

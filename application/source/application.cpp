@@ -1,4 +1,6 @@
 #include "../include/application.h"
+
+
 //static class members must be defined outside. 
 //otherwise invoke 'undefined reference' error when linking
 Camera Application::mainCamera;
@@ -36,7 +38,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
 
     LoadModuleAndInstance(handle_module_example, pVoid, exampleName);
     instance_example = static_cast<LEExample::IExample*>(pVoid);
-    instance_example->Update();
+    instance_example->SetApplication(this);
+    //instance_example->Update();
 
 
     CContext::Init();

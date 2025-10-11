@@ -81,6 +81,7 @@ void CTextbox::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descri
     //std::cout<<"Done set descriptor. "<<std::endl;
 }
 
+
 void CTextbox::Draw(){
     if(!bRegistered) return;
     if(p_controlNode != NULL && !p_controlNode->bVisible) return;
