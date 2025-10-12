@@ -345,7 +345,9 @@ namespace LEApplication{
         }
         void SetObjectVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetVelocity(vx, vy, vz);}
 
-
+        //Expose functions for Example(Furmark) to use
+        int GetWindowWidth() override { return windowWidth; }
+        int GetWindowHeight() override { return windowHeight; }
     };
 
     // extern "C" void* CreateInstance(){ return new Application();}

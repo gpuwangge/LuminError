@@ -53,6 +53,10 @@ namespace LEApplication{
         virtual void UpdateGraphicsCustomUniformBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize) = 0;
         virtual void SetObjectVelocity(int objectId, float vx, float vy, float vz) = 0;
 
+        //Expose functions for Example(Furmark) to use
+        virtual int GetWindowWidth() = 0;
+        virtual int GetWindowHeight() = 0;
+
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

@@ -38,9 +38,19 @@ file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp/lib/libyaml-cpp.dll DESTINAT
 # 创建 autotest.bat 文件
 file(WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "@echo off\r\n")
 file(APPEND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "echo Starting Auto Tests...\r\n\r\n")
-# 定义示例目录
-set(EXAMPLE_DIRS BasicTriangles Bptpc16Texture SimpleTriangle)
-foreach(example_dir IN LISTS EXAMPLE_DIRS)
+# 自动发现所有示例目录
+# file(GLOB EXAMPLE_DIRS RELATIVE ${PROJECT_SOURCE_DIR}/example "*")
+# 自动发现 example 目录下的所有子目录
+file(GLOB EXAMPLE_DIRS RELATIVE ${PROJECT_SOURCE_DIR}/example ${PROJECT_SOURCE_DIR}/example/*)
+# 过滤出目录（排除文件）
+set(EXAMPLE_DIRECTORIES "")
+foreach(dir IN LISTS EXAMPLE_DIRS)
+    if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/example/${dir})
+        list(APPEND EXAMPLE_DIRECTORIES ${dir})
+    endif()
+endforeach()
+message(STATUS "Root CMakeLists.txt: Found example directories: ${EXAMPLE_DIRECTORIES}")
+foreach(example_dir IN LISTS EXAMPLE_DIRECTORIES)
     # 获取目录中的 CPP 文件
     file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/example/${example_dir}/*.cpp)
     foreach(sample_file IN LISTS SRC_FILES)

@@ -75,10 +75,10 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
-    std::cout<<m_sampleName<<std::endl;
+    //std::cout<<m_sampleName<<std::endl;
     //m_sampleName.erase(0, 1);
     m_sampleName = getPureName(m_sampleName);
-    std::cout<<m_sampleName<<std::endl;
+    //std::cout<<m_sampleName<<std::endl;
 #ifdef SDL
    // sdlManager.m_pApp = this;
     //sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);

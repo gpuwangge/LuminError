@@ -2,7 +2,7 @@
 
 layout(location = 0) out vec4 fragColor;
 
-layout(set = 0, binding = 0) uniform UniformCustomBufferObject { 
+layout(set = 0, binding = 2) uniform UniformCustomBufferObject { 
     vec2 u_resolution;
 	float u_time;
 } customUBO;
