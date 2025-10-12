@@ -36,9 +36,9 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //instance_sdlcore->greet();
     instance_sdlcore->SetApplication(this);
 
-    LoadModuleAndInstance(handle_module_example, pVoid, exampleName);
-    instance_example = static_cast<LEExample::IExample*>(pVoid);
-    instance_example->SetApplication(this);
+    LoadModuleAndInstance(handle_module_game, pVoid, exampleName);
+    instance_game = static_cast<LuminError::IGame*>(pVoid);
+    instance_game->SetApplication(this);
     //instance_example->Update();
 
 
@@ -428,7 +428,7 @@ void Application::Initialize(){
     renderer.CreateSyncObjects(swapchain.swapchainImageSize);
     shaderManager.Destroy();
 
-    instance_example->Initialize();
+    instance_game->Initialize();
 
     TimePoint T13 = now();
     if(bVerboseInitialization){
@@ -453,7 +453,7 @@ void Application::Initialize(){
 }
 
 void Application::Update(){
-    instance_example->Update();
+    instance_game->Update();
 
     static TimePoint startTimePoint = now();
     static TimePoint lastTimePoint = now();
@@ -518,16 +518,16 @@ void Application::Update(){
     // }
 }
 
-void Application::PostUpdate(){ instance_example->PostUpdate();}
+void Application::PostUpdate(){ instance_game->PostUpdate();}
 
 void Application::RecordGraphicsCommandBuffer_RenderpassMainscene(){
-    instance_example->Record();
-    instance_example->RecordGraphicsCommandBuffer_RenderpassMainscene();
+    instance_game->Record();
+    instance_game->RecordGraphicsCommandBuffer_RenderpassMainscene();
     for(int i = 0; i < objects.size(); i++) objects[i].Draw();
 	    textManager.Draw();
 }
-void Application::RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex){instance_example->RecordGraphicsCommandBuffer_RenderpassShadowmap(renderpassIndex);}
-void Application::RecordComputeCommandBuffer(){instance_example->RecordComputeCommandBuffer();}
+void Application::RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex){instance_game->RecordGraphicsCommandBuffer_RenderpassShadowmap(renderpassIndex);}
+void Application::RecordComputeCommandBuffer(){instance_game->RecordComputeCommandBuffer();}
 
 
 void Application::UpdateRecordRender(){
@@ -1599,10 +1599,10 @@ Application::~Application(){
         handle_module_sdlcore = nullptr;
     }
 
-    if (handle_module_example) {
+    if (handle_module_game) {
         std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
-        FreeLibrary(handle_module_example);
-        handle_module_example = nullptr;
+        FreeLibrary(handle_module_game);
+        handle_module_game = nullptr;
     }
 }
 
@@ -1617,8 +1617,8 @@ extern "C" void DestroyInstance(void *p){
             static_cast<Application*>(p)->handle_module_sdlcore,
             static_cast<Application*>(p)->instance_sdlcore);
         static_cast<Application*>(p)->DestroyInstance(
-            static_cast<Application*>(p)->handle_module_example,
-            static_cast<Application*>(p)->instance_example);
+            static_cast<Application*>(p)->handle_module_game,
+            static_cast<Application*>(p)->instance_game);
         delete static_cast<Application*>(p);
         std::cout<<"- Destroy Instance Application."<<std::endl;
     } 

@@ -1,8 +1,8 @@
-#include "IExample002.h"
+#include "IGame.h"
 #include <iostream>
 
-namespace LEExample{
-    struct Example002 : public IExample002 {
+namespace LuminError{
+    struct Example002 : public IGame {
         void Update() override{
             std::cout<<"Example002::Update()"<<std::endl;
         }

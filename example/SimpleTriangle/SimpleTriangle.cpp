@@ -1,8 +1,7 @@
-#include "ISimpleTriangle.h"
-#include <iostream>
+#include "IGame.h"
 
-namespace LEExample{
-    struct SimpleTriangle : public ISimpleTriangle {
+namespace LuminError{
+    struct SimpleTriangle : public IGame {
         void Record() override{
             for(int i = 0; i < game->GetObjectSize(); i++) game->DrawObject(i);
             game->DrawTexts();

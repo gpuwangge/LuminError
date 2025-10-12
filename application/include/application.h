@@ -22,7 +22,7 @@
 
 #include <windows.h>
 #include "IApplication.h"
-#include "IExample.h"
+#include "IGame.h"
 
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x
@@ -284,8 +284,8 @@ public:
     //Module Related
     HMODULE handle_module_sdlcore;
     LESDL::ISDLCore *instance_sdlcore = NULL;
-    HMODULE handle_module_example;
-    LEExample::IExample *instance_example = NULL;
+    HMODULE handle_module_game;
+    LuminError::IGame *instance_game = NULL;
     void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
     void DestroyInstance(HMODULE handle, void* instance);
 
