@@ -21,3 +21,4 @@ endfunction()
 
 add_example("SimpleTriangle")
 add_example("BasicTriangles")
+add_example("Bptpc16Texture")
