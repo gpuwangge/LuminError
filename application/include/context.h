@@ -1,9 +1,10 @@
 #ifndef H_CONTEXT
 #define H_CONTEXT
 
-#include "common.h"
 #include "physicalDevice.h"
 #include "logManager.h"
+#include <vulkan/vulkan.h>
+#include <locale>
 
 #ifdef ANDROID
 #include "..\\..\\androidFramework\\include\\androidFileManager.h"

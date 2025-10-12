@@ -3,6 +3,7 @@
 
 #include "entity.h"
 #include "Foundation.h"
+#include <iostream>
 
 class Camera : public CEntity{
 public:

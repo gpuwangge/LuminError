@@ -1,9 +1,9 @@
 #ifndef H_IMAGEMANAGER
 #define H_IMAGEMANAGER
 
-#include "common.h"
 #include "context.h"
 #include "dataBuffer.hpp"
+#include <vulkan/vulkan.h>
 
 //3 places use image buffer: depth, MSAA color, texture. 
 //swap chain has vkimage and vkimageview but not acutally create image(but will create imageView), so it does't use image buffer

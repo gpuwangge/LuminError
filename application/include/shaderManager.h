@@ -1,9 +1,10 @@
 #ifndef H_SHADERMANAGER
 #define H_SHADERMANAGER
 
-#include "common.h"
 #include "context.h"
 #include "Foundation.h"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 class CShaderManager final{
 public:

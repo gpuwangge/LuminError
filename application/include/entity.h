@@ -1,10 +1,9 @@
 #ifndef H_ENTITY
 #define H_ENTITY
 
-//redundant?
-#include "common.h"
 #include <string>
 #include "utility.h"
+#include <locale>
 
 class CEntity{
 public:

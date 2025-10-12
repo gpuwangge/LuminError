@@ -1,11 +1,12 @@
 #ifndef H_RENDERER
 #define H_RENDERER
 
-#include "common.h"
 #include "context.h"
 #include "dataBuffer.hpp"
 #include "swapchain.h"
 #include "textManager.h"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 class CTextbox;
 

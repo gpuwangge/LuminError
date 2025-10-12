@@ -1,7 +1,6 @@
 #ifndef H_LOGMANAGER
 #define H_LOGMANAGER
 
-#include "common.h"
 #include "utility.h"
 
 #ifndef ANDROID

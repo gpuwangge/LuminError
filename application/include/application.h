@@ -1,7 +1,6 @@
 #ifndef H_APPLICATION
 #define H_APPLICATION
 
-#include "common.h"
 #include "camera.hpp"
 #include "instance.h"
 #include "swapchain.h"
@@ -23,7 +22,10 @@
 #include <windows.h>
 #include "IApplication.h"
 #include "IGame.h"
-#include "utility.h"
+#include "Utility.h"
+#include <vector>
+#include <iomanip>
+#include <iostream>
 
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x

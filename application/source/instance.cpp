@@ -1,4 +1,5 @@
 #include "../include/instance.h"
+#include <string.h>
 
 #ifdef ANDROID
 #include "..\\..\\androidFramework\\include\\androidFileManager.h"

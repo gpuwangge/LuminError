@@ -1,4 +1,5 @@
 #include "../include/swapchain.h"
+#include <algorithm>
 
 CSwapchain::CSwapchain(){
     //debugger = new CDebugger("../logs/swapchain.log");

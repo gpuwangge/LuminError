@@ -6,6 +6,8 @@
 #include "context.h"
 #include "logManager.h"
 #include "timer.h"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 class CTextureImage final{
 public:

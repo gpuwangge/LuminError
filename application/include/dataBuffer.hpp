@@ -1,9 +1,10 @@
 #ifndef H_DATABUFFER
 #define H_DATABUFFER
-#include "common.h"
+
 #include "context.h"
 #include <map>
 #include "utility.h"
+#include <vulkan/vulkan.h>
 
 //Uniform Naming Rule: PipelineType_DescriptorType_Purpose
 enum UniformTypes {

@@ -4,6 +4,8 @@
 #include "context.h"
 #include "dataBuffer.hpp"
 #include "../include/texture.h"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 class CGraphicsDescriptorManager{
 public:

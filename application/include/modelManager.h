@@ -1,10 +1,10 @@
 #ifndef H_MODELMANAGER
 #define H_MODELMANAGER
 
-#include "common.h"
 #include "dataBuffer.hpp"
 #include "utility.h"
 #include "Config.h"
+#include <vector>
 
  #ifdef ANDROID
 #include "context.h"

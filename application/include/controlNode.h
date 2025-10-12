@@ -5,6 +5,7 @@
 #include "object.h"
 #include "textManager.h"
 #include "utility.h"
+#include <vector>
 
 class Application;
 

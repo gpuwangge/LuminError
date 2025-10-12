@@ -2,7 +2,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../thirdParty/stb_image.h"
-
+#include <SDL3_ttf/SDL_ttf.h>
 
 /*******************
 *	Texture Manager: to manage a vector of CTextureImages

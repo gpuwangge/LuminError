@@ -1,4 +1,5 @@
 #include "../include/shaderManager.h"
+#include <fstream>
 
 CShaderManager::CShaderManager(){
     //debugger = new CDebugger("../logs/shaderManager.log");

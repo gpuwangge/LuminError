@@ -1,5 +1,6 @@
 #include "../include/modelManager.h"
 #include "Foundation.h"
+#include <unordered_map>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../thirdParty/tiny_obj_loader.h"

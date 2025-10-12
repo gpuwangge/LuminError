@@ -1,9 +1,10 @@
 #ifndef H_RENDERPROCESS
 #define H_RENDERPROCESS
 
-#include "common.h"
 #include "context.h"
 #include "dataBuffer.hpp"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 //renderProcess constains all attachment descriptions
 //when creating renderPass, it will use these attachment descriptions (as well as subpasses and dependencies) 

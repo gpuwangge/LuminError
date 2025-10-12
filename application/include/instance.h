@@ -1,9 +1,12 @@
 #ifndef H_INSTANCE
 #define H_INSTANCE
 
-#include "common.h"
 #include "physicalDevice.h"
 #include "context.h"
+#include <vulkan/vulkan.h>
+#include <vector>
+#include <iostream>
+#include <locale>
 
 class CInstance{
 public:

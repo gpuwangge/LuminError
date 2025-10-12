@@ -1,8 +1,7 @@
 #ifndef H_LOGICALDEVICE
 #define H_LOGICALDEVICE
 
-
-#include "common.h"
+#include <vulkan/vulkan.h>
 
 class CLogicalDevice final{
 

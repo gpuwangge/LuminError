@@ -3,10 +3,13 @@
 
 //#include "instance.h"
 #include "logicalDevice.h"
-#include "common.h"
 //#include "context.h"
 #include "logManager.h"
 #include "Config.h"
+#include <vulkan/vulkan.h>
+#include <vector>
+#include <optional>
+#include <locale>
 
 //#define PRINT logManager.print
 

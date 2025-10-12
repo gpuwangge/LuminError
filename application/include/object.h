@@ -5,6 +5,8 @@
 #include "entity.h"
 #include "renderProcess.h"
 #include "camera.hpp"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.

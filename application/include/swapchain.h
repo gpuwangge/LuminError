@@ -6,6 +6,8 @@
 #include "context.h"
 #include "imageBuffer.h"
 #include "logManager.h"
+#include <vulkan/vulkan.h>
+#include <vector>
 
 //Swapchain has all attachment resources(images, imageViews) for rendering
 //frambuffer wraps the swapchain imageViews, so that it can be used in renderPass
