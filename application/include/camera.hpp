@@ -4,10 +4,10 @@
 #include "entity.h"
 #include "Foundation.h"
 #include <iostream>
+#include "Enum.h"
 
 class Camera : public CEntity{
 public:
-	enum CameraType { LOCK, FREE, SELECT }; //SELECT is not implemented yet
 	CameraType cameraType = CameraType::LOCK;
 	int focusObjectId = 0; //this is the object that camera is focusing on, it will be used in LOCK mode
 

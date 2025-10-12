@@ -25,6 +25,7 @@
 #include <vector>
 #include <iomanip>
 #include <iostream>
+#include "Enum.h"
 
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x
@@ -302,10 +303,23 @@ namespace LEApplication{
         void Set_feature_graphics_enable_controls(bool value) override {appInfo.Feature.feature_graphics_enable_controls = value;}
         void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo.Feature.feature_graphics_show_all_metric_controls = value;}
         void Set_feature_graphics_show_performance_control(bool value) override {appInfo.Feature.feature_graphics_show_performance_control = value;}
-        //std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() override { return controlNodes;}
         int GetControlNodeSize() override { return controlNodes.size();}
         void SetControlNodeVisible(int nodeId, bool value) override { controlNodes[nodeId]->bVisible = value;}
         void* GetInstanceHandle() override {return instance->getHandle();}
+        void SetMainCameraVelocityX(float value) override { mainCamera.Velocity.x = value; }
+        void SetMainCameraVelocityY(float value) override { mainCamera.Velocity.y = value; }
+        void SetMainCameraVelocityZ(float value) override { mainCamera.Velocity.z = value; }
+        void SetMainCameraAngularVelocityX(float value) override { mainCamera.AngularVelocity.x = value; }
+        void SetMainCameraAngularVelocityY(float value) override { mainCamera.AngularVelocity.y = value; }
+        void SetMainCameraAngularVelocityZ(float value) override { mainCamera.AngularVelocity.z = value; }
+        void SetMainCameraType(int type) override { mainCamera.cameraType = (CameraType)type; }
+        int GetMainCameraType() override { return mainCamera.cameraType; }
+        void SetMainCameraFocusObjectId(int objectId) override { mainCamera.focusObjectId = objectId; }
+        int GetMainCameraFocusObjectId() override { return mainCamera.focusObjectId; }
+        void MoveMainCameraLeft(float distance, float speed) override { mainCamera.MoveLeft(distance, speed); }
+        void MoveMainCameraRight(float distance, float speed) override { mainCamera.MoveRight(distance, speed); }
+        void MoveMainCameraForward(float distance, float speed) override { mainCamera.MoveForward(distance, speed); }
+        void MoveMainCameraBackward(float distance, float speed) override { mainCamera.MoveBackward(distance, speed); }
 
         //Expose functions for Example(SimpleTriangle) to use
         int GetObjectSize() override { return objects.size();}

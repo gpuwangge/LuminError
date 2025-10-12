@@ -1,5 +1,5 @@
 #include "../include/logManager.h"
-
+#include "Foundation.h"
 
 CLogManager::CLogManager(){}
 CLogManager::~CLogManager(){  }
@@ -7,8 +7,10 @@ CLogManager::~CLogManager(){  }
 #ifndef ANDROID
 #include <sys/stat.h>
 void CLogManager::setLogFile(std::string s){
-    mkdir("../logs");
-    std::string fullname = "../logs/" + s;
+    //mkdir("../logs");
+    //std::string fullname = "../logs/" + s;
+    mkdir(LOG_PATH);
+    std::string fullname = LOG_PATH + s;
     desktopLogManager.createLogFile(fullname);
 }
 #endif

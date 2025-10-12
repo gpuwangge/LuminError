@@ -8,3 +8,4 @@ const uint32_t WINDOW_HEIGHT = 800; //1280;//2400;
 #define TEXTURE_PATH "../../resource/textures/"
 #define MODEL_PATH "../../resource/models/"
 #define YAML_PATH "../../resource/yamls/"
+#define LOG_PATH "../../logs/"

@@ -1493,7 +1493,7 @@ void Application::ReadLightings(){
 }
 
 void Application::ReadCameras(){
-    mainCamera.cameraType = (Camera::CameraType)(config["MainCamera"]["camera_mode"] ? config["MainCamera"]["camera_mode"].as<int>() : 0);
+    mainCamera.cameraType = (CameraType)(config["MainCamera"]["camera_mode"] ? config["MainCamera"]["camera_mode"].as<int>() : 0);
     mainCamera.SetPosition(
         config["MainCamera"]["camera_position"][0].as<float>(), 
         config["MainCamera"]["camera_position"][1].as<float>(), 
@@ -1537,7 +1537,7 @@ void Application::ReadCameras(){
 #endif
 
     if (config["LightCamera"]) {
-        lightCameras[0].cameraType = (Camera::CameraType)(config["LightCamera"]["camera_mode"] ? config["LightCamera"]["camera_mode"].as<int>() : 0);
+        lightCameras[0].cameraType = (CameraType)(config["LightCamera"]["camera_mode"] ? config["LightCamera"]["camera_mode"].as<int>() : 0);
         lightCameras[0].SetPosition(
             config["LightCamera"]["camera_position"][0].as<float>(), 
             config["LightCamera"]["camera_position"][1].as<float>(), 

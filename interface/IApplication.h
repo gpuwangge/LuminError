@@ -24,6 +24,20 @@ namespace LEApplication{
         virtual int GetControlNodeSize() = 0;
         virtual void SetControlNodeVisible(int nodeId, bool value) = 0;
         virtual void* GetInstanceHandle() = 0; //return type is VkInstance
+        virtual void SetMainCameraVelocityX(float value) = 0;
+        virtual void SetMainCameraVelocityY(float value) = 0;
+        virtual void SetMainCameraVelocityZ(float value) = 0;
+        virtual void SetMainCameraAngularVelocityX(float value) = 0;
+        virtual void SetMainCameraAngularVelocityY(float value) = 0;
+        virtual void SetMainCameraAngularVelocityZ(float value) = 0;
+        virtual void SetMainCameraType(int type) = 0;
+        virtual int GetMainCameraType() = 0;
+        virtual void SetMainCameraFocusObjectId(int objectId) = 0;
+        virtual int GetMainCameraFocusObjectId() = 0;
+        virtual void MoveMainCameraLeft(float distance, float speed) = 0;
+        virtual void MoveMainCameraRight(float distance, float speed) = 0;
+        virtual void MoveMainCameraForward(float distance, float speed) = 0;
+        virtual void MoveMainCameraBackward(float distance, float speed) = 0;
         
         //Expose functions for Example(SimpleTriangle) to use
         virtual int GetObjectSize() = 0;
