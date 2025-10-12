@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "context.h"
+#include "Foundation.h"
 
 class CShaderManager final{
 public:

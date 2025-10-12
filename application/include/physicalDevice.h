@@ -6,6 +6,7 @@
 #include "common.h"
 //#include "context.h"
 #include "logManager.h"
+#include "Config.h"
 
 //#define PRINT logManager.print
 

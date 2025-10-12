@@ -4,6 +4,7 @@
 #include "entity.h"
 #include "object.h"
 #include "textManager.h"
+#include "utility.h"
 
 class Application;
 

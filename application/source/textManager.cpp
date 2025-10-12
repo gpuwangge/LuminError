@@ -1,5 +1,7 @@
 #include "../include/textManager.h"
 #include "../include/application.h"
+#include "Foundation.h"
+#include "Config.h"
 
 /*************
 * Change from CCharacter(no use) to CTextBox

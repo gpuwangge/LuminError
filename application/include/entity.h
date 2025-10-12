@@ -4,6 +4,7 @@
 //redundant?
 #include "common.h"
 #include <string>
+#include "utility.h"
 
 class CEntity{
 public:

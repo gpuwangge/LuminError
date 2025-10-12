@@ -23,6 +23,7 @@
 #include <windows.h>
 #include "IApplication.h"
 #include "IGame.h"
+#include "utility.h"
 
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x

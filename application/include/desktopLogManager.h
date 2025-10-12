@@ -6,6 +6,7 @@
 // #define REPORT(s) { debugger->printVkError( result, s );  debugger->flush(); }
 
 #include "common.h"
+#include "utility.h"
 
 struct errorcode
 {

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "camera.hpp"
+#include "utility.h"
 
 class CLight {
     std::string m_name;

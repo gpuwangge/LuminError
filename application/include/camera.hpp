@@ -2,6 +2,7 @@
 #define H_CAMERA
 
 #include "entity.h"
+#include "Foundation.h"
 
 class Camera : public CEntity{
 public:

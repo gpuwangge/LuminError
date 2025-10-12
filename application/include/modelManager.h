@@ -3,6 +3,8 @@
 
 #include "common.h"
 #include "dataBuffer.hpp"
+#include "utility.h"
+#include "Config.h"
 
  #ifdef ANDROID
 #include "context.h"

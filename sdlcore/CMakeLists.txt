@@ -25,7 +25,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     PREFIX ""
 )
 
-target_link_libraries(${PROJECT_NAME} leinterface SDL3)
+target_link_libraries(${PROJECT_NAME} leinterface SDL3 lecommon)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${PROJECT_NAME}.dll <<<<<<<<<<<<<<<<<<"

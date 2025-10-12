@@ -3,7 +3,7 @@
 #include "common.h"
 #include "context.h"
 #include <map>
-
+#include "utility.h"
 
 //Uniform Naming Rule: PipelineType_DescriptorType_Purpose
 enum UniformTypes {

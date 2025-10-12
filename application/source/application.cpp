@@ -1,5 +1,5 @@
 #include "../include/application.h"
-
+#include "Foundation.h"
 
 //static class members must be defined outside. 
 //otherwise invoke 'undefined reference' error when linking

@@ -1,4 +1,5 @@
 #include "../include/renderer.h"
+#include "Config.h"
 
 CRenderer::CRenderer(){
     currentFrame = 0;

@@ -1,4 +1,5 @@
 #include "../include/light.h"
+
 //#include "../include/application.h"
 
 void CLight::Update(float deltaTime, int currentFrame, Camera &mainCamera, Camera &lightCamera){

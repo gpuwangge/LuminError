@@ -2,6 +2,7 @@
 #define H_LOGMANAGER
 
 #include "common.h"
+#include "utility.h"
 
 #ifndef ANDROID
     //#include "..\\..\\windowsFramework\\include\\windowsLogManager.h"

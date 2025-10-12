@@ -1,10 +1,8 @@
 #include "../include/SDLCore.h"
+#include "Foundation.h"
 
 #include <windows.h>
 #include <iostream>
-
-const uint32_t WINDOW_WIDTH = 800; //1024;//1080;
-const uint32_t WINDOW_HEIGHT = 800; //1280;//2400;
 
 void SDLCore::createWindow(int &windowWidth, int &windowHeight, std::string windowTitle){
     if(!SDL_Init(SDL_INIT_VIDEO)) 

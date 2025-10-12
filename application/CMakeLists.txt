@@ -14,7 +14,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 #target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(${PROJECT_NAME} PRIVATE leinterface vulkan-1 SDL3 SDL3_ttf yaml-cpp) #sdl-vulkan-framework 
+target_link_libraries(${PROJECT_NAME} PRIVATE leinterface vulkan-1 SDL3 SDL3_ttf yaml-cpp lecommon) #sdl-vulkan-framework 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${PROJECT_NAME}.dll <<<<<<<<<<<<<<<<<<"
