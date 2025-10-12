@@ -3,7 +3,7 @@
 #include "utility.h"
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "Types.h"
+#include "TypeVertex.h"
 
 namespace LuminError{
     struct BasicTriangles : public IGame {

@@ -2,10 +2,11 @@
 #define H_GRAPHICSDESCRIPTOR
 
 #include "context.h"
-#include "dataBuffer.hpp"
 #include "../include/texture.h"
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "TypeLight.h"
+#include "TypeUniform.h"
 
 class CGraphicsDescriptorManager{
 public:

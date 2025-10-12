@@ -1,10 +1,11 @@
 #ifndef H_MODELMANAGER
 #define H_MODELMANAGER
 
-#include "dataBuffer.hpp"
 #include "utility.h"
 #include "Config.h"
 #include <vector>
+#include "TypeVertex.h"
+#include "TypeText.h"
 
  #ifdef ANDROID
 #include "context.h"

@@ -2,10 +2,10 @@
 #define H_COMPUTEDESCRIPTOR
 
 #include "context.h"
-#include "dataBuffer.hpp"
 #include "../include/texture.h"
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "TypeUniform.h"
 
 class CComputeDescriptorManager{
 public:

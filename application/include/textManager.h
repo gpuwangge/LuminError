@@ -7,6 +7,9 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <SDL3_ttf/SDL_ttf.h>
+#include "TypeBuffer.h"
+#include "TypeText.h"
+#include <map>
 
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.

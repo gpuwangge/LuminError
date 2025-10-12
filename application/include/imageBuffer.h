@@ -2,7 +2,6 @@
 #define H_IMAGEMANAGER
 
 #include "context.h"
-#include "dataBuffer.hpp"
 #include <vulkan/vulkan.h>
 
 //3 places use image buffer: depth, MSAA color, texture. 
