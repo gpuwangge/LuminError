@@ -260,6 +260,9 @@ namespace LEApplication{
             std::unique_ptr<std::vector<bool>> RenderPassShadowmap;
             std::unique_ptr<std::vector<int>> Subpass;
             std::unique_ptr<std::vector<int>> VertexDatatype;
+            std::unique_ptr<std::vector<bool>> BlendEnable;
+            std::unique_ptr<std::vector<bool>> DepthTestEnable;
+            std::unique_ptr<std::vector<bool>> DepthWriteEnable;
             std::unique_ptr<std::vector<std::string>> ComputeShader;
             CRenderer::RenderModes RenderMode = CRenderer::GRAPHICS;
         }appInfo;

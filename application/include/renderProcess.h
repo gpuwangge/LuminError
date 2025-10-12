@@ -148,14 +148,16 @@ public:
      * *****/
     //this function is for samples that are NOT using vertex shader
     void createGraphicsPipeline(VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, int graphcisPipeline_id, 
-        int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass){
-        createGraphicsPipeline<DummyVertex>(topology, vertShaderModule, fragShaderModule, false, false, graphcisPipeline_id, subpass_id, bEnableDepthBias, renderPass); //DummyVertex doesn't really matter here, because no vertex attributes used
+        int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass, 
+        bool blendEnable, bool depthTestEnable, bool depthWriteEnable){
+        createGraphicsPipeline<DummyVertex>(topology, vertShaderModule, fragShaderModule, false, false, graphcisPipeline_id, subpass_id, bEnableDepthBias, renderPass, blendEnable, depthTestEnable, depthWriteEnable); //DummyVertex doesn't really matter here, because no vertex attributes used
     }
 
     //this function is for samples that are  using vertex shader
     template <typename T>
     void createGraphicsPipeline(VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
-        int graphcisPipeline_id, int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass){
+        int graphcisPipeline_id, int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass,
+        bool blendEnable, bool depthTestEnable, bool depthWriteEnable){
         //HERE_I_AM("CreateGraphicsPipeline");
         bCreateGraphicsPipeline = true;
 
@@ -277,9 +279,9 @@ public:
 
         /*********7 Color Blend**********/
         //VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-        if(!bUseColorBlendAttachment){
+        if(!blendEnable && !bUseColorBlendAttachment){ 
             colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-            colorBlendAttachment.blendEnable = VK_FALSE;
+            colorBlendAttachment.blendEnable = VK_FALSE; //todo?
         }
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};
@@ -330,8 +332,8 @@ public:
             //std::cout<<"bSkybox="<<bSkybox<<"(skyboxID="<<skyboxID<<")"<<std::endl;
             VkPipelineDepthStencilStateCreateInfo depthStencil{};
             depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-            depthStencil.depthTestEnable = VK_TRUE; //change this to true will make text invisible
-            depthStencil.depthWriteEnable = VK_TRUE;
+            depthStencil.depthTestEnable = depthTestEnable;// VK_TRUE; //change this to true will make text invisible
+            depthStencil.depthWriteEnable = depthWriteEnable;// VK_TRUE;
             if(bEnableDepthBias)
                 depthStencil.depthCompareOp = VK_COMPARE_OP_LESS; //for hardware depthbias shadowmap
             else

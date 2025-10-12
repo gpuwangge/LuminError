@@ -23,14 +23,23 @@ Resources:
       resource_graphics_pipeline_vertexshader_name: Common/textboxImage.vert.spv
       resource_graphics_pipeline_fragmentshader_name: Common/textboxImage.frag.spv
       resource_graphics_pipeline_vertexdatatype: 2  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
     - resource_graphics_pipeline_name: textQuadPipeline
       resource_graphics_pipeline_vertexshader_name: Common/textQuad.vert.spv
       resource_graphics_pipeline_fragmentshader_name: Common/textQuad.frag.spv
       resource_graphics_pipeline_vertexdatatype: 4  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
     - resource_graphics_pipeline_name: pipeline
       resource_graphics_pipeline_vertexshader_name: simpleTriangle/shader.vert.spv
       resource_graphics_pipeline_fragmentshader_name: simpleTriangle/shader.frag.spv
       resource_graphics_pipeline_vertexdatatype: 0  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: false
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: true
 
 Uniforms:
   Graphics:

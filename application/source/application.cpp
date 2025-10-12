@@ -991,6 +991,9 @@ void Application::ReadResources(){
             appInfo.RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
             appInfo.Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
             appInfo.VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
+            appInfo.BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
 
             for (const auto& pipeline : resource["Pipelines"]) {
                 //std::cout<<"Application: Read Pipeline."<<std::endl;
@@ -1003,6 +1006,10 @@ void Application::ReadResources(){
                 int subpassId = pipeline["subpasses_subpass_id"] ? pipeline["subpasses_subpass_id"].as<int>() : 0;
                 int vertexDatatype = pipeline["resource_graphics_pipeline_vertexdatatype"] ? pipeline["resource_graphics_pipeline_vertexdatatype"].as<int>() : 2; //2 is normal 3d vertex
 
+                bool blendEnable = pipeline["resource_graphics_pipeline_blend_enable"] ? pipeline["resource_graphics_pipeline_blend_enable"].as<bool>() : false;
+                bool depthTestEnable = pipeline["resource_graphics_pipeline_depth_test_enable"] ? pipeline["resource_graphics_pipeline_depth_test_enable"].as<bool>() : true;
+                bool depthWriteEnable = pipeline["resource_graphics_pipeline_depth_write_enable"] ? pipeline["resource_graphics_pipeline_depth_write_enable"].as<bool>() : true;
+
                 //std::cout<<"Pipeline Name: "<<name<<std::endl;
                 appInfo.VertexShader->push_back(vertexShaderName);
                 appInfo.FragmentShader->push_back(fragmentShaderName);
@@ -1011,6 +1018,9 @@ void Application::ReadResources(){
                 appInfo.RenderPassShadowmap->push_back(bRenderPassShadowmap);
                 appInfo.Subpass->push_back(subpassId);
                 appInfo.VertexDatatype->push_back(vertexDatatype);
+                appInfo.BlendEnable->push_back(blendEnable);
+                appInfo.DepthTestEnable->push_back(depthTestEnable);
+                appInfo.DepthWriteEnable->push_back(depthWriteEnable);
             }
 
             // if (resource["VertexShaders"]) {
@@ -1254,7 +1264,8 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], i,
-                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene);  
+                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
@@ -1263,13 +1274,15 @@ void Application::CreatePipelines(){
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap);
+                            (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
                     }else{
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene);  
+                            (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);   
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
@@ -1278,7 +1291,8 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene);
+                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
                     std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
                 break;
                 case VertexStructureTypes::ParticleType:
@@ -1286,14 +1300,16 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_POINT_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene);
+                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
                 break;
                 case VertexStructureTypes::TextQuad:
                     renderProcess.createGraphicsPipeline<TextQuadVertex>(
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, true, i,
-                        (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene); 
+                        (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);   
                 break;
                 default:
                 break;
