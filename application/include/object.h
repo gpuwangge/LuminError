@@ -11,7 +11,9 @@
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
 //We want application to include object.h instead
-class Application;
+namespace LEApplication{
+    class Application;
+}
 class CControlNode;
 
 class CObject : public CEntity {
@@ -65,7 +67,7 @@ public:
     void Update(float deltaTime, int currentFrame, Camera &mainCamera);
 
     bool bRegistered = false;
-    void Register(Application *p_app);
+    void Register(LEApplication::Application *p_app);
 
     bool bVisible = true;
 

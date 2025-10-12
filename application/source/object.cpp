@@ -155,7 +155,7 @@ void CObject::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descrip
     //std::cout<<"Done set descriptor. "<<std::endl;
 }
 
-void CObject::Register(Application *p_app){
+void CObject::Register(LEApplication::Application *p_app){
     //if(p_app->appInfo.VertexBufferType == VertexStructureTypes::TwoDimension || p_app->appInfo.VertexBufferType == VertexStructureTypes::ThreeDimension){
     Length_original = p_app->modelManager.modelLengths.size() > m_model_id ? p_app->modelManager.modelLengths[m_model_id] : glm::vec3();
     LengthMin_original = p_app->modelManager.modelLengthsMin.size() > m_model_id ? p_app->modelManager.modelLengthsMin[m_model_id] : glm::vec3();

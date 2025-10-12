@@ -7,7 +7,9 @@
 #include "utility.h"
 #include <vector>
 
-class Application;
+namespace LEApplication{
+    class Application;
+}
 
 /******************
 * ControlNode
@@ -30,7 +32,7 @@ public:
     }
     ~CControlNode(){}
 
-    Application *m_pApp;
+    LEApplication::Application *m_pApp;
     bool bVisible = true;
     int m_object_count = 0;
     int m_textbox_count = 0;
@@ -41,7 +43,7 @@ public:
     std::vector<CObject*> m_pObjects;
     std::vector<CTextbox*> m_pTextboxes;
 
-    void Register(Application *p_app);
+    void Register(LEApplication::Application *p_app);
     virtual void RegisterObject(int startIndex);
     virtual void RegisterTextbox(int startIndex);
     virtual void Update();

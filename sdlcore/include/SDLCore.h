@@ -23,42 +23,44 @@
 class CApplication;
 class CInstance;
 
-class SDLCore final : public LESDL::ISDLCore{
-public:
-    SDLCore(){};
-    ~SDLCore(){};
+namespace LESDL{
+    class SDLCore final : public ISDLCore{
+    public:
+        SDLCore(){};
+        ~SDLCore(){};
 
-    SDL_Window* window;
-    int m_windowWidth, m_windowHeight;
-    int m_windowCenterX, m_windowCenterY;
+        SDL_Window* window;
+        int m_windowWidth, m_windowHeight;
+        int m_windowCenterX, m_windowCenterY;
 
-    //TTF_Font* m_font;
+        //TTF_Font* m_font;
 
-    bool bStillRunning = true;
-    bool bKeyDown = false;
-    bool bMouseDown = false;
+        bool bStillRunning = true;
+        bool bKeyDown = false;
+        bool bMouseDown = false;
 
-    float keyboard_sensitive = 3;
-    float mouse_sensitive = 60;//0.2f;
-    
-    //float previous_mouse_x = 0;
-    //float previous_mouse_y = 0;
-    //bool bFirstPersonMouseRotate = false;
+        float keyboard_sensitive = 3;
+        float mouse_sensitive = 60;//0.2f;
+        
+        //float previous_mouse_x = 0;
+        //float previous_mouse_y = 0;
+        //bool bFirstPersonMouseRotate = false;
 
-    bool IsRunning() override {return bStillRunning;}
-    void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle) override;
-    void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) override;
-    void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
-    void eventHandle() override;
+        bool IsRunning() override {return bStillRunning;}
+        void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle) override;
+        void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) override;
+        void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
+        void eventHandle() override;
 
-    //void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
-    //LEApplication::IApplication* game;
-    //void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
+        //void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
+        //LEApplication::IApplication* game;
+        //void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
 
-
-};
-
-extern "C" void* CreateInstance();
-extern "C" void DestroyInstance(void *p);
+        
+    };
+    EXPORT_FACTORY_FOR(SDLCore);
+}
+//extern "C" void* CreateInstance();
+//extern "C" void DestroyInstance(void *p);
 
 #endif

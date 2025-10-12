@@ -5,7 +5,7 @@
 /******************
 * ControlNode
 *******************/
-void CControlNode::Register(Application *p_app){
+void CControlNode::Register(LEApplication::Application *p_app){
     m_pApp = p_app;
     p_app->objectCountControl += m_object_count;
     p_app->textboxCountControl += m_textbox_count;

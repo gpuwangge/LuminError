@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     
     DestroyInstance(instance_application);
     FreeLibrary(handle_application);
-    std::cout<<"- FreeLibrary: Application."<<std::endl;
+    //std::cout<<"- FreeLibrary: Application."<<std::endl;
 
     return 0;
 }

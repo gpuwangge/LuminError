@@ -32,4 +32,14 @@ namespace LEApplication{
         virtual void DrawObject(int objectId) = 0;
         virtual void DrawTexts() = 0;
     };
+
+    // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \
+    //     extern "C" void* CreateInstance() { return new ClassName(); } \
+    //     extern "C" void DestroyInstance(void* p) { \
+    //         if (p){ \
+    //             static_cast<ClassName*>(p)->DestroyInstance(static_cast<ClassName*>(p)->handle_module_sdlcore,static_cast<ClassName*>(p)->instance_sdlcore); \
+    //             static_cast<ClassName*>(p)->DestroyInstance(static_cast<ClassName*>(p)->handle_module_game,static_cast<ClassName*>(p)->instance_game); \
+    //             delete static_cast<ClassName*>(p); \
+    //         } \
+    //     }
 }

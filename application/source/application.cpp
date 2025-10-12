@@ -2,6 +2,8 @@
 #include "Foundation.h"
 #include <locale>
 
+namespace LEApplication{
+
 //static class members must be defined outside. 
 //otherwise invoke 'undefined reference' error when linking
 Camera Application::mainCamera;
@@ -1595,32 +1597,25 @@ Application::~Application(){
     CleanUp();
 
     if (handle_module_sdlcore) {
-        std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
+        //std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
         FreeLibrary(handle_module_sdlcore);
         handle_module_sdlcore = nullptr;
     }
 
     if (handle_module_game) {
-        std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
+        //std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
         FreeLibrary(handle_module_game);
         handle_module_game = nullptr;
     }
 }
 
-
-
-
-extern "C" void* CreateInstance(){ return new Application();}
-extern "C" void DestroyInstance(void *p){ 
-    if(p) {
-        //void *pVoid = static_cast<Application*>(p)->instance_sdlcore;
-        static_cast<Application*>(p)->DestroyInstance(
-            static_cast<Application*>(p)->handle_module_sdlcore,
-            static_cast<Application*>(p)->instance_sdlcore);
-        static_cast<Application*>(p)->DestroyInstance(
-            static_cast<Application*>(p)->handle_module_game,
-            static_cast<Application*>(p)->instance_game);
-        delete static_cast<Application*>(p);
-        std::cout<<"- Destroy Instance Application."<<std::endl;
-    } 
+    extern "C" void* CreateInstance(){ return new Application();}
+    extern "C" void DestroyInstance(void *p){ 
+        if(p) {
+            static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
+            static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
+            delete static_cast<Application*>(p);
+            //std::cout<<"- Destroy Instance Application."<<std::endl;
+        } 
+    }
 }
