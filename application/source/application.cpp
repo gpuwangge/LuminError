@@ -33,7 +33,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
     instance_sdlcore = static_cast<LESDL::ISDLCore*>(pVoid);
-    instance_sdlcore->greet();
+    //instance_sdlcore->greet();
     instance_sdlcore->SetApplication(this);
 
     LoadModuleAndInstance(handle_module_example, pVoid, exampleName);

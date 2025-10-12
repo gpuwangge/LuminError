@@ -51,9 +51,9 @@ public:
     void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
     void eventHandle() override;
 
-    void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
-    LEApplication::IApplication* game;
-    void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
+    //void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
+    //LEApplication::IApplication* game;
+    //void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
 
 
 };

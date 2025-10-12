@@ -1,14 +1,12 @@
 #pragma once
-
-namespace LEApplication{
-    class IApplication;
-}
+#include "IApplication.h"
 
 namespace LEExample{
     class IExample{
     public:
         virtual ~IExample() = default;
-        virtual void SetApplication(LEApplication::IApplication* pApplication) = 0;
+        LEApplication::IApplication* game;
+        void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
         
         virtual void Initialize() = 0;
         virtual void Update() = 0;
@@ -19,4 +17,8 @@ namespace LEExample{
 
         virtual void Record() = 0; //same as RecordGraphicsCommandBuffer_RenderpassMainscene()
     };
+
+    #define EXPORT_FACTORY_FOR(ClassName) \
+        extern "C" void* CreateInstance() { return new ClassName(); } \
+        extern "C" void DestroyInstance(void* p) { if (p) delete static_cast<ClassName*>(p); }
 }
