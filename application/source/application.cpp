@@ -182,7 +182,7 @@ void Application::Initialize(){
     //elapseTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
     //deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
-    std::string fullYamlName = "../../samples/yaml/" + m_sampleName + ".yaml";
+    std::string fullYamlName = YAML_PATH + m_sampleName + ".yaml";
     try{
         config = YAML::LoadFile(fullYamlName);
     } catch (...){
