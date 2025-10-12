@@ -1,0 +1,127 @@
+Objects:
+  - object_name: ScreenBackground
+    object_id: 0
+    object_scale: 5
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 2
+
+Textboxes:
+  - textbox_name: Textbox_Normal
+    textbox_id: 0
+    textbox_sticker: false
+    textbox_position: [-2.0, 2.0, 0]
+    textbox_rotation: [180,0,0]
+    textbox_scale: 1
+    textbox_color: [0, 0, 0, 128]
+    textbox_text_content: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+    textbox_text_color: [255, 255, 255, 255]
+    resource_model_id: 1
+    resource_text_id_list: [1]
+    resource_default_graphics_pipeline_id: 1
+
+
+Resources:
+  - Fonts:
+    - resource_font_name: AscII
+      resource_font_outlinecolor: [255, 255, 255, 255]
+      resource_font_textcolor: [255, 255, 255, 255]
+      resource_font_size: 50
+      uniform_sampler_id: 0
+  - Models:
+    - resource_model_name: TEXTBOXIMAGE
+    - resource_model_name: TEXTQUAD
+  - Textures:
+    - resource_texture_name: textbox_cyber.png
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
+    - resource_texture_name: WoodTexture.jpg #yellowcloth.jpg
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
+  - Pipelines:
+    - resource_graphics_pipeline_name: textboxImagePipeline
+      resource_graphics_pipeline_vertexshader_name: Common/textboxImage.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: Common/textboxImage.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 2  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+    - resource_graphics_pipeline_name: textQuadPipeline
+      resource_graphics_pipeline_vertexshader_name: Common/textQuad.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: Common/textQuad.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 4  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+    - resource_graphics_pipeline_name: tabletopPipeline
+      resource_graphics_pipeline_vertexshader_name: simpleText/tabletop.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: simpleText/tabletop.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 2  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+ 
+Uniforms:
+  Graphics:
+    uniform_graphics_name: Graphics
+    uniform_graphics_mvp: true
+    uniform_graphics_text_mvp: true
+    uniform_graphics_custom: false
+    uniform_graphics_lighting: false
+    uniform_graphics_vp: false
+    uniform_graphics_depth_image_sampler: false
+    uniform_graphics_lightdepth_image_sampler: false
+  GraphicsTextureImageSamplers:
+  - uniform_graphics_texture_image_sampler_name: GeneralSampler
+    uniform_graphics_texture_image_sampler_miplevel: 1
+    uniform_graphics_texture_image_sampler_uvwrepeat: [true, true, true]
+  Compute:
+    uniform_compute_name: Compute
+    uniform_compute_custom: false
+    uniform_compute_storage: false
+    uniform_compute_texture_storage: false
+    uniform_compute_swapchain_storage: false
+  
+Features:
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_blend: true
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_pipeline_skybox_id: -1
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_show_performance_control: true
+  feature_graphics_show_all_metric_controls: true
+
+ShadowmapRenderpassAttachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+MainSceneRenderpassAttachments:
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: false
+  mainsceneRenderpass_attachment_color_resovle: false
+  mainsceneRenderpass_attachment_color_present: true
+
+ShadowmapRenderpassSubpasses:
+  shadowmapRenderpass_subpasses_shadowmap: false
+MainSceneRenderpassSubpasses: #the index is 0, 1, 2
+  mainsceneRenderpass_subpasses_shadowmap: false
+  mainsceneRenderpass_subpasses_draw: true
+  mainsceneRenderpass_subpasses_observe: false
+
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,0,-2.55]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 90
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60
+
+Controls:
+  - UIContainer:
+      resource_model_id_box: 0
+      resource_model_id_text: 1
+      resource_default_graphics_pipeline_id_box: 0
+      resource_default_graphics_pipeline_id_text: 1
+      resource_texture_id_list_box: [0]

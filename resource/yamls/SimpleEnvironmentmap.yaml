@@ -1,0 +1,161 @@
+Objects:
+  - object_name: Cube
+    object_id: 0
+    object_scale: 0.2
+    object_position: [-1,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 1
+    object_scale: 0.2
+    object_position: [1,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 2
+    object_scale: 0.2
+    object_position: [0,-1,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 3
+    object_scale: 0.2
+    object_position: [0,1,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 4
+    object_scale: 0.2
+    object_position: [0,0,-1]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 5
+    object_scale: 0.2
+    object_position: [0,0,1]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 6
+    object_scale: 0.2
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [10,10,10]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: SkyCube
+    object_id: 7
+    object_scale: 1
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: true
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 1
+
+Resources:
+  - Models:
+    - resource_model_name: cube.obj
+  - Textures:
+    - resource_texture_name: skybox_interstellar.jpg
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: true
+      uniform_sampler_id: 0
+  - Pipelines:
+    - resource_graphics_pipeline_name: pipeline
+      resource_graphics_pipeline_vertexshader_name: simpleEnvironmentmap/environmentmap.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: simpleEnvironmentmap/environmentmap.frag.spv
+    - resource_graphics_pipeline_name: pipeline
+      resource_graphics_pipeline_vertexshader_name: simpleEnvironmentmap/skybox.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: simpleEnvironmentmap/skybox.frag.spv
+
+Uniforms:
+  Graphics:
+    uniform_graphics_name: Graphics
+    uniform_graphics_custom: true
+    uniform_graphics_lighting: false
+    uniform_graphics_mvp: true
+    uniform_graphics_vp: false
+    uniform_graphics_depth_image_sampler: false
+    uniform_graphics_lightdepth_image_sampler: false
+  GraphicsTextureImageSamplers:
+    - uniform_graphics_texture_image_sampler_name: Sampler
+      uniform_graphics_texture_image_sampler_miplevel: 1
+  Compute:
+    uniform_compute_name: Compute
+    uniform_compute_custom: false
+    uniform_compute_storage: false
+    uniform_compute_texture_storage: false
+    uniform_compute_swapchain_storage: false
+
+Features:
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_pipeline_skybox_id: 1
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_fps: false
+
+ShadowmapRenderpassAttachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+MainSceneRenderpassAttachments:
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: true
+  mainsceneRenderpass_attachment_color_resovle: true
+  mainsceneRenderpass_attachment_color_present: true
+
+ShadowmapRenderpassSubpasses:
+  shadowmapRenderpass_subpasses_shadowmap: false
+MainSceneRenderpassSubpasses: #the index is 0, 1, 2
+  mainsceneRenderpass_subpasses_shadowmap: false
+  mainsceneRenderpass_subpasses_draw: true
+  mainsceneRenderpass_subpasses_observe: false
+
+MainCamera:
+  camera_mode: 1
+  camera_position: [0,0,-3]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.01, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 60
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60

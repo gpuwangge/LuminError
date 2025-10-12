@@ -1,0 +1,123 @@
+Objects:
+  - object_name: Table
+    object_id: 0
+    object_scale: 1
+    object_position: [0,-103,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 1
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 1
+  - object_name: Sphere
+    object_id: 1
+    object_scale: 0.04
+    object_position: [0,0.0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_default_graphics_pipeline_id: 1
+  - object_name: LightSphere
+    object_id: 2
+    object_scale: 0.01
+    resource_default_graphics_pipeline_id: 1
+
+Resources:
+  - Models:
+    - resource_model_name: sphere.obj
+    - resource_model_name: ElegantTable.obj
+  - Textures:
+    - resource_texture_name: metal.jpg
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
+    - resource_texture_name: repeat-pattern2.jpg
+      resource_texture_miplevels: 9
+      resource_texture_cubmap: false
+      uniform_sampler_id: 1
+  - Pipelines:
+    - resource_graphics_pipeline_name: pipeline_shadowmap
+      resource_graphics_pipeline_vertexshader_name: SimpleShadowMapHWDepthbias/shadowmap.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: SimpleShadowMapHWDepthbias/shadowmap.frag.spv
+      renderpasses_shadowmap: true
+      subpasses_subpass_id: 0
+    - resource_graphics_pipeline_name: pipeline_mainscene
+      resource_graphics_pipeline_vertexshader_name: SimpleShadowMapHWDepthbias/draw.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: SimpleShadowMapHWDepthbias/draw.frag.spv
+      renderpasses_shadowmap: false
+      subpasses_subpass_id: 0
+
+Uniforms:
+  Graphics:
+    uniform_graphics_name: Graphics
+    uniform_graphics_custom: false
+    uniform_graphics_lighting: true
+    uniform_graphics_mvp: true
+    uniform_graphics_vp: false
+    uniform_graphics_depth_image_sampler: true
+    uniform_graphics_lightdepth_image_sampler: false
+    uniform_graphics_lightdepth_image_sampler_hardware: true
+  GraphicsTextureImageSamplers:
+    - uniform_graphics_texture_image_sampler_name: Sampler
+      uniform_graphics_texture_image_sampler_miplevel: 1
+    - uniform_graphics_texture_image_sampler_name: Sampler
+      uniform_graphics_texture_image_sampler_miplevel: 9
+  
+Features:
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: true
+  feature_graphics_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_pipeline_skybox_id: -1
+  feature_graphics_observe_attachment_id: 0
+  feature_graphics_fps: false
+
+ShadowmapRenderpassAttachments:
+  ShadowmapRenderpass_attachment_depth_light: true
+MainSceneRenderpassAttachments:
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: true
+  mainsceneRenderpass_attachment_color_resovle: true
+  mainsceneRenderpass_attachment_color_present: true
+
+ShadowmapRenderpassSubpasses:
+  shadowmapRenderpass_subpasses_shadowmap: true
+MainSceneRenderpassSubpasses: #the index is 0, 1, 2
+  mainsceneRenderpass_subpasses_shadowmap: false
+  mainsceneRenderpass_subpasses_draw: true
+  mainsceneRenderpass_subpasses_observe: false
+
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,1,-15]
+  camera_rotation: [0,0,0]
+  object_id_target: 1
+  camera_z: [0.1, 30]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 60
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60
+
+LightCamera:
+  camera_mode: 0
+  camera_position: [0,0.5,-4]
+  camera_rotation: [0,0,0]
+  object_id_target: 1
+  camera_z: [0.01, 20]
+  camera_projection_enable_orthographic: true
+  camera_projection_perspective_fov: 60
+  camera_projection_orthographic_width: 10
+  camera_projection_orthographic_height: 10
+
+Lights:
+  - light_name: Light
+    light_id: 0
+    light_position: [0.0,2.0,0.0]
+    light_intensity: [0.5,2,4,1]
+    light_color: [1.0,1.0,1.0]
+    light_spot: [20,25]
+

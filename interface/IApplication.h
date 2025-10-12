@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
+#include <vector>
 
 class CControlNode;
 class CObject;
 class CTextManager;
+class Vertex3D;
 
 namespace LEApplication{
     class IApplication {
@@ -19,18 +21,24 @@ namespace LEApplication{
         virtual void Set_feature_graphics_enable_controls(bool value) = 0;
         virtual void Set_feature_graphics_show_all_metric_controls(bool value) = 0;
         virtual void Set_feature_graphics_show_performance_control(bool value) = 0;
-        //virtual std::vector<std::unique_ptr<CControlNode>>& GetControlNodes() = 0;
         virtual int GetControlNodeSize() = 0;
         virtual void SetControlNodeVisible(int nodeId, bool value) = 0;
         virtual void* GetInstanceHandle() = 0; //return type is VkInstance
         
-
-        //Expose functions for Example to use
-        //virtual std::vector<CObject>& GetObjects() = 0; //
-        //virtual CTextManager& GetTextManager() = 0;
+        //Expose functions for Example(SimpleTriangle) to use
         virtual int GetObjectSize() = 0;
         virtual void DrawObject(int objectId) = 0;
         virtual void DrawTexts() = 0;
+
+        //Expose functions for Example(BasicTriangles) to use
+        virtual int GetCurrentFrame() = 0;
+        virtual double GetElapseTime() = 0;
+        virtual void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage = false) = 0;
+        virtual void SetGraphicsCustomSize(int size) = 0;
+        virtual void SetGraphicsCustomBinding(void* VkDescriptorSetLayoutBinding) = 0;
+        virtual void UpdateGraphicsCustomUniformBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize) = 0;
+        virtual void SetObjectVelocity(int objectId, float vx, float vy, float vz) = 0;
+
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

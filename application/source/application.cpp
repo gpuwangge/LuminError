@@ -17,6 +17,29 @@ std::vector<CObject> Application::objects;
 //std::vector<CTextBox> CApplication::textBoxes;
 std::vector<CLight> Application::lights;
 
+std::string getPureName(const std::string& path) {
+    std::string result = path;
+    
+    // 移除前导的 .\ 或 ./
+    if (result.size() >= 2 && result[0] == '.' && 
+        (result[1] == '\\' || result[1] == '/')) {
+        result = result.substr(2);
+    }
+    
+    // 找到最后一个路径分隔符
+    size_t lastSlash = result.find_last_of("/\\");
+    if (lastSlash != std::string::npos) {
+        result = result.substr(lastSlash + 1);
+    }
+    
+    // 移除扩展名
+    size_t lastDot = result.find_last_of('.');
+    if (lastDot != std::string::npos) {
+        result = result.substr(0, lastDot);
+    }
+    
+    return result;
+}
 
 Application::Application(){
     //debugger = new CDebugger("../logs/application.log");
@@ -44,6 +67,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     instance_game->SetApplication(this);
     //instance_example->Update();
 
+    m_sampleName = exampleName;
 
     CContext::Init();
 
@@ -51,7 +75,10 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
-    m_sampleName.erase(0, 1);
+    std::cout<<m_sampleName<<std::endl;
+    //m_sampleName.erase(0, 1);
+    m_sampleName = getPureName(m_sampleName);
+    std::cout<<m_sampleName<<std::endl;
 #ifdef SDL
    // sdlManager.m_pApp = this;
     //sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
@@ -170,6 +197,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
 #endif
 
 void Application::Initialize(){
+    instance_game->Initialize();
+
     bool bVerboseInitialization = false;
     TimePoint T0 = now();
 
@@ -431,7 +460,7 @@ void Application::Initialize(){
     renderer.CreateSyncObjects(swapchain.swapchainImageSize);
     shaderManager.Destroy();
 
-    instance_game->Initialize();
+    
 
     TimePoint T13 = now();
     if(bVerboseInitialization){
@@ -745,10 +774,11 @@ void Application::ReadUniforms(){
     auto uniformsNode = config["Uniforms"];
 
     // Graphics
-    if (uniformsNode["Graphics"]) appInfo.Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
+    if(uniformsNode["Graphics"]) appInfo.Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
+
     if(appInfo.Uniform.b_uniform_graphics_custom)
         CGraphicsDescriptorManager::addCustomUniformBuffer(appInfo.Uniform.GraphicsCustom.Size);
-
+    
     if(appInfo.Uniform.b_uniform_graphics_lighting)
         CGraphicsDescriptorManager::addLightingUniformBuffer();
 
@@ -795,7 +825,6 @@ void Application::ReadUniforms(){
     if(appInfo.Uniform.b_uniform_compute_swapchain_storage)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_STORAGEIMAGE_SWAPCHAIN;
         CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
-
 
     //GraphicsTextureImageSamplers
     if (uniformsNode["GraphicsTextureImageSamplers"]) {

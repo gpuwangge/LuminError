@@ -1,0 +1,51 @@
+Objects:
+  - object_name: Triangle
+    object_id: 0
+
+Resources:
+  - Models:
+    - resource_model_name: CUSTOM2D0
+  - Pipelines:
+    - resource_graphics_pipeline_name: pipeline
+      resource_graphics_pipeline_vertexshader_name: simpleVertexBuffer/shader.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: simpleVertexBuffer/shader.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 1  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+
+Features:
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_pipeline_skybox_id: -1
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_fps: false
+
+ShadowmapRenderpassAttachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+MainSceneRenderpassAttachments:
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: false
+  mainsceneRenderpass_attachment_color_resovle: false
+  mainsceneRenderpass_attachment_color_present: true
+
+ShadowmapRenderpassSubpasses:
+  shadowmapRenderpass_subpasses_shadowmap: false
+MainSceneRenderpassSubpasses: #the index is 0, 1, 2
+  mainsceneRenderpass_subpasses_shadowmap: false
+  mainsceneRenderpass_subpasses_draw: true
+  mainsceneRenderpass_subpasses_observe: false
+
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,0,-3]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 90
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60
+
+

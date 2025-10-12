@@ -305,13 +305,30 @@ namespace LEApplication{
         void SetControlNodeVisible(int nodeId, bool value) override { controlNodes[nodeId]->bVisible = value;}
         void* GetInstanceHandle() override {return instance->getHandle();}
 
-        //Expose functions for Example to use
-        //std::vector<CObject>& GetObjects() override { return objects; }
-        //CTextManager& GetTextManager() override { return textManager;}
+        //Expose functions for Example(SimpleTriangle) to use
         int GetObjectSize() override { return objects.size();}
         void DrawObject(int objectId) override {objects[objectId].Draw();}
         void DrawTexts() override {textManager.Draw();}
         
+        //Expose functions for Example(BasicTriangles) to use
+        int GetCurrentFrame() override { return renderer.currentFrame;}
+        double GetElapseTime() override { return elapseTime;}
+        void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) override {
+            modelManager.CreateCustomModel3D(vertices3D, indices3D, isTextboxImage);
+        }
+        void SetGraphicsCustomSize(int size) override {
+            appInfo.Uniform.GraphicsCustom.Size = size;
+        }
+        void SetGraphicsCustomBinding(void* binding) override {
+            VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
+            if (bindingPtr) appInfo.Uniform.GraphicsCustom.Binding = *bindingPtr;
+        }
+        void UpdateGraphicsCustomUniformBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize) override {
+            //graphicsDescriptorManager.updateCustomUniformBuffer<CustomUniformBufferObject>(renderer.currentFrame, customUBO);
+            graphicsDescriptorManager.updateCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+        }
+        void SetObjectVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetVelocity(vx, vy, vz);}
+
 
     };
 

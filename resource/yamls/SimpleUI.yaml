@@ -1,0 +1,128 @@
+Objects:
+  - object_name: UI
+    object_id: 0
+    object_sticker: true
+    object_scale: 1
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: Cube
+    object_id: 1
+    object_scale: 1
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 1
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: hallway
+    object_id: 2
+    object_scale: 1
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 2
+    resource_texture_id_list: [2]
+    resource_default_graphics_pipeline_id: 0
+  - object_name: UI
+    object_id: 3
+    object_sticker: true
+    object_scale: 1
+    object_position: [0,0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0]
+    object_angular_velocity: [0,0,0]
+    object_skybox: false
+    resource_model_id: 0
+    resource_texture_id_list: [0]
+    resource_default_graphics_pipeline_id: 0
+
+Resources:
+  - Models:
+    - resource_model_name: CUSTOM3D0
+    - resource_model_name: cube.obj
+    - resource_model_name: hallway.obj
+  - Textures:
+    - resource_texture_name: texture.jpg
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
+    - resource_texture_name: viking_room.png
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
+    - resource_texture_name: fur.jpg
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
+  - Pipelines:
+    - resource_graphics_pipeline_name: pipeline
+      resource_graphics_pipeline_vertexshader_name: simpleUI/shader.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: simpleUI/shader.frag.spv
+
+Uniforms:
+  Graphics:
+    uniform_graphics_name: Graphics
+    uniform_graphics_custom: false
+    uniform_graphics_lighting: false
+    uniform_graphics_mvp: true
+    uniform_graphics_vp: false
+    uniform_graphics_depth_image_sampler: false
+    uniform_graphics_lightdepth_image_sampler: false
+  GraphicsTextureImageSamplers:
+    - uniform_graphics_texture_image_sampler_name: Sampler
+      uniform_graphics_texture_image_sampler_miplevel: 1
+  Compute:
+    uniform_compute_name: Compute
+    uniform_compute_custom: false
+    uniform_compute_storage: false
+    uniform_compute_texture_storage: false
+    uniform_compute_swapchain_storage: false
+
+Features:
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_pipeline_skybox_id: -1
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_fps: false
+
+ShadowmapRenderpassAttachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+MainSceneRenderpassAttachments:
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: true
+  mainsceneRenderpass_attachment_color_resovle: true
+  mainsceneRenderpass_attachment_color_present: true
+
+ShadowmapRenderpassSubpasses:
+  shadowmapRenderpass_subpasses_shadowmap: false
+MainSceneRenderpassSubpasses: #the index is 0, 1, 2
+  mainsceneRenderpass_subpasses_shadowmap: false
+  mainsceneRenderpass_subpasses_draw: true
+  mainsceneRenderpass_subpasses_observe: false
+
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,-8.5,-8.5]
+  camera_rotation: [45,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 60
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60
+
+
