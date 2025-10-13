@@ -50,12 +50,25 @@ namespace LEApplication{
         virtual void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage = false) = 0;
         virtual void SetGraphicsCustomSize(int size) = 0;
         virtual void SetGraphicsCustomBinding(void* VkDescriptorSetLayoutBinding) = 0;
-        virtual void UpdateGraphicsCustomUniformBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize) = 0;
+        virtual void UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) = 0;
         virtual void SetObjectVelocity(int objectId, float vx, float vy, float vz) = 0;
 
         //Expose functions for Example(Furmark) to use
         virtual int GetWindowWidth() = 0;
         virtual int GetWindowHeight() = 0;
+
+        //Expose functions for Example(GemmCompute) to use
+        virtual void SetRenderMode(int mode) = 0;
+        virtual void SetComputeStorageBufferSize(int size) = 0;
+        virtual void SetComputeStorageBufferUsage(int usage) = 0;
+        virtual void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
+        virtual void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
+        virtual void DeviceWaitIdle() = 0;
+        virtual void DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) = 0;
+        virtual void SetPause(bool value) = 0;
+        virtual void LogContext(std::string s, float *n, int size) = 0;
+        virtual void LogContext(std::string s) = 0;
+        virtual void LogContext(std::string s, float n) = 0;
 
     };
 

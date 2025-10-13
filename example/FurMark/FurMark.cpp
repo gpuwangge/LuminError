@@ -42,7 +42,7 @@ namespace LuminError{
             double et = game->GetElapseTime();
             customUBO.u_time = et;
             customUBO.u_resolution = glm::vec2(game->GetWindowWidth(), game->GetWindowHeight());
-            game->UpdateGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
+            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
         }
 
         void Record() override{

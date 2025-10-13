@@ -9,6 +9,7 @@ namespace LuminError{
         void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
         
         virtual void Initialize() {}
+        virtual void PostInitialize() {}
         virtual void Update() {}
         virtual void PostUpdate() {}
         virtual void RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex) {}

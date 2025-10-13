@@ -20,13 +20,6 @@ public:
      * Universial Render Functions
      * 
      * ***********************/
-    typedef enum RenderModes {
-        GRAPHICS = 0,
-        COMPUTE,
-        COMPUTE_SWAPCHAIN,
-        COMPUTE_GRAPHICS,
-        GRAPHICS_SHADOWMAP
-    } RenderModes;
 
     RenderModes m_renderMode = GRAPHICS;
     //void RecordCompute();

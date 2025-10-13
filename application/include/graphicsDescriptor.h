@@ -68,10 +68,10 @@ public:
     //         memcpy(customUniformBuffersMapped[currentFrame], &customUniformBufferObject, sizeof(customUniformBufferObject));
     // }
     //alternative(no template)
-    void updateCustomUniformBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize) {
+    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
     if (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) {
-        if (customUniformBufferObject && dataSize > 0) {
-            memcpy(customUniformBuffersMapped[currentFrame], customUniformBufferObject, dataSize);
+        if (data && dataSize > 0) {
+            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
         }
     }
 }

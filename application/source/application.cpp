@@ -482,6 +482,7 @@ void Application::Initialize(){
     // float mat[4] = {1.1, 2.2, 3.3, 4.4};
     // PRINT("Test vector: ", mat, 4);
     // PRINT("Test two floats:  %f, %f!", 1.2, 2.3);    
+    instance_game->PostInitialize();
 }
 
 void Application::Update(){
@@ -548,9 +549,10 @@ void Application::Update(){
     //         intervalStartTime = std::chrono::high_resolution_clock::now();
     //     }else frameCount++;
     // }
+    
 }
 
-void Application::PostUpdate(){ instance_game->PostUpdate();}
+//void Application::PostUpdate(){ instance_game->PostUpdate();}
 
 void Application::RecordGraphicsCommandBuffer_RenderpassMainscene(){
     instance_game->Record();
@@ -571,7 +573,7 @@ void Application::UpdateRecordRender(){
      * 
      * ***********************/
     switch(renderer.m_renderMode){
-        case CRenderer::GRAPHICS:
+        case RenderModes::GRAPHICS:
         //case renderer.RENDER_GRAPHICS_Mode:
             //std::cout<<"RENDER_GRAPHICS_Mode"<<std::endl;
 
@@ -593,7 +595,7 @@ void Application::UpdateRecordRender(){
 
             renderer.PresentSwapchainImage(swapchain);
         break;
-        case CRenderer::GRAPHICS_SHADOWMAP:
+        case RenderModes::GRAPHICS_SHADOWMAP:
             //must wait for fence before record command buffer
             renderer.WaitForGraphicsFence();
             //must aquire swap image before record command buffer
@@ -627,7 +629,7 @@ void Application::UpdateRecordRender(){
 
 
         break;
-        case CRenderer::COMPUTE:
+        case RenderModes::COMPUTE:
         //case renderer.RENDER_COMPUTE_Mode:
             //std::cout<<"Application: RENDER_COMPUTE_Mode."<<std::endl;
             renderer.WaitForComputeFence();//must wait for fence before record
@@ -646,7 +648,7 @@ void Application::UpdateRecordRender(){
 
            // renderer.PresentSwapchainImage(swapchain); //???
         break;
-        case CRenderer::COMPUTE_SWAPCHAIN:
+        case RenderModes::COMPUTE_SWAPCHAIN:
         //case renderer.RENDER_COMPUTE_SWAPCHAIN_Mode:
             //must wait for fence before record
             renderer.WaitForComputeFence();
@@ -666,7 +668,7 @@ void Application::UpdateRecordRender(){
 
             renderer.PresentSwapchainImage(swapchain); 
         break;
-        case CRenderer::COMPUTE_GRAPHICS:
+        case RenderModes::COMPUTE_GRAPHICS:
         //case renderer.RENDER_COMPUTE_GRAPHICS_Mode:
             renderer.WaitForComputeFence();//must wait for fence before record
             renderer.WaitForGraphicsFence();//must wait for fence before record
@@ -695,9 +697,9 @@ void Application::UpdateRecordRender(){
         break;
     }
 
-    PostUpdate();
+    instance_game->PostUpdate();
 
-    renderer.Update(); //update currentFrame    
+    renderer.Update(); //update currentFrame
 }
 
 

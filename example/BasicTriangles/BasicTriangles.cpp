@@ -40,7 +40,7 @@ namespace LuminError{
         void Update() override {
             double et = game->GetElapseTime();
             customUBO.color = {(sin(et) + 1.0f) / 2.0f, 0.0f, (cos(et) + 1.0f) / 2.0f};
-            game->UpdateGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
+            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
             game->SetObjectVelocity(0, 
                 0.5 * sin(et * 2), 
                 0.5 * sin(et * 2), 

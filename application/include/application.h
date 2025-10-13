@@ -265,7 +265,7 @@ namespace LEApplication{
             std::unique_ptr<std::vector<bool>> DepthTestEnable;
             std::unique_ptr<std::vector<bool>> DepthWriteEnable;
             std::unique_ptr<std::vector<std::string>> ComputeShader;
-            CRenderer::RenderModes RenderMode = CRenderer::GRAPHICS;
+            RenderModes RenderMode = RenderModes::GRAPHICS;
         }appInfo;
 
 
@@ -281,7 +281,7 @@ namespace LEApplication{
 
         void Initialize(); //use this to call sample initialization
         void Update(); //base: update time, frame id, camera and ubo
-        void PostUpdate();
+        //void PostUpdate();
         void RecordGraphicsCommandBuffer_RenderpassMainscene();
         void RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex);
         void RecordComputeCommandBuffer();
@@ -339,15 +339,37 @@ namespace LEApplication{
             VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
             if (bindingPtr) appInfo.Uniform.GraphicsCustom.Binding = *bindingPtr;
         }
-        void UpdateGraphicsCustomUniformBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize) override {
+        void UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override {
             //graphicsDescriptorManager.updateCustomUniformBuffer<CustomUniformBufferObject>(renderer.currentFrame, customUBO);
-            graphicsDescriptorManager.updateCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+            graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
         }
         void SetObjectVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetVelocity(vx, vy, vz);}
 
         //Expose functions for Example(Furmark) to use
         int GetWindowWidth() override { return windowWidth; }
         int GetWindowHeight() override { return windowHeight; }
+
+        //Expose functions for Example(GemmCompute) to use
+        void SetRenderMode(int mode) override { appInfo.RenderMode = (RenderModes)mode; }
+        void SetComputeStorageBufferSize(int size) override { appInfo.Uniform.ComputeStorageBuffer.Size = size; }
+        void SetComputeStorageBufferUsage(int usage) override {appInfo.Uniform.ComputeStorageBuffer.Usage = usage; }
+        void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override {
+            computeDescriptorManager.uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+        }
+        void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override {
+            Dispatch(numWorkGroupsX,numWorkGroupsY,numWorkGroupsZ);
+        }
+        void DeviceWaitIdle() override { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
+        void DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) override {
+            //std::cout<<"RestoreComputeStorageBuffer: dataSize = "<<dataSize<<", currentFrame = "<<currentFrame<<std::endl;
+            //memcpy(storageBufferObject, computeDescriptorManager.storageBuffersMapped[currentFrame], dataSize);
+            computeDescriptorManager.downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+        }
+        void SetPause(bool value) override { NeedToPause = value; }
+        void LogContext(std::string s, float *n, int size) override { CContext::GetHandle().logManager.print(s, n, size);}
+        void LogContext(std::string s) override { CContext::GetHandle().logManager.print(s); }
+        void LogContext(std::string s, float n) override {CContext::GetHandle().logManager.print(s, n);}
+
     };
 
     // extern "C" void* CreateInstance(){ return new Application();}
