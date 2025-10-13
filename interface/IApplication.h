@@ -70,6 +70,8 @@ namespace LEApplication{
         virtual void LogContext(std::string s) = 0;
         virtual void LogContext(std::string s, float n) = 0;
 
+        //Expose functions for Example(MultiCubes) to use
+        virtual void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) = 0;
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

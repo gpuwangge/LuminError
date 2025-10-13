@@ -51,16 +51,9 @@ namespace LESDL{
         void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) override;
         void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
         void eventHandle() override;
-
-        //void greet() override {std::cout<<"SDL Greet."<<std::endl;} 
-        //LEApplication::IApplication* game;
-        //void SetApplication(LEApplication::IApplication* pApplication) override {game = pApplication;}
-
         
     };
     EXPORT_FACTORY_FOR(SDLCore);
 }
-//extern "C" void* CreateInstance();
-//extern "C" void DestroyInstance(void *p);
 
 #endif

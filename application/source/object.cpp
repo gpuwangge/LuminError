@@ -197,10 +197,11 @@ void CObject::Register(LEApplication::Application *p_app){
 
 
 void CObject::Draw(int graphicsPipelineId, uint32_t n){
-    //std::cout<<"CObject::Draw() bVisible:"<<bVisible<<std::endl;
+    //std::cout<<"CObject::Draw() bVisible:"<<bVisible<<", id="<<m_object_id<<std::endl;
     //if(p_controlNode) std::cout<<"CObject::Draw() p_controlNode->bVisible:"<<p_controlNode->bVisible<<std::endl;
     if(!bRegistered || !bVisible) return;
     if(p_controlNode != NULL && !p_controlNode->bVisible) return;
+    //std::cout<<"CObject::Draw():"<<" id="<<m_object_id<<std::endl;
 
     int current_graphics_pipeline_id = (graphicsPipelineId == -1) ? m_default_graphics_pipeline_id : graphicsPipelineId;
 
@@ -230,6 +231,7 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
         //std::cout<<"No index buffer is used."<<std::endl;
         p_renderer->Draw(n);
     }else{
+        //std::cout<<"CObject::Draw():"<<" m_object_id="<<m_object_id<<", m_model_id="<<m_model_id<<std::endl;
         p_renderer->BindIndexBuffer(m_model_id);
         p_renderer->DrawIndexed(m_model_id);
     }

@@ -81,7 +81,7 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
 	poolInfo.poolSizeCount = static_cast<uint32_t>(graphicsDescriptorPoolSizes.size());
     //std::cout<<"poolInfo.poolSizeCount = "<<poolInfo.poolSizeCount <<std::endl;
 	poolInfo.pPoolSizes = graphicsDescriptorPoolSizes.data();
-	poolInfo.maxSets = ((counter==0)?1:counter)*20*static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);///!!!TODO: currently support 20 sets?
+	poolInfo.maxSets = ((counter==0)?1:counter)*50*static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);///!!!TODO: currently support 50 sets?
 
 	VkResult result = vkCreateDescriptorPool(CContext::GetHandle().GetLogicalDevice(), &poolInfo, nullptr, &graphicsDescriptorPool);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create descriptor pool!");

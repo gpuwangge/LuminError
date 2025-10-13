@@ -17,7 +17,8 @@ Features:
   feature_graphics_rainbow_mipmap: false
   feature_graphics_pipeline_skybox_id: -1
   feature_graphics_observe_attachment_id: -1
-  feature_graphics_fps: false
+  feature_graphics_show_performance_control: false
+  feature_graphics_show_all_metric_controls: false
 
 MainCamera:
   camera_mode: 0

@@ -97,46 +97,20 @@ namespace LESDL{
                 case SDL_EVENT_KEY_DOWN:
                     //std::cout<<"Key Down"<<event.key.key<<std::endl;
                     switch(event.key.key){ //need 6 directions and 6 turns to translate camera
-                        case SDLK_UP:
-                            //CApplication::mainCamera.Velocity.y = -1 * keyboard_sensitive;
-                            game->SetMainCameraVelocityY(-1 * keyboard_sensitive);
-                            break;
-                        case SDLK_DOWN:
-                            //CApplication::mainCamera.Velocity.y = 1 * keyboard_sensitive;
-                            game->SetMainCameraVelocityY(1 * keyboard_sensitive);
-                            break;
-                        case SDLK_W:
-                            //CApplication::mainCamera.Velocity.z = 1 * keyboard_sensitive;
-                            game->SetMainCameraVelocityZ(1 * keyboard_sensitive);
-                            break;
-                        case SDLK_S:
-                            //CApplication::mainCamera.Velocity.z = -1 * keyboard_sensitive;
-                            game->SetMainCameraVelocityZ(-1 * keyboard_sensitive);
-                            break;
+                        case SDLK_UP: game->SetMainCameraVelocityY(-1 * keyboard_sensitive); break;
+                        case SDLK_DOWN: game->SetMainCameraVelocityY(1 * keyboard_sensitive); break;
+                        case SDLK_W: game->SetMainCameraVelocityZ(1 * keyboard_sensitive); break;
+                        case SDLK_S: game->SetMainCameraVelocityZ(-1 * keyboard_sensitive); break;
                         case SDLK_LEFT:
-                        case SDLK_A:
-                            //CApplication::mainCamera.Velocity.x = 1 * keyboard_sensitive;
-                            game->SetMainCameraVelocityX(1 * keyboard_sensitive);
-                            break;
+                        case SDLK_A: game->SetMainCameraVelocityX(1 * keyboard_sensitive); break;
                         case SDLK_RIGHT:
-                        case SDLK_D:
-                            //CApplication::mainCamera.Velocity.x = -1 * keyboard_sensitive;
-                            game->SetMainCameraVelocityX(-1 * keyboard_sensitive);
-                            break;
+                        case SDLK_D: game->SetMainCameraVelocityX(-1 * keyboard_sensitive); break;
 
-                        case SDLK_F:/*
-                            if(CApplication::mainCamera.cameraType == Camera::CameraType::LOCK) CApplication::mainCamera.cameraType = Camera::CameraType::FREE;
-                            else if(CApplication::mainCamera.cameraType == Camera::CameraType::FREE) CApplication::mainCamera.cameraType = Camera::CameraType::LOCK;
-                            */
+                        case SDLK_F:
                             if(game->GetMainCameraType() == CameraType::LOCK) game->SetMainCameraType(CameraType::FREE);
                             else if(game->GetMainCameraType() == CameraType::FREE) game->SetMainCameraType(CameraType::LOCK);
                             break;
-                        case SDLK_TAB:/*
-                            if(CApplication::mainCamera.cameraType == Camera::CameraType::LOCK) {
-                                CApplication::mainCamera.focusObjectId += 1;
-                                CApplication::mainCamera.focusObjectId = CApplication::mainCamera.focusObjectId % CApplication::objects.size();
-                            }
-                            */
+                        case SDLK_TAB:
                            if(game->GetMainCameraType() == CameraType::LOCK) {
                                 game->SetMainCameraFocusObjectId(game->GetMainCameraFocusObjectId()+1);
                                 game->SetMainCameraFocusObjectId(game->GetMainCameraFocusObjectId() % game->GetObjectSize());
@@ -147,12 +121,10 @@ namespace LESDL{
                             if(!game->Get_feature_graphics_show_all_metric_controls()) {
                                 bool bvalue = game->Get_feature_graphics_show_performance_control();
                                 game->Set_feature_graphics_show_performance_control(!bvalue);
-                                //game->GetControlNodes()[0]->bVisible = game->Get_feature_graphics_show_performance_control(); 
                                 game->SetControlNodeVisible(0, game->Get_feature_graphics_show_performance_control());
                             }else{
                                 game->Set_feature_graphics_show_all_metric_controls(false);
                                 for(int i = 1; i < game->GetControlNodeSize(); i++) game->SetControlNodeVisible(i, false);
-
                                 game->Set_feature_graphics_show_performance_control(true);
                                 game->SetControlNodeVisible(0, true);
                             }
@@ -175,38 +147,18 @@ namespace LESDL{
                 case SDL_EVENT_KEY_UP:
                     //std::cout<<"Key Up"<<event.key.scancode<<std::endl;
                     switch(event.key.key){
-                        case SDLK_UP:
-                            //CApplication::mainCamera.Velocity.y = 0;
-                            game->SetMainCameraVelocityY(0);
-                            break;
-                        case SDLK_DOWN:
-                            //CApplication::mainCamera.Velocity.y = 0;
-                            game->SetMainCameraVelocityY(0);
-                            break;
-                        case SDLK_W:
-                            //CApplication::mainCamera.Velocity.z = 0;
-                            game->SetMainCameraVelocityZ(0);
-                            break;
-                        case SDLK_S:
-                            //CApplication::mainCamera.Velocity.z = 0;
-                            game->SetMainCameraVelocityZ(0);
-                            break;
+                        case SDLK_UP: game->SetMainCameraVelocityY(0); break;
+                        case SDLK_DOWN: game->SetMainCameraVelocityY(0); break;
+                        case SDLK_W: game->SetMainCameraVelocityZ(0); break;
+                        case SDLK_S: game->SetMainCameraVelocityZ(0); break;
                         case SDLK_LEFT:
-                        case SDLK_A:
-                            //CApplication::mainCamera.Velocity.x = 0;
-                            game->SetMainCameraVelocityX(0);
-                            break;
+                        case SDLK_A: game->SetMainCameraVelocityX(0); break;
                         case SDLK_RIGHT:
-                        case SDLK_D:
-                            //CApplication::mainCamera.Velocity.x = 0;
-                            game->SetMainCameraVelocityX(0);
-                            break;
+                        case SDLK_D: game->SetMainCameraVelocityX(0); break;
                     }
                     bKeyDown = false;
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    //if(CApplication::mainCamera.cameraType == Camera::CameraType::LOCK) CApplication::mainCamera.cameraType = Camera::CameraType::FREE;
-                    //else if(CApplication::mainCamera.cameraType == Camera::CameraType::FREE) CApplication::mainCamera.cameraType = Camera::CameraType::LOCK;
                     if(game->GetMainCameraType() == CameraType::LOCK) game->SetMainCameraType(CameraType::FREE);
                     else if(game->GetMainCameraType() == CameraType::FREE) game->SetMainCameraType(CameraType::LOCK);
                     break;
@@ -217,12 +169,7 @@ namespace LESDL{
                     ref_diff_x = -mouse_sensitive*event.motion.yrel;
                     ref_diff_y = mouse_sensitive*event.motion.xrel;
                     break;
-                case SDL_EVENT_MOUSE_WHEEL:/*
-                    if(event.wheel.x == 1) CApplication::mainCamera.MoveLeft(1, 2);
-                    else if(event.wheel.x == -1) CApplication::mainCamera.MoveRight(1, 2);
-                    if(event.wheel.y == 1) CApplication::mainCamera.MoveForward(1, 2);
-                    else if(event.wheel.y == -1) CApplication::mainCamera.MoveBackward(1, 2);
-                    */
+                case SDL_EVENT_MOUSE_WHEEL:
                     if(event.wheel.x == 1) game->MoveMainCameraLeft(1,2);
                     else if(event.wheel.x == -1) game->MoveMainCameraRight(1,2);
                     if(event.wheel.y == 1) game->MoveMainCameraForward(1,2);
@@ -235,11 +182,7 @@ namespace LESDL{
                     // Do nothing
                     break;
             }
-        }/*
-        if(CApplication::mainCamera.cameraType == Camera::CameraType::FREE){
-            CApplication::mainCamera.AngularVelocity.x = ref_diff_x;
-            CApplication::mainCamera.AngularVelocity.y = ref_diff_y;
-        }*/
+        }
        if(game->GetMainCameraType() == CameraType::FREE){
             game->SetMainCameraAngularVelocityX(ref_diff_x);
             game->SetMainCameraAngularVelocityY(ref_diff_y);
@@ -247,14 +190,5 @@ namespace LESDL{
 
         SDL_Delay(1);//delay 1ms. otherwise it could run millians of times per second
     }
-
-
-    // extern "C" void* CreateInstance(){ return new SDLCore();}
-    // extern "C" void DestroyInstance(void *p){ 
-    //     if(p) {
-    //         delete static_cast<SDLCore*>(p);
-    //         std::cout<<"- Destroy Instance SDLCore."<<std::endl;
-    //     } 
-    // }
 
 }
