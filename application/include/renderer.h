@@ -66,9 +66,10 @@ public:
     void BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets);
 
     //Draw
-    template <typename T>
-    void PushConstantToCommand(T &pc, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange){
-        vkCmdPushConstants(commandBuffers[graphicsCmdId][currentFrame], graphicsPipelineLayout, pushConstantRange.stageFlags, pushConstantRange.offset, pushConstantRange.size, &pc);
+    void PushConstantToCommand(void* pcData, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange) {
+        vkCmdPushConstants(commandBuffers[graphicsCmdId][currentFrame], graphicsPipelineLayout, 
+                      pushConstantRange.stageFlags, pushConstantRange.offset, 
+                      pushConstantRange.size, pcData);
     }
     void DrawIndexed(int model_id);//std::vector<uint32_t> &indices3D
     void Draw(uint32_t n);

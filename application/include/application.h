@@ -382,22 +382,21 @@ namespace LEApplication{
         void SetObjectPosition(int objectId, float px, float py, float pz) override { objects[objectId].SetPosition(px, py, pz); }
         void SetObjectPosition(int objectId, glm::vec3 p) override { objects[objectId].SetPosition(p); }
  
+        //Expose functions for Example(MultiPhongShadows) to use
+        void SetLightCameraPosition(int lightCameraId, glm::vec3 p) override { lightCameras[lightCameraId].SetPosition(p); }
+        void DrawObject(int objectId, int pipelineId) override { objects[objectId].Draw(pipelineId); }
+        void PushConstantToCommand(void* pcData, int pipelineId) override {
+            renderer.PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
+        }
+        void SetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) override {
+            vkCmdSetDepthBias(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+        }
+
     };
 
-    // extern "C" void* CreateInstance(){ return new Application();}
-    // extern "C" void DestroyInstance(void *p){ 
-    //     if(p) {
-    //         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
-    //         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
-    //         delete static_cast<Application*>(p);
-    //         std::cout<<"- Destroy Instance Application."<<std::endl;
-    //     } 
-    // }
 
     extern "C" void* CreateInstance();
     extern "C" void DestroyInstance(void *p);
-
-    //EXPORT_APPLICATION_FACTORY_FOR(Application)
 }
 
 

@@ -251,7 +251,7 @@ void CControlAttachment::Update(){
 *******************/
 CControlGraphicsUniform::CControlGraphicsUniform(){
     Name = "Control Graphics Uniform Node";
-    m_textbox_count = 8;
+    m_textbox_count = 9;
     m_object_count = 1;
     SetScale(0.5, 0.5, 0);
     SetPositionY(-1.0f + 1.0f + 0.5f * Length.y);
@@ -317,7 +317,7 @@ void CControlGraphicsUniform::Update(){
 
         if(m_pApp->appInfo.Uniform.b_uniform_graphics_mvp) m_pTextboxes[1]->bFlash = true;
         else m_pTextboxes[1]->SetTextColor(greyColor);
-        m_pTextboxes[1]->SetTextContent("MVP");
+        m_pTextboxes[1]->SetTextContent("Object MVP");
 
         if(m_pApp->appInfo.Uniform.b_uniform_graphics_text_mvp) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
@@ -333,7 +333,7 @@ void CControlGraphicsUniform::Update(){
 
         if(m_pApp->appInfo.Uniform.b_uniform_graphics_vp) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
-        m_pTextboxes[5]->SetTextContent("VP");
+        m_pTextboxes[5]->SetTextContent("Object VP");
 
         if(m_pApp->appInfo.Uniform.b_uniform_graphics_depth_image_sampler) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
@@ -343,11 +343,15 @@ void CControlGraphicsUniform::Update(){
         else m_pTextboxes[7]->SetTextColor(greyColor);
         m_pTextboxes[7]->SetTextContent("Lightdepth Img Sp");
 
+        if(m_pApp->appInfo.Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) m_pTextboxes[8]->bFlash = true;
+        else m_pTextboxes[8]->SetTextColor(greyColor);
+        m_pTextboxes[8]->SetTextContent("Lightdepth Img Sp Hw");
+
         firstTime = false;
     }
 
 	if(currentTrigger!=lastTrigger) {
-        for(int i = 1; i <= 7; i++){
+        for(int i = 1; i <= 8; i++){
             if(m_pTextboxes[i]->bFlash) {
                 m_pTextboxes[i]->SetTextContent(); //to update the text color
             }
@@ -562,7 +566,7 @@ void CControlSubpass::Update(){
 CControlHotkey::CControlHotkey(){
     //std::cout<<"Creating Control Hotkey Node"<<std::endl;
     Name = "Control Hotkey Node";
-    m_textbox_count = 3;
+    m_textbox_count = 4;
     m_object_count = 1;
     SetScale(0.5, 0.5, 0);
     SetPositionY(-1.0f + 0.5f * Length.y);
@@ -628,10 +632,11 @@ void CControlHotkey::Update(){
     if(firstTime){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
 
-        for(int i = 1; i <= 2; i++) m_pTextboxes[i]->bFlash = true;
+        for(int i = 1; i <= 3; i++) m_pTextboxes[i]->bFlash = true;
 
         m_pTextboxes[1]->SetTextContent("Toggle Perf Panel:P");
         m_pTextboxes[2]->SetTextContent("Toggle All Panels:H");
+        m_pTextboxes[3]->SetTextContent("Exit:ESC");
 
         // if(m_pApp->objects.size()>0) m_pTextboxes[5]->bFlash = true;
         // else m_pTextboxes[5]->SetTextColor(greyColor);
@@ -652,7 +657,7 @@ void CControlHotkey::Update(){
         // m_pTextboxes[1]->SetTextContent("FPS:" + std::to_string((int)(1.0f/m_pApp->deltaTime)));
         // m_pTextboxes[2]->SetTextContent("Time:" + to_string_prec(m_pApp->elapseTime) + "s");
         // m_pTextboxes[3]->SetTextContent("Frame:" + std::to_string(m_pApp->frameCount));
-        for(int i = 1; i <= 2; i++) if(m_pTextboxes[i]->bFlash) m_pTextboxes[i]->SetTextContent(); //to update the text color
+        for(int i = 1; i <= 3; i++) if(m_pTextboxes[i]->bFlash) m_pTextboxes[i]->SetTextContent(); //to update the text color
             
         lastTrigger = currentTrigger;
 	}

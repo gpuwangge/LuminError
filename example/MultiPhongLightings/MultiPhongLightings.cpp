@@ -1,6 +1,5 @@
 /************
- * This sample is to test render mutiple cubes in a single scene
- * (modified from simpleMSAA, shader to use multiCubes, model to use cube.obj)
+ * 
  * *********** */
 #include "IGame.h"
 #include "Utility.h"

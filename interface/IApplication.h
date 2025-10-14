@@ -83,7 +83,14 @@ namespace LEApplication{
         virtual void SetObjectPosition(int objectId, float px, float py, float pz) = 0;
         virtual void SetObjectPosition(int objectId, glm::vec3 p) = 0;
 
-
+        //Expose functions for Example(MultiPhongShadows) to use
+        virtual void SetLightCameraPosition(int lightCameraId, glm::vec3 p) = 0;
+        virtual void DrawObject(int objectId, int pipelineId) = 0;
+        virtual void PushConstantToCommand(void* pcData, int pipelineId) = 0;
+        virtual void SetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) = 0;
+        
+    
+    
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \
