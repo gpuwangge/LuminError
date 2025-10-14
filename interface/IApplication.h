@@ -88,13 +88,19 @@ namespace LEApplication{
         virtual void SetLightCameraPosition(int lightCameraId, glm::vec3 p) = 0;
         virtual void DrawObject(int objectId, int pipelineId) = 0;
         virtual void PushConstantToCommand(void* pcData, int pipelineId) = 0;
-        virtual void SetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) = 0;
+        virtual void CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) = 0;
         
         //Expose functions for Example(SimpleComputeStorageImage) to use
         virtual void SetSwapchainImageSize(int size) = 0;
         virtual void EnableComputeSwapChainImage(bool enable) = 0;
         virtual void CreateComputeCommandBuffers() = 0; //TODO: optimize this
-        //virtual void RecordImageBarrier() = 0; //TODO: optimize this
+        
+        //Expose functions for Example(SimpleDepthImage) to use
+        virtual void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) = 0;
+        virtual void CmdNextSubpass() = 0;
+        virtual int GetCustomObjectSize() = 0;
+
+
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

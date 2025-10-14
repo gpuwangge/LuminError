@@ -389,7 +389,7 @@ namespace LEApplication{
         void PushConstantToCommand(void* pcData, int pipelineId) override {
             renderer.PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
         }
-        void SetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) override {
+        void CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) override {
             vkCmdSetDepthBias(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
         }
 
@@ -457,6 +457,12 @@ namespace LEApplication{
             vkCmdPipelineBarrier(buffer, srcBind, dstBind,
                 0, 0, nullptr, 0, nullptr, 1, &barrier);
         }
+
+        //Expose functions for Example(SimpleDepthImage) to use
+        void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
+        void CmdNextSubpass() override { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
+        int GetCustomObjectSize() override { return customObjectSize; }
+
     };
 
 

@@ -15,13 +15,13 @@ struct LightAttribute{
     float spotOuterAngle;
 };
 
-layout(set = 0, binding = 1) uniform lightsBufferObject { 
+layout(set = 0, binding = 2) uniform lightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
 	vec4 mainCameraPos; 
 	int lightNum; //number of lights, max is LIGHT_MAX
 } lightsUBO;
 
-layout (set = 0, binding = 2) uniform sampler2D depthSampler;//test
+layout (set = 0, binding = 3) uniform sampler2D depthSampler;//test
 layout (set = 1, binding = 0) uniform sampler2D texSampler;
 
 layout (location = 0) in vec3 inNormal;

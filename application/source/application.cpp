@@ -558,8 +558,8 @@ void Application::Update(){
 void Application::RecordGraphicsCommandBuffer_RenderpassMainscene(){
     instance_game->Record();
     instance_game->RecordGraphicsCommandBuffer_RenderpassMainscene();
-    for(int i = 0; i < objects.size(); i++) objects[i].Draw();
-	    textManager.Draw();
+    //for(int i = 0; i < objects.size(); i++) objects[i].Draw();
+	//textManager.Draw();
 }
 void Application::RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex){instance_game->RecordGraphicsCommandBuffer_RenderpassShadowmap(renderpassIndex);}
 void Application::RecordComputeCommandBuffer(){instance_game->RecordComputeCommandBuffer();}
