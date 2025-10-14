@@ -44,6 +44,7 @@ namespace LEApplication{
         virtual int GetObjectSize() = 0;
         virtual void DrawObject(int objectId) = 0;
         virtual void DrawTexts() = 0;
+        virtual void DrawObjects() = 0;
 
         //Expose functions for Example(BasicTriangles) to use
         virtual int GetCurrentFrame() = 0;

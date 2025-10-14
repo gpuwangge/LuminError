@@ -279,7 +279,10 @@ public:
 
         /*********7 Color Blend**********/
         //VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-        if(!blendEnable && !bUseColorBlendAttachment){ 
+        //bUseColorBlendAttachment: global blend switch
+        //blendEnable: pipeline blend switch
+        //if either switch is off, disable blend
+        if(!blendEnable || !bUseColorBlendAttachment){
             colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
             colorBlendAttachment.blendEnable = VK_FALSE; //todo?
         }

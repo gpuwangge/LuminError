@@ -322,9 +322,10 @@ namespace LEApplication{
         void MoveMainCameraBackward(float distance, float speed) override { mainCamera.MoveBackward(distance, speed); }
 
         //Expose functions for Example(SimpleTriangle) to use
-        int GetObjectSize() override { return objects.size();}
-        void DrawObject(int objectId) override {objects[objectId].Draw();}
-        void DrawTexts() override {textManager.Draw();}
+        int GetObjectSize() override { return objects.size(); }
+        void DrawObject(int objectId) override { objects[objectId].Draw(); }
+        void DrawTexts() override { textManager.Draw(); }
+        void DrawObjects() override { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
         
         //Expose functions for Example(BasicTriangles) to use
         int GetCurrentFrame() override { return renderer.currentFrame;}

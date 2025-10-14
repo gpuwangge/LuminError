@@ -46,7 +46,7 @@ namespace LuminError{
         }
 
         void Record() override{
-            for(int i = 0; i < game->GetObjectSize(); i++) game->DrawObject(i);
+            game->DrawObjects();
             game->DrawTexts();
         }
     };
