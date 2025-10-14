@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Utility.h"
 
 class CControlNode;
 class CObject;
@@ -72,6 +73,16 @@ namespace LEApplication{
 
         //Expose functions for Example(MultiCubes) to use
         virtual void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) = 0;
+
+        //Expose functions for Example(MultiPhongLightings) to use
+        virtual int GetLightSize() = 0;
+        virtual glm::vec3 GetLightPosition(int lightId) = 0;
+        virtual void SetLightPosition(int lightId, float px, float py, float pz) = 0;
+        virtual void SetLightPosition(int lightId, glm::vec3 p) = 0;
+        virtual void SetObjectPosition(int objectId, float px, float py, float pz) = 0;
+        virtual void SetObjectPosition(int objectId, glm::vec3 p) = 0;
+
+
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

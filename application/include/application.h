@@ -372,6 +372,15 @@ namespace LEApplication{
 
         //Expose functions for Example(MultiCubes) to use
         void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetAngularVelocity(vx, vy, vz); }
+ 
+        //Expose functions for Example(MultiPhongLightings) to use
+        int GetLightSize() override { return lights.size(); }
+        glm::vec3 GetLightPosition(int lightId) override { return lights[lightId].GetLightPosition(); }
+        void SetLightPosition(int lightId, float px, float py, float pz) override { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }
+        void SetLightPosition(int lightId, glm::vec3 p) override { lights[lightId].SetLightPosition(p); }
+        void SetObjectPosition(int objectId, float px, float py, float pz) override { objects[objectId].SetPosition(px, py, pz); }
+        void SetObjectPosition(int objectId, glm::vec3 p) override { objects[objectId].SetPosition(p); }
+ 
     };
 
     // extern "C" void* CreateInstance(){ return new Application();}
