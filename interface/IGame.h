@@ -8,6 +8,7 @@ namespace LuminError{
         LEApplication::IApplication* game;
         void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
         
+        virtual void PreInitialize() {}
         virtual void Initialize() {}
         virtual void PostInitialize() {}
         virtual void Update() {}

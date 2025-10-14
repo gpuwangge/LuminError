@@ -65,7 +65,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
     LoadModuleAndInstance(handle_module_game, pVoid, exampleName);
     instance_game = static_cast<LuminError::IGame*>(pVoid);
     instance_game->SetApplication(this);
-    //instance_example->Update();
+
+    instance_game->PreInitialize();
 
     m_sampleName = exampleName;
 

@@ -90,8 +90,11 @@ namespace LEApplication{
         virtual void PushConstantToCommand(void* pcData, int pipelineId) = 0;
         virtual void SetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) = 0;
         
-        //Expose functions for Example(SimpleComputeStorageBuffer) to use
-    
+        //Expose functions for Example(SimpleComputeStorageImage) to use
+        virtual void SetSwapchainImageSize(int size) = 0;
+        virtual void EnableComputeSwapChainImage(bool enable) = 0;
+        virtual void CreateComputeCommandBuffers() = 0; //TODO: optimize this
+        //virtual void RecordImageBarrier() = 0; //TODO: optimize this
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

@@ -393,6 +393,70 @@ namespace LEApplication{
             vkCmdSetDepthBias(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
         }
 
+        //Expose functions for Example(SimpleComputeStorageImage) to use
+        void SetSwapchainImageSize(int size) override { swapchain.swapchainImageSize = size; }
+        void EnableComputeSwapChainImage(bool enable) override { swapchain.bComputeSwapChainImage = enable; }
+        void CreateComputeCommandBuffers() override {
+            std::vector<VkCommandBuffer> &commandBuffers = renderer.commandBuffers[renderer.computeCmdId];
+            std::vector<VkImage> &swapChainImages = swapchain.swapchain_images;
+
+            for (size_t i = 0; i < commandBuffers.size(); i++) {
+                renderer.currentFrame = i;
+                //std::cout<<"commandbuffer i: "<<i<<std::endl;
+                VkCommandBufferBeginInfo beginInfo{};
+                beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+                //if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+                //    throw std::runtime_error("failed to begin recording command buffer!");
+                //}
+                renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+
+
+                recordImageBarrier(commandBuffers[i], swapChainImages[i],
+                    VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL,
+                    VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
+                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+                
+                
+                Dispatch(200,300,1);
+            
+                recordImageBarrier(commandBuffers[i], swapChainImages[i],
+                    VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                    VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+
+                //if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+                //    throw std::runtime_error("failed to record command buffer!");
+                //}
+                renderer.EndRecordComputeCommandBuffer();
+            }
+            renderer.currentFrame = 0;
+
+
+        } //TODO: optimize this
+        //void RecordImageBarrier() override {} //TODO: optimize this
+        void recordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
+            VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind) {
+            VkImageMemoryBarrier barrier{};
+            barrier.image = image;
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.oldLayout = oldLayout;
+            barrier.newLayout = newLayout;
+            barrier.srcAccessMask = scrAccess;
+            barrier.dstAccessMask = dstAccess;
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            VkImageSubresourceRange sub{};
+            sub.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            sub.baseArrayLayer = 0;
+            sub.baseMipLevel = 0;
+            sub.layerCount = VK_REMAINING_MIP_LEVELS;
+            sub.levelCount = VK_REMAINING_MIP_LEVELS;
+            barrier.subresourceRange = sub;
+
+            vkCmdPipelineBarrier(buffer, srcBind, dstBind,
+                0, 0, nullptr, 0, nullptr, 1, &barrier);
+        }
     };
 
 
