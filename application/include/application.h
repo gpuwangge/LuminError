@@ -370,6 +370,7 @@ namespace LEApplication{
         void LogContext(std::string s, float *n, int size) override { CContext::GetHandle().logManager.print(s, n, size);}
         void LogContext(std::string s) override { CContext::GetHandle().logManager.print(s); }
         void LogContext(std::string s, float n) override {CContext::GetHandle().logManager.print(s, n);}
+        void LogContext(std::string s, int n1, int n2) override {CContext::GetHandle().logManager.print(s, n1, n2);}
 
         //Expose functions for Example(MultiCubes) to use
         void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetAngularVelocity(vx, vy, vz); }

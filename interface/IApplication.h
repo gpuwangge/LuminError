@@ -71,6 +71,7 @@ namespace LEApplication{
         virtual void LogContext(std::string s, float *n, int size) = 0;
         virtual void LogContext(std::string s) = 0;
         virtual void LogContext(std::string s, float n) = 0;
+        virtual void LogContext(std::string s, int n1, int n2) = 0;
 
         //Expose functions for Example(MultiCubes) to use
         virtual void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) = 0;
@@ -89,7 +90,7 @@ namespace LEApplication{
         virtual void PushConstantToCommand(void* pcData, int pipelineId) = 0;
         virtual void SetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) = 0;
         
-    
+        //Expose functions for Example(SimpleComputeStorageBuffer) to use
     
     };
 

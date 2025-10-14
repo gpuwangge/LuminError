@@ -25,7 +25,6 @@ namespace LuminError{
 	    bool bVerify = true;
 
         void Initialize() override{
-            //std::cout<<"Initialize()."<<std::endl;
             game->SetRenderMode(RenderModes::COMPUTE);
             game->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
             game->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
@@ -56,19 +55,16 @@ namespace LuminError{
         }
 
         void Update() override {
-            //std::cout<<"Update()."<<std::endl;
             static int counter = 1;
             if(counter==KernelRunNumber) game->SetPause(true);
-            counter++;            
+            counter++;
         }
 
         void RecordComputeCommandBuffer() override{
-            //std::cout<<"RecordComputeCommandBuffer()."<<std::endl;
             game->ComputeDispatch(1, 1, 1);
         }
 
         void PostUpdate() override {
-            //std::cout<<"postUpdate()."<<std::endl;
             game->DeviceWaitIdle();
 
             float cpu_result0 = 0.0f;

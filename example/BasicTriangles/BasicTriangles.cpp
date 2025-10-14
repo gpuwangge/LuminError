@@ -15,7 +15,7 @@ namespace LuminError{
         };
         std::vector<uint32_t> indices3D = { 0, 1, 2, 2, 1, 3};
 
-        struct CustomUniformBufferObject {
+        struct StructCustomUniformBuffer {
             glm::vec3 color;
 
             static VkDescriptorSetLayoutBinding GetBinding(){
@@ -28,19 +28,19 @@ namespace LuminError{
                 return binding;
             }
         };
-        CustomUniformBufferObject customUBO{};
+        StructCustomUniformBuffer customUniformBufferObject{};
 
         void Initialize() override {
             game->CreateCustomModel3D(vertices3D, indices3D);
-            game->SetGraphicsCustomSize(sizeof(CustomUniformBufferObject));
-            VkDescriptorSetLayoutBinding binding = CustomUniformBufferObject::GetBinding();
+            game->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
+            VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             game->SetGraphicsCustomBinding(static_cast<void*>(&binding));
         }
 
         void Update() override {
             double et = game->GetElapseTime();
-            customUBO.color = {(sin(et) + 1.0f) / 2.0f, 0.0f, (cos(et) + 1.0f) / 2.0f};
-            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
+            customUniformBufferObject.color = {(sin(et) + 1.0f) / 2.0f, 0.0f, (cos(et) + 1.0f) / 2.0f};
+            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
             game->SetObjectVelocity(0, 
                 0.5 * sin(et * 2), 
                 0.5 * sin(et * 2), 
