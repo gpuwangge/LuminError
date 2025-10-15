@@ -14,7 +14,7 @@ Uniforms:
     uniform_graphics_name: Graphics
     uniform_graphics_custom: true
     uniform_graphics_lighting: false
-    uniform_graphics_mvp: false
+    uniform_graphics_object_mvp: false
     uniform_graphics_vp: false
     uniform_graphics_depth_image_sampler: false
     uniform_graphics_lightdepth_image_sampler: false

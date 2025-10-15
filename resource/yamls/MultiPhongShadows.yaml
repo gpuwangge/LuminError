@@ -122,7 +122,7 @@ Resources:
 Uniforms:
   Graphics:
     uniform_graphics_name: Graphics
-    uniform_graphics_mvp: true
+    uniform_graphics_object_mvp: true
     uniform_graphics_text_mvp: true
     uniform_graphics_custom: false
     uniform_graphics_lighting: true

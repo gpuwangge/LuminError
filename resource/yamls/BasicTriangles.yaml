@@ -56,7 +56,7 @@ Resources:
 Uniforms:
   Graphics: #binding order(set0): custom->lighting->mvp->vp; 
     uniform_graphics_name: Graphics
-    uniform_graphics_mvp: true
+    uniform_graphics_object_mvp: true
     uniform_graphics_text_mvp: true
     uniform_graphics_custom: true
     uniform_graphics_lighting: false

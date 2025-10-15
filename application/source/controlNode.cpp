@@ -315,7 +315,7 @@ void CControlGraphicsUniform::Update(){
     if(firstTime){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_mvp) m_pTextboxes[1]->bFlash = true;
+        if(m_pApp->appInfo.Uniform.b_uniform_graphics_object_mvp) m_pTextboxes[1]->bFlash = true;
         else m_pTextboxes[1]->SetTextColor(greyColor);
         m_pTextboxes[1]->SetTextContent("Object MVP");
 

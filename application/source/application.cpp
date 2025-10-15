@@ -389,7 +389,7 @@ void Application::Initialize(){
     /****************************
     * 5 Create Uniform Descriptors
     ****************************/
-    bool b_uniform_graphics = appInfo.Uniform.b_uniform_graphics_custom || appInfo.Uniform.b_uniform_graphics_mvp || appInfo.Uniform.b_uniform_graphics_text_mvp || appInfo.Uniform.b_uniform_graphics_vp;
+    bool b_uniform_graphics = appInfo.Uniform.b_uniform_graphics_custom || appInfo.Uniform.b_uniform_graphics_object_mvp || appInfo.Uniform.b_uniform_graphics_text_mvp || appInfo.Uniform.b_uniform_graphics_vp;
     bool b_uniform_compute = appInfo.Uniform.b_uniform_compute_custom || appInfo.Uniform.b_uniform_compute_storage || appInfo.Uniform.b_uniform_compute_swapchain_storage || appInfo.Uniform.b_uniform_compute_texture_storage;
     CreateUniformDescriptors(b_uniform_graphics, b_uniform_compute);
 
@@ -785,7 +785,7 @@ void Application::ReadUniforms(){
     if(appInfo.Uniform.b_uniform_graphics_lighting)
         CGraphicsDescriptorManager::addLightingUniformBuffer();
 
-    if(appInfo.Uniform.b_uniform_graphics_mvp){
+    if(appInfo.Uniform.b_uniform_graphics_object_mvp){
         CGraphicsDescriptorManager::addMVPUniformBuffer();
         renderer.bUseObjectMVP = true;
     }

@@ -180,7 +180,7 @@ namespace LEApplication{
 
         struct UniformConfig {
             bool b_uniform_graphics_custom = false;
-            bool b_uniform_graphics_mvp = false;
+            bool b_uniform_graphics_object_mvp = false;
             bool b_uniform_graphics_text_mvp = false;
             bool b_uniform_graphics_vp = false;
             bool b_uniform_graphics_lighting = false;
@@ -208,7 +208,7 @@ namespace LEApplication{
             // ---------------------
             void loadGraphicsFromYaml(const YAML::Node& node) {
                 b_uniform_graphics_custom                     = getOrDefault(node, "uniform_graphics_custom", false);
-                b_uniform_graphics_mvp                        = getOrDefault(node, "uniform_graphics_mvp", false);
+                b_uniform_graphics_object_mvp                        = getOrDefault(node, "uniform_graphics_object_mvp", false);
                 b_uniform_graphics_text_mvp                   = getOrDefault(node, "uniform_graphics_text_mvp", false);
                 b_uniform_graphics_vp                         = getOrDefault(node, "uniform_graphics_vp", false);
                 b_uniform_graphics_lighting                   = getOrDefault(node, "uniform_graphics_lighting", false);
@@ -217,7 +217,7 @@ namespace LEApplication{
                 b_uniform_graphics_lightdepth_image_sampler_hardware = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler_hardware", false);
 
                 // std::cout<<"b_uniform_graphics_custom "<<b_uniform_graphics_custom<<std::endl;
-                // std::cout<<"b_uniform_graphics_mvp "<<b_uniform_graphics_mvp<<std::endl;
+                // std::cout<<"b_uniform_graphics_object_mvp "<<b_uniform_graphics_object_mvp<<std::endl;
                 // std::cout<<"b_uniform_graphics_text_mvp "<<b_uniform_graphics_text_mvp<<std::endl;
                 // std::cout<<"b_uniform_graphics_vp "<<b_uniform_graphics_vp<<std::endl;
                 // std::cout<<"b_uniform_graphics_lighting "<<b_uniform_graphics_lighting<<std::endl;
