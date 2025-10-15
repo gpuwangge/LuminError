@@ -765,7 +765,7 @@ void Application::ReadFeatures(){
     if(appInfo.Feature.b_feature_graphics_push_constant){
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     }
-    if(appInfo.Feature.b_feature_graphics_blend){
+    if(appInfo.Feature.b_feature_graphics_global_blend){
         renderProcess.addColorBlendAttachment(
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO);        

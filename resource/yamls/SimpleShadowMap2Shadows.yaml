@@ -70,7 +70,7 @@ Uniforms:
 Features:
   feature_graphics_48pbt: false
   feature_graphics_push_constant: true
-  feature_graphics_blend: false
+  feature_graphics_global_blend: false
   feature_graphics_rainbow_mipmap: false
   feature_graphics_observe_attachment_id: 0
   feature_graphics_fps: false

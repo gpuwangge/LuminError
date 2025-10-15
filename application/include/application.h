@@ -155,7 +155,7 @@ namespace LEApplication{
         struct FeatureConfig {
             bool b_feature_graphics_48pbt = false;
             bool b_feature_graphics_push_constant = false;
-            bool b_feature_graphics_blend = false;
+            bool b_feature_graphics_global_blend = false;
             bool b_feature_graphics_rainbow_mipmap = false;
             //int feature_graphics_pipeline_skybox_id = -1;
             int feature_graphics_observe_attachment_id = -1;
@@ -167,7 +167,7 @@ namespace LEApplication{
             void loadFromYaml(const YAML::Node& node) {
                 b_feature_graphics_48pbt                    = getOrDefault(node, "feature_graphics_48pbt", false);
                 b_feature_graphics_push_constant            = getOrDefault(node, "feature_graphics_push_constant", false);
-                b_feature_graphics_blend                    = getOrDefault(node, "feature_graphics_blend", false);
+                b_feature_graphics_global_blend                    = getOrDefault(node, "feature_graphics_global_blend", false);
                 b_feature_graphics_rainbow_mipmap           = getOrDefault(node, "feature_graphics_rainbow_mipmap", false);
                 //feature_graphics_pipeline_skybox_id         = getOrDefault(node, "feature_graphics_pipeline_skybox_id", -1);
                 feature_graphics_observe_attachment_id      = getOrDefault(node, "feature_graphics_observe_attachment_id", -1);

@@ -741,9 +741,9 @@ void CControlFeature::Update(){
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Push Constant");
         
-        if(m_pApp->appInfo.Feature.b_feature_graphics_blend) m_pTextboxes[3]->bFlash = true;
+        if(m_pApp->appInfo.Feature.b_feature_graphics_global_blend) m_pTextboxes[3]->bFlash = true;
         else m_pTextboxes[3]->SetTextColor(greyColor);
-        m_pTextboxes[3]->SetTextContent("Blend");
+        m_pTextboxes[3]->SetTextContent("Global Blend");
 
         if(m_pApp->appInfo.Feature.b_feature_graphics_rainbow_mipmap) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
