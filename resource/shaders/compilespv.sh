@@ -6,36 +6,58 @@ else
     search_dir="$1"
 fi
 
-
-
 count=0
+skipped=0
+
+compile_if_newer() {
+    local source_file="$1"
+    local output_file="${source_file}.spv"
+    
+    if [ ! -f "$output_file" ]; then
+        count=$((count+1))
+        echo "📦 Compile ${source_file} (new)"
+        glslc.exe "${source_file}" -o "${output_file}"
+        return 0
+    elif [ "$source_file" -nt "$output_file" ]; then
+        count=$((count+1))
+        echo "🔄 Compile ${source_file} (updated)"
+        glslc.exe "${source_file}" -o "${output_file}"
+        return 0
+    else
+        skipped=$((skipped+1))
+        echo "✅ Skip ${source_file} (up to date)"
+        return 1
+    fi
+}
+
+echo "🔍 Scanning for shaders in: ${search_dir}"
 
 for entry in ${search_dir}/*.vert
 do
     if [ -e "$entry" ]; then
-        count=$((count+1))
-        echo Compile ${entry}
-        glslc.exe ${entry} -o ${entry}.spv
-    fi
-done
-for entry in ${search_dir}/*.frag
-do
-    if [ -e "$entry" ]; then
-        count=$((count+1))
-        echo Compile ${entry}
-        glslc.exe ${entry} -o ${entry}.spv
-    fi
-done
-for entry in ${search_dir}/*.comp
-do
-    if [ -e "$entry" ]; then
-        count=$((count+1))
-        echo Compile ${entry}
-        glslc.exe ${entry} -o ${entry}.spv
+        compile_if_newer "$entry"
     fi
 done
 
-echo Compiling finishes. Total compiled: ${count}
+for entry in ${search_dir}/*.frag
+do
+    if [ -e "$entry" ]; then
+        compile_if_newer "$entry"
+    fi
+done
+
+for entry in ${search_dir}/*.comp
+do
+    if [ -e "$entry" ]; then
+        compile_if_newer "$entry"
+    fi
+done
+
+echo ""
+echo "📊 Compilation summary:"
+echo "   Compiled: ${count}"
+echo "   Skipped: ${skipped}"
+echo "   Total: $((count + skipped))"
 
 read
 

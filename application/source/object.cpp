@@ -34,8 +34,8 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
         //update view and perspective matrices to ubo
         if(!bSticker){
             CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraProj = mainCamera.matrices.projection;
-            if(bSkybox) CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(glm::mat3(mainCamera.matrices.view)); //remove translate
-            else CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = mainCamera.matrices.view;
+            //if(bSkybox) CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(glm::mat3(mainCamera.matrices.view)); //update: remove translate in shader instead
+            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = mainCamera.matrices.view;
         }else{
             CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraProj = glm::mat4(1.0f);
             CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(1.0f);

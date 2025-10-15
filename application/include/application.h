@@ -345,6 +345,7 @@ namespace LEApplication{
             graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
         }
         void SetObjectVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetVelocity(vx, vy, vz);}
+        void SetObjectVelocity(int objectId, glm::vec3 v) override {objects[objectId].SetVelocity(v);}
 
         //Expose functions for Example(Furmark) to use
         int GetWindowWidth() override { return windowWidth; }
@@ -462,6 +463,10 @@ namespace LEApplication{
         void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
         void CmdNextSubpass() override { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
         int GetCustomObjectSize() override { return customObjectSize; }
+
+        //Expose functions for Example(SimpleEnvironmentmap) to use
+        glm::vec3 GetObjectPosition(int objectId) override { return objects[objectId].Position; }
+        glm::vec3 GetMainCameraPosition() override { return mainCamera.Position; }
 
     };
 

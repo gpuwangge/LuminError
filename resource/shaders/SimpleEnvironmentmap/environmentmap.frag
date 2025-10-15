@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 1) uniform UniformCustomBufferObject { 
+layout(set = 0, binding = 2) uniform UniformCustomBufferObject { 
     vec3 cameraPos;
 } customUBO;
 

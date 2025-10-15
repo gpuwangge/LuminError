@@ -54,6 +54,7 @@ namespace LEApplication{
         virtual void SetGraphicsCustomBinding(void* VkDescriptorSetLayoutBinding) = 0;
         virtual void UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) = 0;
         virtual void SetObjectVelocity(int objectId, float vx, float vy, float vz) = 0;
+        virtual void SetObjectVelocity(int objectId, glm::vec3 v) = 0;
 
         //Expose functions for Example(Furmark) to use
         virtual int GetWindowWidth() = 0;
@@ -99,6 +100,10 @@ namespace LEApplication{
         virtual void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) = 0;
         virtual void CmdNextSubpass() = 0;
         virtual int GetCustomObjectSize() = 0;
+
+        //Expose functions for Example(SimpleEnvironmentmap) to use
+        virtual glm::vec3 GetObjectPosition(int objectId) = 0;
+        virtual glm::vec3 GetMainCameraPosition() = 0;
 
 
     };
