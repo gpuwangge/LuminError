@@ -811,6 +811,7 @@ void Application::ReadUniforms(){
         //CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardwareDepthBias2();
     }
 
+    //std::cout<<"Begin Read Compute"<<std::endl;
     // Compute
     if (uniformsNode["Compute"]) appInfo.Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
     if(appInfo.Uniform.b_uniform_compute_custom)
@@ -828,6 +829,7 @@ void Application::ReadUniforms(){
     if(appInfo.Uniform.b_uniform_compute_swapchain_storage)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_STORAGEIMAGE_SWAPCHAIN;
         CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
+    //std::cout<<"End Read Compute"<<std::endl;
 
     //GraphicsTextureImageSamplers
     if (uniformsNode["GraphicsTextureImageSamplers"]) {

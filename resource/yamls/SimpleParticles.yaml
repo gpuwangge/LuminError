@@ -1,6 +1,7 @@
 Objects:
   - object_name: ParticleGenerator
     object_id: 0
+    resource_default_graphics_pipeline_id: 0
 
 Resources:
   - Pipelines:
@@ -8,6 +9,9 @@ Resources:
       resource_graphics_pipeline_vertexshader_name: simpleParticles/shader.vert.spv
       resource_graphics_pipeline_fragmentshader_name: simpleParticles/shader.frag.spv
       resource_graphics_pipeline_vertexdatatype: 3  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: false
+      resource_graphics_pipeline_depth_write_enable: false
   - ComputeShaders:
     - resource_computeshader_name: simpleParticles/shader.comp.spv
 

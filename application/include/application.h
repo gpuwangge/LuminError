@@ -334,9 +334,7 @@ namespace LEApplication{
         void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) override {
             modelManager.CreateCustomModel3D(vertices3D, indices3D, isTextboxImage);
         }
-        void SetGraphicsCustomSize(int size) override {
-            appInfo.Uniform.GraphicsCustom.Size = size;
-        }
+        void SetGraphicsCustomSize(int size) override { appInfo.Uniform.GraphicsCustom.Size = size; }
         void SetGraphicsCustomBinding(void* binding) override {
             VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
             if (bindingPtr) appInfo.Uniform.GraphicsCustom.Binding = *bindingPtr;
@@ -469,6 +467,21 @@ namespace LEApplication{
         glm::vec3 GetObjectPosition(int objectId) override { return objects[objectId].Position; }
         glm::vec3 GetMainCameraPosition() override { return mainCamera.Position; }
 
+        //Expose functions for Example(SimpleParticles) to use
+        double GetDeltaTime() override { return deltaTime; }
+        void DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) override {
+            //objects[objectId].Draw(*static_cast<std::vector<CWxjBuffer>*>(buffer), graphicsPipelineId, particleCount);
+            objects[objectId].Draw(computeDescriptorManager.storageBuffers, -1, particleCount);
+        }
+        void SetComputeCustomSize(int size) override { appInfo.Uniform.ComputeCustom.Size = size; }
+        void SetComputeCustomBinding(void* binding) override {
+            VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
+            if (bindingPtr) appInfo.Uniform.ComputeCustom.Binding = *bindingPtr;
+        }
+        void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override {
+            //graphicsDescriptorManager.updateCustomUniformBuffer<CustomUniformBufferObject>(renderer.currentFrame, customUBO);
+            computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+        }
     };
 
 

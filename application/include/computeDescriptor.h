@@ -42,10 +42,17 @@ public:
 	static std::vector<void*> customUniformBuffersMapped;
     static VkDeviceSize m_customUniformBufferSize;
     static void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
-    template <typename T>
-    void updateCustomUniformBuffer(uint32_t currentFrame, T customUniformBufferObject){
-        if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM)
-            memcpy(customUniformBuffersMapped[currentFrame], &customUniformBufferObject, sizeof(customUniformBufferObject));
+    // template <typename T>
+    // void uploadCustomUniformBuffer(uint32_t currentFrame, T customUniformBufferObject){
+    //     if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM)
+    //         memcpy(customUniformBuffersMapped[currentFrame], &customUniformBufferObject, sizeof(customUniformBufferObject));
+    // }
+    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
+        if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
+            if (data && dataSize > 0) {
+                memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+            }
+        }
     }
 
 

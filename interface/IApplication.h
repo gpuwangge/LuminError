@@ -105,6 +105,12 @@ namespace LEApplication{
         virtual glm::vec3 GetObjectPosition(int objectId) = 0;
         virtual glm::vec3 GetMainCameraPosition() = 0;
 
+        //Expose functions for Example(SimpleParticles) to use
+        virtual double GetDeltaTime() = 0;
+        virtual void DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) = 0;
+        virtual void SetComputeCustomSize(int size) = 0;
+        virtual void SetComputeCustomBinding(void* VkDescriptorSetLayoutBinding) = 0;
+        virtual void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) = 0;
 
     };
 

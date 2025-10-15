@@ -69,12 +69,12 @@ public:
     // }
     //alternative(no template)
     void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
-    if (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) {
-        if (data && dataSize > 0) {
-            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+        if (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) {
+            if (data && dataSize > 0) {
+                memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+            }
         }
     }
-}
 
     /************
      * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING
