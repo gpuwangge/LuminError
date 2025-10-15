@@ -88,9 +88,9 @@ namespace LuminError{
         }
 
         void Record() override {
-            //game->DrawObjects();
-            //game->DrawTexts();
             game->DrawParticlesFromStorageBuffer(0, PARTICLE_COUNT);
+            for(int i = 1; i < game->GetObjectSize(); i++) game->DrawObject(i);
+            game->DrawTexts();
         }
 
         void RecordComputeCommandBuffer() override {
