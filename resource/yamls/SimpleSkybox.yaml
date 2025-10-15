@@ -6,7 +6,6 @@ Objects:
     object_rotation: [0,0,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
-    object_skybox: true
     resource_model_id: 0
     resource_texture_id_list: [0]
     resource_default_graphics_pipeline_id: 0

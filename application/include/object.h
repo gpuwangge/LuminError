@@ -55,7 +55,7 @@ public:
     CControlNode *p_controlNode = NULL;
 
     bool bSticker = false;
-    bool bSkybox = false;
+    //bool bSkybox = false;
 
     int GetObjectID(){return m_object_id;}
     std::vector<int> GetTextureID(){return m_texture_ids;}

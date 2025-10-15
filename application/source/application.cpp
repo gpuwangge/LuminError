@@ -1344,7 +1344,7 @@ void Application::ReadRegisterObjects(){
             auto rotation = obj["object_rotation"] ? obj["object_rotation"].as<std::vector<float>>(): std::vector<float>(3, 0);
             auto velocity = obj["object_velocity"] ? obj["object_velocity"].as<std::vector<float>>(): std::vector<float>(3, 0);
             auto angular_velocity = obj["object_angular_velocity"] ? obj["object_angular_velocity"].as<std::vector<float>>(): std::vector<float>(3, 0);
-            bool isSkybox = obj["object_skybox"] ? obj["object_skybox"].as<bool>() : false;
+            //bool isSkybox = obj["object_skybox"] ? obj["object_skybox"].as<bool>() : false;
 
             objects[object_id].m_object_id = object_id;
             objects[object_id].m_model_id = resource_model_id;
@@ -1356,7 +1356,7 @@ void Application::ReadRegisterObjects(){
             objects[object_id].SetRotation(rotation[0], rotation[1], rotation[2]);
             objects[object_id].SetVelocity(velocity[0], velocity[1], velocity[2]);
             objects[object_id].SetAngularVelocity(angular_velocity[0], angular_velocity[1], angular_velocity[2]);
-            objects[object_id].bSkybox = isSkybox;
+            //objects[object_id].bSkybox = isSkybox;
 
             //must load resources before object register
             if(objects[object_id].bRegistered) {
