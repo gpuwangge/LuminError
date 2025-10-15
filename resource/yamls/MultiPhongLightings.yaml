@@ -116,7 +116,7 @@ Uniforms:
     uniform_graphics_text_mvp: true
     uniform_graphics_custom: false
     uniform_graphics_lighting: true
-    uniform_graphics_vp: false
+    uniform_graphics_object_vp: false
     uniform_graphics_depth_image_sampler: false
     uniform_graphics_lightdepth_image_sampler: false
   GraphicsTextureImageSamplers:
