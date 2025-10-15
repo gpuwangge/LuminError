@@ -124,6 +124,7 @@ Resources:
       resource_graphics_pipeline_blend_enable: false
       resource_graphics_pipeline_depth_test_enable: true
       resource_graphics_pipeline_depth_write_enable: false
+      resource_graphics_pipeline_skybox: true
 
 Uniforms:
   Graphics:
@@ -150,7 +151,6 @@ Features:
   feature_graphics_push_constant: false
   feature_graphics_blend: true
   feature_graphics_rainbow_mipmap: false
-  feature_graphics_pipeline_skybox_id: 3
   feature_graphics_observe_attachment_id: -1
   ffeature_graphics_show_performance_control: true
   feature_graphics_show_all_metric_controls: true

@@ -84,7 +84,6 @@ Features:
   feature_graphics_push_constant: false
   feature_graphics_blend: true
   feature_graphics_rainbow_mipmap: false
-  feature_graphics_pipeline_skybox_id: -1
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: true
   feature_graphics_show_all_metric_controls: true

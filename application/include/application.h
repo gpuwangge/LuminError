@@ -157,19 +157,19 @@ namespace LEApplication{
             bool b_feature_graphics_push_constant = false;
             bool b_feature_graphics_blend = false;
             bool b_feature_graphics_rainbow_mipmap = false;
-            int feature_graphics_pipeline_skybox_id = -1;
+            //int feature_graphics_pipeline_skybox_id = -1;
             int feature_graphics_observe_attachment_id = -1;
             bool feature_graphics_show_performance_control = true;
             bool feature_graphics_show_all_metric_controls = true;
 
-            bool feature_graphics_enable_controls = false;
+            bool feature_graphics_enable_controls = false; //this is not read from yaml
 
             void loadFromYaml(const YAML::Node& node) {
                 b_feature_graphics_48pbt                    = getOrDefault(node, "feature_graphics_48pbt", false);
                 b_feature_graphics_push_constant            = getOrDefault(node, "feature_graphics_push_constant", false);
                 b_feature_graphics_blend                    = getOrDefault(node, "feature_graphics_blend", false);
                 b_feature_graphics_rainbow_mipmap           = getOrDefault(node, "feature_graphics_rainbow_mipmap", false);
-                feature_graphics_pipeline_skybox_id         = getOrDefault(node, "feature_graphics_pipeline_skybox_id", -1);
+                //feature_graphics_pipeline_skybox_id         = getOrDefault(node, "feature_graphics_pipeline_skybox_id", -1);
                 feature_graphics_observe_attachment_id      = getOrDefault(node, "feature_graphics_observe_attachment_id", -1);
                 feature_graphics_show_performance_control   = getOrDefault(node, "feature_graphics_show_performance_control", false);
                 feature_graphics_show_all_metric_controls   = getOrDefault(node, "feature_graphics_show_all_metric_controls", false);
@@ -264,6 +264,7 @@ namespace LEApplication{
             std::unique_ptr<std::vector<bool>> BlendEnable;
             std::unique_ptr<std::vector<bool>> DepthTestEnable;
             std::unique_ptr<std::vector<bool>> DepthWriteEnable;
+            std::unique_ptr<std::vector<bool>> SkyboxEnable;
             std::unique_ptr<std::vector<std::string>> ComputeShader;
             RenderModes RenderMode = RenderModes::GRAPHICS;
         }appInfo;

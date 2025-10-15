@@ -125,7 +125,7 @@ public:
     bool bCreateGraphicsPipeline = false;
     std::vector<VkPipelineLayout> graphicsPipelineLayouts;
     std::vector<VkPipeline> graphicsPipelines;  
-    int skyboxID = -1;
+    //int skyboxID = -1;
     
     void createComputePipeline(VkShaderModule &computeShaderModule);
 
@@ -149,15 +149,15 @@ public:
     //this function is for samples that are NOT using vertex shader
     void createGraphicsPipeline(VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, int graphcisPipeline_id, 
         int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass, 
-        bool blendEnable, bool depthTestEnable, bool depthWriteEnable){
-        createGraphicsPipeline<DummyVertex>(topology, vertShaderModule, fragShaderModule, false, false, graphcisPipeline_id, subpass_id, bEnableDepthBias, renderPass, blendEnable, depthTestEnable, depthWriteEnable); //DummyVertex doesn't really matter here, because no vertex attributes used
+        bool blendEnable, bool depthTestEnable, bool depthWriteEnable, bool skyboxEnable){
+        createGraphicsPipeline<DummyVertex>(topology, vertShaderModule, fragShaderModule, false, false, graphcisPipeline_id, subpass_id, bEnableDepthBias, renderPass, blendEnable, depthTestEnable, depthWriteEnable, skyboxEnable); //DummyVertex doesn't really matter here, because no vertex attributes used
     }
 
     //this function is for samples that are  using vertex shader
     template <typename T>
     void createGraphicsPipeline(VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
         int graphcisPipeline_id, int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass,
-        bool blendEnable, bool depthTestEnable, bool depthWriteEnable){
+        bool blendEnable, bool depthTestEnable, bool depthWriteEnable, bool skyboxEnable){
         //HERE_I_AM("CreateGraphicsPipeline");
         bCreateGraphicsPipeline = true;
 
@@ -330,8 +330,8 @@ public:
 
         /*********11**********/
         if (iMainSceneAttachmentDepthCamera >= 0) {
-            bool bSkybox = false;
-            if(graphicsPipelines.size() == skyboxID) bSkybox = true;
+            //bool bSkybox = false;
+            //if(graphicsPipelines.size() == skyboxID) bSkybox = true;
             //std::cout<<"bSkybox="<<bSkybox<<"(skyboxID="<<skyboxID<<")"<<std::endl;
             VkPipelineDepthStencilStateCreateInfo depthStencil{};
             depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -340,7 +340,7 @@ public:
             if(bEnableDepthBias)
                 depthStencil.depthCompareOp = VK_COMPARE_OP_LESS; //for hardware depthbias shadowmap
             else
-                depthStencil.depthCompareOp = bSkybox ? VK_COMPARE_OP_LESS_OR_EQUAL : VK_COMPARE_OP_LESS;
+                depthStencil.depthCompareOp = skyboxEnable ? VK_COMPARE_OP_LESS_OR_EQUAL : VK_COMPARE_OP_LESS;
             depthStencil.depthBoundsTestEnable = VK_FALSE;
             depthStencil.stencilTestEnable = VK_FALSE;
             pipelineInfo.pDepthStencilState = &depthStencil;

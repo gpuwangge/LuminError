@@ -668,7 +668,7 @@ void CControlHotkey::Update(){
 *******************/
 CControlFeature::CControlFeature(){
     Name = "Control Feature Node";
-    m_textbox_count = 8;
+    m_textbox_count = 7;
     m_object_count = 1;
     SetScale(0.5, 0.5, 0);
     SetPositionY(-1.0f + 0.5f + 0.5f * Length.y);
@@ -749,23 +749,23 @@ void CControlFeature::Update(){
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Rainbow Mipmap");
 
-        if(m_pApp->appInfo.Feature.feature_graphics_pipeline_skybox_id != -1) m_pTextboxes[5]->bFlash = true;
+        //if(m_pApp->appInfo.Feature.feature_graphics_show_all_metric_controls != -1) m_pTextboxes[5]->bFlash = true;
+        //else m_pTextboxes[5]->SetTextColor(greyColor);
+        //m_pTextboxes[5]->SetTextContent("");
+
+        if(m_pApp->appInfo.Feature.feature_graphics_observe_attachment_id != -1) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
-        m_pTextboxes[5]->SetTextContent("Skybox");
+        m_pTextboxes[5]->SetTextContent("Observe Attachment");
 
-        if(m_pApp->appInfo.Feature.feature_graphics_observe_attachment_id != -1) m_pTextboxes[6]->bFlash = true;
+        if(m_pApp->appInfo.Feature.feature_graphics_enable_controls) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
-        m_pTextboxes[6]->SetTextContent("Observe Attachment");
-
-        if(m_pApp->appInfo.Feature.feature_graphics_enable_controls) m_pTextboxes[7]->bFlash = true;
-        else m_pTextboxes[7]->SetTextColor(greyColor);
-        m_pTextboxes[7]->SetTextContent("Performance Metrics");
+        m_pTextboxes[6]->SetTextContent("Show Metric Panels");
 
         firstTime = false;
     }
 
 	if(currentTrigger!=lastTrigger) {
-        for(int i = 1; i <= 7; i++){
+        for(int i = 1; i <= 6; i++){
             if(m_pTextboxes[i]->bFlash) {
                 m_pTextboxes[i]->SetTextContent(); //to update the text color
             }

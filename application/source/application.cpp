@@ -770,7 +770,7 @@ void Application::ReadFeatures(){
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO);        
     }
-    renderProcess.skyboxID = appInfo.Feature.feature_graphics_pipeline_skybox_id;
+    //renderProcess.skyboxID = appInfo.Feature.feature_graphics_pipeline_skybox_id;
 }
 
 void Application::ReadUniforms(){
@@ -997,6 +997,7 @@ void Application::ReadResources(){
             appInfo.BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
             appInfo.DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
             appInfo.DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
 
             for (const auto& pipeline : resource["Pipelines"]) {
                 //std::cout<<"Application: Read Pipeline."<<std::endl;
@@ -1012,6 +1013,7 @@ void Application::ReadResources(){
                 bool blendEnable = pipeline["resource_graphics_pipeline_blend_enable"] ? pipeline["resource_graphics_pipeline_blend_enable"].as<bool>() : false;
                 bool depthTestEnable = pipeline["resource_graphics_pipeline_depth_test_enable"] ? pipeline["resource_graphics_pipeline_depth_test_enable"].as<bool>() : true;
                 bool depthWriteEnable = pipeline["resource_graphics_pipeline_depth_write_enable"] ? pipeline["resource_graphics_pipeline_depth_write_enable"].as<bool>() : true;
+                bool skyboxEnable = pipeline["resource_graphics_pipeline_skybox"] ? pipeline["resource_graphics_pipeline_skybox"].as<bool>() : false;
 
                 //std::cout<<"Pipeline Name: "<<name<<std::endl;
                 appInfo.VertexShader->push_back(vertexShaderName);
@@ -1024,6 +1026,7 @@ void Application::ReadResources(){
                 appInfo.BlendEnable->push_back(blendEnable);
                 appInfo.DepthTestEnable->push_back(depthTestEnable);
                 appInfo.DepthWriteEnable->push_back(depthWriteEnable);
+                appInfo.SkyboxEnable->push_back(skyboxEnable);
             }
 
             // if (resource["VertexShaders"]) {
@@ -1268,7 +1271,7 @@ void Application::CreatePipelines(){
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], i,
                         (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
@@ -1278,14 +1281,14 @@ void Application::CreatePipelines(){
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
                             (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
                     }else{
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
                             (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);   
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);   
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
@@ -1295,7 +1298,7 @@ void Application::CreatePipelines(){
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
                         (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
                     std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
                 break;
                 case VertexStructureTypes::ParticleType:
@@ -1304,7 +1307,7 @@ void Application::CreatePipelines(){
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
                         (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);  
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
                 break;
                 case VertexStructureTypes::TextQuad:
                     renderProcess.createGraphicsPipeline<TextQuadVertex>(
@@ -1312,7 +1315,7 @@ void Application::CreatePipelines(){
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, true, i,
                         (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i]);   
+                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);   
                 break;
                 default:
                 break;
