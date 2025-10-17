@@ -20,14 +20,14 @@ namespace LuminError{
         }
 
         void PostInitialize() override {
-            game->SetObjectScaleRectangleXY(0, -1, -1, 0, 0);
+            game->SetObjectScaleRectangleXY(2, -1, -1, 0, 0);
             game->SetObjectScaleRectangleXY(3, 0.5, 0.5, 1, 1);
         }
 
         void Update() override {
             double et = game->GetElapseTime();
-            game->SetObjectAngularVelocity(1, 50, 0, 50);
-            game->SetObjectVelocity(2, glm::vec3(0, 3*sin(et * 2), 0));
+            game->SetObjectAngularVelocity(0, 50, 0, 50);
+            game->SetObjectVelocity(1, glm::vec3(0, 3*sin(et * 2), 0));
         }
 
         void Record() override{

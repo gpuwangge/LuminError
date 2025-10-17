@@ -1,6 +1,6 @@
 Objects:
   - object_name: UI
-    object_id: 0
+    object_id: 2 # UI must be last object(s) to render correctly
     object_sticker: true
     object_scale: 1
     object_position: [0,0,0]
@@ -11,7 +11,7 @@ Objects:
     resource_texture_id_list: [1]
     resource_default_graphics_pipeline_id: 3
   - object_name: Cube
-    object_id: 1
+    object_id: 0
     object_scale: 1
     object_position: [0,0,0]
     object_rotation: [0,0,0]
@@ -21,7 +21,7 @@ Objects:
     resource_texture_id_list: [2]
     resource_default_graphics_pipeline_id: 2
   - object_name: hallway
-    object_id: 2
+    object_id: 1
     object_scale: 1
     object_position: [0,0,0]
     object_rotation: [0,0,0]
