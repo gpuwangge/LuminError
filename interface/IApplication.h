@@ -117,6 +117,10 @@ namespace LEApplication{
         virtual int GetLightCameraFocusObjectId(int lightCameraId) = 0;
         virtual void SetMainCameraSensitivity(float sensitivity) = 0;
         
+        //Expose functions for Example(SimpleUniformBuffer) to use
+        virtual void DrawObject(int objectId, int pipelineId, int numVertex) = 0;
+        
+
     };
 
     // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \

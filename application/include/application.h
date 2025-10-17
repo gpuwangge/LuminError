@@ -488,6 +488,9 @@ namespace LEApplication{
         int GetLightCameraFocusObjectId(int lightCameraId) override { return lightCameras[lightCameraId].focusObjectId; }
         void SetMainCameraSensitivity(float sensitivity) override { mainCamera.SetRotationSensitivity(sensitivity); };
 
+        //Expose functions for Example(SimpleUniformBuffer) to use
+        void DrawObject(int objectId, int pipelineId, int numVertex) override { objects[objectId].Draw(pipelineId, numVertex); }
+
     };
 
 

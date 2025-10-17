@@ -1,6 +1,6 @@
 #version 450
 
-layout(binding = 0) uniform UniformBufferObject { 
+layout(binding = 2) uniform UniformBufferObject { 
     vec4 color;
 } ubo;
 
