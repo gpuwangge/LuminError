@@ -18,11 +18,11 @@ layout(location = 3) in vec3 inNormal; //no use
 
 //layout(location = 0) out vec3 fragColor;
 //layout(location = 1) out vec2 fragTexCoord;
-layout(location = 0) out vec3 pos;
+layout(location = 0) out vec3 outPos;
 
 void main() {
-    gl_Position = mvpUBO.mainCameraProj * mvpUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
-    //fragColor = inColor;
-    //fragTexCoord = inTexCoord;
-    pos = inPosition;
+	mat4 view = mat4(mat3(mvpUBO.mainCameraView)); //remove translation of skybox
+    vec4 pos = mvpUBO.mainCameraProj * view * mvpUBO.model * vec4(inPosition, 1.0);
+    gl_Position = pos.xyww; //cheat in depth test
+    outPos = inPosition; //pass input position to fragment for cubemap sampler
 }
