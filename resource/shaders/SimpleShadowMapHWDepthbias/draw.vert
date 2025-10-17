@@ -26,11 +26,11 @@ layout (location = 3) out vec4 outPosWorld;
 //layout (location = 4) out vec4 outFragPosLightSpace;
 
 //biasMat is to prevent shadow acne
-const mat4 biasMat = mat4( 
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 );
+// const mat4 biasMat = mat4( 
+// 	0.5, 0.0, 0.0, 0.0,
+// 	0.0, 0.5, 0.0, 0.0,
+// 	0.0, 0.0, 1.0, 0.0,
+// 	0.5, 0.5, 0.0, 1.0 );
 
 void main() {
 	gl_Position = mvpUBO.mainCameraProj * mvpUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
