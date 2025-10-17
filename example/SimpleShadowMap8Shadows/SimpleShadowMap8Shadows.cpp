@@ -41,7 +41,7 @@ namespace LuminError{
             //object2(removed): small light sphere0 (light0), because both light cameras are at this position, it should not be drawn
             //object3(removed): small light sphere1 (light1)
             //...
-            for(int i = 0; i < 1; i++) { //only draw table and middle big sphere in shadowmap
+            for(int i = 0; i < 2; i++) { //only draw table and middle big sphere in shadowmap
                 game->DrawObject(i, shadowmapPipelineIndex); 
             }
         }

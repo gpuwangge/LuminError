@@ -6,9 +6,9 @@ Objects:
     object_rotation: [0,0,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
-    resource_model_id: 1
-    resource_texture_id_list: [1]
-    resource_default_graphics_pipeline_id: 1
+    resource_model_id: 3
+    resource_texture_id_list: [2]
+    resource_default_graphics_pipeline_id: 3
   - object_name: Sphere
     object_id: 1
     object_scale: 0.04
@@ -16,7 +16,9 @@ Objects:
     object_rotation: [0,0,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
-    resource_default_graphics_pipeline_id: 1
+    resource_model_id: 2
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 3
   - object_name: Sphere
     object_id: 2
     object_scale: 0.04
@@ -24,7 +26,9 @@ Objects:
     object_rotation: [0,0,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
-    resource_default_graphics_pipeline_id: 1    
+    resource_model_id: 2
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 3
   - object_name: Sphere
     object_id: 3
     object_scale: 0.04
@@ -32,7 +36,9 @@ Objects:
     object_rotation: [0,0,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
-    resource_default_graphics_pipeline_id: 1
+    resource_model_id: 2
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 3
   - object_name: Sphere
     object_id: 4
     object_scale: 0.04
@@ -40,13 +46,27 @@ Objects:
     object_rotation: [0,0,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
-    resource_default_graphics_pipeline_id: 1  
+    resource_model_id: 2
+    resource_texture_id_list: [1]
+    resource_default_graphics_pipeline_id: 3
 
 Resources:
+  - Fonts:
+    - resource_font_name: AscII
+      resource_font_outlinecolor: [255, 255, 255, 255]
+      resource_font_textcolor: [255, 255, 255, 255]
+      resource_font_size: 50
+      uniform_sampler_id: 0
   - Models:
+    - resource_model_name: TEXTBOXIMAGE
+    - resource_model_name: TEXTQUAD
     - resource_model_name: sphere.obj
     - resource_model_name: ElegantTable.obj
   - Textures:
+    - resource_texture_name: textbox_cyber.png
+      resource_texture_miplevels: 1
+      resource_texture_cubmap: false
+      uniform_sampler_id: 0
     - resource_texture_name: metal.jpg
       resource_texture_miplevels: 1
       resource_texture_cubmap: false
@@ -56,23 +76,38 @@ Resources:
       resource_texture_cubmap: false
       uniform_sampler_id: 1
   - Pipelines:
+    - resource_graphics_pipeline_name: textboxImagePipeline
+      resource_graphics_pipeline_vertexshader_name: Common/textboxImage.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: Common/textboxImage.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 2  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
+    - resource_graphics_pipeline_name: textQuadPipeline
+      resource_graphics_pipeline_vertexshader_name: Common/textQuad.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: Common/textQuad.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 4  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
     - resource_graphics_pipeline_name: pipeline_shadowmap
-      resource_graphics_pipeline_vertexshader_name: SimpleShadowMap32Shadows/shadowmap.vert.spv
-      resource_graphics_pipeline_fragmentshader_name: SimpleShadowMap32Shadows/shadowmap.frag.spv
+      resource_graphics_pipeline_vertexshader_name: SimpleShadowMap16Shadows/shadowmap.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: SimpleShadowMap16Shadows/shadowmap.frag.spv
       renderpasses_shadowmap: true
       subpasses_subpass_id: 0
     - resource_graphics_pipeline_name: pipeline_mainscene
-      resource_graphics_pipeline_vertexshader_name: SimpleShadowMap32Shadows/draw.vert.spv
-      resource_graphics_pipeline_fragmentshader_name: SimpleShadowMap32Shadows/draw.frag.spv
+      resource_graphics_pipeline_vertexshader_name: SimpleShadowMap16Shadows/draw.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: SimpleShadowMap16Shadows/draw.frag.spv
       renderpasses_shadowmap: false
       subpasses_subpass_id: 0
 
 Uniforms:
   Graphics:
     uniform_graphics_name: Graphics
+    uniform_graphics_object_mvp: true
+    uniform_graphics_text_mvp: true
     uniform_graphics_custom: false
     uniform_graphics_lighting: true
-    uniform_graphics_object_mvp: true
     uniform_graphics_object_vp: false
     uniform_graphics_depth_image_sampler: true
     uniform_graphics_lightdepth_image_sampler: false
@@ -86,10 +121,11 @@ Uniforms:
 Features:
   feature_graphics_48pbt: false
   feature_graphics_push_constant: true
-  feature_graphics_global_blend: false
+  feature_graphics_global_blend: true
   feature_graphics_rainbow_mipmap: false
   feature_graphics_observe_attachment_id: 0
-  feature_graphics_fps: false
+  feature_graphics_show_performance_control: true
+  feature_graphics_show_all_metric_controls: true
 
 ShadowmapRenderpassAttachments:
   ShadowmapRenderpass_attachment_depth_light: true
@@ -228,6 +264,14 @@ Lights:
     light_intensity: [0.5,2,4,1.0]
     light_color: [0.0,1.0,0.5]
     light_spot: [20,25]
+
+Controls:
+  - UIContainer:
+      resource_model_id_box: 0
+      resource_model_id_text: 1
+      resource_default_graphics_pipeline_id_box: 0
+      resource_default_graphics_pipeline_id_text: 1
+      resource_texture_id_list_box: [0]
 
 disabled_config: |
   - light_name: Light

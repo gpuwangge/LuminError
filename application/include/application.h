@@ -482,6 +482,12 @@ namespace LEApplication{
             //graphicsDescriptorManager.updateCustomUniformBuffer<CustomUniformBufferObject>(renderer.currentFrame, customUBO);
             computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
         }
+
+        //Expose functions for Example(SimpleShadowMap16Shadows) to use
+        void SetLightCameraFocusObjectId(int lightCameraId, int objectId) override { lightCameras[lightCameraId].focusObjectId = objectId; }
+        int GetLightCameraFocusObjectId(int lightCameraId) override { return lightCameras[lightCameraId].focusObjectId; }
+        void SetMainCameraSensitivity(float sensitivity) override { mainCamera.SetRotationSensitivity(sensitivity); };
+
     };
 
 
