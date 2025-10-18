@@ -111,6 +111,9 @@ Resources:
     - resource_graphics_pipeline_name: pipeline_observe
       resource_graphics_pipeline_vertexshader_name: simpleDepthImage/observe.vert.spv
       resource_graphics_pipeline_fragmentshader_name: simpleDepthImage/observe.frag.spv
+      resource_graphics_pipeline_blend_enable: false
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
       subpasses_subpass_id: 2
     - resource_graphics_pipeline_name: pipeline_lightdepth
       resource_graphics_pipeline_vertexshader_name: simpleDepthImage/lightdepth.vert.spv

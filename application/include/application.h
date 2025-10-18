@@ -327,6 +327,9 @@ namespace LEApplication{
         void DrawObject(int objectId) override { objects[objectId].Draw(); }
         void DrawTexts() override { textManager.Draw(); }
         void DrawObjects() override { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
+        void DrawObjects(int startObjectId, int endObjectId) override { 
+            for(int i = startObjectId; i <= endObjectId && i < objects.size(); i++)  objects[i].Draw(); 
+        }
         
         //Expose functions for Example(BasicTriangles) to use
         int GetCurrentFrame() override { return renderer.currentFrame;}
@@ -489,7 +492,11 @@ namespace LEApplication{
         void SetMainCameraSensitivity(float sensitivity) override { mainCamera.SetRotationSensitivity(sensitivity); };
 
         //Expose functions for Example(SimpleUniformBuffer) to use
-        void DrawObject(int objectId, int pipelineId, int numVertex) override { objects[objectId].Draw(pipelineId, numVertex); }
+        void DrawObject(int objectId, int pipelineId, int numVertex) override { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
+
+        //Expose functions for Example(SimpleVertexBuffer) to use
+        void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) override {modelManager.CreateCustomModel2D(vertices2D);}
+
 
     };
 

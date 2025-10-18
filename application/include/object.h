@@ -73,6 +73,7 @@ public:
 
     //draw with renderer's buffer, or no buffer
     void Draw(int graphicsPipelineId = -1, uint32_t n = 0); //-1 means use default graphics pipeline id
+    void Draw_NoIndexNoSet(int graphicsPipelineId = -1, uint32_t n = 0);
     //draw with external buffers
     void Draw(std::vector<CWxjBuffer> &buffer, int graphicsPipelineId = -1, uint32_t n = 0); //const VkBuffer *pBuffers
 };

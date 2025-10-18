@@ -7,6 +7,7 @@ class CControlNode;
 class CObject;
 class CTextManager;
 class Vertex3D;
+class Vertex2D;
 
 namespace LEApplication{
     class IApplication {
@@ -45,6 +46,7 @@ namespace LEApplication{
         virtual void DrawObject(int objectId) = 0;
         virtual void DrawTexts() = 0;
         virtual void DrawObjects() = 0;
+        virtual void DrawObjects(int startObjectId, int endObjectId) = 0;
 
         //Expose functions for Example(BasicTriangles) to use
         virtual int GetCurrentFrame() = 0;
@@ -120,6 +122,8 @@ namespace LEApplication{
         //Expose functions for Example(SimpleUniformBuffer) to use
         virtual void DrawObject(int objectId, int pipelineId, int numVertex) = 0;
         
+        //Expose functions for Example(SimpleVertexBuffer) to use
+        virtual void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) = 0;
 
     };
 

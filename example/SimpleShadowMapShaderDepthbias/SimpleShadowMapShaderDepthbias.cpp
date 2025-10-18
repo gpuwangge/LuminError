@@ -40,7 +40,6 @@ namespace LuminError{
 
         void Record() override{
             int objectCustomSize = game->GetCustomObjectSize();
-            int objectSize = game->GetObjectSize();
 
             int lightDepthPipeline = 4;
 
@@ -56,17 +55,15 @@ namespace LuminError{
             }
 
             game->CmdNextSubpass();
-            
              //second subpass: render main scene from camera's perspective
-            for(int i = 0; i < objectCustomSize-1; i++)  game->DrawObject(i);
-
-            game->CmdNextSubpass();
+            game->DrawObjects(0, objectCustomSize-2);
             
+            game->CmdNextSubpass();
             //third subpass: render depth image rectangle
             game->DrawObject(objectCustomSize-1);
 
-            //render info panels (dont forget to set subpasses_subpass_id = 2 in yaml)
-            for(int i = objectCustomSize; i < objectSize; i++) game->DrawObject(i);
+            //render info panels (panesl must be drawn at the last; dont forget to set subpasses_subpass_id = 2 in yaml)
+            game->DrawObjects(objectCustomSize, game->GetObjectSize()-1);
             game->DrawTexts(); 
         }
     };

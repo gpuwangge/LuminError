@@ -197,6 +197,8 @@ void CObject::Register(LEApplication::Application *p_app){
 
 
 void CObject::Draw(int graphicsPipelineId, uint32_t n){
+    //! Assume use vertex buffer, index buffer and use sets
+
     //std::cout<<"CObject::Draw() bVisible:"<<bVisible<<", id="<<m_object_id<<std::endl;
     //if(p_controlNode) std::cout<<"CObject::Draw() p_controlNode->bVisible:"<<p_controlNode->bVisible<<std::endl;
     if(!bRegistered || !bVisible) return;
@@ -208,34 +210,47 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
     VkPipelineLayout *p_graphicsPipelineLayout = &(p_renderProcess->graphicsPipelineLayouts[current_graphics_pipeline_id]);
     p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
 
-
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     //set = 0 is for general uniform; set = 1 is for texture sampler uniform
     if(CGraphicsDescriptorManager::getSetSize_General() > 0) dsSets.push_back(*p_descriptorSets_graphics_general); 
     if(CGraphicsDescriptorManager::textureImageSamplers.size() > 0) dsSets.push_back(descriptorSets_graphics_texture_image_sampler); 
-    //std::cout<<"test3.dsSets.size()="<<dsSets.size()<<std::endl;
     
-    if(dsSets.size() > 0){
+    //std::cout<<"dsSets.size()="<<dsSets.size()<<std::endl;
+    //std::cout<<"p_renderer->indices3Ds.size()="<<p_renderer->indices3Ds.size()<<std::endl;
+    
+    //if(dsSets.size() > 0){
         //int dynamicObjectMVPOffset = -1; //-1 means not use dynamic offset (no MVP/VP used)
         //if(bUseMVP_VP) 
-        int dynamicObjectMVPOffset = m_object_id; //assume descriptor uniform(MVP/VP) offset is m_id
-        p_renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
-    }//else std::cout<<"No Descritpor is used."<<std::endl;
+    int dynamicObjectMVPOffset = m_object_id; //assume descriptor uniform(MVP/VP) offset is m_id
+    p_renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
+    //}//else std::cout<<"No Descritpor is used."<<std::endl;
     //std::cout<<"test4."<<std::endl;
     //if(!vertices3D.empty() || !vertices2D.empty()){
     p_renderer->BindVertexBuffer(m_model_id);
     //}//else std::cout<<"No vertex buffer is used."<<std::endl;
     //std::cout<<"test5."<<std::endl;
     //if(indices3D.empty()){
-    if(p_renderer->indices3Ds.empty()){
+    //if(p_renderer->indices3Ds.empty()){
         //std::cout<<"No index buffer is used."<<std::endl;
-        p_renderer->Draw(n);
-    }else{
+    //    p_renderer->Draw(n);
+    //}else{
         //std::cout<<"CObject::Draw():"<<" m_object_id="<<m_object_id<<", m_model_id="<<m_model_id<<std::endl;
-        p_renderer->BindIndexBuffer(m_model_id);
-        p_renderer->DrawIndexed(m_model_id);
-    }
+    p_renderer->BindIndexBuffer(m_model_id);
+    p_renderer->DrawIndexed(m_model_id);
+    //}
 
+}
+
+void CObject::Draw_NoIndexNoSet(int graphicsPipelineId, uint32_t n){
+    if(!bRegistered || !bVisible) return;
+    if(p_controlNode != NULL && !p_controlNode->bVisible) return;
+    int current_graphics_pipeline_id = (graphicsPipelineId == -1) ? m_default_graphics_pipeline_id : graphicsPipelineId;
+
+    //std::cout<<"CObject::Draw_NoIndexNoSet():"<<" m_object_id="<<m_object_id<<", m_model_id="<<m_model_id<<", current_graphics_pipeline_id="<<current_graphics_pipeline_id<<std::endl;
+
+    p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
+    p_renderer->BindVertexBuffer(m_model_id);
+    p_renderer->Draw(n);
 }
 
 

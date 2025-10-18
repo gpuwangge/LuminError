@@ -33,14 +33,8 @@ namespace LuminError{
         }
 
         void Record() override{
-            int objectCustomSize = game->GetCustomObjectSize();
-            int objectSize = game->GetObjectSize();
-            
-            game->DrawObject(0, -1, 3); //objectId=0, use default pipeline, draw 3 veritices
-
-            for(int i = objectCustomSize; i < objectSize; i++) game->DrawObject(i);
+            game->DrawObjects();
             game->DrawTexts();
-  
         }
     };
 
