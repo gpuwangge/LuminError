@@ -10,7 +10,6 @@ std::vector<VkDescriptorPoolSize> CGraphicsDescriptorManager::graphicsDescriptor
 unsigned int CGraphicsDescriptorManager::textureImageSamplerSize;
 void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbox_count){
     //Descriptor Step 1/3
-    //objectCount = object_count;
 
 	graphicsDescriptorPoolSizes.resize(getPoolSize());
 	int counter = 0;

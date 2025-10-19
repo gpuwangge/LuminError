@@ -82,7 +82,6 @@ namespace LESDL{
         // SDL_RenderPresent(renderer);
         // TTF_CloseFont(m_font);
         // TTF_Quit();
-        
     }*/
 
     void SDLCore::eventHandle(){

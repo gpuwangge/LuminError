@@ -1081,8 +1081,8 @@ void Application::ReadAttachments(){
     swapchain.iMainSceneAttachmentColorResovle = renderProcess.iMainSceneAttachmentColorResovle;
     swapchain.iMainSceneAttachmentColorPresent = renderProcess.iMainSceneAttachmentColorPresent;
 
-    std::cout<<"Shadowmap attachments: "<<swapchain.iShadowmapAttachmentDepthLight<<std::endl;
-    std::cout<<"Mainscene attachments: "<<swapchain.iMainSceneAttachmentDepthLight<<","<<swapchain.iMainSceneAttachmentDepthCamera<<","<<swapchain.iMainSceneAttachmentColorResovle<<","<<swapchain.iMainSceneAttachmentColorPresent<<std::endl;
+    //std::cout<<"Shadowmap attachments: "<<swapchain.iShadowmapAttachmentDepthLight<<std::endl;
+    //std::cout<<"Mainscene attachments: "<<swapchain.iMainSceneAttachmentDepthLight<<","<<swapchain.iMainSceneAttachmentDepthCamera<<","<<swapchain.iMainSceneAttachmentColorResovle<<","<<swapchain.iMainSceneAttachmentColorPresent<<std::endl;
 
     //when creating attachment resource, need 1.create attachment description in renderProcess; 2.create attachment buffer in swapchain
     if(swapchain.iMainSceneAttachmentColorResovle >= 0) swapchain.GetMaxUsableSampleCount(); //calcuate max sampler count first
@@ -1491,8 +1491,8 @@ void Application::ReadLightings(){
 
             lights[id].Register(name, id, glm_position, intensity, glm_color, spotInnerAngle, spotOuterAngle);
 
-            std::cout<<"LightId:("<<id<<") Name:("<<lights[id].GetLightName()<<") Intensity:("<<lights[id].GetIntensity(0)<<","<<lights[id].GetIntensity(1)<<","<<lights[id].GetIntensity(2)<<","<<lights[id].GetIntensity(3)<<")"
-                <<" Position:("<<lights[id].GetLightPosition().x<<","<<lights[id].GetLightPosition().y<<","<<lights[id].GetLightPosition().z<<")"<<std::endl;
+            //std::cout<<"LightId:("<<id<<") Name:("<<lights[id].GetLightName()<<") Intensity:("<<lights[id].GetIntensity(0)<<","<<lights[id].GetIntensity(1)<<","<<lights[id].GetIntensity(2)<<","<<lights[id].GetIntensity(3)<<")"
+            //    <<" Position:("<<lights[id].GetLightPosition().x<<","<<lights[id].GetLightPosition().y<<","<<lights[id].GetLightPosition().z<<")"<<std::endl;
  
         }
         for(int i = 0; i < lights.size(); i++)
