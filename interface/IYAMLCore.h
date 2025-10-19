@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef WIN32
-    #define YAML_CPP_STATIC_DEFINE //to disable lots of yaml warnings
-#endif
-#include "../thirdParty/yaml-cpp/yaml.h"
-
+#include "TypeAppInfo.h"
 #include "IApplication.h"
 
 namespace LEYAML{
@@ -19,8 +15,10 @@ namespace LEYAML{
         virtual void LoadGraphicsFromYaml(const YAML::Node& node) = 0;
         virtual void LoadComputeFromYaml(const YAML::Node& node) = 0;
         virtual void LoadControlUIContainerFromYaml(const YAML::Node& node) = 0;
+        AppInfo& GetAppInfo() { return appInfo; }
 
-
+    private:
+        AppInfo appInfo;
     };
 
     #define EXPORT_FACTORY_FOR(ClassName) \

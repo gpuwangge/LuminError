@@ -77,7 +77,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
 
     instance_game->PreInitialize();
 
-
+    appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
     
     m_sampleName = exampleName;
 
@@ -242,7 +242,7 @@ void Application::Initialize(){
     /****************************
     * 1 Read Features and Controls
     ****************************/   
-    renderer.m_renderMode = appInfo.RenderMode;
+    renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
     ReadFeatures();
     ReadControls();
 
@@ -255,7 +255,7 @@ void Application::Initialize(){
     /****************************
     * 2 Initialize ObjectList and LightList
     ****************************/
-    if(appInfo.Feature.feature_graphics_enable_controls){
+    if(appInfo->Feature.feature_graphics_enable_controls){
         controlNodes.push_back(std::make_unique<CControlPerfMetric>());
         controlNodes.back()->Register(this);
         controlNodes.push_back(std::make_unique<CControlAttachment>());
@@ -273,8 +273,8 @@ void Application::Initialize(){
         controlNodes.push_back(std::make_unique<CControlStatistics>());
         controlNodes.back()->Register(this);
 
-        for(int i = 0; i < controlNodes.size(); i++) controlNodes[i]->bVisible = appInfo.Feature.feature_graphics_show_all_metric_controls;
-        if(!appInfo.Feature.feature_graphics_show_all_metric_controls) controlNodes[0]->bVisible = appInfo.Feature.feature_graphics_show_performance_control; //show performance control only
+        for(int i = 0; i < controlNodes.size(); i++) controlNodes[i]->bVisible = appInfo->Feature.feature_graphics_show_all_metric_controls;
+        if(!appInfo->Feature.feature_graphics_show_all_metric_controls) controlNodes[0]->bVisible = appInfo->Feature.feature_graphics_show_performance_control; //show performance control only
     }
 
     //controlNodes[0]->bVisible = false; //hide fps control node
@@ -400,8 +400,8 @@ void Application::Initialize(){
     /****************************
     * 5 Create Uniform Descriptors
     ****************************/
-    bool b_uniform_graphics = appInfo.Uniform.b_uniform_graphics_custom || appInfo.Uniform.b_uniform_graphics_object_mvp || appInfo.Uniform.b_uniform_graphics_text_mvp || appInfo.Uniform.b_uniform_graphics_object_vp;
-    bool b_uniform_compute = appInfo.Uniform.b_uniform_compute_custom || appInfo.Uniform.b_uniform_compute_storage || appInfo.Uniform.b_uniform_compute_swapchain_storage || appInfo.Uniform.b_uniform_compute_texture_storage;
+    bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_mvp || appInfo->Uniform.b_uniform_graphics_text_mvp || appInfo->Uniform.b_uniform_graphics_object_vp;
+    bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_uniform_compute_storage || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     CreateUniformDescriptors(b_uniform_graphics, b_uniform_compute);
 
     TimePoint T7 = now();
@@ -533,7 +533,7 @@ void Application::Update(){
     for(int i = 0; i < objects.size(); i++) objects[i].Update(deltaTime, renderer.currentFrame, mainCamera); 
     textManager.Update(deltaTime, renderer.currentFrame, mainCamera);
     for(int i = 0; i < lights.size(); i++) lights[i].Update(deltaTime, renderer.currentFrame, mainCamera, lightCameras[i]);
-    if(appInfo.Feature.feature_graphics_enable_controls)
+    if(appInfo->Feature.feature_graphics_enable_controls)
         for(int i = 0; i < controlNodes.size(); i++) controlNodes[i]->Update();
 
     /*Calcuate FPS*/
@@ -767,16 +767,16 @@ void Application::CleanUp(){
  
 void Application::ReadControls(){
     for (const auto& control : config["Controls"])
-        if (control["UIContainer"]) appInfo.ControlUIContainer.loadFromYaml(control["UIContainer"]);
+        if (control["UIContainer"]) appInfo->ControlUIContainer.loadFromYaml(control["UIContainer"]);
 }
 
 void Application::ReadFeatures(){
-    if (config["Features"]) appInfo.Feature.loadFromYaml(config["Features"]);
+    if (config["Features"]) appInfo->Feature.loadFromYaml(config["Features"]);
 
-    if(appInfo.Feature.b_feature_graphics_push_constant){
+    if(appInfo->Feature.b_feature_graphics_push_constant){
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     }
-    if(appInfo.Feature.b_feature_graphics_global_blend){
+    if(appInfo->Feature.b_feature_graphics_global_blend){
         renderProcess.addColorBlendAttachment(
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO);        
@@ -788,56 +788,56 @@ void Application::ReadUniforms(){
     auto uniformsNode = config["Uniforms"];
 
     // Graphics
-    if(uniformsNode["Graphics"]) appInfo.Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
+    if(uniformsNode["Graphics"]) appInfo->Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
 
-    if(appInfo.Uniform.b_uniform_graphics_custom)
-        CGraphicsDescriptorManager::addCustomUniformBuffer(appInfo.Uniform.GraphicsCustom.Size);
+    if(appInfo->Uniform.b_uniform_graphics_custom)
+        CGraphicsDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
     
-    if(appInfo.Uniform.b_uniform_graphics_lighting)
+    if(appInfo->Uniform.b_uniform_graphics_lighting)
         CGraphicsDescriptorManager::addLightingUniformBuffer();
 
-    if(appInfo.Uniform.b_uniform_graphics_object_mvp){
+    if(appInfo->Uniform.b_uniform_graphics_object_mvp){
         CGraphicsDescriptorManager::addMVPUniformBuffer();
         renderer.bUseObjectMVP = true;
     }
 
-    if(appInfo.Uniform.b_uniform_graphics_text_mvp){
+    if(appInfo->Uniform.b_uniform_graphics_text_mvp){
         CGraphicsDescriptorManager::addTextMVPUniformBuffer();
         renderer.bUseTextboxMVP = true;
     }   
 
-    if(appInfo.Uniform.b_uniform_graphics_object_vp){
+    if(appInfo->Uniform.b_uniform_graphics_object_vp){
         CGraphicsDescriptorManager::addVPUniformBuffer();
         renderer.bUseObjectMVP = true; //reuse MVP bool
     }
 
-    if(appInfo.Uniform.b_uniform_graphics_depth_image_sampler)
+    if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler)
         CGraphicsDescriptorManager::addDepthImageSamplerUniformBuffer();
 
-    if(appInfo.Uniform.b_uniform_graphics_lightdepth_image_sampler)
+    if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler)
         CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer();
 
-    if(appInfo.Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware){
+    if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware){
         CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
         //CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardwareDepthBias2();
     }
 
     //std::cout<<"Begin Read Compute"<<std::endl;
     // Compute
-    if (uniformsNode["Compute"]) appInfo.Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
-    if(appInfo.Uniform.b_uniform_compute_custom)
+    if (uniformsNode["Compute"]) appInfo->Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
+    if(appInfo->Uniform.b_uniform_compute_custom)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_UNIFORMBUFFER_CUSTOM;
-        CComputeDescriptorManager::addCustomUniformBuffer(appInfo.Uniform.ComputeCustom.Size);
+        CComputeDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
 
-    if(appInfo.Uniform.b_uniform_compute_storage)
+    if(appInfo->Uniform.b_uniform_compute_storage)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_STORAGEBUFFER_DOUBLE;
-        CComputeDescriptorManager::addStorageBuffer(appInfo.Uniform.ComputeStorageBuffer.Size, appInfo.Uniform.ComputeStorageBuffer.Usage);
+        CComputeDescriptorManager::addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
 
-    if(appInfo.Uniform.b_uniform_compute_texture_storage)
+    if(appInfo->Uniform.b_uniform_compute_texture_storage)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_STORAGEIMAGE_TEXTURE;
         CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
 
-    if(appInfo.Uniform.b_uniform_compute_swapchain_storage)
+    if(appInfo->Uniform.b_uniform_compute_swapchain_storage)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_STORAGEIMAGE_SWAPCHAIN;
         CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
     //std::cout<<"End Read Compute"<<std::endl;
@@ -975,7 +975,7 @@ void Application::ReadResources(){
                     if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
                     else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 
-                if(!appInfo.Feature.b_feature_graphics_48pbt){ //24bpt
+                if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
                     if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, swapchain.swapChainImageFormat);
                     else textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R8G8B8A8_SRGB, 8, enableCubemap);  
                 }else{ //48bpt
@@ -983,7 +983,7 @@ void Application::ReadResources(){
                     textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_SFLOAT, 16, enableCubemap); 
                 }
                 
-                if(appInfo.Feature.b_feature_graphics_rainbow_mipmap){
+                if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
                     VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                     if(miplevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps("checkerboard", usage_mipmap);
                 }else if(miplevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps();
@@ -1000,17 +1000,17 @@ void Application::ReadResources(){
         //shaders id is allocated by engine, not user, in order
         if (resource["Pipelines"]) {
             //Must initialize smart pointers, otherwise will crash
-            appInfo.VertexShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-            appInfo.FragmentShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+            appInfo->VertexShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+            appInfo->FragmentShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
             //appInfo.EnableSamplerCountOne =  std::make_unique<std::vector<bool>>(std::vector<bool>());
             //appInfo.EnableDepthBias =  std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo.RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo.Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
-            appInfo.VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
-            appInfo.BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo.DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo.DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo.SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo->RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo->Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
+            appInfo->VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
+            appInfo->BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo->DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo->DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo->SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
 
             for (const auto& pipeline : resource["Pipelines"]) {
                 //std::cout<<"Application: Read Pipeline."<<std::endl;
@@ -1029,17 +1029,17 @@ void Application::ReadResources(){
                 bool skyboxEnable = pipeline["resource_graphics_pipeline_skybox"] ? pipeline["resource_graphics_pipeline_skybox"].as<bool>() : false;
 
                 //std::cout<<"Pipeline Name: "<<name<<std::endl;
-                appInfo.VertexShader->push_back(vertexShaderName);
-                appInfo.FragmentShader->push_back(fragmentShaderName);
+                appInfo->VertexShader->push_back(vertexShaderName);
+                appInfo->FragmentShader->push_back(fragmentShaderName);
                 //appInfo.EnableSamplerCountOne->push_back(bEnableSamplerCountOne);
                // appInfo.EnableDepthBias->push_back(bEnableDepthBias);
-                appInfo.RenderPassShadowmap->push_back(bRenderPassShadowmap);
-                appInfo.Subpass->push_back(subpassId);
-                appInfo.VertexDatatype->push_back(vertexDatatype);
-                appInfo.BlendEnable->push_back(blendEnable);
-                appInfo.DepthTestEnable->push_back(depthTestEnable);
-                appInfo.DepthWriteEnable->push_back(depthWriteEnable);
-                appInfo.SkyboxEnable->push_back(skyboxEnable);
+                appInfo->RenderPassShadowmap->push_back(bRenderPassShadowmap);
+                appInfo->Subpass->push_back(subpassId);
+                appInfo->VertexDatatype->push_back(vertexDatatype);
+                appInfo->BlendEnable->push_back(blendEnable);
+                appInfo->DepthTestEnable->push_back(depthTestEnable);
+                appInfo->DepthWriteEnable->push_back(depthWriteEnable);
+                appInfo->SkyboxEnable->push_back(skyboxEnable);
             }
 
             // if (resource["VertexShaders"]) {
@@ -1064,7 +1064,7 @@ void Application::ReadResources(){
             for (const auto& computeShader : resource["ComputeShaders"]) {
                 computeShaderList->push_back(computeShader["resource_computeshader_name"].as<std::string>());
             }
-            appInfo.ComputeShader = std::move(computeShaderList);
+            appInfo->ComputeShader = std::move(computeShaderList);
         }
     }
 
@@ -1140,7 +1140,7 @@ void Application::ReadSubpasses(){
     //for mainscene renderpass (this renderpass is mandatory)
     //create renderpass
     //std::cout<<"Application: Create MainScene Render Pass."<<std::endl;
-    renderProcess.createSubpass_mainscene(appInfo.Feature.feature_graphics_observe_attachment_id);
+    renderProcess.createSubpass_mainscene(appInfo->Feature.feature_graphics_observe_attachment_id);
     renderProcess.createDependency_mainscene();
     renderProcess.createRenderPass_mainscene();
 
@@ -1158,13 +1158,13 @@ void Application::CreateUniformDescriptors(bool b_uniform_graphics, bool b_unifo
 
     //UNIFORM STEP 2/3 (Layer)
     if(b_uniform_graphics){
-        if(appInfo.Uniform.b_uniform_graphics_custom) 
-             CGraphicsDescriptorManager::createDescriptorSetLayout_General(&appInfo.Uniform.GraphicsCustom.Binding); 
+        if(appInfo->Uniform.b_uniform_graphics_custom) 
+             CGraphicsDescriptorManager::createDescriptorSetLayout_General(&appInfo->Uniform.GraphicsCustom.Binding); 
         else CGraphicsDescriptorManager::createDescriptorSetLayout_General(); 
         if(CGraphicsDescriptorManager::textureImageSamplers.size()>0) CGraphicsDescriptorManager::createDescriptorSetLayout_TextureImageSampler(); 
     }
     if(b_uniform_compute){
-        if(appInfo.Uniform.b_uniform_compute_custom) CComputeDescriptorManager::createDescriptorSetLayout(&appInfo.Uniform.ComputeCustom.Binding);
+        if(appInfo->Uniform.b_uniform_compute_custom) CComputeDescriptorManager::createDescriptorSetLayout(&appInfo->Uniform.ComputeCustom.Binding);
         else CComputeDescriptorManager::createDescriptorSetLayout();
     }
 
@@ -1178,8 +1178,8 @@ void Application::CreateUniformDescriptors(bool b_uniform_graphics, bool b_unifo
             //graphicsDescriptorManager.createDescriptorSets_General(swapchain.depthImageBuffer.view);//TODO: what if no depthImageBuffer is not enable 
     }
     if(b_uniform_compute){
-        if(appInfo.Uniform.b_uniform_compute_swapchain_storage) {
-            if(appInfo.Uniform.b_uniform_compute_texture_storage)
+        if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
+            if(appInfo->Uniform.b_uniform_compute_texture_storage)
                 computeDescriptorManager.createDescriptorSets(&(textureManager.textureImages), &(swapchain.swapchain_views));//this must be called after texture resource is loaded
             else computeDescriptorManager.createDescriptorSets(NULL, &(swapchain.swapchain_views));
         }else computeDescriptorManager.createDescriptorSets();
@@ -1192,8 +1192,8 @@ void Application::CreatePipelines(){
     /****************************
     * Command Buffer
     ****************************/
-    if(appInfo.VertexShader != NULL) renderer.CreateGraphicsCommandBuffer();
-    if(appInfo.ComputeShader != NULL) renderer.CreateComputeCommandBuffer();
+    if(appInfo->VertexShader != NULL) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->ComputeShader != NULL) renderer.CreateComputeCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
 
     /****************************
@@ -1222,21 +1222,21 @@ void Application::CreatePipelines(){
     /****************************
     * Create Shaders
     ****************************/
-    if(appInfo.VertexShader != NULL){
-        for(int i = 0; i < appInfo.VertexShader->size(); i++){
-            shaderManager.CreateShader((*appInfo.VertexShader)[i], shaderManager.VERT);
-            shaderManager.CreateShader((*appInfo.FragmentShader)[i], shaderManager.FRAG);
+    if(appInfo->VertexShader != NULL){
+        for(int i = 0; i < appInfo->VertexShader->size(); i++){
+            shaderManager.CreateShader((*appInfo->VertexShader)[i], shaderManager.VERT);
+            shaderManager.CreateShader((*appInfo->FragmentShader)[i], shaderManager.FRAG);
         }
     }
-    if(appInfo.ComputeShader != NULL)
-        for(int i = 0; i < appInfo.ComputeShader->size(); i++)
-            shaderManager.CreateShader((*appInfo.ComputeShader)[i], shaderManager.COMP);
+    if(appInfo->ComputeShader != NULL)
+        for(int i = 0; i < appInfo->ComputeShader->size(); i++)
+            shaderManager.CreateShader((*appInfo->ComputeShader)[i], shaderManager.COMP);
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
 
     /****************************
     * Create Pipelines
     ****************************/
-    if(appInfo.VertexShader != NULL){
+    if(appInfo->VertexShader != NULL){
         std::vector<VkDescriptorSetLayout> dsLayouts; //2 sets for graphics
 
         if((CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
@@ -1263,7 +1263,7 @@ void Application::CreatePipelines(){
         //sampler should also be universal
         
         //std::cout<<"Begin create graphics pipeline"<<std::endl;
-        for(int i = 0; i < appInfo.VertexShader->size(); i++){
+        for(int i = 0; i < appInfo->VertexShader->size(); i++){
             //std::cout<<"test create pipeline"<<std::endl;
             //! All graphics pipelines use the same dsLayouts
             if(shaderManager.bEnablePushConstant){
@@ -1274,7 +1274,7 @@ void Application::CreatePipelines(){
             else renderProcess.createGraphicsPipelineLayout(dsLayouts, i);
 
             
-            int vertexDatatype = appInfo.VertexDatatype ? (*appInfo.VertexDatatype)[i] : 0;
+            int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
 
             switch(vertexDatatype){
@@ -1283,25 +1283,25 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], i,
-                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
+                        (*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
-                    if((*appInfo.RenderPassShadowmap)[i]) {
+                    if((*appInfo->RenderPassShadowmap)[i]) {
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
+                            (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
+                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                     }else{
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);   
+                            (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
+                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
@@ -1310,8 +1310,8 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
+                        (*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                     std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
                 break;
                 case VertexStructureTypes::ParticleType:
@@ -1319,16 +1319,16 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_POINT_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        (*appInfo.Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);  
+                        (*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                 break;
                 case VertexStructureTypes::TextQuad:
                     renderProcess.createGraphicsPipeline<TextQuadVertex>(
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, true, i,
-                        (*appInfo.Subpass)[i], (*appInfo.RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
-                        (*appInfo.BlendEnable)[i],  (*appInfo.DepthTestEnable)[i], (*appInfo.DepthWriteEnable)[i], (*appInfo.SkyboxEnable)[i]);   
+                        (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
+                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
                 break;
                 default:
                 break;
@@ -1336,7 +1336,7 @@ void Application::CreatePipelines(){
         }
         //std::cout<<"Done create graphics pipeline"<<std::endl;
     }
-    if(appInfo.ComputeShader != NULL){ //for now assume only one compute pipeline
+    if(appInfo->ComputeShader != NULL){ //for now assume only one compute pipeline
         //! only support one compute pipeline
         renderProcess.createComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
         renderProcess.createComputePipeline(shaderManager.compShaderModules[0]);
@@ -1388,7 +1388,7 @@ void Application::ReadRegisterObjects(){
     }
 
     //register objects for controls
-    if(appInfo.Feature.feature_graphics_enable_controls){
+    if(appInfo->Feature.feature_graphics_enable_controls){
         int indexOffset = customObjectSize;
         for(int i = 0; i < controlNodes.size(); i++){
             controlNodes[i]->RegisterObject(indexOffset);
@@ -1455,7 +1455,7 @@ void Application::ReadRegisterTextboxes(){
     }
 
     //register textbox for controls
-    if(appInfo.Feature.feature_graphics_enable_controls){
+    if(appInfo->Feature.feature_graphics_enable_controls){
         int indexOffset = customTextboxSize;
         for(int i = 0; i < controlNodes.size(); i++){
             controlNodes[i]->RegisterTextbox(indexOffset);

@@ -68,9 +68,9 @@ void CControlPerfMetric::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
         //no need to set position/scale, because all object follows control node's model matrix
@@ -93,9 +93,9 @@ void CControlPerfMetric::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Performance";  //->SetTextContent("PerfMetric");
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -170,9 +170,9 @@ void CControlAttachment::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
     }
@@ -192,9 +192,9 @@ void CControlAttachment::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Attachment";
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -275,9 +275,9 @@ void CControlGraphicsUniform::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
     }
@@ -298,9 +298,9 @@ void CControlGraphicsUniform::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Graphics Uniform";
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -321,35 +321,35 @@ void CControlGraphicsUniform::Update(){
     if(firstTime){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_object_mvp) m_pTextboxes[1]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_mvp) m_pTextboxes[1]->bFlash = true;
         else m_pTextboxes[1]->SetTextColor(greyColor);
         m_pTextboxes[1]->SetTextContent("Object MVP");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_text_mvp) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_text_mvp) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Text MVP");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_custom) m_pTextboxes[3]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_custom) m_pTextboxes[3]->bFlash = true;
         else m_pTextboxes[3]->SetTextColor(greyColor);
         m_pTextboxes[3]->SetTextContent("Custom");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_lighting) m_pTextboxes[4]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_lighting) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Lighting");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_object_vp) m_pTextboxes[5]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_vp) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
         m_pTextboxes[5]->SetTextContent("Object VP");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_depth_image_sampler) m_pTextboxes[6]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_depth_image_sampler) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
         m_pTextboxes[6]->SetTextContent("Depth Img Sp");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_lightdepth_image_sampler) m_pTextboxes[7]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) m_pTextboxes[7]->bFlash = true;
         else m_pTextboxes[7]->SetTextColor(greyColor);
         m_pTextboxes[7]->SetTextContent("Lightdepth Img Sp");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) m_pTextboxes[8]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) m_pTextboxes[8]->bFlash = true;
         else m_pTextboxes[8]->SetTextColor(greyColor);
         m_pTextboxes[8]->SetTextContent("Lightdepth Img Sp Hw");
 
@@ -389,9 +389,9 @@ void CControlComputeUniform::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
     }
@@ -412,9 +412,9 @@ void CControlComputeUniform::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Compute Uniform";
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -436,19 +436,19 @@ void CControlComputeUniform::Update(){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
         //std::cout<<"ControlGraphicsUniform Update"<<std::endl;
         //std::string r = "F";
-        if(m_pApp->appInfo.Uniform.b_uniform_compute_custom) m_pTextboxes[1]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_compute_custom) m_pTextboxes[1]->bFlash = true;
         else m_pTextboxes[1]->SetTextColor(greyColor);
         m_pTextboxes[1]->SetTextContent("Custom");
         
-        if(m_pApp->appInfo.Uniform.b_uniform_compute_storage) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_compute_storage) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Storage");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_compute_texture_storage) m_pTextboxes[3]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_compute_texture_storage) m_pTextboxes[3]->bFlash = true;
         else m_pTextboxes[3]->SetTextColor(greyColor);
         m_pTextboxes[3]->SetTextContent("Texture Storage");
 
-        if(m_pApp->appInfo.Uniform.b_uniform_compute_swapchain_storage) m_pTextboxes[4]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_compute_swapchain_storage) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Swapchain Storage");
 
@@ -488,9 +488,9 @@ void CControlSubpass::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
     }
@@ -510,9 +510,9 @@ void CControlSubpass::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Subpass";
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -590,9 +590,9 @@ void CControlHotkey::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
         //no need to set position/scale, because all object follows control node's model matrix
@@ -615,9 +615,9 @@ void CControlHotkey::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Hotkey";  //->SetTextContent("PerfMetric");
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -692,9 +692,9 @@ void CControlFeature::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
     }
@@ -715,9 +715,9 @@ void CControlFeature::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Feature";
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color
@@ -739,19 +739,19 @@ void CControlFeature::Update(){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
         //std::cout<<"ControlGraphicsUniform Update"<<std::endl;
         //std::string r = "F";
-        if(m_pApp->appInfo.Feature.b_feature_graphics_48pbt) m_pTextboxes[1]->bFlash = true;
+        if(m_pApp->appInfo->Feature.b_feature_graphics_48pbt) m_pTextboxes[1]->bFlash = true;
         else m_pTextboxes[1]->SetTextColor(greyColor);
         m_pTextboxes[1]->SetTextContent("48bpt");
 
-        if(m_pApp->appInfo.Feature.b_feature_graphics_push_constant) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->appInfo->Feature.b_feature_graphics_push_constant) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Push Constant");
         
-        if(m_pApp->appInfo.Feature.b_feature_graphics_global_blend) m_pTextboxes[3]->bFlash = true;
+        if(m_pApp->appInfo->Feature.b_feature_graphics_global_blend) m_pTextboxes[3]->bFlash = true;
         else m_pTextboxes[3]->SetTextColor(greyColor);
         m_pTextboxes[3]->SetTextContent("Global Blend");
 
-        if(m_pApp->appInfo.Feature.b_feature_graphics_rainbow_mipmap) m_pTextboxes[4]->bFlash = true;
+        if(m_pApp->appInfo->Feature.b_feature_graphics_rainbow_mipmap) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Rainbow Mipmap");
 
@@ -759,11 +759,11 @@ void CControlFeature::Update(){
         //else m_pTextboxes[5]->SetTextColor(greyColor);
         //m_pTextboxes[5]->SetTextContent("");
 
-        if(m_pApp->appInfo.Feature.feature_graphics_observe_attachment_id != -1) m_pTextboxes[5]->bFlash = true;
+        if(m_pApp->appInfo->Feature.feature_graphics_observe_attachment_id != -1) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
         m_pTextboxes[5]->SetTextContent("Observe Attachment");
 
-        if(m_pApp->appInfo.Feature.feature_graphics_enable_controls) m_pTextboxes[6]->bFlash = true;
+        if(m_pApp->appInfo->Feature.feature_graphics_enable_controls) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
         m_pTextboxes[6]->SetTextContent("Show Metric Panels");
 
@@ -804,9 +804,9 @@ void CControlStatistics::RegisterObject(int startIndex){
         object->SetPosition(0,0,0);
         object->p_controlNode = this;
         object->m_object_id = index;
-        object->m_texture_ids = m_pApp->appInfo.ControlUIContainer.resource_texture_id_list_box;
-        object->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_box;
-        object->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_box;
+        object->m_texture_ids = m_pApp->appInfo->ControlUIContainer.resource_texture_id_list_box;
+        object->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_box;
+        object->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_box;
 
         object->Register(m_pApp);
         //no need to set position/scale, because all object follows control node's model matrix
@@ -829,9 +829,9 @@ void CControlStatistics::RegisterTextbox(int startIndex){
         textbox->p_controlNode = this;
         textbox->m_textBoxID = index;
         textbox->m_text_content = "text_content";
-        textbox->m_model_id = m_pApp->appInfo.ControlUIContainer.resource_model_id_text;
-        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo.ControlUIContainer.resource_default_graphics_pipeline_id_text;
-        
+        textbox->m_model_id = m_pApp->appInfo->ControlUIContainer.resource_model_id_text;
+        textbox->m_default_graphics_pipeline_id = m_pApp->appInfo->ControlUIContainer.resource_default_graphics_pipeline_id_text;
+
         if(i == 0){
             m_pTextboxes[0]->m_text_content = "Statistics";  //->SetTextContent("PerfMetric");
             m_pTextboxes[0]->SetTextColor(glm::vec4(0.2, 0.7, 1.0, 1)); //title color

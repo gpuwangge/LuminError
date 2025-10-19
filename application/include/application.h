@@ -34,23 +34,7 @@
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
 
- /******************
-* Utility Functions
-******************/
 
-template <typename T>
-T getOrDefault(const YAML::Node& node, const std::string& key, const T& defaultValue) {
-    if (node[key]) {
-        return node[key].as<T>();
-    }
-    return defaultValue;
-}
-
-// inline std::string to_string_prec(double value, int prec = 1) {
-//     std::ostringstream oss;
-//     oss << std::fixed << std::setprecision(prec) << value;
-//     return oss.str();
-// }
 
 namespace LEApplication{
     class Application : public LEApplication::IApplication{
@@ -144,127 +128,7 @@ namespace LEApplication{
         void ReadCameras();
         void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);  
             
-        /*************
-         * APP INFO
-         *******/
-        struct FeatureConfig {
-            bool b_feature_graphics_48pbt = false;
-            bool b_feature_graphics_push_constant = false;
-            bool b_feature_graphics_global_blend = false;
-            bool b_feature_graphics_rainbow_mipmap = false;
-            //int feature_graphics_pipeline_skybox_id = -1;
-            int feature_graphics_observe_attachment_id = -1;
-            bool feature_graphics_show_performance_control = true;
-            bool feature_graphics_show_all_metric_controls = true;
-
-            bool feature_graphics_enable_controls = false; //this is not read from yaml
-
-            void loadFromYaml(const YAML::Node& node) {
-                b_feature_graphics_48pbt                    = getOrDefault(node, "feature_graphics_48pbt", false);
-                b_feature_graphics_push_constant            = getOrDefault(node, "feature_graphics_push_constant", false);
-                b_feature_graphics_global_blend                    = getOrDefault(node, "feature_graphics_global_blend", false);
-                b_feature_graphics_rainbow_mipmap           = getOrDefault(node, "feature_graphics_rainbow_mipmap", false);
-                //feature_graphics_pipeline_skybox_id         = getOrDefault(node, "feature_graphics_pipeline_skybox_id", -1);
-                feature_graphics_observe_attachment_id      = getOrDefault(node, "feature_graphics_observe_attachment_id", -1);
-                feature_graphics_show_performance_control   = getOrDefault(node, "feature_graphics_show_performance_control", false);
-                feature_graphics_show_all_metric_controls   = getOrDefault(node, "feature_graphics_show_all_metric_controls", false);
-                
-                feature_graphics_enable_controls = feature_graphics_show_performance_control || feature_graphics_show_all_metric_controls;
-            }
-        };
-
-        struct UniformConfig {
-            bool b_uniform_graphics_custom = false;
-            bool b_uniform_graphics_object_mvp = false;
-            bool b_uniform_graphics_text_mvp = false;
-            bool b_uniform_graphics_object_vp = false;
-            bool b_uniform_graphics_lighting = false;
-            bool b_uniform_graphics_depth_image_sampler = false;
-            bool b_uniform_graphics_lightdepth_image_sampler = false;
-            bool b_uniform_graphics_lightdepth_image_sampler_hardware = false;
-            struct GraphicsCustomInfo {
-                VkDeviceSize Size = 0;
-                VkDescriptorSetLayoutBinding Binding{};
-            } GraphicsCustom;
-
-            bool b_uniform_compute_custom = false;
-            bool b_uniform_compute_storage = false;
-            bool b_uniform_compute_swapchain_storage = false;
-            bool b_uniform_compute_texture_storage = false;
-            struct ComputeCustomInfo {
-                VkDeviceSize Size = 0;
-                VkDescriptorSetLayoutBinding Binding{};
-            } ComputeCustom;
-            struct ComputeStorageBufferInfo {
-                VkDeviceSize Size = 0;
-                VkBufferUsageFlags Usage = 0;
-            } ComputeStorageBuffer;
-
-            // ---------------------
-            void loadGraphicsFromYaml(const YAML::Node& node) {
-                b_uniform_graphics_custom                     = getOrDefault(node, "uniform_graphics_custom", false);
-                b_uniform_graphics_object_mvp                        = getOrDefault(node, "uniform_graphics_object_mvp", false);
-                b_uniform_graphics_text_mvp                   = getOrDefault(node, "uniform_graphics_text_mvp", false);
-                b_uniform_graphics_object_vp                         = getOrDefault(node, "uniform_graphics_object_vp", false);
-                b_uniform_graphics_lighting                   = getOrDefault(node, "uniform_graphics_lighting", false);
-                b_uniform_graphics_depth_image_sampler        = getOrDefault(node, "uniform_graphics_depth_image_sampler", false);
-                b_uniform_graphics_lightdepth_image_sampler   = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler", false);
-                b_uniform_graphics_lightdepth_image_sampler_hardware = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler_hardware", false);
-
-                // std::cout<<"b_uniform_graphics_custom "<<b_uniform_graphics_custom<<std::endl;
-                // std::cout<<"b_uniform_graphics_object_mvp "<<b_uniform_graphics_object_mvp<<std::endl;
-                // std::cout<<"b_uniform_graphics_text_mvp "<<b_uniform_graphics_text_mvp<<std::endl;
-                // std::cout<<"b_uniform_graphics_object_vp "<<b_uniform_graphics_object_vp<<std::endl;
-                // std::cout<<"b_uniform_graphics_lighting "<<b_uniform_graphics_lighting<<std::endl;
-                // std::cout<<"b_uniform_graphics_depth_image_sampler "<<b_uniform_graphics_depth_image_sampler<<std::endl;
-                // std::cout<<"b_uniform_graphics_lightdepth_image_sampler "<<b_uniform_graphics_lightdepth_image_sampler<<std::endl;
-                // std::cout<<"b_uniform_graphics_lightdepth_image_sampler_hardware "<<b_uniform_graphics_lightdepth_image_sampler_hardware<<std::endl;
-
-            }
-
-            void loadComputeFromYaml(const YAML::Node& node) {
-                b_uniform_compute_custom                       = getOrDefault(node, "uniform_compute_custom", false);
-                b_uniform_compute_storage                      = getOrDefault(node, "uniform_compute_storage", false);
-                b_uniform_compute_swapchain_storage           = getOrDefault(node, "uniform_compute_swapchain_storage", false);
-                b_uniform_compute_texture_storage             = getOrDefault(node, "uniform_compute_texture_storage", false);
-            }
-        };
-
-        struct ControlUIContainerConfig {
-            std::vector<int> resource_texture_id_list_box;
-            int resource_model_id_box = 0;
-            int resource_default_graphics_pipeline_id_box = 0;
-            int resource_model_id_text = 0;
-            int resource_default_graphics_pipeline_id_text = 0;
-
-            void loadFromYaml(const YAML::Node& node) {
-                resource_texture_id_list_box            = getOrDefault(node, "resource_texture_id_list_box", std::vector<int>{0});
-                resource_model_id_box                   = getOrDefault(node, "resource_model_id_box", 0);
-                resource_default_graphics_pipeline_id_box= getOrDefault(node, "resource_default_graphics_pipeline_id_box", 0);
-                resource_model_id_text                  = getOrDefault(node, "resource_model_id_text", 0);
-                resource_default_graphics_pipeline_id_text= getOrDefault(node, "resource_default_graphics_pipeline_id_text", 0);
-            }
-        };
-
-        struct AppInfo{
-            FeatureConfig Feature;
-            ControlUIContainerConfig ControlUIContainer;
-            UniformConfig Uniform;
-
-            std::unique_ptr<std::vector<std::string>> VertexShader;
-            std::unique_ptr<std::vector<std::string>> FragmentShader;
-            std::unique_ptr<std::vector<bool>> RenderPassShadowmap;
-            std::unique_ptr<std::vector<int>> Subpass;
-            std::unique_ptr<std::vector<int>> VertexDatatype;
-            std::unique_ptr<std::vector<bool>> BlendEnable;
-            std::unique_ptr<std::vector<bool>> DepthTestEnable;
-            std::unique_ptr<std::vector<bool>> DepthWriteEnable;
-            std::unique_ptr<std::vector<bool>> SkyboxEnable;
-            std::unique_ptr<std::vector<std::string>> ComputeShader;
-            RenderModes RenderMode = RenderModes::GRAPHICS;
-        };
-
-        AppInfo appInfo;
+        
 
 
         //Functions to call example functions
@@ -294,13 +158,15 @@ namespace LEApplication{
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
         void DestroyInstance(HMODULE handle, void* instance);
 
+        std::unique_ptr<AppInfo> appInfo;
+
         //Expose functions for SDL Core to use
-        bool Get_feature_graphics_enable_controls() override {return appInfo.Feature.feature_graphics_enable_controls;}
-        bool Get_feature_graphics_show_all_metric_controls() override {return appInfo.Feature.feature_graphics_show_all_metric_controls;}
-        bool Get_feature_graphics_show_performance_control() override {return appInfo.Feature.feature_graphics_show_performance_control;}
-        void Set_feature_graphics_enable_controls(bool value) override {appInfo.Feature.feature_graphics_enable_controls = value;}
-        void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo.Feature.feature_graphics_show_all_metric_controls = value;}
-        void Set_feature_graphics_show_performance_control(bool value) override {appInfo.Feature.feature_graphics_show_performance_control = value;}
+        bool Get_feature_graphics_enable_controls() override {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}
+        bool Get_feature_graphics_show_all_metric_controls() override {return appInfo->Feature.feature_graphics_show_all_metric_controls;}
+        bool Get_feature_graphics_show_performance_control() override {return appInfo->Feature.feature_graphics_show_performance_control;}
+        void Set_feature_graphics_enable_controls(bool value) override {appInfo->Feature.feature_graphics_enable_controls = value;}
+        void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo->Feature.feature_graphics_show_all_metric_controls = value;}
+        void Set_feature_graphics_show_performance_control(bool value) override {appInfo->Feature.feature_graphics_show_performance_control = value;}
         int GetControlNodeSize() override { return controlNodes.size();}
         void SetControlNodeVisible(int nodeId, bool value) override { controlNodes[nodeId]->bVisible = value;}
         void* GetInstanceHandle() override {return instance->getHandle();}
@@ -334,10 +200,10 @@ namespace LEApplication{
         void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) override {
             modelManager.CreateCustomModel3D(vertices3D, indices3D, isTextboxImage);
         }
-        void SetGraphicsCustomSize(int size) override { appInfo.Uniform.GraphicsCustom.Size = size; }
+        void SetGraphicsCustomSize(int size) override { appInfo->Uniform.GraphicsCustom.Size = size; }
         void SetGraphicsCustomBinding(void* binding) override {
             VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
-            if (bindingPtr) appInfo.Uniform.GraphicsCustom.Binding = *bindingPtr;
+            if (bindingPtr) appInfo->Uniform.GraphicsCustom.Binding = *bindingPtr;
         }
         void UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override {
             //graphicsDescriptorManager.updateCustomUniformBuffer<CustomUniformBufferObject>(renderer.currentFrame, customUBO);
@@ -351,9 +217,9 @@ namespace LEApplication{
         int GetWindowHeight() override { return windowHeight; }
 
         //Expose functions for Example(GemmCompute) to use
-        void SetRenderMode(int mode) override { appInfo.RenderMode = (RenderModes)mode; }
-        void SetComputeStorageBufferSize(int size) override { appInfo.Uniform.ComputeStorageBuffer.Size = size; }
-        void SetComputeStorageBufferUsage(int usage) override {appInfo.Uniform.ComputeStorageBuffer.Usage = usage; }
+        void SetRenderMode(int mode) override { appInfo->RenderMode = (RenderModes)mode; }
+        void SetComputeStorageBufferSize(int size) override { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
+        void SetComputeStorageBufferUsage(int usage) override {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
         void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override {
             computeDescriptorManager.uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
         }
@@ -448,10 +314,10 @@ namespace LEApplication{
             //objects[objectId].Draw(*static_cast<std::vector<CWxjBuffer>*>(buffer), graphicsPipelineId, particleCount);
             objects[objectId].Draw(computeDescriptorManager.storageBuffers, -1, particleCount);
         }
-        void SetComputeCustomSize(int size) override { appInfo.Uniform.ComputeCustom.Size = size; }
+        void SetComputeCustomSize(int size) override { appInfo->Uniform.ComputeCustom.Size = size; }
         void SetComputeCustomBinding(void* binding) override {
             VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
-            if (bindingPtr) appInfo.Uniform.ComputeCustom.Binding = *bindingPtr;
+            if (bindingPtr) appInfo->Uniform.ComputeCustom.Binding = *bindingPtr;
         }
         void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override {
             //graphicsDescriptorManager.updateCustomUniformBuffer<CustomUniformBufferObject>(renderer.currentFrame, customUBO);
