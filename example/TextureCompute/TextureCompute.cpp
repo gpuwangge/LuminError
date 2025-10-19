@@ -1,0 +1,39 @@
+/* ***********
+ * This test is similar to simpleComputeStorageImage, but instead use 2 texture image, one as input, the other as output
+ * It also render the result to swapchain
+ * simpleComputeStorageImage: write result to texture image and show to swapchain
+ * textureCompute: read texture image, make changes(use compute shader to do blur effect), and write to texture image, and show to swapchain
+ * This test use graphics pipeline but does not draw anything with it, because result is drawn directly to swap chain
+ * The reason for graphics pipeline is to load texture to texture image
+ * but why mvp? why color attachment?
+ * no need bind graphics pipeline?
+ * TODO: improve this sample, there is still something unknown for this test; something can be simplified
+ * A texture image is presented on the screen. Image is blured. char is blue/white. background is yellow.
+ * *********** */
+#include "IGame.h"
+#include "Enum.h"
+#include "Config.h"
+
+namespace LuminError{
+    struct TextureCompute : public IGame {
+        void PreInitialize() override {
+            game->SetSwapchainImageSize(MAX_FRAMES_IN_FLIGHT);
+            game->EnableComputeSwapChainImage(true);
+	    }
+
+        void Initialize() override {
+            game->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
+        }
+
+        void PostInitialize() override{
+            //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
+            game->CreateComputeCommandBuffers_DispatchForSwapchainImage(300, 600, 1);
+        }
+
+        void PostUpdate() override {
+            game->DeviceWaitIdle();
+        }
+    };
+
+    EXPORT_FACTORY_FOR(TextureCompute)
+}

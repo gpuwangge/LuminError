@@ -96,7 +96,7 @@ namespace LEApplication{
         //Expose functions for Example(SimpleComputeStorageImage) to use
         virtual void SetSwapchainImageSize(int size) = 0;
         virtual void EnableComputeSwapChainImage(bool enable) = 0;
-        virtual void CreateComputeCommandBuffers() = 0; //TODO: optimize this
+        virtual void CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
         
         //Expose functions for Example(SimpleDepthImage) to use
         virtual void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) = 0;

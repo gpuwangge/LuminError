@@ -21,7 +21,8 @@ namespace LuminError{
         }
 
         void PostInitialize() override{
-            game->CreateComputeCommandBuffers();
+            //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
+            game->CreateComputeCommandBuffers_DispatchForSwapchainImage(200, 300, 1);
         }
     };
 

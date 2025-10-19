@@ -101,6 +101,15 @@ public:
 
     /**************************
      * 
+     * Utility Functions
+     * 
+     * ***********************/
+
+    void RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
+            VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind);
+
+    /**************************
+     * 
      * MISC Functions
      * 
      * ***********************/

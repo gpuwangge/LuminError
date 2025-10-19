@@ -725,6 +725,36 @@ void CRenderer::EndRecordComputeCommandBuffer(){
 	EndCommandBuffer(computeCmdId);
 }
 
+/**************************
+ * 
+ * Utility Functions
+ * 
+ * ***********************/
+
+void CRenderer::RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
+            VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind) {
+            VkImageMemoryBarrier barrier{};
+            barrier.image = image;
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.oldLayout = oldLayout;
+            barrier.newLayout = newLayout;
+            barrier.srcAccessMask = scrAccess;
+            barrier.dstAccessMask = dstAccess;
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            VkImageSubresourceRange sub{};
+            sub.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            sub.baseArrayLayer = 0;
+            sub.baseMipLevel = 0;
+            sub.layerCount = VK_REMAINING_MIP_LEVELS;
+            sub.levelCount = VK_REMAINING_MIP_LEVELS;
+            barrier.subresourceRange = sub;
+
+            vkCmdPipelineBarrier(buffer, srcBind, dstBind,
+                0, 0, nullptr, 0, nullptr, 1, &barrier);
+        }
+
+
 void CRenderer::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     vkCmdDispatch(commandBuffers[computeCmdId][currentFrame], numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ); 
 }
