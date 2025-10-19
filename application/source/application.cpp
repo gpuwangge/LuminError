@@ -57,17 +57,28 @@ Application::Application(){
 #ifndef ANDROID
 void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
+
+    //Load YAML Core Module
+    LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
+    instance_yamlcore = static_cast<LEYAML::IYAMLCore*>(pVoid);
+    instance_yamlcore->Greet();
+    instance_yamlcore->SetApplication(this);
+
+    //Load SDL Core Module
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
     instance_sdlcore = static_cast<LESDL::ISDLCore*>(pVoid);
     //instance_sdlcore->greet();
     instance_sdlcore->SetApplication(this);
 
+    //Load Game(Example) Module
     LoadModuleAndInstance(handle_module_game, pVoid, exampleName);
     instance_game = static_cast<LuminError::IGame*>(pVoid);
     instance_game->SetApplication(this);
 
     instance_game->PreInitialize();
 
+
+    
     m_sampleName = exampleName;
 
     CContext::Init();
@@ -1649,6 +1660,18 @@ void Application::DestroyInstance(HMODULE handle, void* instance){
 Application::~Application(){
     CleanUp();
 
+    if (handle_module_yamlcore) {
+        //std::cout<<"- FreeLibrary: handle_module_yamlcore. (~Application())"<<std::endl;
+        FreeLibrary(handle_module_yamlcore);
+        handle_module_yamlcore = nullptr;
+    }
+
+    if (handle_module_sdlcore) {
+        //std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
+        FreeLibrary(handle_module_sdlcore);
+        handle_module_sdlcore = nullptr;
+    }
+
     if (handle_module_sdlcore) {
         //std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
         FreeLibrary(handle_module_sdlcore);
@@ -1665,6 +1688,7 @@ Application::~Application(){
     extern "C" void* CreateInstance(){ return new Application();}
     extern "C" void DestroyInstance(void *p){ 
         if(p) {
+            static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->instance_yamlcore);
             static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
             static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
             delete static_cast<Application*>(p);

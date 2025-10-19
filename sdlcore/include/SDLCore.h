@@ -1,5 +1,4 @@
-#ifndef H_SDLMANAGER
-#define H_SDLMANAGER
+#pragma once
 
 // Enable the WSI extensions
 #if defined(__ANDROID__)
@@ -20,14 +19,14 @@
 #include <vector>
 #include <iostream>
 
-class CApplication;
+//class CApplication;
 class CInstance;
 
 namespace LESDL{
     class SDLCore final : public ISDLCore{
     public:
-        SDLCore(){};
-        ~SDLCore(){};
+        SDLCore(){}
+        ~SDLCore(){}
 
         SDL_Window* window;
         int m_windowWidth, m_windowHeight;
@@ -56,4 +55,3 @@ namespace LESDL{
     EXPORT_FACTORY_FOR(SDLCore);
 }
 
-#endif

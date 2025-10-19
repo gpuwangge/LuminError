@@ -37,6 +37,7 @@
 #include "../../thirdParty/yaml-cpp/yaml.h"
 
 #include "ISDLCore.h"
+#include "IYAMLCore.h"
 
 
  /******************
@@ -98,7 +99,7 @@ namespace LEApplication{
 
         void CleanUp();
 
-        void Greet() override {std::cout<<"test greet"<<std::endl;}
+        //void Greet() override {std::cout<<"test greet"<<std::endl;}
 
         //for static class member. But can not define and init them in the header file!
         static Camera mainCamera; 
@@ -290,6 +291,8 @@ namespace LEApplication{
         
 
         //Module Related
+        HMODULE handle_module_yamlcore;
+        LEYAML::IYAMLCore *instance_yamlcore = NULL;
         HMODULE handle_module_sdlcore;
         LESDL::ISDLCore *instance_sdlcore = NULL;
         HMODULE handle_module_game;

@@ -14,7 +14,7 @@ namespace LEApplication{
     public:
         virtual ~IApplication() = default;
         virtual void Run(std::string exampleName = "SimpleTriangle") = 0;
-        virtual void Greet() = 0;
+        //virtual void Greet() = 0;
 
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;

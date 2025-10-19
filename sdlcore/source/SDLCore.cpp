@@ -1,7 +1,7 @@
 #include "../include/SDLCore.h"
 #include "Foundation.h"
 #include <windows.h>
-#include <iostream>
+//#include <iostream>
 #include "Enum.h"
 
 namespace LESDL{
