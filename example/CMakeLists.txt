@@ -1,3 +1,4 @@
+project(example)
 
 function(add_example EXAMPLENAME)
     file(GLOB SOURCES "${EXAMPLENAME}/*.cpp")

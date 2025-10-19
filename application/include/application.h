@@ -31,14 +31,8 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-#ifdef WIN32
-    #define YAML_CPP_STATIC_DEFINE //to disable lots of yaml warnings
-#endif
-#include "../../thirdParty/yaml-cpp/yaml.h"
-
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
-
 
  /******************
 * Utility Functions
@@ -52,11 +46,11 @@ T getOrDefault(const YAML::Node& node, const std::string& key, const T& defaultV
     return defaultValue;
 }
 
-inline std::string to_string_prec(double value, int prec = 1) {
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(prec) << value;
-    return oss.str();
-}
+// inline std::string to_string_prec(double value, int prec = 1) {
+//     std::ostringstream oss;
+//     oss << std::fixed << std::setprecision(prec) << value;
+//     return oss.str();
+// }
 
 namespace LEApplication{
     class Application : public LEApplication::IApplication{
@@ -268,9 +262,9 @@ namespace LEApplication{
             std::unique_ptr<std::vector<bool>> SkyboxEnable;
             std::unique_ptr<std::vector<std::string>> ComputeShader;
             RenderModes RenderMode = RenderModes::GRAPHICS;
-        }appInfo;
+        };
 
-
+        AppInfo appInfo;
 
 
         //Functions to call example functions

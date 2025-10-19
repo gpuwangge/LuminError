@@ -2,6 +2,12 @@
 #include "../include/application.h"
 #include <iostream>
 
+inline std::string to_string_prec(double value, int prec = 1) {
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(prec) << value;
+    return oss.str();
+}
+
 /******************
 * ControlNode
 *******************/
