@@ -73,7 +73,6 @@ struct UniformConfig {
         VkBufferUsageFlags Usage = 0;
     } ComputeStorageBuffer;
 
-    // ---------------------
     void loadGraphicsFromYaml(const YAML::Node& node) {
         b_uniform_graphics_custom                     = getOrDefault(node, "uniform_graphics_custom", false);
         b_uniform_graphics_object_mvp                        = getOrDefault(node, "uniform_graphics_object_mvp", false);

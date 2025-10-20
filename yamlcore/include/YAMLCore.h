@@ -14,10 +14,6 @@ namespace LEYAML{
         YAMLCore(){}
         ~YAMLCore(){}
 
-        void Greet() override {
-            std::cout << "Hello from YAMLCore!" << std::endl;
-        }
-
         void LoadFeatureFromYaml(const YAML::Node& node) override {
         }
 

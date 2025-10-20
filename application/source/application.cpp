@@ -57,12 +57,21 @@ Application::Application(){
 #ifndef ANDROID
 void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
+    m_sampleName = exampleName;
+
+    //std::cout<<m_sampleName<<std::endl;
+    //m_sampleName.erase(0, 1);
+    m_sampleName = getPureName(m_sampleName);
+    //std::cout<<m_sampleName<<std::endl;
 
     //Load YAML Core Module
     LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
     instance_yamlcore = static_cast<LEYAML::IYAMLCore*>(pVoid);
-    instance_yamlcore->Greet();
     instance_yamlcore->SetApplication(this);
+
+    appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
+    instance_yamlcore->ReadYAMLFile(m_sampleName);
+    config = std::make_unique<YAML::Node>(std::move(instance_yamlcore->GetConfig()));
 
     //Load SDL Core Module
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
@@ -77,20 +86,13 @@ void Application::Run(std::string exampleName){ //Entrance Function
 
     instance_game->PreInitialize();
 
-    appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
-    
-    m_sampleName = exampleName;
-
     CContext::Init();
 
     /**************** 
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
-    //std::cout<<m_sampleName<<std::endl;
-    //m_sampleName.erase(0, 1);
-    m_sampleName = getPureName(m_sampleName);
-    //std::cout<<m_sampleName<<std::endl;
+    
 #ifdef SDL
    // sdlManager.m_pApp = this;
     //sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
@@ -226,13 +228,14 @@ void Application::Initialize(){
     //elapseTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
     //deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
-    std::string fullYamlName = YAML_PATH + m_sampleName + ".yaml";
-    try{
-        config = YAML::LoadFile(fullYamlName);
-    } catch (...){
-        std::cout<<"Error loading yaml file"<<std::endl;
-        return;
-    }
+    // std::string fullYamlName = YAML_PATH + m_sampleName + ".yaml";
+    // try{
+    //     config = YAML::LoadFile(fullYamlName);
+    // } catch (...){
+    //     std::cout<<"Error loading yaml file"<<std::endl;
+    //     return;
+    // }
+    //instance_yamlcore->ReadYAMLFile(m_sampleName);
 
     /****************************
     * ? ControlNode
@@ -280,36 +283,36 @@ void Application::Initialize(){
     //controlNodes[0]->bVisible = false; //hide fps control node
 
     int max_object_id = -1;
-    if (config["Objects"]) {
-        for (const auto& obj : config["Objects"]) {
+    if ((*config)["Objects"]) {
+        for (const auto& obj : (*config)["Objects"]) {
             int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
             max_object_id = (object_id > max_object_id) ? object_id : max_object_id;
         }
     }
-    customObjectSize = ((max_object_id+1) < config["Objects"].size()) ? (max_object_id+1) : config["Objects"].size();
+    customObjectSize = ((max_object_id+1) < (*config)["Objects"].size()) ? (max_object_id+1) : (*config)["Objects"].size();
     objects.resize(customObjectSize + objectCountControl);
     std::cout<<"Object Size: "<<objects.size()<<std::endl;
     
     int max_textbox_id = -1;
-    if (config["Textboxes"]) {
-        for (const auto& tb : config["Textboxes"]) {
+    if ((*config)["Textboxes"]) {
+        for (const auto& tb : (*config)["Textboxes"]) {
             int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
             max_textbox_id = (textbox_id > max_textbox_id) ? textbox_id : max_textbox_id;
         }
     }
-    customTextboxSize = ((max_textbox_id+1) < config["Textboxes"].size()) ? (max_textbox_id+1) : config["Textboxes"].size();
+    customTextboxSize = ((max_textbox_id+1) < (*config)["Textboxes"].size()) ? (max_textbox_id+1) : (*config)["Textboxes"].size();
     textManager.m_textBoxes.resize(customTextboxSize + textboxCountControl);
     for(int i = 0; i < textManager.m_textBoxes.size(); i++)
         textManager.m_textBoxes[i].p_textManager = &textManager;
     std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
     
-    if (config["Lights"]) {
+    if ((*config)["Lights"]) {
         int max_light_d = 0;
-        for (const auto& light : config["Lights"]) {
+        for (const auto& light : (*config)["Lights"]) {
             int light_id = light["light_id"] ? light["light_id"].as<int>() : 0;
             max_light_d = (light_id > max_light_d) ? light_id : max_light_d;
         }
-        customLightsSize = ((max_light_d+1) < config["Lights"].size())?(max_light_d+1):config["Lights"].size();
+        customLightsSize = ((max_light_d+1) < (*config)["Lights"].size())?(max_light_d+1):(*config)["Lights"].size();
         lights.resize(customLightsSize + lightCountControl);
         std::cout<<"Light Size: "<<lights.size()<<std::endl;
 
@@ -766,12 +769,12 @@ void Application::CleanUp(){
 
  
 void Application::ReadControls(){
-    for (const auto& control : config["Controls"])
+    for (const auto& control : (*config)["Controls"])
         if (control["UIContainer"]) appInfo->ControlUIContainer.loadFromYaml(control["UIContainer"]);
 }
 
 void Application::ReadFeatures(){
-    if (config["Features"]) appInfo->Feature.loadFromYaml(config["Features"]);
+    if ((*config)["Features"]) appInfo->Feature.loadFromYaml((*config)["Features"]);
 
     if(appInfo->Feature.b_feature_graphics_push_constant){
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
@@ -785,7 +788,7 @@ void Application::ReadFeatures(){
 }
 
 void Application::ReadUniforms(){
-    auto uniformsNode = config["Uniforms"];
+    auto uniformsNode = (*config)["Uniforms"];
 
     // Graphics
     if(uniformsNode["Graphics"]) appInfo->Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
@@ -866,7 +869,7 @@ void Application::ReadUniforms(){
 }
 
 void Application::ReadResources(){
-    for (const auto& resource : config["Resources"]) {
+    for (const auto& resource : (*config)["Resources"]) {
         if (resource["Fonts"]) {
             for (const auto& font : resource["Fonts"]) {
                 std::string name = font["resource_font_name"].as<std::string>();
@@ -1072,11 +1075,11 @@ void Application::ReadResources(){
 }
 
 void Application::ReadAttachments(){
-    bool bShadowmapAttachmentDepthLight = config["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"] ? config["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"].as<bool>() : false;
-    bool bMainSceneAttachmentDepthLight = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"].as<bool>() : false;
-    bool bMainSceneAttachmentDepthCamera = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"].as<bool>()  : false;
-    bool bMainSceneAttachmentColorResovle = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"].as<bool>()  : false;
-    bool bMainSceneAttachmentColorPresent = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"].as<bool>()  : true; //need al least one subpass with at least one color attachment
+    bool bShadowmapAttachmentDepthLight = (*config)["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"] ? (*config)["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"].as<bool>() : false;
+    bool bMainSceneAttachmentDepthLight = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"].as<bool>() : false;
+    bool bMainSceneAttachmentDepthCamera = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"].as<bool>()  : false;
+    bool bMainSceneAttachmentColorResovle = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"].as<bool>()  : false;
+    bool bMainSceneAttachmentColorPresent = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"].as<bool>()  : true; //need al least one subpass with at least one color attachment
 
     renderProcess.iShadowmapAttachmentDepthLight = bShadowmapAttachmentDepthLight ? 0 : -1; //shadowmap renderpass attachment depth light, only one attachment, so id is 0
 
@@ -1120,10 +1123,10 @@ void Application::ReadAttachments(){
 }
 
 void Application::ReadSubpasses(){
-    renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = config["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"] ? config["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"].as<bool>() : false;
-    renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"].as<bool>() : false;
-    renderProcess.bEnableMainSceneRenderpassSubpassDraw = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"].as<bool>() : true; //need at least one subpass, even for compute sample
-    renderProcess.bEnableMainSceneRenderpassSubpassObserve = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"].as<bool>() : false;
+    renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = (*config)["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"] ? (*config)["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"].as<bool>() : false;
+    renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"] ? (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"].as<bool>() : false;
+    renderProcess.bEnableMainSceneRenderpassSubpassDraw = (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"] ? (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"].as<bool>() : true; //need at least one subpass, even for compute sample
+    renderProcess.bEnableMainSceneRenderpassSubpassObserve = (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"] ? (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"].as<bool>() : false;
 
     //for shadowmap renderpass (this renderpass is optional)
     if(renderProcess.bEnableShadowmapRenderpassSubpassShadowmap){
@@ -1345,9 +1348,9 @@ void Application::CreatePipelines(){
 }
 
 void Application::ReadRegisterObjects(){
-    if (config["Objects"]) {
+    if ((*config)["Objects"]) {
         //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
-        for (const auto& obj : config["Objects"]) {
+        for (const auto& obj : (*config)["Objects"]) {
             int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
             int resource_model_id = obj["resource_model_id"] ? obj["resource_model_id"].as<int>() : 0;
             auto resource_texture_id_list = obj["resource_texture_id_list"] ? obj["resource_texture_id_list"].as<std::vector<int>>() : std::vector<int>(1, 0);
@@ -1413,8 +1416,8 @@ void Application::ReadRegisterObjects(){
 
 void Application::ReadRegisterTextboxes(){
     //std::cout<<"Begin Read Textboxes"<<std::endl;
-    if (config["Textboxes"]) {
-        for (const auto& tb : config["Textboxes"]) {
+    if ((*config)["Textboxes"]) {
+        for (const auto& tb : (*config)["Textboxes"]) {
             int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
             std::string name = tb["textbox_name"] ? tb["textbox_name"].as<std::string>() : "Default";
             auto position = tb["textbox_position"] ? tb["textbox_position"].as<std::vector<float>>(): std::vector<float>(3,0);
@@ -1478,8 +1481,8 @@ void Application::ReadRegisterTextboxes(){
 }
 
 void Application::ReadLightings(){
-    if (config["Lights"]) {
-        for (const auto& light : config["Lights"]) {
+    if ((*config)["Lights"]) {
+        for (const auto& light : (*config)["Lights"]) {
             int id = light["light_id"] ? light["light_id"].as<int>() : 0;
             if(lights[id].bRegistered) {
                 std::cout<<"WARNING: Trying to register a registered Light id("<<id<<")!"<<std::endl;
@@ -1512,28 +1515,28 @@ void Application::ReadLightings(){
 }
 
 void Application::ReadCameras(){
-    mainCamera.cameraType = (CameraType)(config["MainCamera"]["camera_mode"] ? config["MainCamera"]["camera_mode"].as<int>() : 0);
+    mainCamera.cameraType = (CameraType)((*config)["MainCamera"]["camera_mode"] ? (*config)["MainCamera"]["camera_mode"].as<int>() : 0);
     mainCamera.SetPosition(
-        config["MainCamera"]["camera_position"][0].as<float>(), 
-        config["MainCamera"]["camera_position"][1].as<float>(), 
-        config["MainCamera"]["camera_position"][2].as<float>());
+        (*config)["MainCamera"]["camera_position"][0].as<float>(), 
+        (*config)["MainCamera"]["camera_position"][1].as<float>(), 
+        (*config)["MainCamera"]["camera_position"][2].as<float>());
     mainCamera.SetRotation(
-        config["MainCamera"]["camera_rotation"][0].as<float>(), 
-        config["MainCamera"]["camera_rotation"][1].as<float>(), 
-        config["MainCamera"]["camera_rotation"][2].as<float>());
+        (*config)["MainCamera"]["camera_rotation"][0].as<float>(), 
+        (*config)["MainCamera"]["camera_rotation"][1].as<float>(), 
+        (*config)["MainCamera"]["camera_rotation"][2].as<float>());
         
-    mainCamera.focusObjectId = config["MainCamera"]["object_id_target"] ? config["MainCamera"]["object_id_target"].as<int>() : 0;
+    mainCamera.focusObjectId = (*config)["MainCamera"]["object_id_target"] ? (*config)["MainCamera"]["object_id_target"].as<int>() : 0;
 
-    mainCamera.bEnableOrthographic = config["MainCamera"]["camera_projection_enable_orthographic"] ? config["MainCamera"]["camera_projection_enable_orthographic"].as<bool>() : false;
-    float nearPlane = config["MainCamera"]["camera_z"][0].as<float>();
-    float farPlane = config["MainCamera"]["camera_z"][1].as<float>();
+    mainCamera.bEnableOrthographic = (*config)["MainCamera"]["camera_projection_enable_orthographic"] ? (*config)["MainCamera"]["camera_projection_enable_orthographic"].as<bool>() : false;
+    float nearPlane = (*config)["MainCamera"]["camera_z"][0].as<float>();
+    float farPlane = (*config)["MainCamera"]["camera_z"][1].as<float>();
 
     if(!mainCamera.bEnableOrthographic){
-        float fov = config["MainCamera"]["camera_projection_perspective_fov"] ? config["MainCamera"]["camera_projection_perspective_fov"].as<float>() : 90.0f;
+        float fov = (*config)["MainCamera"]["camera_projection_perspective_fov"] ? (*config)["MainCamera"]["camera_projection_perspective_fov"].as<float>() : 90.0f;
         mainCamera.setPerspective(fov, 1.0f, nearPlane, farPlane);
     }else{
-        float orthoWidth = config["MainCamera"]["camera_projection_orthographic_width"] ? config["MainCamera"]["camera_projection_orthographic_width"].as<float>() : 20.0f;
-        float orthoHeight = config["MainCamera"]["camera_projection_orthographic_height"] ? config["MainCamera"]["camera_projection_orthographic_height"].as<float>() : 20.0f;
+        float orthoWidth = (*config)["MainCamera"]["camera_projection_orthographic_width"] ? (*config)["MainCamera"]["camera_projection_orthographic_width"].as<float>() : 20.0f;
+        float orthoHeight = (*config)["MainCamera"]["camera_projection_orthographic_height"] ? (*config)["MainCamera"]["camera_projection_orthographic_height"].as<float>() : 20.0f;
         mainCamera.setOrthographic(
             -orthoWidth / 2.0f, orthoWidth / 2.0f,
             -orthoHeight / 2.0f, orthoHeight / 2.0f,
@@ -1555,28 +1558,28 @@ void Application::ReadCameras(){
     glfwManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
 #endif
 
-    if (config["LightCamera"]) {
-        lightCameras[0].cameraType = (CameraType)(config["LightCamera"]["camera_mode"] ? config["LightCamera"]["camera_mode"].as<int>() : 0);
+    if ((*config)["LightCamera"]) {
+        lightCameras[0].cameraType = (CameraType)((*config)["LightCamera"]["camera_mode"] ? (*config)["LightCamera"]["camera_mode"].as<int>() : 0);
         lightCameras[0].SetPosition(
-            config["LightCamera"]["camera_position"][0].as<float>(), 
-            config["LightCamera"]["camera_position"][1].as<float>(), 
-            config["LightCamera"]["camera_position"][2].as<float>());
+            (*config)["LightCamera"]["camera_position"][0].as<float>(), 
+            (*config)["LightCamera"]["camera_position"][1].as<float>(), 
+            (*config)["LightCamera"]["camera_position"][2].as<float>());
         lightCameras[0].SetRotation(
-            config["LightCamera"]["camera_rotation"][0].as<float>(), 
-            config["LightCamera"]["camera_rotation"][1].as<float>(), 
-            config["LightCamera"]["camera_rotation"][2].as<float>());
-        lightCameras[0].focusObjectId = config["LightCamera"]["object_id_target"] ? config["LightCamera"]["object_id_target"].as<int>() : 0;
+            (*config)["LightCamera"]["camera_rotation"][0].as<float>(), 
+            (*config)["LightCamera"]["camera_rotation"][1].as<float>(), 
+            (*config)["LightCamera"]["camera_rotation"][2].as<float>());
+        lightCameras[0].focusObjectId = (*config)["LightCamera"]["object_id_target"] ? (*config)["LightCamera"]["object_id_target"].as<int>() : 0;
 
-        lightCameras[0].bEnableOrthographic = config["LightCamera"]["camera_projection_enable_orthographic"] ? config["LightCamera"]["camera_projection_enable_orthographic"].as<bool>() : false;
-        float nearPlane = config["LightCamera"]["camera_z"][0].as<float>();
-        float farPlane = config["LightCamera"]["camera_z"][1].as<float>();
+        lightCameras[0].bEnableOrthographic = (*config)["LightCamera"]["camera_projection_enable_orthographic"] ? (*config)["LightCamera"]["camera_projection_enable_orthographic"].as<bool>() : false;
+        float nearPlane = (*config)["LightCamera"]["camera_z"][0].as<float>();
+        float farPlane = (*config)["LightCamera"]["camera_z"][1].as<float>();
 
         if(!lightCameras[0].bEnableOrthographic){
-            float fov = config["LightCamera"]["camera_projection_perspective_fov"] ? config["LightCamera"]["camera_projection_perspective_fov"].as<float>() : 90.0f;
+            float fov = (*config)["LightCamera"]["camera_projection_perspective_fov"] ? (*config)["LightCamera"]["camera_projection_perspective_fov"].as<float>() : 90.0f;
             lightCameras[0].setPerspective(fov, 1.0f, nearPlane, farPlane);
         }else{
-            float orthoWidth = config["LightCamera"]["camera_projection_orthographic_width"] ? config["LightCamera"]["camera_projection_orthographic_width"].as<float>() : 20.0f;
-            float orthoHeight = config["LightCamera"]["camera_projection_orthographic_height"] ? config["LightCamera"]["camera_projection_orthographic_height"].as<float>() : 20.0f;
+            float orthoWidth = (*config)["LightCamera"]["camera_projection_orthographic_width"] ? (*config)["LightCamera"]["camera_projection_orthographic_width"].as<float>() : 20.0f;
+            float orthoHeight = (*config)["LightCamera"]["camera_projection_orthographic_height"] ? (*config)["LightCamera"]["camera_projection_orthographic_height"].as<float>() : 20.0f;
             lightCameras[0].setOrthographic(
                 -orthoWidth / 2.0f, orthoWidth / 2.0f,
                 -orthoHeight / 2.0f, orthoHeight / 2.0f,

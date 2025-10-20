@@ -104,7 +104,7 @@ namespace LEApplication{
         double totalInitTime = 0;
 
         std::string m_sampleName = "CSimpleTriangle";
-        YAML::Node config;
+        
 
         std::vector<std::unique_ptr<CControlNode>> controlNodes;  
 
@@ -159,6 +159,7 @@ namespace LEApplication{
         void DestroyInstance(HMODULE handle, void* instance);
 
         std::unique_ptr<AppInfo> appInfo;
+        std::unique_ptr<YAML::Node> config;
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}
