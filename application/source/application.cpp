@@ -69,10 +69,13 @@ void Application::Run(std::string exampleName){ //Entrance Function
     instance_yamlcore = static_cast<LEYAML::IYAMLCore*>(pVoid);
     instance_yamlcore->SetApplication(this);
 
-    appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
-    instance_yamlcore->ReadYAMLFile(m_sampleName);
-    config = std::make_unique<YAML::Node>(std::move(instance_yamlcore->GetConfig()));
+    //appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
+    //config = std::make_unique<YAML::Node>(std::move(instance_yamlcore->GetConfig()));
 
+    instance_yamlcore->ReadYAMLFile(m_sampleName);
+    appInfo = &instance_yamlcore->GetAppInfo();
+    config = &instance_yamlcore->GetConfig();
+    
     //Load SDL Core Module
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
     instance_sdlcore = static_cast<LESDL::ISDLCore*>(pVoid);
@@ -228,15 +231,6 @@ void Application::Initialize(){
     //elapseTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
     //deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
-    // std::string fullYamlName = YAML_PATH + m_sampleName + ".yaml";
-    // try{
-    //     config = YAML::LoadFile(fullYamlName);
-    // } catch (...){
-    //     std::cout<<"Error loading yaml file"<<std::endl;
-    //     return;
-    // }
-    //instance_yamlcore->ReadYAMLFile(m_sampleName);
-
     /****************************
     * ? ControlNode
     ****************************/
@@ -247,7 +241,7 @@ void Application::Initialize(){
     ****************************/   
     renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
     ReadFeatures();
-    ReadControls();
+    //ReadControls();
 
     TimePoint T1 = now();
     if(bVerboseInitialization){
@@ -767,14 +761,8 @@ void Application::CleanUp(){
  * Helper Functions
  *******/
 
- 
-void Application::ReadControls(){
-    for (const auto& control : (*config)["Controls"])
-        if (control["UIContainer"]) appInfo->ControlUIContainer.loadFromYaml(control["UIContainer"]);
-}
-
 void Application::ReadFeatures(){
-    if ((*config)["Features"]) appInfo->Feature.loadFromYaml((*config)["Features"]);
+    //if ((*config)["Features"]) appInfo->Feature.loadFromYaml((*config)["Features"]);
 
     if(appInfo->Feature.b_feature_graphics_push_constant){
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
@@ -788,10 +776,10 @@ void Application::ReadFeatures(){
 }
 
 void Application::ReadUniforms(){
-    auto uniformsNode = (*config)["Uniforms"];
+    
 
     // Graphics
-    if(uniformsNode["Graphics"]) appInfo->Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
+    //if(uniformsNode["Graphics"]) appInfo->Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
 
     if(appInfo->Uniform.b_uniform_graphics_custom)
         CGraphicsDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
@@ -827,7 +815,7 @@ void Application::ReadUniforms(){
 
     //std::cout<<"Begin Read Compute"<<std::endl;
     // Compute
-    if (uniformsNode["Compute"]) appInfo->Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
+    //if (uniformsNode["Compute"]) appInfo->Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
     if(appInfo->Uniform.b_uniform_compute_custom)
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_UNIFORMBUFFER_CUSTOM;
         CComputeDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
@@ -846,6 +834,9 @@ void Application::ReadUniforms(){
     //std::cout<<"End Read Compute"<<std::endl;
 
     //GraphicsTextureImageSamplers
+    //auto uniformsNode = config["Uniforms"];
+    /*
+    auto uniformsNode = (*config)["Uniforms"];
     if (uniformsNode["GraphicsTextureImageSamplers"]) {
         auto samplersNode = uniformsNode["GraphicsTextureImageSamplers"];
         std::vector<int> miplevels;
@@ -864,25 +855,179 @@ void Application::ReadUniforms(){
 
         CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
         CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(miplevels, uvwRepeats);
+    }*/
+
+    //std::cout<<"insance_yamlcore->GetMipLevels().size() = "<<instance_yamlcore->GetMipLevels().size()<<std::endl;
+    //std::cout<<"insance_yamlcore->GetUvwRepeats().size() = "<<instance_yamlcore->GetUvwRepeats().size()<<std::endl;
+    if(instance_yamlcore->GetSamplerMipLevels().size() > 0){
+        CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
+        CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(instance_yamlcore->GetSamplerMipLevels(), instance_yamlcore->GetSamplerUvwRepeats());
     }
 
 }
 
 void Application::ReadResources(){
+    if(instance_yamlcore->GetFontSize() > 0){
+        textManager.SetFontSize(instance_yamlcore->GetFontSize());
+        textManager.SetSamplerID(instance_yamlcore->GetFontSamplerId());
+        textManager.SetOutlineColor(glm::vec4(instance_yamlcore->GetOutlineColor()[0], instance_yamlcore->GetOutlineColor()[1], instance_yamlcore->GetOutlineColor()[2], instance_yamlcore->GetOutlineColor()[3]));
+        textManager.SetTextColor(glm::vec4(instance_yamlcore->GetTextColor()[0], instance_yamlcore->GetTextColor()[1], instance_yamlcore->GetTextColor()[2], instance_yamlcore->GetTextColor()[3]));
+        textManager.p_renderer = &renderer;
+        textManager.p_textImageManager = &textImageManager;
+        textManager.p_modelManager = &modelManager;
+
+        textManager.CreateTextImage(); //create text atlas image and push to textImageManager
+        textManager.CreateGlyphMap(); //create glyph map
+        textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
+    }
+
+    if(instance_yamlcore->GetModelNames().size() > 0){
+        for(int i = 0; i < instance_yamlcore->GetModelNames().size(); i++){
+            std::string modelName = instance_yamlcore->GetModelNames()[i];
+            if(modelName == "CUSTOM3D0"){
+                renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[0].vertices);
+                renderer.CreateIndexBuffer(modelManager.customModels3D[0].indices);
+                
+                modelManager.modelLengths.push_back(modelManager.customModels3D[0].length);
+                modelManager.modelLengthsMin.push_back(modelManager.customModels3D[0].lengthMin);
+                modelManager.modelLengthsMax.push_back(modelManager.customModels3D[0].lengthMax);
+            // }else if(name == "CUSTOM3D1"){
+            //     renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[1].vertices);
+            //     renderer.CreateIndexBuffer(modelManager.customModels3D[1].indices);
+
+            //     modelManager.modelLengths.push_back(modelManager.customModels3D[1].length);
+            //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
+            //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
+            }else if(modelName == "TEXTBOXIMAGE"){
+                renderer.CreateVertexBuffer<Vertex3D>(modelManager.textboxImageModels[0].vertices);
+                renderer.CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
+                
+                modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
+                modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
+                modelManager.modelLengthsMax.push_back(modelManager.textboxImageModels[0].lengthMax);
+            }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
+                //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
+                //std::cout<<"Application: Load "<<std::endl;
+                renderer.CreateVertexBuffer<TextQuadVertex>(modelManager.textQuadModels[0].vertices);
+                //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
+                renderer.CreateIndexBuffer(modelManager.textQuadModels[0].indices);
+
+                //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
+                //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
+                //std::cout<<"Application: Created IndexBuffer, size = "<<renderer.indexDataBuffers.size()<<std::endl;
+
+                glm::vec3 v(1,1,1); //text quad length is not important, only placeholder
+                modelManager.modelLengths.push_back(v);
+                modelManager.modelLengthsMin.push_back(v);
+                modelManager.modelLengthsMax.push_back(v);
+            }else if(modelName == "CUSTOM2D0"){
+                //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
+                renderer.CreateVertexBuffer<Vertex2D>(modelManager.customModels2D[0].vertices); 
+
+                modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
+                modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
+                modelManager.modelLengthsMax.push_back(modelManager.customModels2D[0].lengthMax);
+            }else{
+                //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
+                std::vector<Vertex3D> modelVertices3D;
+                std::vector<uint32_t> modelIndices3D;
+                modelManager.LoadObjModel(modelName, modelVertices3D, modelIndices3D);
+                renderer.CreateVertexBuffer<Vertex3D>(modelVertices3D); 
+                renderer.CreateIndexBuffer(modelIndices3D);
+            }
+        }
+        
+    }
+
+    if(instance_yamlcore->GetTextureNames().size() > 0){
+        for(int i = 0; i < instance_yamlcore->GetTextureNames().size(); i++){
+            std::string textureName = instance_yamlcore->GetTextureNames()[i];
+            int textureMipLevel = instance_yamlcore->GetTextureMipLevels()[i];
+            bool textureEnableCubemap = instance_yamlcore->GetTextureEnableCubemaps()[i];
+            int textureSamplerId = instance_yamlcore->GetTextureSamplerIds()[i];
+            
+            VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                //VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+                //for(int i = 0; i < textureAttributes->size(); i++){
+                    //auto startTextureTime = std::chrono::high_resolution_clock::now();
+
+                if(textureMipLevel > 1) //mipmap
+                    usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                else 
+                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+                    else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                
+                if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
+                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, renderer.commandPool, textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
+                    else textureManager.CreateTextureImage(textureName, usage, renderer.commandPool, textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
+                }else{ //48bpt
+                    //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
+                    textureManager.CreateTextureImage(textureName, usage, renderer.commandPool, textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+                }
+                
+                if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
+                    VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                    if(textureMipLevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps("checkerboard", usage_mipmap);
+                }else if(textureMipLevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps();
+
+        }
+    }
+
+
+    //Must initialize smart pointers, otherwise will crash
+    appInfo->VertexShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+    appInfo->FragmentShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+    appInfo->RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
+    appInfo->Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
+    appInfo->VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
+    appInfo->BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+    appInfo->DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+    appInfo->DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+    appInfo->SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+
+    if(instance_yamlcore->GetPipelineNames().size() > 0){
+        for(int i = 0; i < instance_yamlcore->GetPipelineNames().size(); i++){
+            std::string pipelineName = instance_yamlcore->GetPipelineNames()[i];
+            std::string vertexShaderName = instance_yamlcore->GetPipelineVertexShaderNames()[i];
+            std::string fragmentShaderName = instance_yamlcore->GetPipelineFragmentShaderNames()[i];
+            bool bRenderPassShadowmap = instance_yamlcore->GetPipelineRenderPassShadowmaps()[i];
+            int pipelineSubpassId = instance_yamlcore->GetPipelineSubpassIds()[i];
+            int vertexDataType = instance_yamlcore->GetPipelineVertexDatatypes()[i];
+            bool blendingEnable = instance_yamlcore->GetPipelineBlendEnables()[i];
+            bool depthtestEnable = instance_yamlcore->GetPipelineDepthTestEnables()[i];
+            bool depthwriteEnable = instance_yamlcore->GetPipelineDepthWriteEnables()[i];
+            bool skyboxEnable = instance_yamlcore->GetPipelineSkyboxEnables()[i];
+
+            //std::cout<<"Application: Load Pipeline "<<pipelineName<<std::endl;
+            //std::cout<<vertexShaderName<<", "<<fragmentShaderName<<", "<<bRenderPassShadowmap<<", "<<pipelineSubpassId<<", "<<vertexDataType<<", "<<blendingEnable<<", "<<depthtestEnable<<", "<<depthwriteEnable<<", "<<skyboxEnable<<std::endl;
+
+            appInfo->VertexShader->push_back(vertexShaderName);
+            appInfo->FragmentShader->push_back(fragmentShaderName);
+            appInfo->RenderPassShadowmap->push_back(bRenderPassShadowmap);
+            appInfo->Subpass->push_back(pipelineSubpassId);
+            appInfo->VertexDatatype->push_back(vertexDataType);
+            appInfo->BlendEnable->push_back(blendingEnable);
+            appInfo->DepthTestEnable->push_back(depthtestEnable);
+            appInfo->DepthWriteEnable->push_back(depthwriteEnable);
+            appInfo->SkyboxEnable->push_back(skyboxEnable);
+        }
+    }
+
     for (const auto& resource : (*config)["Resources"]) {
+        /*
         if (resource["Fonts"]) {
             for (const auto& font : resource["Fonts"]) {
-                std::string name = font["resource_font_name"].as<std::string>();
-                int samplerid = font["uniform_sampler_id"].as<int>();
-                //std::vector<bool> uvwRepeat = samplerUniform["uniform_graphics_texture_image_sampler_uvwrepeat"] ? samplerUniform["uniform_graphics_texture_image_sampler_uvwrepeat"].as<std::vector<bool>>() : std::vector<bool>{true, true, true};
-                std::vector<int> outlineColor = font["resource_font_outlinecolor"] ? font["resource_font_outlinecolor"].as<std::vector<int>>() : std::vector<int>{255, 255, 255, 255};
-                std::vector<int> textColor = font["resource_font_textcolor"] ? font["resource_font_textcolor"].as<std::vector<int>>() : std::vector<int>{0, 0, 0, 255};
-                int fontSize = font["resource_font_size"] ? font["resource_font_size"].as<int>() : 20;
+                // std::string name = font["resource_font_name"].as<std::string>();
+                // int samplerid = font["uniform_sampler_id"].as<int>();
+                // //std::vector<bool> uvwRepeat = samplerUniform["uniform_graphics_texture_image_sampler_uvwrepeat"] ? samplerUniform["uniform_graphics_texture_image_sampler_uvwrepeat"].as<std::vector<bool>>() : std::vector<bool>{true, true, true};
+                // std::vector<int> outlineColor = font["resource_font_outlinecolor"] ? font["resource_font_outlinecolor"].as<std::vector<int>>() : std::vector<int>{255, 255, 255, 255};
+                // std::vector<int> textColor = font["resource_font_textcolor"] ? font["resource_font_textcolor"].as<std::vector<int>>() : std::vector<int>{0, 0, 0, 255};
+                // int fontSize = font["resource_font_size"] ? font["resource_font_size"].as<int>() : 20;
                 //std::cout<<"Font name: "<<name<<std::endl;
-                textManager.SetFontSize(fontSize);
-                textManager.SetSamplerID(samplerid);
-                textManager.SetOutlineColor(glm::vec4(outlineColor[0], outlineColor[1], outlineColor[2], outlineColor[3]));
-                textManager.SetTextColor(glm::vec4(textColor[0], textColor[1], textColor[2], textColor[3]));
+                textManager.SetFontSize(instance_yamlcore->GetFontSize());
+                textManager.SetSamplerID(instance_yamlcore->GetFontSamplerId());
+                textManager.SetOutlineColor(glm::vec4(instance_yamlcore->GetOutlineColor()[0], instance_yamlcore->GetOutlineColor()[1], instance_yamlcore->GetOutlineColor()[2], instance_yamlcore->GetOutlineColor()[3]));
+                textManager.SetTextColor(glm::vec4(instance_yamlcore->GetTextColor()[0], instance_yamlcore->GetTextColor()[1], instance_yamlcore->GetTextColor()[2], instance_yamlcore->GetTextColor()[3]));
                 textManager.p_renderer = &renderer;
                 textManager.p_textImageManager = &textImageManager;
                 textManager.p_modelManager = &modelManager;
@@ -893,6 +1038,7 @@ void Application::ReadResources(){
                 //std::cout<<"Font "<<name<<" loaded."<<std::endl;
             }
         }
+        
 
         if (resource["Models"]) {
             for (const auto& model : resource["Models"]) {
@@ -1060,7 +1206,7 @@ void Application::ReadResources(){
             //     }
             //     appInfo.FragmentShader = std::move(fragmentShaderList);
             // }
-        }
+        }*/
 
         if (resource["ComputeShaders"]) {
             auto computeShaderList = std::make_unique<std::vector<std::string>>(std::vector<std::string>());
