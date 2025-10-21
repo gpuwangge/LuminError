@@ -975,19 +975,13 @@ void Application::ReadResources(){
 }
 
 void Application::ReadAttachments(){
-    bool bShadowmapAttachmentDepthLight = (*config)["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"] ? (*config)["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"].as<bool>() : false;
-    bool bMainSceneAttachmentDepthLight = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"].as<bool>() : false;
-    bool bMainSceneAttachmentDepthCamera = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"].as<bool>()  : false;
-    bool bMainSceneAttachmentColorResovle = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"].as<bool>()  : false;
-    bool bMainSceneAttachmentColorPresent = (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"] ? (*config)["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"].as<bool>()  : true; //need al least one subpass with at least one color attachment
-
-    renderProcess.iShadowmapAttachmentDepthLight = bShadowmapAttachmentDepthLight ? 0 : -1; //shadowmap renderpass attachment depth light, only one attachment, so id is 0
+    renderProcess.iShadowmapAttachmentDepthLight = instance_yamlcore->GetShadowmapAttachmentDepthLight() ? 0 : -1; //shadowmap renderpass attachment depth light, only one attachment, so id is 0
 
     int AttachmentCount = 0;
-    renderProcess.iMainSceneAttachmentDepthLight = bMainSceneAttachmentDepthLight ? AttachmentCount++ : -1;
-    renderProcess.iMainSceneAttachmentDepthCamera = bMainSceneAttachmentDepthCamera ? AttachmentCount++ : -1;
-    renderProcess.iMainSceneAttachmentColorResovle = bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1;
-    renderProcess.iMainSceneAttachmentColorPresent = bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1;
+    renderProcess.iMainSceneAttachmentDepthLight = instance_yamlcore->GetMainSceneAttachmentDepthLight() ? AttachmentCount++ : -1;
+    renderProcess.iMainSceneAttachmentDepthCamera = instance_yamlcore->GetMainSceneAttachmentDepthCamera() ? AttachmentCount++ : -1;
+    renderProcess.iMainSceneAttachmentColorResovle = instance_yamlcore->GetMainSceneAttachmentColorResovle() ? AttachmentCount++ : -1;
+    renderProcess.iMainSceneAttachmentColorPresent = instance_yamlcore->GetMainSceneAttachmentColorPresent() ? AttachmentCount++ : -1;
 
     swapchain.iShadowmapAttachmentDepthLight = renderProcess.iShadowmapAttachmentDepthLight;
     swapchain.iMainSceneAttachmentDepthLight = renderProcess.iMainSceneAttachmentDepthLight;
@@ -1023,10 +1017,10 @@ void Application::ReadAttachments(){
 }
 
 void Application::ReadSubpasses(){
-    renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = (*config)["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"] ? (*config)["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"].as<bool>() : false;
-    renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"] ? (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"].as<bool>() : false;
-    renderProcess.bEnableMainSceneRenderpassSubpassDraw = (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"] ? (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"].as<bool>() : true; //need at least one subpass, even for compute sample
-    renderProcess.bEnableMainSceneRenderpassSubpassObserve = (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"] ? (*config)["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"].as<bool>() : false;
+    renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = instance_yamlcore->GetEnableShadowmapRenderpassSubpassShadowmap();
+    renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = instance_yamlcore->GetEnableMainSceneRenderpassSubpassShadowmap();
+    renderProcess.bEnableMainSceneRenderpassSubpassDraw = instance_yamlcore->GetEnableMainSceneRenderpassSubpassDraw();
+    renderProcess.bEnableMainSceneRenderpassSubpassObserve = instance_yamlcore->GetEnableMainSceneRenderpassSubpassObserve();
 
     //for shadowmap renderpass (this renderpass is optional)
     if(renderProcess.bEnableShadowmapRenderpassSubpassShadowmap){

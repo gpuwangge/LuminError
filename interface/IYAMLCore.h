@@ -115,6 +115,18 @@ namespace LEYAML{
             }
 
 
+            bShadowmapAttachmentDepthLight = config["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"] ? config["ShadowmapRenderpassAttachments"]["ShadowmapRenderpass_attachment_depth_light"].as<bool>() : false;
+            bMainSceneAttachmentDepthLight = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_light"].as<bool>() : false;
+            bMainSceneAttachmentDepthCamera = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_depth_camera"].as<bool>()  : false;
+            bMainSceneAttachmentColorResovle = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_resovle"].as<bool>()  : false;
+            bMainSceneAttachmentColorPresent = config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"] ? config["MainSceneRenderpassAttachments"]["mainsceneRenderpass_attachment_color_present"].as<bool>()  : true; //need al least one subpass with at least one color attachment
+
+
+            bEnableShadowmapRenderpassSubpassShadowmap = config["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"] ? config["ShadowmapRenderpassSubpasses"]["shadowmapRenderpass_subpasses_shadowmap"].as<bool>() : false;
+            bEnableMainSceneRenderpassSubpassShadowmap = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_shadowmap"].as<bool>() : false;
+            bEnableMainSceneRenderpassSubpassDraw = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"].as<bool>() : true; //need at least one subpass, even for compute sample
+            bEnableMainSceneRenderpassSubpassObserve = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"].as<bool>() : false;
+
         }
 
         virtual void LoadFeatureFromYaml(const YAML::Node& node) = 0;
@@ -142,6 +154,17 @@ namespace LEYAML{
         std::vector<bool>& GetTextureEnableCubemaps() { return texture_enableCubemaps; }
         std::vector<int>& GetTextureSamplerIds() { return texture_samplerids; }
 
+        bool GetShadowmapAttachmentDepthLight() { return bShadowmapAttachmentDepthLight; }
+        bool GetMainSceneAttachmentDepthLight() { return bMainSceneAttachmentDepthLight; }
+        bool GetMainSceneAttachmentDepthCamera() { return bMainSceneAttachmentDepthCamera; }
+        bool GetMainSceneAttachmentColorResovle() { return bMainSceneAttachmentColorResovle; }
+        bool GetMainSceneAttachmentColorPresent() { return bMainSceneAttachmentColorPresent; }
+
+        bool GetEnableShadowmapRenderpassSubpassShadowmap() { return bEnableShadowmapRenderpassSubpassShadowmap; }
+        bool GetEnableMainSceneRenderpassSubpassShadowmap() { return bEnableMainSceneRenderpassSubpassShadowmap; }
+        bool GetEnableMainSceneRenderpassSubpassDraw() { return bEnableMainSceneRenderpassSubpassDraw; }
+        bool GetEnableMainSceneRenderpassSubpassObserve() { return bEnableMainSceneRenderpassSubpassObserve; }
+
     private:
         AppInfo appInfo;
         YAML::Node config;
@@ -162,6 +185,17 @@ namespace LEYAML{
         std::vector<int> texture_miplevels;
         std::vector<bool> texture_enableCubemaps;
         std::vector<int> texture_samplerids;
+
+        bool bShadowmapAttachmentDepthLight;
+        bool bMainSceneAttachmentDepthLight;
+        bool bMainSceneAttachmentDepthCamera;
+        bool bMainSceneAttachmentColorResovle;
+        bool bMainSceneAttachmentColorPresent;
+
+        bool bEnableShadowmapRenderpassSubpassShadowmap;
+        bool bEnableMainSceneRenderpassSubpassShadowmap;
+        bool bEnableMainSceneRenderpassSubpassDraw;
+        bool bEnableMainSceneRenderpassSubpassObserve;
 
 
     };
