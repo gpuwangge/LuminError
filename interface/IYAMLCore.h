@@ -47,6 +47,18 @@ namespace LEYAML{
             }
 
 
+            //Must initialize smart pointers, otherwise will crash
+            appInfo.VertexShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+            appInfo.FragmentShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+            appInfo.RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
+            appInfo.VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
+            appInfo.BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
+            appInfo.ComputeShader = std::make_unique<std::vector<std::string>>(std::vector<std::string>());
+
 
             for (const auto& resource : config["Resources"]) {
                 if (resource["Fonts"]) {
@@ -77,18 +89,29 @@ namespace LEYAML{
 
                 if (resource["Pipelines"]) {
                     for (const auto& pipeline : resource["Pipelines"]) {
-                        pipeline_names.push_back(pipeline["resource_graphics_pipeline_name"] ? pipeline["resource_graphics_pipeline_name"].as<std::string>() : "DefaultPipeline");
-                        pipeline_vertexShaderNames.push_back(pipeline["resource_graphics_pipeline_vertexshader_name"] ? pipeline["resource_graphics_pipeline_vertexshader_name"].as<std::string>() : "default.vert");
-                        pipeline_fragmentShaderNames.push_back(pipeline["resource_graphics_pipeline_fragmentshader_name"] ? pipeline["resource_graphics_pipeline_fragmentshader_name"].as<std::string>() : "default.frag");
-                        pipeline_bRenderPassShadowmaps.push_back(pipeline["renderpasses_shadowmap"] ? pipeline["renderpasses_shadowmap"].as<bool>() : false);
-                        pipeline_subpassIds.push_back(pipeline["subpasses_subpass_id"] ? pipeline["subpasses_subpass_id"].as<int>() : 0);
-                        pipeline_vertexDatatypes.push_back(pipeline["resource_graphics_pipeline_vertexdatatype"] ? pipeline["resource_graphics_pipeline_vertexdatatype"].as<int>() : 2);
-                        pipeline_blendEnables.push_back(pipeline["resource_graphics_pipeline_blend_enable"] ? pipeline["resource_graphics_pipeline_blend_enable"].as<bool>() : false);
-                        pipeline_depthTestEnables.push_back(pipeline["resource_graphics_pipeline_depth_test_enable"] ? pipeline["resource_graphics_pipeline_depth_test_enable"].as<bool>() : true);
-                        pipeline_depthWriteEnables.push_back(pipeline["resource_graphics_pipeline_depth_write_enable"] ? pipeline["resource_graphics_pipeline_depth_write_enable"].as<bool>() : true);
-                        pipeline_skyboxEnables.push_back(pipeline["resource_graphics_pipeline_skybox"] ? pipeline["resource_graphics_pipeline_skybox"].as<bool>() : false);
+                        //pipeline_names.push_back(pipeline["resource_graphics_pipeline_name"] ? pipeline["resource_graphics_pipeline_name"].as<std::string>() : "DefaultPipeline");
+
+                        std::string pipelineName = pipeline["resource_graphics_pipeline_name"] ? pipeline["resource_graphics_pipeline_name"].as<std::string>() : "DefaultPipeline"; //not used
+
+                        appInfo.VertexShader->push_back(pipeline["resource_graphics_pipeline_vertexshader_name"] ? pipeline["resource_graphics_pipeline_vertexshader_name"].as<std::string>() : "default.vert");
+                        appInfo.FragmentShader->push_back(pipeline["resource_graphics_pipeline_fragmentshader_name"] ? pipeline["resource_graphics_pipeline_fragmentshader_name"].as<std::string>() : "default.frag");
+                        appInfo.RenderPassShadowmap->push_back(pipeline["renderpasses_shadowmap"] ? pipeline["renderpasses_shadowmap"].as<bool>() : false);
+                        appInfo.Subpass->push_back(pipeline["subpasses_subpass_id"] ? pipeline["subpasses_subpass_id"].as<int>() : 0);
+                        appInfo.VertexDatatype->push_back(pipeline["resource_graphics_pipeline_vertexdatatype"] ? pipeline["resource_graphics_pipeline_vertexdatatype"].as<int>() : 2);
+                        appInfo.BlendEnable->push_back(pipeline["resource_graphics_pipeline_blend_enable"] ? pipeline["resource_graphics_pipeline_blend_enable"].as<bool>() : false);
+                        appInfo.DepthTestEnable->push_back(pipeline["resource_graphics_pipeline_depth_test_enable"] ? pipeline["resource_graphics_pipeline_depth_test_enable"].as<bool>() : true);
+                        appInfo.DepthWriteEnable->push_back(pipeline["resource_graphics_pipeline_depth_write_enable"] ? pipeline["resource_graphics_pipeline_depth_write_enable"].as<bool>() : true);
+                        appInfo.SkyboxEnable->push_back(pipeline["resource_graphics_pipeline_skybox"] ? pipeline["resource_graphics_pipeline_skybox"].as<bool>() : false);
+    
                     }
                 }
+
+                if (resource["ComputeShaders"]) {
+                    for (const auto& computeShader : resource["ComputeShaders"]) {
+                        appInfo.ComputeShader->push_back(computeShader["resource_computeshader_name"].as<std::string>());
+                    }
+                }
+
             }
 
 
@@ -119,17 +142,6 @@ namespace LEYAML{
         std::vector<bool>& GetTextureEnableCubemaps() { return texture_enableCubemaps; }
         std::vector<int>& GetTextureSamplerIds() { return texture_samplerids; }
 
-        std::vector<std::string>& GetPipelineNames() { return pipeline_names; }
-        std::vector<std::string>& GetPipelineVertexShaderNames() { return pipeline_vertexShaderNames; }
-        std::vector<std::string>& GetPipelineFragmentShaderNames() { return pipeline_fragmentShaderNames; }
-        std::vector<bool>& GetPipelineRenderPassShadowmaps() { return pipeline_bRenderPassShadowmaps; }
-        std::vector<int>& GetPipelineSubpassIds() { return pipeline_subpassIds; }
-        std::vector<int>& GetPipelineVertexDatatypes() { return pipeline_vertexDatatypes; }
-        std::vector<bool>& GetPipelineBlendEnables() { return pipeline_blendEnables; }
-        std::vector<bool>& GetPipelineDepthTestEnables() { return pipeline_depthTestEnables; }
-        std::vector<bool>& GetPipelineDepthWriteEnables() { return pipeline_depthWriteEnables; }
-        std::vector<bool>& GetPipelineSkyboxEnables() { return pipeline_skyboxEnables; }
-
     private:
         AppInfo appInfo;
         YAML::Node config;
@@ -151,16 +163,6 @@ namespace LEYAML{
         std::vector<bool> texture_enableCubemaps;
         std::vector<int> texture_samplerids;
 
-        std::vector<std::string> pipeline_names;
-        std::vector<std::string> pipeline_vertexShaderNames;
-        std::vector<std::string> pipeline_fragmentShaderNames;
-        std::vector<bool> pipeline_bRenderPassShadowmaps;
-        std::vector<int> pipeline_subpassIds;
-        std::vector<int> pipeline_vertexDatatypes;
-        std::vector<bool> pipeline_blendEnables;
-        std::vector<bool> pipeline_depthTestEnables;
-        std::vector<bool> pipeline_depthWriteEnables;
-        std::vector<bool> pipeline_skyboxEnables;
 
     };
 

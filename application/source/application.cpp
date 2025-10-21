@@ -972,252 +972,6 @@ void Application::ReadResources(){
 
         }
     }
-
-
-    //Must initialize smart pointers, otherwise will crash
-    appInfo->VertexShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-    appInfo->FragmentShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-    appInfo->RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
-    appInfo->Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
-    appInfo->VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
-    appInfo->BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-    appInfo->DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-    appInfo->DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-    appInfo->SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-
-    if(instance_yamlcore->GetPipelineNames().size() > 0){
-        for(int i = 0; i < instance_yamlcore->GetPipelineNames().size(); i++){
-            std::string pipelineName = instance_yamlcore->GetPipelineNames()[i];
-            std::string vertexShaderName = instance_yamlcore->GetPipelineVertexShaderNames()[i];
-            std::string fragmentShaderName = instance_yamlcore->GetPipelineFragmentShaderNames()[i];
-            bool bRenderPassShadowmap = instance_yamlcore->GetPipelineRenderPassShadowmaps()[i];
-            int pipelineSubpassId = instance_yamlcore->GetPipelineSubpassIds()[i];
-            int vertexDataType = instance_yamlcore->GetPipelineVertexDatatypes()[i];
-            bool blendingEnable = instance_yamlcore->GetPipelineBlendEnables()[i];
-            bool depthtestEnable = instance_yamlcore->GetPipelineDepthTestEnables()[i];
-            bool depthwriteEnable = instance_yamlcore->GetPipelineDepthWriteEnables()[i];
-            bool skyboxEnable = instance_yamlcore->GetPipelineSkyboxEnables()[i];
-
-            //std::cout<<"Application: Load Pipeline "<<pipelineName<<std::endl;
-            //std::cout<<vertexShaderName<<", "<<fragmentShaderName<<", "<<bRenderPassShadowmap<<", "<<pipelineSubpassId<<", "<<vertexDataType<<", "<<blendingEnable<<", "<<depthtestEnable<<", "<<depthwriteEnable<<", "<<skyboxEnable<<std::endl;
-
-            appInfo->VertexShader->push_back(vertexShaderName);
-            appInfo->FragmentShader->push_back(fragmentShaderName);
-            appInfo->RenderPassShadowmap->push_back(bRenderPassShadowmap);
-            appInfo->Subpass->push_back(pipelineSubpassId);
-            appInfo->VertexDatatype->push_back(vertexDataType);
-            appInfo->BlendEnable->push_back(blendingEnable);
-            appInfo->DepthTestEnable->push_back(depthtestEnable);
-            appInfo->DepthWriteEnable->push_back(depthwriteEnable);
-            appInfo->SkyboxEnable->push_back(skyboxEnable);
-        }
-    }
-
-    for (const auto& resource : (*config)["Resources"]) {
-        /*
-        if (resource["Fonts"]) {
-            for (const auto& font : resource["Fonts"]) {
-                // std::string name = font["resource_font_name"].as<std::string>();
-                // int samplerid = font["uniform_sampler_id"].as<int>();
-                // //std::vector<bool> uvwRepeat = samplerUniform["uniform_graphics_texture_image_sampler_uvwrepeat"] ? samplerUniform["uniform_graphics_texture_image_sampler_uvwrepeat"].as<std::vector<bool>>() : std::vector<bool>{true, true, true};
-                // std::vector<int> outlineColor = font["resource_font_outlinecolor"] ? font["resource_font_outlinecolor"].as<std::vector<int>>() : std::vector<int>{255, 255, 255, 255};
-                // std::vector<int> textColor = font["resource_font_textcolor"] ? font["resource_font_textcolor"].as<std::vector<int>>() : std::vector<int>{0, 0, 0, 255};
-                // int fontSize = font["resource_font_size"] ? font["resource_font_size"].as<int>() : 20;
-                //std::cout<<"Font name: "<<name<<std::endl;
-                textManager.SetFontSize(instance_yamlcore->GetFontSize());
-                textManager.SetSamplerID(instance_yamlcore->GetFontSamplerId());
-                textManager.SetOutlineColor(glm::vec4(instance_yamlcore->GetOutlineColor()[0], instance_yamlcore->GetOutlineColor()[1], instance_yamlcore->GetOutlineColor()[2], instance_yamlcore->GetOutlineColor()[3]));
-                textManager.SetTextColor(glm::vec4(instance_yamlcore->GetTextColor()[0], instance_yamlcore->GetTextColor()[1], instance_yamlcore->GetTextColor()[2], instance_yamlcore->GetTextColor()[3]));
-                textManager.p_renderer = &renderer;
-                textManager.p_textImageManager = &textImageManager;
-                textManager.p_modelManager = &modelManager;
-
-                textManager.CreateTextImage(); //create text atlas image and push to textImageManager
-                textManager.CreateGlyphMap(); //create glyph map
-                textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
-                //std::cout<<"Font "<<name<<" loaded."<<std::endl;
-            }
-        }
-        
-
-        if (resource["Models"]) {
-            for (const auto& model : resource["Models"]) {
-                std::string name = model["resource_model_name"] ? model["resource_model_name"].as<std::string>() : "Default";
-                //std::cout<<"model name: "<<name<<std::endl;
-                //id is not really useful here, because the model id must be in order
-                int id = model["resource_model_id"] ? model["resource_model_id"].as<int>() : 0;
-
-                //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
-                if(name == "CUSTOM3D0"){
-                    renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[0].vertices);
-                    renderer.CreateIndexBuffer(modelManager.customModels3D[0].indices);
-                    
-                    modelManager.modelLengths.push_back(modelManager.customModels3D[0].length);
-                    modelManager.modelLengthsMin.push_back(modelManager.customModels3D[0].lengthMin);
-                    modelManager.modelLengthsMax.push_back(modelManager.customModels3D[0].lengthMax);
-                // }else if(name == "CUSTOM3D1"){
-                //     renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[1].vertices);
-                //     renderer.CreateIndexBuffer(modelManager.customModels3D[1].indices);
-
-                //     modelManager.modelLengths.push_back(modelManager.customModels3D[1].length);
-                //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
-                //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
-                }else if(name == "TEXTBOXIMAGE"){
-                    renderer.CreateVertexBuffer<Vertex3D>(modelManager.textboxImageModels[0].vertices);
-                    renderer.CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
-                    
-                    modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
-                    modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
-                    modelManager.modelLengthsMax.push_back(modelManager.textboxImageModels[0].lengthMax);
-                }else if(name == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
-                    //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
-                    //std::cout<<"Application: Load "<<std::endl;
-                    renderer.CreateVertexBuffer<TextQuadVertex>(modelManager.textQuadModels[0].vertices);
-                    //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
-                    renderer.CreateIndexBuffer(modelManager.textQuadModels[0].indices);
-
-                    //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
-                    //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
-                    //std::cout<<"Application: Created IndexBuffer, size = "<<renderer.indexDataBuffers.size()<<std::endl;
-
-                    glm::vec3 v(1,1,1); //text quad length is not important, only placeholder
-                    modelManager.modelLengths.push_back(v);
-                    modelManager.modelLengthsMin.push_back(v);
-                    modelManager.modelLengthsMax.push_back(v);
-                }else if(name == "CUSTOM2D0"){
-                    //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
-                    renderer.CreateVertexBuffer<Vertex2D>(modelManager.customModels2D[0].vertices); 
-
-                    modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
-                    modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
-                    modelManager.modelLengthsMax.push_back(modelManager.customModels2D[0].lengthMax);
-                }else{
-                    //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
-                    std::vector<Vertex3D> modelVertices3D;
-                    std::vector<uint32_t> modelIndices3D;
-                    modelManager.LoadObjModel(name, modelVertices3D, modelIndices3D);
-                    renderer.CreateVertexBuffer<Vertex3D>(modelVertices3D); 
-                    renderer.CreateIndexBuffer(modelIndices3D);
-                }
-            }
-        }
-
-        //std::cout<<"Application: Total Texture Images before creating new ones: "<<textureManager.textureImages.size()<<std::endl;
-
-        if (resource["Textures"]) {
-            //texture id is allocated by engine, instead of user, in order
-            for (const auto& texture : resource["Textures"]) {
-                std::string name = texture["resource_texture_name"].as<std::string>();
-                //int id = texture["resource_texture_id"].as<int>();
-                int miplevel = texture["resource_texture_miplevels"].as<int>();
-                bool enableCubemap = texture["resource_texture_cubmap"].as<bool>();
-                int samplerid = texture["uniform_sampler_id"].as<int>();
-
-                VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                //VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-                //for(int i = 0; i < textureAttributes->size(); i++){
-                    //auto startTextureTime = std::chrono::high_resolution_clock::now();
-
-                if(miplevel > 1) //mipmap
-                    usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                else 
-                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-                    else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                
-                if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, swapchain.swapChainImageFormat);
-                    else textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R8G8B8A8_SRGB, 8, enableCubemap);  
-                }else{ //48bpt
-                    //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                    textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_SFLOAT, 16, enableCubemap); 
-                }
-                
-                if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
-                    VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                    if(miplevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps("checkerboard", usage_mipmap);
-                }else if(miplevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps();
-                
-                    //auto endTextureTime = std::chrono::high_resolution_clock::now();
-                    //auto durationTime = std::chrono::duration<float, std::chrono::seconds::period>(endTextureTime - startTextureTime).count()*1000;
-                    //std::cout<<"Load Texture '"<< (*textureNames)[i].first <<"' cost: "<<durationTime<<" milliseconds"<<std::endl;
-                //}
-            }
-        }
-
-        //std::cout<<"Application: Total Texture Images after creating new ones: "<<textureManager.textureImages.size()<<std::endl;
-
-        //shaders id is allocated by engine, not user, in order
-        if (resource["Pipelines"]) {
-            //Must initialize smart pointers, otherwise will crash
-            appInfo->VertexShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-            appInfo->FragmentShader =  std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-            //appInfo.EnableSamplerCountOne =  std::make_unique<std::vector<bool>>(std::vector<bool>());
-            //appInfo.EnableDepthBias =  std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo->RenderPassShadowmap = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo->Subpass =  std::make_unique<std::vector<int>>(std::vector<int>());
-            appInfo->VertexDatatype = std::make_unique<std::vector<int>>(std::vector<int>());
-            appInfo->BlendEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo->DepthTestEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo->DepthWriteEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-            appInfo->SkyboxEnable = std::make_unique<std::vector<bool>>(std::vector<bool>());
-
-            for (const auto& pipeline : resource["Pipelines"]) {
-                //std::cout<<"Application: Read Pipeline."<<std::endl;
-                std::string name = pipeline["resource_graphics_pipeline_name"].as<std::string>();
-                std::string vertexShaderName = pipeline["resource_graphics_pipeline_vertexshader_name"].as<std::string>();
-                std::string fragmentShaderName = pipeline["resource_graphics_pipeline_fragmentshader_name"].as<std::string>();
-                //bool bEnableSamplerCountOne = pipeline["resource_graphics_pipeline_enable_sampler_count_one"] ? pipeline["resource_graphics_pipeline_enable_sampler_count_one"].as<bool>() : false;
-                //bool bEnableDepthBias = pipeline["resource_graphics_pipeline_enable_depth_bias"] ? pipeline["resource_graphics_pipeline_enable_depth_bias"].as<bool>() : false;
-                bool bRenderPassShadowmap = pipeline["renderpasses_shadowmap"] ? pipeline["renderpasses_shadowmap"].as<bool>() : false;
-                int subpassId = pipeline["subpasses_subpass_id"] ? pipeline["subpasses_subpass_id"].as<int>() : 0;
-                int vertexDatatype = pipeline["resource_graphics_pipeline_vertexdatatype"] ? pipeline["resource_graphics_pipeline_vertexdatatype"].as<int>() : 2; //2 is normal 3d vertex
-
-                bool blendEnable = pipeline["resource_graphics_pipeline_blend_enable"] ? pipeline["resource_graphics_pipeline_blend_enable"].as<bool>() : false;
-                bool depthTestEnable = pipeline["resource_graphics_pipeline_depth_test_enable"] ? pipeline["resource_graphics_pipeline_depth_test_enable"].as<bool>() : true;
-                bool depthWriteEnable = pipeline["resource_graphics_pipeline_depth_write_enable"] ? pipeline["resource_graphics_pipeline_depth_write_enable"].as<bool>() : true;
-                bool skyboxEnable = pipeline["resource_graphics_pipeline_skybox"] ? pipeline["resource_graphics_pipeline_skybox"].as<bool>() : false;
-
-                //std::cout<<"Pipeline Name: "<<name<<std::endl;
-                appInfo->VertexShader->push_back(vertexShaderName);
-                appInfo->FragmentShader->push_back(fragmentShaderName);
-                //appInfo.EnableSamplerCountOne->push_back(bEnableSamplerCountOne);
-               // appInfo.EnableDepthBias->push_back(bEnableDepthBias);
-                appInfo->RenderPassShadowmap->push_back(bRenderPassShadowmap);
-                appInfo->Subpass->push_back(subpassId);
-                appInfo->VertexDatatype->push_back(vertexDatatype);
-                appInfo->BlendEnable->push_back(blendEnable);
-                appInfo->DepthTestEnable->push_back(depthTestEnable);
-                appInfo->DepthWriteEnable->push_back(depthWriteEnable);
-                appInfo->SkyboxEnable->push_back(skyboxEnable);
-            }
-
-            // if (resource["VertexShaders"]) {
-            //     auto vertexShaderList = std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-            //     for (const auto& vertexShader : resource["VertexShaders"]) {
-            //         vertexShaderList->push_back(vertexShader["resource_vertexshader_name"].as<std::string>());
-            //     }
-            //     appInfo.VertexShader = std::move(vertexShaderList);
-            // }
-
-            // if (resource["FragmentShaders"]) {
-            //     auto fragmentShaderList = std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-            //     for (const auto& fragmentShader : resource["FragmentShaders"]) {
-            //         fragmentShaderList->push_back(fragmentShader["resource_fragmentshader_name"].as<std::string>());
-            //     }
-            //     appInfo.FragmentShader = std::move(fragmentShaderList);
-            // }
-        }*/
-
-        if (resource["ComputeShaders"]) {
-            auto computeShaderList = std::make_unique<std::vector<std::string>>(std::vector<std::string>());
-            for (const auto& computeShader : resource["ComputeShaders"]) {
-                computeShaderList->push_back(computeShader["resource_computeshader_name"].as<std::string>());
-            }
-            appInfo->ComputeShader = std::move(computeShaderList);
-        }
-    }
-
-    //std::cout<<"Application: Read Resources Done."<<std::endl;
 }
 
 void Application::ReadAttachments(){
@@ -1341,8 +1095,8 @@ void Application::CreatePipelines(){
     /****************************
     * Command Buffer
     ****************************/
-    if(appInfo->VertexShader != NULL) renderer.CreateGraphicsCommandBuffer();
-    if(appInfo->ComputeShader != NULL) renderer.CreateComputeCommandBuffer();
+    if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
 
     /****************************
@@ -1371,13 +1125,13 @@ void Application::CreatePipelines(){
     /****************************
     * Create Shaders
     ****************************/
-    if(appInfo->VertexShader != NULL){
+    if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
         for(int i = 0; i < appInfo->VertexShader->size(); i++){
             shaderManager.CreateShader((*appInfo->VertexShader)[i], shaderManager.VERT);
             shaderManager.CreateShader((*appInfo->FragmentShader)[i], shaderManager.FRAG);
         }
     }
-    if(appInfo->ComputeShader != NULL)
+    if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0)
         for(int i = 0; i < appInfo->ComputeShader->size(); i++)
             shaderManager.CreateShader((*appInfo->ComputeShader)[i], shaderManager.COMP);
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
@@ -1385,7 +1139,7 @@ void Application::CreatePipelines(){
     /****************************
     * Create Pipelines
     ****************************/
-    if(appInfo->VertexShader != NULL){
+    if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
         std::vector<VkDescriptorSetLayout> dsLayouts; //2 sets for graphics
 
         if((CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
@@ -1485,7 +1239,7 @@ void Application::CreatePipelines(){
         }
         //std::cout<<"Done create graphics pipeline"<<std::endl;
     }
-    if(appInfo->ComputeShader != NULL){ //for now assume only one compute pipeline
+    if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
         renderProcess.createComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
         renderProcess.createComputePipeline(shaderManager.compShaderModules[0]);
