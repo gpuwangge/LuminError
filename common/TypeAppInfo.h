@@ -149,12 +149,42 @@ struct ObjectConfig {
     }
 };
 
+struct TextConfig {
+    int textbox_id = 0;
+    std::string textbox_name = "Default";
+    std::vector<float> textbox_position = std::vector<float>(3,0);
+    std::vector<float> textbox_rotation = std::vector<float>(3,0);
+    bool textbox_bSticker = false;
+    float textbox_scale = 1.0f;
+    std::vector<float> textbox_color = std::vector<float>(4,1.0f);
+    int textbox_resource_model_id = 0;
+    //std::vector<int> resource_text_id_list;
+    std::string textbox_text_content = "";
+    std::vector<float> textbox_text_color = std::vector<float>(4,1.0f);
+    int textbox_resource_default_graphics_pipeline_id = 0;
+
+    void loadFromYaml(const YAML::Node& node) {
+        textbox_id                                     = getOrDefault(node, "textbox_id", 0);
+        textbox_name                                   = getOrDefault(node, "textbox_name", std::string{"Default"});
+        textbox_position                               = getOrDefault(node, "textbox_position", std::vector<float>(3, 0.0f));
+        textbox_rotation                               = getOrDefault(node, "textbox_rotation", std::vector<float>(3, 0.0f));
+        textbox_bSticker                               = getOrDefault(node, "textbox_sticker", false);
+        textbox_scale                                  = getOrDefault(node, "textbox_scale", 1.0f);
+        textbox_color                                  = getOrDefault(node, "textbox_color", std::vector<float>(4, 1.0f));
+        textbox_resource_model_id                      = getOrDefault(node, "resource_model_id", 0);
+        textbox_text_content                           = getOrDefault(node, "textbox_text_content", std::string{""});
+        textbox_text_color                             = getOrDefault(node, "textbox_text_color", std::vector<float>(4, 1.0f));
+        textbox_resource_default_graphics_pipeline_id  = getOrDefault(node, "resource_default_graphics_pipeline_id", 0);
+    }
+};
+
 
 struct AppInfo{
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;
     UniformConfig Uniform;
-    std::vector<ObjectConfig> objects;
+    std::vector<ObjectConfig> Objects;
+    std::vector<TextConfig> Textboxes;
 
     std::unique_ptr<std::vector<std::string>> VertexShader;
     std::unique_ptr<std::vector<std::string>> FragmentShader;

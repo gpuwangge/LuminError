@@ -73,7 +73,7 @@ namespace LEApplication{
         static std::vector<CLight> lights;
         //int customObjectSize = 0;
         int customLightsSize = 0;
-        int customTextboxSize = 0;
+        //int customTextboxSize = 0;
 
         void CleanUp();
 
@@ -114,7 +114,7 @@ namespace LEApplication{
         /******************
         * Helper Functions
         ******************/
-        void ReadControls();
+        //void ReadControls();
         void ReadFeatures();
         void ReadUniforms();
         void ReadAttachments();

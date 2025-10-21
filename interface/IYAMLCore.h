@@ -135,12 +135,28 @@ namespace LEYAML{
                 }
             }
             customObjectCount = ((max_object_id+1) < config["Objects"].size()) ? (max_object_id+1) : config["Objects"].size();
-            appInfo.objects.resize(customObjectCount);
+            appInfo.Objects.resize(customObjectCount);
             if (config["Objects"]) {
                 //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
                 for (const auto& obj : config["Objects"]) {
                     int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
-                    appInfo.objects[object_id].loadFromYaml(obj);
+                    appInfo.Objects[object_id].loadFromYaml(obj);
+                }
+            }
+
+            int max_textbox_id = -1;
+            if (config["Textboxes"]) {
+                for (const auto& tb : config["Textboxes"]) {
+                    int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
+                    max_textbox_id = (textbox_id > max_textbox_id) ? textbox_id : max_textbox_id;
+                }
+            }
+            customTextboxCount = ((max_textbox_id+1) < config["Textboxes"].size()) ? (max_textbox_id+1) : config["Textboxes"].size();
+            appInfo.Textboxes.resize(customTextboxCount);
+            if (config["Textboxes"]) {
+                for (const auto& tb : config["Textboxes"]) {
+                    int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
+                    appInfo.Textboxes[textbox_id].loadFromYaml(tb);
                 }
             }
 

@@ -21,7 +21,7 @@ Textboxes:
     textbox_text_content: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
     textbox_text_color: [255, 255, 255, 255]
     resource_model_id: 1
-    resource_text_id_list: [1]
+    #resource_text_id_list: [1]
     resource_default_graphics_pipeline_id: 1
 
 

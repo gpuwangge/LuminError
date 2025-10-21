@@ -289,15 +289,15 @@ void Application::Initialize(){
     objects.resize(instance_yamlcore->GetCustomObjectCount() + objectCountControl);
     std::cout<<"Object Size: "<<objects.size()<<std::endl;
     
-    int max_textbox_id = -1;
-    if ((*config)["Textboxes"]) {
-        for (const auto& tb : (*config)["Textboxes"]) {
-            int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
-            max_textbox_id = (textbox_id > max_textbox_id) ? textbox_id : max_textbox_id;
-        }
-    }
-    customTextboxSize = ((max_textbox_id+1) < (*config)["Textboxes"].size()) ? (max_textbox_id+1) : (*config)["Textboxes"].size();
-    textManager.m_textBoxes.resize(customTextboxSize + textboxCountControl);
+    // int max_textbox_id = -1;
+    // if ((*config)["Textboxes"]) {
+    //     for (const auto& tb : (*config)["Textboxes"]) {
+    //         int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
+    //         max_textbox_id = (textbox_id > max_textbox_id) ? textbox_id : max_textbox_id;
+    //     }
+    // }
+    // customTextboxSize = ((max_textbox_id+1) < (*config)["Textboxes"].size()) ? (max_textbox_id+1) : (*config)["Textboxes"].size();
+    textManager.m_textBoxes.resize(instance_yamlcore->GetCustomTextboxCount() + textboxCountControl);
     for(int i = 0; i < textManager.m_textBoxes.size(); i++)
         textManager.m_textBoxes[i].p_textManager = &textManager;
     std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
@@ -1244,18 +1244,17 @@ void Application::CreatePipelines(){
 }
 
 void Application::ReadRegisterObjects(){
-
     for(int i = 0; i < instance_yamlcore->GetCustomObjectCount(); i++){
-        objects[i].m_object_id = appInfo->objects[i].object_id;
-        objects[i].m_model_id = appInfo->objects[i].object_resource_model_id;
-        objects[i].m_texture_ids = appInfo->objects[i].object_resource_texture_id_list;
-        objects[i].m_default_graphics_pipeline_id = appInfo->objects[i].object_resource_default_graphics_pipeline_id;
-        objects[i].Name = appInfo->objects[i].object_name;
-        objects[i].bSticker = appInfo->objects[i].object_bSticker;
-        objects[i].SetPosition(appInfo->objects[i].object_position[0], appInfo->objects[i].object_position[1], appInfo->objects[i].object_position[2]);
-        objects[i].SetRotation(appInfo->objects[i].object_rotation[0], appInfo->objects[i].object_rotation[1], appInfo->objects[i].object_rotation[2]);
-        objects[i].SetVelocity(appInfo->objects[i].object_velocity[0], appInfo->objects[i].object_velocity[1], appInfo->objects[i].object_velocity[2]);
-        objects[i].SetAngularVelocity(appInfo->objects[i].object_angular_velocity[0], appInfo->objects[i].object_angular_velocity[1], appInfo->objects[i].object_angular_velocity[2]);
+        objects[i].m_object_id = appInfo->Objects[i].object_id;
+        objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
+        objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
+        objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
+        objects[i].Name = appInfo->Objects[i].object_name;
+        objects[i].bSticker = appInfo->Objects[i].object_bSticker;
+        objects[i].SetPosition(appInfo->Objects[i].object_position[0], appInfo->Objects[i].object_position[1], appInfo->Objects[i].object_position[2]);
+        objects[i].SetRotation(appInfo->Objects[i].object_rotation[0], appInfo->Objects[i].object_rotation[1], appInfo->Objects[i].object_rotation[2]);
+        objects[i].SetVelocity(appInfo->Objects[i].object_velocity[0], appInfo->Objects[i].object_velocity[1], appInfo->Objects[i].object_velocity[2]);
+        objects[i].SetAngularVelocity(appInfo->Objects[i].object_angular_velocity[0], appInfo->Objects[i].object_angular_velocity[1], appInfo->Objects[i].object_angular_velocity[2]);
 
         //must load resources before object register
         if(objects[i].bRegistered) {
@@ -1264,10 +1263,10 @@ void Application::ReadRegisterObjects(){
         }
         objects[i].Register((Application*)this);
         
-        if(appInfo->objects[i].object_scale != 1.0f){
-            objects[i].SetScale(appInfo->objects[i].object_scale, appInfo->objects[i].object_scale, appInfo->objects[i].object_scale);
+        if(appInfo->Objects[i].object_scale != 1.0f){
+            objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
         }else{
-            auto object_scale_3 = appInfo->objects[i].object_scale_3;
+            auto object_scale_3 = appInfo->Objects[i].object_scale_3;
             objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
         }
     }
@@ -1296,51 +1295,29 @@ void Application::ReadRegisterObjects(){
 }
 
 void Application::ReadRegisterTextboxes(){
-    //std::cout<<"Begin Read Textboxes"<<std::endl;
-    if ((*config)["Textboxes"]) {
-        for (const auto& tb : (*config)["Textboxes"]) {
-            int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
-            std::string name = tb["textbox_name"] ? tb["textbox_name"].as<std::string>() : "Default";
-            auto position = tb["textbox_position"] ? tb["textbox_position"].as<std::vector<float>>(): std::vector<float>(3,0);
-            glm::vec3 glm_position(position[0], position[1], position[2]);
-            auto rotation = tb["textbox_rotation"] ? tb["textbox_rotation"] .as<std::vector<float>>(): std::vector<float>(3,0);
-            glm::vec3 glm_rotation(rotation[0],rotation[1],rotation[2]);
-            bool bSticker = tb["textbox_sticker"] ? tb["textbox_sticker"].as<bool>() : false;
-            auto scale = tb["textbox_scale"] ? tb["textbox_scale"].as<float>() : 1.0f;
-            auto color = tb["textbox_color"] ? tb["textbox_color"].as<std::vector<float>>(): std::vector<float>(4,1.0f);
-            glm::vec4 glm_boxColor(color[0], color[1], color[2], color[3]);
-            int resource_model_id = tb["resource_model_id"] ? tb["resource_model_id"].as<int>() : 0;
-            //auto resource_text_id_list = tb["resource_text_id_list"] ? tb["resource_text_id_list"].as<std::vector<int>>() : std::vector<int>(1, 0); //recover later
-            std::string text_content = tb["textbox_text_content"] ? tb["textbox_text_content"].as<std::string>() : "";
-            auto text_color = tb["textbox_text_color"] ? tb["textbox_text_color"].as<std::vector<float>>() : std::vector<float>(4,1.0f);
-            glm::vec4 glm_textColor(text_color[0], text_color[1], text_color[2], text_color[3]);
-            int resource_default_graphics_pipeline_id = tb["resource_default_graphics_pipeline_id"] ? tb["resource_default_graphics_pipeline_id"].as<int>() : 0;
+    for(int i = 0; i < instance_yamlcore->GetCustomTextboxCount(); i++){
+        textManager.m_textBoxes[i].Name = appInfo->Textboxes[i].textbox_name;
+        textManager.m_textBoxes[i].m_textBoxID = appInfo->Textboxes[i].textbox_id;
+        textManager.m_textBoxes[i].SetPosition(appInfo->Textboxes[i].textbox_position[0], appInfo->Textboxes[i].textbox_position[1], appInfo->Textboxes[i].textbox_position[2]);
+        textManager.m_textBoxes[i].SetRotation(appInfo->Textboxes[i].textbox_rotation[0], appInfo->Textboxes[i].textbox_rotation[1], appInfo->Textboxes[i].textbox_rotation[2]);
+        textManager.m_textBoxes[i].bSticker = appInfo->Textboxes[i].textbox_bSticker;
+        textManager.m_textBoxes[i].SetScale(appInfo->Textboxes[i].textbox_scale);
+        textManager.m_textBoxes[i].SetBoxColor(glm::vec4(appInfo->Textboxes[i].textbox_color[0], appInfo->Textboxes[i].textbox_color[1], appInfo->Textboxes[i].textbox_color[2], appInfo->Textboxes[i].textbox_color[3]));
+        textManager.m_textBoxes[i].m_model_id = appInfo->Textboxes[i].textbox_resource_model_id;
+        textManager.m_textBoxes[i].m_text_content = appInfo->Textboxes[i].textbox_text_content;
+        textManager.m_textBoxes[i].SetTextColor(glm::vec4(appInfo->Textboxes[i].textbox_text_color[0], appInfo->Textboxes[i].textbox_text_color[1], appInfo->Textboxes[i].textbox_text_color[2], appInfo->Textboxes[i].textbox_text_color[3]));
+        textManager.m_textBoxes[i].m_default_graphics_pipeline_id = appInfo->Textboxes[i].textbox_resource_default_graphics_pipeline_id;
 
-            textManager.m_textBoxes[textbox_id].Name = name;
-            textManager.m_textBoxes[textbox_id].m_textBoxID = textbox_id;
-            textManager.m_textBoxes[textbox_id].SetPosition(glm_position);
-            textManager.m_textBoxes[textbox_id].SetRotation(glm_rotation);
-            textManager.m_textBoxes[textbox_id].bSticker = bSticker;
-            textManager.m_textBoxes[textbox_id].SetScale(scale);
-            textManager.m_textBoxes[textbox_id].SetBoxColor(glm_boxColor);
-            textManager.m_textBoxes[textbox_id].m_model_id = resource_model_id;
-            textManager.m_textBoxes[textbox_id].m_text_content = text_content;
-            textManager.m_textBoxes[textbox_id].SetTextColor(glm_textColor);
-            textManager.m_textBoxes[textbox_id].m_default_graphics_pipeline_id = resource_default_graphics_pipeline_id;
-
-            if(textManager.m_textBoxes[textbox_id].bRegistered) {
-                std::cout<<"WARNING: Trying to register a registered Textbox id("<<textbox_id<<")!"<<std::endl;
-                continue;
-            }
-            textManager.m_textBoxes[textbox_id].Register((Application*)this);
-
-            //std::cout<<"TextboxId:("<<id<<") Name:("<<textBoxes[id].GetName()<<") Position:("<<textBoxes[id].GetPosition().x<<","<<textBoxes[id].GetPosition().y<<","<<textBoxes[id].GetPosition().z<<")"<<std::endl;
+        if(textManager.m_textBoxes[i].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Textbox id("<<i<<")!"<<std::endl;
+            continue;
         }
+        textManager.m_textBoxes[i].Register((Application*)this);
     }
 
     //register textbox for controls
     if(appInfo->Feature.feature_graphics_enable_controls){
-        int indexOffset = customTextboxSize;
+        int indexOffset = instance_yamlcore->GetCustomTextboxCount();
         for(int i = 0; i < controlNodes.size(); i++){
             controlNodes[i]->RegisterTextbox(indexOffset);
             indexOffset += controlNodes[i]->m_textbox_count;
