@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <vector>
 
 #ifdef WIN32
     #define YAML_CPP_STATIC_DEFINE //to disable lots of yaml warnings
@@ -118,10 +119,42 @@ struct ControlUIContainerConfig {
     }
 };
 
+struct ObjectConfig {
+    std::string object_name = "Default";
+    int object_id = 0;
+    int object_resource_model_id = 0;
+    std::vector<int> object_resource_texture_id_list = std::vector<int>(1, 0);
+    int object_resource_default_graphics_pipeline_id = 0;
+    bool object_bSticker = false;
+    float object_scale = 1.0f;
+    std::vector<float> object_scale_3 = std::vector<float>(3, 1);
+    std::vector<float> object_position = std::vector<float>(3, 0);
+    std::vector<float> object_rotation = std::vector<float>(3, 0);
+    std::vector<float> object_velocity = std::vector<float>(3, 0);
+    std::vector<float> object_angular_velocity = std::vector<float>(3, 0);
+
+    void loadFromYaml(const YAML::Node& node) {
+        object_name                                     = getOrDefault(node, "object_name", std::string{"Default"});
+        object_id                                       = getOrDefault(node, "object_id", 0);
+        object_resource_model_id                        = getOrDefault(node, "resource_model_id", 0);
+        object_resource_texture_id_list                 = getOrDefault(node, "resource_texture_id_list", std::vector<int>{0});
+        object_resource_default_graphics_pipeline_id    = getOrDefault(node, "resource_default_graphics_pipeline_id", 0);
+        object_bSticker                                 = getOrDefault(node, "object_sticker", false);
+        object_scale                                    = getOrDefault(node, "object_scale", 1.0f);
+        object_scale_3                                  = getOrDefault(node, "object_scale_3", std::vector<float>(3, 1.0f));
+        object_position                                 = getOrDefault(node, "object_position", std::vector<float>(3, 0.0f));
+        object_rotation                                 = getOrDefault(node, "object_rotation", std::vector<float>(3, 0.0f));
+        object_velocity                                 = getOrDefault(node, "object_velocity", std::vector<float>(3, 0.0f));
+        object_angular_velocity                         = getOrDefault(node, "object_angular_velocity", std::vector<float>(3, 0.0f));
+    }
+};
+
+
 struct AppInfo{
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;
     UniformConfig Uniform;
+    std::vector<ObjectConfig> objects;
 
     std::unique_ptr<std::vector<std::string>> VertexShader;
     std::unique_ptr<std::vector<std::string>> FragmentShader;

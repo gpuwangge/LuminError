@@ -127,6 +127,23 @@ namespace LEYAML{
             bEnableMainSceneRenderpassSubpassDraw = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_draw"].as<bool>() : true; //need at least one subpass, even for compute sample
             bEnableMainSceneRenderpassSubpassObserve = config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"] ? config["MainSceneRenderpassSubpasses"]["mainsceneRenderpass_subpasses_observe"].as<bool>() : false;
 
+            int max_object_id = -1;
+            if (config["Objects"]) {
+                for (const auto& obj : config["Objects"]) {
+                    int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
+                    max_object_id = (object_id > max_object_id) ? object_id : max_object_id;
+                }
+            }
+            customObjectCount = ((max_object_id+1) < config["Objects"].size()) ? (max_object_id+1) : config["Objects"].size();
+            appInfo.objects.resize(customObjectCount);
+            if (config["Objects"]) {
+                //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
+                for (const auto& obj : config["Objects"]) {
+                    int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
+                    appInfo.objects[object_id].loadFromYaml(obj);
+                }
+            }
+
         }
 
         virtual void LoadFeatureFromYaml(const YAML::Node& node) = 0;
@@ -165,6 +182,10 @@ namespace LEYAML{
         bool GetEnableMainSceneRenderpassSubpassDraw() { return bEnableMainSceneRenderpassSubpassDraw; }
         bool GetEnableMainSceneRenderpassSubpassObserve() { return bEnableMainSceneRenderpassSubpassObserve; }
 
+        int& GetCustomObjectCount() { return customObjectCount; }
+        int& GetCustomTextboxCount() { return customTextboxCount; }
+        int& GetCustomLightCount() { return customLightCount; }
+
     private:
         AppInfo appInfo;
         YAML::Node config;
@@ -197,7 +218,9 @@ namespace LEYAML{
         bool bEnableMainSceneRenderpassSubpassDraw;
         bool bEnableMainSceneRenderpassSubpassObserve;
 
-
+        int customObjectCount;
+        int customTextboxCount;
+        int customLightCount;
     };
 
     #define EXPORT_FACTORY_FOR(ClassName) \

@@ -72,7 +72,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
     //config = std::make_unique<YAML::Node>(std::move(instance_yamlcore->GetConfig()));
 
-    instance_yamlcore->ReadYAMLFile(m_sampleName);
+    //instance_yamlcore->ReadYAMLFile(m_sampleName);
     appInfo = &instance_yamlcore->GetAppInfo();
     config = &instance_yamlcore->GetConfig();
     
@@ -232,9 +232,11 @@ void Application::Initialize(){
     //deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
     /****************************
-    * ? ControlNode
+    * 0 Read YAML File
     ****************************/
     //pControlNodes.push_back(&perfMetric);
+
+    instance_yamlcore->ReadYAMLFile(m_sampleName);
 
     /****************************
     * 1 Read Features and Controls
@@ -276,15 +278,15 @@ void Application::Initialize(){
 
     //controlNodes[0]->bVisible = false; //hide fps control node
 
-    int max_object_id = -1;
-    if ((*config)["Objects"]) {
-        for (const auto& obj : (*config)["Objects"]) {
-            int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
-            max_object_id = (object_id > max_object_id) ? object_id : max_object_id;
-        }
-    }
-    customObjectSize = ((max_object_id+1) < (*config)["Objects"].size()) ? (max_object_id+1) : (*config)["Objects"].size();
-    objects.resize(customObjectSize + objectCountControl);
+    // int max_object_id = -1;
+    // if ((*config)["Objects"]) {
+    //     for (const auto& obj : (*config)["Objects"]) {
+    //         int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
+    //         max_object_id = (object_id > max_object_id) ? object_id : max_object_id;
+    //     }
+    // }
+    // customObjectSize = ((max_object_id+1) < (*config)["Objects"].size()) ? (max_object_id+1) : (*config)["Objects"].size();
+    objects.resize(instance_yamlcore->GetCustomObjectCount() + objectCountControl);
     std::cout<<"Object Size: "<<objects.size()<<std::endl;
     
     int max_textbox_id = -1;
@@ -1242,51 +1244,37 @@ void Application::CreatePipelines(){
 }
 
 void Application::ReadRegisterObjects(){
-    if ((*config)["Objects"]) {
-        //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
-        for (const auto& obj : (*config)["Objects"]) {
-            int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
-            int resource_model_id = obj["resource_model_id"] ? obj["resource_model_id"].as<int>() : 0;
-            auto resource_texture_id_list = obj["resource_texture_id_list"] ? obj["resource_texture_id_list"].as<std::vector<int>>() : std::vector<int>(1, 0);
-            int resource_default_graphics_pipeline_id = obj["resource_default_graphics_pipeline_id"] ? obj["resource_default_graphics_pipeline_id"].as<int>() : 0;
-            std::string name = obj["object_name"] ? obj["object_name"].as<std::string>() : "Default";
-            bool bSticker = obj["object_sticker"] ? obj["object_sticker"].as<bool>() : false;
-            float object_scale = obj["object_scale"] ? obj["object_scale"].as<float>() : 1.0f;
-            auto object_scale_3 = obj["object_scale_3"] ? obj["object_scale_3"].as<std::vector<float>>() : std::vector<float>(3, object_scale);
-            auto position = obj["object_position"] ? obj["object_position"].as<std::vector<float>>(): std::vector<float>(3, 0);
-            auto rotation = obj["object_rotation"] ? obj["object_rotation"].as<std::vector<float>>(): std::vector<float>(3, 0);
-            auto velocity = obj["object_velocity"] ? obj["object_velocity"].as<std::vector<float>>(): std::vector<float>(3, 0);
-            auto angular_velocity = obj["object_angular_velocity"] ? obj["object_angular_velocity"].as<std::vector<float>>(): std::vector<float>(3, 0);
-            //bool isSkybox = obj["object_skybox"] ? obj["object_skybox"].as<bool>() : false;
 
-            objects[object_id].m_object_id = object_id;
-            objects[object_id].m_model_id = resource_model_id;
-            objects[object_id].m_texture_ids = resource_texture_id_list;
-            objects[object_id].m_default_graphics_pipeline_id = resource_default_graphics_pipeline_id;
-            objects[object_id].Name = name;
-            objects[object_id].bSticker = bSticker;
-            objects[object_id].SetPosition(position[0], position[1], position[2]);
-            objects[object_id].SetRotation(rotation[0], rotation[1], rotation[2]);
-            objects[object_id].SetVelocity(velocity[0], velocity[1], velocity[2]);
-            objects[object_id].SetAngularVelocity(angular_velocity[0], angular_velocity[1], angular_velocity[2]);
-            //objects[object_id].bSkybox = isSkybox;
+    for(int i = 0; i < instance_yamlcore->GetCustomObjectCount(); i++){
+        objects[i].m_object_id = appInfo->objects[i].object_id;
+        objects[i].m_model_id = appInfo->objects[i].object_resource_model_id;
+        objects[i].m_texture_ids = appInfo->objects[i].object_resource_texture_id_list;
+        objects[i].m_default_graphics_pipeline_id = appInfo->objects[i].object_resource_default_graphics_pipeline_id;
+        objects[i].Name = appInfo->objects[i].object_name;
+        objects[i].bSticker = appInfo->objects[i].object_bSticker;
+        objects[i].SetPosition(appInfo->objects[i].object_position[0], appInfo->objects[i].object_position[1], appInfo->objects[i].object_position[2]);
+        objects[i].SetRotation(appInfo->objects[i].object_rotation[0], appInfo->objects[i].object_rotation[1], appInfo->objects[i].object_rotation[2]);
+        objects[i].SetVelocity(appInfo->objects[i].object_velocity[0], appInfo->objects[i].object_velocity[1], appInfo->objects[i].object_velocity[2]);
+        objects[i].SetAngularVelocity(appInfo->objects[i].object_angular_velocity[0], appInfo->objects[i].object_angular_velocity[1], appInfo->objects[i].object_angular_velocity[2]);
 
-            //must load resources before object register
-            if(objects[object_id].bRegistered) {
-                std::cout<<"WARNING: Trying to register a registered Object id("<<object_id<<")!"<<std::endl;
-                continue;
-            }
-            objects[object_id].Register((Application*)this);
-            objects[object_id].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
-
-            //std::cout<<"ObjectId:("<<object_id<<") Name:("<<objects[object_id].Name<<") Length:("<<objects[object_id].Length.x<<","<<objects[object_id].Length.y<<","<<objects[object_id].Length.z<<")"
-            //    <<" Position:("<<objects[object_id].Position.x<<","<<objects[object_id].Position.y<<","<<objects[object_id].Position.z<<")"<<std::endl;
+        //must load resources before object register
+        if(objects[i].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+            continue;
+        }
+        objects[i].Register((Application*)this);
+        
+        if(appInfo->objects[i].object_scale != 1.0f){
+            objects[i].SetScale(appInfo->objects[i].object_scale, appInfo->objects[i].object_scale, appInfo->objects[i].object_scale);
+        }else{
+            auto object_scale_3 = appInfo->objects[i].object_scale_3;
+            objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
         }
     }
 
     //register objects for controls
     if(appInfo->Feature.feature_graphics_enable_controls){
-        int indexOffset = customObjectSize;
+        int indexOffset = instance_yamlcore->GetCustomObjectCount();
         for(int i = 0; i < controlNodes.size(); i++){
             controlNodes[i]->RegisterObject(indexOffset);
             indexOffset += controlNodes[i]->m_object_count;
@@ -1304,7 +1292,6 @@ void Application::ReadRegisterObjects(){
         logManager.print("\tScale: %f, %f, %f", objects[i].Scale);
         logManager.print("\tLength: %f, %f, %f", objects[i].Length);
     }
-    
 
 }
 

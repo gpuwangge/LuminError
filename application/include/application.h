@@ -71,7 +71,7 @@ namespace LEApplication{
         static std::vector<CObject> objects;
         //static std::vector<CTextBox> textBoxes;
         static std::vector<CLight> lights;
-        int customObjectSize = 0;
+        //int customObjectSize = 0;
         int customLightsSize = 0;
         int customTextboxSize = 0;
 
@@ -305,7 +305,7 @@ namespace LEApplication{
         //Expose functions for Example(SimpleDepthImage) to use
         void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
         void CmdNextSubpass() override { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
-        int GetCustomObjectSize() override { return customObjectSize; }
+        int GetCustomObjectSize() override { return instance_yamlcore->GetCustomObjectCount(); }
 
         //Expose functions for Example(SimpleEnvironmentmap) to use
         glm::vec3 GetObjectPosition(int objectId) override { return objects[objectId].Position; }
