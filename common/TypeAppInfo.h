@@ -196,6 +196,33 @@ struct LightConfig{
     }
 };
 
+struct CameraConfig{
+    int camera_mode = 0;
+    std::array<float,3> camera_position{};
+    std::array<float,3> camera_rotation{};
+    int object_id_target = 1;
+    std::array<float,2> camera_z{};
+    bool camera_projection_enable_orthographic = false;
+    float camera_projection_perspective_fov = 60;
+    float camera_projection_orthographic_width = 8;
+    float camera_projection_orthographic_height = 8;
+    float camera_keyboard_sensitive = 3;
+    float camera_mouse_sensitive = 60;
+
+    void loadFromYaml(const YAML::Node& node) {
+        camera_mode                                    = getOrDefault(node, "camera_mode", 0);
+        camera_position                                = getOrDefault(node, "camera_position", std::array<float, 3>{0.0f, 0.0f, 0.0f});
+        camera_rotation                                = getOrDefault(node, "camera_rotation", std::array<float, 3>{0.0f, 0.0f, 0.0f});
+        object_id_target                               = getOrDefault(node, "object_id_target", 1);
+        camera_z                                       = getOrDefault(node, "camera_z", std::array<float, 2>{0.0f, 0.0f});
+        camera_projection_enable_orthographic          = getOrDefault(node, "camera_projection_enable_orthographic", false);
+        camera_projection_perspective_fov              = getOrDefault(node, "camera_projection_perspective_fov", 60.0f);
+        camera_projection_orthographic_width           = getOrDefault(node, "camera_projection_orthographic_width", 8.0f);
+        camera_projection_orthographic_height          = getOrDefault(node, "camera_projection_orthographic_height", 8.0f);
+        camera_keyboard_sensitive                      = getOrDefault(node, "camera_keyboard_sensitive", 3.0f);
+        camera_mouse_sensitive                         = getOrDefault(node, "camera_mouse_sensitive", 60.0f);
+    }
+};
 
 struct AppInfo{
     FeatureConfig Feature;
@@ -204,6 +231,8 @@ struct AppInfo{
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
+    CameraConfig mainCamera;
+    CameraConfig lightCamera;
 
     std::unique_ptr<std::vector<std::string>> VertexShader;
     std::unique_ptr<std::vector<std::string>> FragmentShader;

@@ -1304,28 +1304,17 @@ void Application::ReadLightings(){
 }
 
 void Application::ReadCameras(){
-    mainCamera.cameraType = (CameraType)((*config)["MainCamera"]["camera_mode"] ? (*config)["MainCamera"]["camera_mode"].as<int>() : 0);
-    mainCamera.SetPosition(
-        (*config)["MainCamera"]["camera_position"][0].as<float>(), 
-        (*config)["MainCamera"]["camera_position"][1].as<float>(), 
-        (*config)["MainCamera"]["camera_position"][2].as<float>());
-    mainCamera.SetRotation(
-        (*config)["MainCamera"]["camera_rotation"][0].as<float>(), 
-        (*config)["MainCamera"]["camera_rotation"][1].as<float>(), 
-        (*config)["MainCamera"]["camera_rotation"][2].as<float>());
-        
-    mainCamera.focusObjectId = (*config)["MainCamera"]["object_id_target"] ? (*config)["MainCamera"]["object_id_target"].as<int>() : 0;
-
-    mainCamera.bEnableOrthographic = (*config)["MainCamera"]["camera_projection_enable_orthographic"] ? (*config)["MainCamera"]["camera_projection_enable_orthographic"].as<bool>() : false;
-    float nearPlane = (*config)["MainCamera"]["camera_z"][0].as<float>();
-    float farPlane = (*config)["MainCamera"]["camera_z"][1].as<float>();
-
-    if(!mainCamera.bEnableOrthographic){
-        float fov = (*config)["MainCamera"]["camera_projection_perspective_fov"] ? (*config)["MainCamera"]["camera_projection_perspective_fov"].as<float>() : 90.0f;
-        mainCamera.setPerspective(fov, 1.0f, nearPlane, farPlane);
+    mainCamera.cameraType = (CameraType)appInfo->mainCamera.camera_mode;
+    mainCamera.SetPosition(appInfo->mainCamera.camera_position[0], appInfo->mainCamera.camera_position[1],  appInfo->mainCamera.camera_position[2]);
+    mainCamera.SetRotation(appInfo->mainCamera.camera_rotation[0], appInfo->mainCamera.camera_rotation[1],  appInfo->mainCamera.camera_rotation[2]);
+    mainCamera.focusObjectId = appInfo->mainCamera.object_id_target;
+    mainCamera.bEnableOrthographic = appInfo->mainCamera.camera_projection_enable_orthographic;
+    float nearPlane = appInfo->mainCamera.camera_z[0];
+    float farPlane = appInfo->mainCamera.camera_z[1];
+    if(!mainCamera.bEnableOrthographic){ mainCamera.setPerspective(appInfo->mainCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
     }else{
-        float orthoWidth = (*config)["MainCamera"]["camera_projection_orthographic_width"] ? (*config)["MainCamera"]["camera_projection_orthographic_width"].as<float>() : 20.0f;
-        float orthoHeight = (*config)["MainCamera"]["camera_projection_orthographic_height"] ? (*config)["MainCamera"]["camera_projection_orthographic_height"].as<float>() : 20.0f;
+        float orthoWidth = appInfo->mainCamera.camera_projection_orthographic_width;
+        float orthoHeight = appInfo->mainCamera.camera_projection_orthographic_height;
         mainCamera.setOrthographic(
             -orthoWidth / 2.0f, orthoWidth / 2.0f,
             -orthoHeight / 2.0f, orthoHeight / 2.0f,
@@ -1333,11 +1322,24 @@ void Application::ReadCameras(){
     }
     mainCamera.SetRotationSensitivity(200.0f);
 
+    lightCameras[0].cameraType = (CameraType)appInfo->lightCamera.camera_mode;
+    lightCameras[0].SetPosition(appInfo->lightCamera.camera_position[0], appInfo->lightCamera.camera_position[1],  appInfo->lightCamera.camera_position[2]);
+    lightCameras[0].SetRotation(appInfo->lightCamera.camera_rotation[0], appInfo->lightCamera.camera_rotation[1],  appInfo->lightCamera.camera_rotation[2]);
+    lightCameras[0].focusObjectId = appInfo->lightCamera.object_id_target;
+    lightCameras[0].bEnableOrthographic = appInfo->lightCamera.camera_projection_enable_orthographic;
+    nearPlane = appInfo->lightCamera.camera_z[0];
+    farPlane = appInfo->lightCamera.camera_z[1];
+    if(!lightCameras[0].bEnableOrthographic){ lightCameras[0].setPerspective(appInfo->lightCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
+    }else{
+        float orthoWidth = appInfo->lightCamera.camera_projection_orthographic_width;
+        float orthoHeight = appInfo->lightCamera.camera_projection_orthographic_height;
+        lightCameras[0].setOrthographic(
+            -orthoWidth / 2.0f, orthoWidth / 2.0f,
+            -orthoHeight / 2.0f, orthoHeight / 2.0f,
+            nearPlane, farPlane);
+    }
+    //lightCameras[0].SetRotationSensitivity(100.0f);
 
-    // mainCamera.SetTargetPosition(
-    //     config["MainCamera"]["camera_target_position"][0].as<float>(), 
-    //     config["MainCamera"]["camera_target_position"][1].as<float>(), 
-    //     config["MainCamera"]["camera_target_position"][2].as<float>());
 
 #ifdef SDL
     //sdlManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
@@ -1346,43 +1348,6 @@ void Application::ReadCameras(){
     glfwManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
     glfwManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
 #endif
-
-    if ((*config)["LightCamera"]) {
-        lightCameras[0].cameraType = (CameraType)((*config)["LightCamera"]["camera_mode"] ? (*config)["LightCamera"]["camera_mode"].as<int>() : 0);
-        lightCameras[0].SetPosition(
-            (*config)["LightCamera"]["camera_position"][0].as<float>(), 
-            (*config)["LightCamera"]["camera_position"][1].as<float>(), 
-            (*config)["LightCamera"]["camera_position"][2].as<float>());
-        lightCameras[0].SetRotation(
-            (*config)["LightCamera"]["camera_rotation"][0].as<float>(), 
-            (*config)["LightCamera"]["camera_rotation"][1].as<float>(), 
-            (*config)["LightCamera"]["camera_rotation"][2].as<float>());
-        lightCameras[0].focusObjectId = (*config)["LightCamera"]["object_id_target"] ? (*config)["LightCamera"]["object_id_target"].as<int>() : 0;
-
-        lightCameras[0].bEnableOrthographic = (*config)["LightCamera"]["camera_projection_enable_orthographic"] ? (*config)["LightCamera"]["camera_projection_enable_orthographic"].as<bool>() : false;
-        float nearPlane = (*config)["LightCamera"]["camera_z"][0].as<float>();
-        float farPlane = (*config)["LightCamera"]["camera_z"][1].as<float>();
-
-        if(!lightCameras[0].bEnableOrthographic){
-            float fov = (*config)["LightCamera"]["camera_projection_perspective_fov"] ? (*config)["LightCamera"]["camera_projection_perspective_fov"].as<float>() : 90.0f;
-            lightCameras[0].setPerspective(fov, 1.0f, nearPlane, farPlane);
-        }else{
-            float orthoWidth = (*config)["LightCamera"]["camera_projection_orthographic_width"] ? (*config)["LightCamera"]["camera_projection_orthographic_width"].as<float>() : 20.0f;
-            float orthoHeight = (*config)["LightCamera"]["camera_projection_orthographic_height"] ? (*config)["LightCamera"]["camera_projection_orthographic_height"].as<float>() : 20.0f;
-            lightCameras[0].setOrthographic(
-                -orthoWidth / 2.0f, orthoWidth / 2.0f,
-                -orthoHeight / 2.0f, orthoHeight / 2.0f,
-                nearPlane, farPlane);
-        }
-    }else{
-        lightCameras[0].cameraType = mainCamera.cameraType; //default to main camera type
-        lightCameras[0].SetPosition(mainCamera.Position);
-        lightCameras[0].SetRotation(mainCamera.Rotation);
-        lightCameras[0].setPerspective(mainCamera.fov,  (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, mainCamera.znear, mainCamera.zfar);
-        lightCameras[0].focusObjectId = mainCamera.focusObjectId; //default to main camera focus object id
-        lightCameras[0].bEnableOrthographic = mainCamera.bEnableOrthographic; //default to main camera orthographic mode
-    }
-    //lightCameras[0].SetRotationSensitivity(100.0f);
 
     for(int i = 1; i < lights.size(); i++){//lightCameras.size()
         lightCameras[i].cameraType = lightCameras[0].cameraType; //default to light camera type

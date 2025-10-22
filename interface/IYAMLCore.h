@@ -176,7 +176,10 @@ namespace LEYAML{
                 }
             }
 
-        }
+            if (config["MainCamera"]) appInfo.mainCamera.loadFromYaml(config["MainCamera"]);
+            if (config["LightCamera"]) appInfo.lightCamera.loadFromYaml(config["LightCamera"]);
+
+        }//end of ReadYAMLFile()
 
         virtual void LoadFeatureFromYaml(const YAML::Node& node) = 0;
         virtual void LoadGraphicsFromYaml(const YAML::Node& node) = 0;
