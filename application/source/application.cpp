@@ -69,12 +69,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
     instance_yamlcore = static_cast<LEYAML::IYAMLCore*>(pVoid);
     instance_yamlcore->SetApplication(this);
 
-    //appInfo = std::make_unique<AppInfo>(std::move(instance_yamlcore->GetAppInfo()));
-    //config = std::make_unique<YAML::Node>(std::move(instance_yamlcore->GetConfig()));
-
-    //instance_yamlcore->ReadYAMLFile(m_sampleName);
     appInfo = &instance_yamlcore->GetAppInfo();
-    config = &instance_yamlcore->GetConfig();
+    //config = &instance_yamlcore->GetConfig();
     
     //Load SDL Core Module
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
@@ -704,8 +700,6 @@ void Application::CleanUp(){
  *******/
 
 void Application::ReadFeatures(){
-    //if ((*config)["Features"]) appInfo->Feature.loadFromYaml((*config)["Features"]);
-
     if(appInfo->Feature.b_feature_graphics_push_constant){
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     }
@@ -774,30 +768,6 @@ void Application::ReadUniforms(){
         //CComputeDescriptorManager::computeUniformTypes |= COMPUTE_STORAGEIMAGE_SWAPCHAIN;
         CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
     //std::cout<<"End Read Compute"<<std::endl;
-
-    //GraphicsTextureImageSamplers
-    //auto uniformsNode = config["Uniforms"];
-    /*
-    auto uniformsNode = (*config)["Uniforms"];
-    if (uniformsNode["GraphicsTextureImageSamplers"]) {
-        auto samplersNode = uniformsNode["GraphicsTextureImageSamplers"];
-        std::vector<int> miplevels;
-        std::vector<std::vector<bool>> uvwRepeats;
-
-        for (const auto& samplerNode : samplersNode) {
-            std::string name = getOrDefault<std::string>(samplerNode, "uniform_graphics_texture_image_sampler_name", ""); //not used
-            int miplevel = getOrDefault<int>(samplerNode, "uniform_graphics_texture_image_sampler_miplevel", 0);
-            std::vector<bool> uvwRepeat = getOrDefault<std::vector<bool>>(samplerNode, "uniform_graphics_texture_image_sampler_uvwrepeat", {true,true,true});
-
-            miplevels.push_back(miplevel);
-            uvwRepeats.push_back(uvwRepeat);
-        }
-
-        //std::cout<<"miplevels.size "<<miplevels.size()<<std::endl;
-
-        CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
-        CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(miplevels, uvwRepeats);
-    }*/
 
     //std::cout<<"insance_yamlcore->GetMipLevels().size() = "<<instance_yamlcore->GetMipLevels().size()<<std::endl;
     //std::cout<<"insance_yamlcore->GetUvwRepeats().size() = "<<instance_yamlcore->GetUvwRepeats().size()<<std::endl;

@@ -34,7 +34,7 @@ foreach(dir IN LISTS EXAMPLE_DIRS)
     endif()
 endforeach()
 
-message(STATUS "Example CMakeLists.txt: Found example directories: ${EXAMPLE_DIRECTORIES}")
+#message(STATUS "Example CMakeLists.txt: Found example directories: ${EXAMPLE_DIRECTORIES}")
 
 foreach(example_dir IN LISTS EXAMPLE_DIRECTORIES)
     add_example(${example_dir})

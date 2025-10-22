@@ -158,7 +158,7 @@ namespace LEApplication{
         //std::unique_ptr<AppInfo> appInfo;
         //std::unique_ptr<YAML::Node> config;
         AppInfo* appInfo = nullptr;
-        YAML::Node* config = nullptr;
+        //YAML::Node* config = nullptr;
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}

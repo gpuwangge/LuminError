@@ -50,7 +50,7 @@ foreach(dir IN LISTS EXAMPLE_DIRS)
         list(APPEND EXAMPLE_DIRECTORIES ${dir})
     endif()
 endforeach()
-message(STATUS "Root CMakeLists.txt: Found example directories: ${EXAMPLE_DIRECTORIES}")
+#message(STATUS "Root CMakeLists.txt: Found example directories: ${EXAMPLE_DIRECTORIES}")
 foreach(example_dir IN LISTS EXAMPLE_DIRECTORIES)
     # 获取目录中的 CPP 文件
     file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/example/${example_dir}/*.cpp)
