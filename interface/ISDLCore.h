@@ -18,6 +18,9 @@ namespace LESDL{
         virtual void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) = 0;
         virtual void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) = 0;
         virtual void eventHandle() = 0;
+
+        virtual void SetMouseSensibility(float value) = 0;
+        virtual void SetKeyboardSensibility(float value) = 0;
     };
 
     #define EXPORT_FACTORY_FOR(ClassName) \

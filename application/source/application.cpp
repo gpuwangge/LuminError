@@ -1322,6 +1322,9 @@ void Application::ReadCameras(){
     }
     mainCamera.SetRotationSensitivity(200.0f);
 
+    instance_sdlcore->SetKeyboardSensibility(appInfo->mainCamera.camera_keyboard_sensitive);
+    instance_sdlcore->SetMouseSensibility(appInfo->mainCamera.camera_mouse_sensitive);
+
     lightCameras[0].cameraType = (CameraType)appInfo->lightCamera.camera_mode;
     lightCameras[0].SetPosition(appInfo->lightCamera.camera_position[0], appInfo->lightCamera.camera_position[1],  appInfo->lightCamera.camera_position[2]);
     lightCameras[0].SetRotation(appInfo->lightCamera.camera_rotation[0], appInfo->lightCamera.camera_rotation[1],  appInfo->lightCamera.camera_rotation[2]);
@@ -1339,15 +1342,6 @@ void Application::ReadCameras(){
             nearPlane, farPlane);
     }
     //lightCameras[0].SetRotationSensitivity(100.0f);
-
-
-#ifdef SDL
-    //sdlManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
-    //sdlManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
-#else    
-    glfwManager.keyboard_sensitive = config["MainCamera"]["camera_keyboard_sensitive"] ? config["MainCamera"]["camera_keyboard_sensitive"].as<float>() : 3;
-    glfwManager.mouse_sensitive = config["MainCamera"]["camera_mouse_sensitive"] ? config["MainCamera"]["camera_mouse_sensitive"].as<float>() : 60;
-#endif
 
     for(int i = 1; i < lights.size(); i++){//lightCameras.size()
         lightCameras[i].cameraType = lightCameras[0].cameraType; //default to light camera type

@@ -50,6 +50,9 @@ namespace LESDL{
         void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) override;
         void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
         void eventHandle() override;
+
+        void SetMouseSensibility(float value) override { mouse_sensitive = value; }
+        void SetKeyboardSensibility(float value) override {keyboard_sensitive = value; }
         
     };
     EXPORT_FACTORY_FOR(SDLCore);
