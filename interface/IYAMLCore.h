@@ -160,6 +160,22 @@ namespace LEYAML{
                 }
             }
 
+            int max_light_id = -1;
+            if (config["Lights"]) {
+                for (const auto& light : config["Lights"]) {
+                    int light_id = light["light_id"] ? light["light_id"].as<int>() : 0;
+                    max_light_id = (light_id > max_light_id) ? light_id : max_light_id;
+                }
+            }
+            customLightCount = ((max_light_id+1) < config["Lights"].size())?(max_light_id+1):config["Lights"].size();
+            appInfo.Lights.resize(customLightCount);
+            if (config["Lights"]) {
+                for (const auto& light : config["Lights"]) {
+                    int light_id = light["light_id"] ? light["light_id"].as<int>() : 0;
+                    appInfo.Lights[light_id].loadFromYaml(light);
+                }
+            }
+
         }
 
         virtual void LoadFeatureFromYaml(const YAML::Node& node) = 0;

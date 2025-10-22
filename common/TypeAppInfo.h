@@ -178,6 +178,24 @@ struct TextConfig {
     }
 };
 
+struct LightConfig{
+    int light_id = 0;
+    std::string light_name = "Default";
+    std::vector<float> light_position = std::vector<float>(3,0);
+    std::vector<float> light_intensity = std::vector<float>(4,0);
+    std::vector<float> light_color = std::vector<float>(3,1.0f);
+    std::vector<float> light_spotAngle = std::vector<float>(2, 180.0f); //the default value is [180,180] degrees which sets the light to point light instead of spot light
+
+    void loadFromYaml(const YAML::Node& node) {
+        light_id                                       = getOrDefault(node, "light_id", 0);
+        light_name                                     = getOrDefault(node, "light_name", std::string{"Default"});
+        light_position                                 = getOrDefault(node, "light_position", std::vector<float>(3, 0.0f));
+        light_intensity                                = getOrDefault(node, "light_intensity", std::vector<float>(4, 0.0f));
+        light_color                                    = getOrDefault(node, "light_color", std::vector<float>(3, 1.0f));
+        light_spotAngle                                = getOrDefault(node, "light_spot", std::vector<float>(2, 180.0f));
+    }
+};
+
 
 struct AppInfo{
     FeatureConfig Feature;
@@ -185,6 +203,7 @@ struct AppInfo{
     UniformConfig Uniform;
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
+    std::vector<LightConfig> Lights;
 
     std::unique_ptr<std::vector<std::string>> VertexShader;
     std::unique_ptr<std::vector<std::string>> FragmentShader;

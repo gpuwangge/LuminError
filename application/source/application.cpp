@@ -276,45 +276,23 @@ void Application::Initialize(){
         if(!appInfo->Feature.feature_graphics_show_all_metric_controls) controlNodes[0]->bVisible = appInfo->Feature.feature_graphics_show_performance_control; //show performance control only
     }
 
-    //controlNodes[0]->bVisible = false; //hide fps control node
-
-    // int max_object_id = -1;
-    // if ((*config)["Objects"]) {
-    //     for (const auto& obj : (*config)["Objects"]) {
-    //         int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
-    //         max_object_id = (object_id > max_object_id) ? object_id : max_object_id;
-    //     }
-    // }
-    // customObjectSize = ((max_object_id+1) < (*config)["Objects"].size()) ? (max_object_id+1) : (*config)["Objects"].size();
+    
+    /****************************
+    * Precompute size for object/textbox/light
+    ****************************/
     objects.resize(instance_yamlcore->GetCustomObjectCount() + objectCountControl);
     std::cout<<"Object Size: "<<objects.size()<<std::endl;
     
-    // int max_textbox_id = -1;
-    // if ((*config)["Textboxes"]) {
-    //     for (const auto& tb : (*config)["Textboxes"]) {
-    //         int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
-    //         max_textbox_id = (textbox_id > max_textbox_id) ? textbox_id : max_textbox_id;
-    //     }
-    // }
-    // customTextboxSize = ((max_textbox_id+1) < (*config)["Textboxes"].size()) ? (max_textbox_id+1) : (*config)["Textboxes"].size();
     textManager.m_textBoxes.resize(instance_yamlcore->GetCustomTextboxCount() + textboxCountControl);
     for(int i = 0; i < textManager.m_textBoxes.size(); i++)
         textManager.m_textBoxes[i].p_textManager = &textManager;
     std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
     
-    if ((*config)["Lights"]) {
-        int max_light_d = 0;
-        for (const auto& light : (*config)["Lights"]) {
-            int light_id = light["light_id"] ? light["light_id"].as<int>() : 0;
-            max_light_d = (light_id > max_light_d) ? light_id : max_light_d;
-        }
-        customLightsSize = ((max_light_d+1) < (*config)["Lights"].size())?(max_light_d+1):(*config)["Lights"].size();
-        lights.resize(customLightsSize + lightCountControl);
-        std::cout<<"Light Size: "<<lights.size()<<std::endl;
+    lights.resize(instance_yamlcore->GetCustomLightCount() + lightCountControl);
+    swapchain.buffer_depthlight.resize(lights.size());
+    swapchain.framebuffers_shadowmap.resize(lights.size());
+    std::cout<<"Light Size: "<<lights.size()<<std::endl;
 
-        swapchain.buffer_depthlight.resize(lights.size());
-        swapchain.framebuffers_shadowmap.resize(lights.size());
-    }
     //update light number to ubo
     //std::cout<<"CGraphicsDescriptorManager::m_lightingUBO.lightNum = "<<lights.size()<<std::endl;
     CGraphicsDescriptorManager::m_lightingUBO.lightNum = lights.size();
@@ -506,13 +484,6 @@ void Application::Update(){
     deltaTime = secondsBetween(lastTimePoint, currentTimePoint);
     lastTimePoint = currentTimePoint;
 
-    //static auto startTime = std::chrono::high_resolution_clock::now();
-    //static auto lastTime = std::chrono::high_resolution_clock::now();
-    // auto currentTime = std::chrono::high_resolution_clock::now();
-    // elapseTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-    // deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-    // lastTime = currentTime;
-
     if(objects.size() > 0 && mainCamera.focusObjectId < objects.size())
         mainCamera.SetTargetPosition(objects[mainCamera.focusObjectId].Position);
     mainCamera.update(deltaTime);
@@ -522,12 +493,6 @@ void Application::Update(){
             lightCameras[i].SetTargetPosition(objects[lightCameras[i].focusObjectId].Position);
         lightCameras[i].update(deltaTime);
     }
-    // if(objects.size() > 0 && lightCamera[0].focusObjectId < objects.size())
-    //     lightCamera[0].SetTargetPosition(objects[lightCamera[0].focusObjectId].Position);
-    // if(objects.size() > 0 && lightCamera[1].focusObjectId < objects.size())
-    //     lightCamera[1].SetTargetPosition(objects[lightCamera[1].focusObjectId].Position);  
-    //lightCamera[0].update(deltaTime);
-    //lightCamera[1].update(deltaTime);
 
     for(int i = 0; i < objects.size(); i++) objects[i].Update(deltaTime, renderer.currentFrame, mainCamera); 
     textManager.Update(deltaTime, renderer.currentFrame, mainCamera);
@@ -535,32 +500,7 @@ void Application::Update(){
     if(appInfo->Feature.feature_graphics_enable_controls)
         for(int i = 0; i < controlNodes.size(); i++) controlNodes[i]->Update();
 
-    /*Calcuate FPS*/
-    //static int tempCount = 0;
-    //static TimePoint intervalStartTimePoint = now();
-    // if(PrintFPS){
-    //     double intervalElapseTime = millisecondsBetween(intervalStartTimePoint, currentTimePoint);
-    //     if(intervalElapseTime > 1000){
-    //         std::cout<<"FPS: "<<tempCount<<" interval: "<<intervalElapseTime<<" milliseconds"<<std::endl;
-    //         tempCount = 0;
-    //         intervalStartTimePoint = now();
-    //     }else tempCount++;
-    // }
     frameCount++;
-
-
-    // static auto intervalStartTime = std::chrono::high_resolution_clock::now();
-    // static auto intervalEndTime = std::chrono::high_resolution_clock::now();
-    // if(PrintFPS){
-    //     intervalEndTime = std::chrono::high_resolution_clock::now();
-    //     auto intervalElapseTime = std::chrono::duration<float, std::chrono::milliseconds::period>(intervalEndTime - intervalStartTime).count();
-    //     if(intervalElapseTime > 1000){
-    //         std::cout<<"FPS: "<<frameCount<<" interval: "<<intervalElapseTime<<" milliseconds"<<std::endl;
-    //         frameCount = 0;
-    //         intervalStartTime = std::chrono::high_resolution_clock::now();
-    //     }else frameCount++;
-    // }
-    
 }
 
 //void Application::PostUpdate(){ instance_game->PostUpdate();}
@@ -1339,37 +1279,28 @@ void Application::ReadRegisterTextboxes(){
 }
 
 void Application::ReadLightings(){
-    if ((*config)["Lights"]) {
-        for (const auto& light : (*config)["Lights"]) {
-            int id = light["light_id"] ? light["light_id"].as<int>() : 0;
-            if(lights[id].bRegistered) {
-                std::cout<<"WARNING: Trying to register a registered Light id("<<id<<")!"<<std::endl;
-                continue;
-            }
-            
-            std::string name = light["light_name"] ? light["light_name"].as<std::string>() : "Default";
-
-            auto position = light["light_position"] ? light["light_position"].as<std::vector<float>>(): std::vector<float>(3,0);
-            glm::vec3 glm_position(position[0], position[1], position[2]);
-
-            auto intensity = light["light_intensity"] ? light["light_intensity"].as<std::vector<float>>(): std::vector<float>(4,0);
-
-            auto color = light["light_color"] ? light["light_color"].as<std::vector<float>>(): std::vector<float>(3,1.0f);
-            glm::vec3 glm_color(color[0], color[1], color[2]);
-
-            auto spotAngle = light["light_spot"] ? light["light_spot"].as<std::vector<float>>() : std::vector<float>(2, 180.0f); //the default value is [180,180] degrees which sets the light to point light instead of spot light
-            float spotInnerAngle = spotAngle[0];
-            float spotOuterAngle = spotAngle[1];
-
-            lights[id].Register(name, id, glm_position, intensity, glm_color, spotInnerAngle, spotOuterAngle);
-
-            //std::cout<<"LightId:("<<id<<") Name:("<<lights[id].GetLightName()<<") Intensity:("<<lights[id].GetIntensity(0)<<","<<lights[id].GetIntensity(1)<<","<<lights[id].GetIntensity(2)<<","<<lights[id].GetIntensity(3)<<")"
-            //    <<" Position:("<<lights[id].GetLightPosition().x<<","<<lights[id].GetLightPosition().y<<","<<lights[id].GetLightPosition().z<<")"<<std::endl;
- 
+    for(int i = 0; i < instance_yamlcore->GetCustomLightCount(); i++){
+        int light_id = appInfo->Lights[i].light_id;
+        if(lights[light_id].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Light id("<<light_id<<")!"<<std::endl;
+            continue;
         }
-        for(int i = 0; i < lights.size(); i++)
-            if(!lights[i].bRegistered) std::cout<<"WARNING: Light id("<<i<<") is not registered!"<<std::endl;
+        
+        std::string name = appInfo->Lights[i].light_name;
+        auto position = appInfo->Lights[i].light_position;
+        glm::vec3 glm_position(position[0], position[1], position[2]);
+        auto intensity = appInfo->Lights[i].light_intensity;
+        auto color = appInfo->Lights[i].light_color;
+        glm::vec3 glm_color(color[0], color[1], color[2]);
+        auto spotAngle = appInfo->Lights[i].light_spotAngle; //the default value is [180,180] degrees which sets the light to point light instead of spot light
+        float spotInnerAngle = spotAngle[0];
+        float spotOuterAngle = spotAngle[1];
+
+        lights[light_id].Register(name, light_id, glm_position, intensity, glm_color, spotInnerAngle, spotOuterAngle);
     }
+
+    for(int i = 0; i < lights.size(); i++)
+        if(!lights[i].bRegistered) std::cout<<"WARNING: Light id("<<i<<") is not registered!"<<std::endl;
 }
 
 void Application::ReadCameras(){

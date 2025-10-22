@@ -71,9 +71,6 @@ namespace LEApplication{
         static std::vector<CObject> objects;
         //static std::vector<CTextBox> textBoxes;
         static std::vector<CLight> lights;
-        //int customObjectSize = 0;
-        int customLightsSize = 0;
-        //int customTextboxSize = 0;
 
         void CleanUp();
 
