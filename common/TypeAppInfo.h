@@ -224,6 +224,40 @@ struct CameraConfig{
     }
 };
 
+struct GraphicsPipelineConfig{
+    std::string graphics_pipeline_name = "Default";
+    std::string graphics_pipeline_vertexshader_name = "Default";
+    std::string graphics_pipeline_fragmentshader_name = "Default";
+    bool graphics_pipeline_renderpasses_shadowmap = 0;
+    int graphics_pipeline_subpasses_subpass_id = 0;
+    int graphics_pipeline_vertexdatatype = 2;
+    bool graphics_pipeline_blend_enable = false;
+    bool graphics_pipeline_depth_test_enable = true;
+    bool graphics_pipeline_depth_write_enable = true;
+    bool graphics_pipeline_skybox = false;
+
+    void loadFromYaml(const YAML::Node& node) {
+        graphics_pipeline_name                         = getOrDefault(node, "resource_graphics_pipeline_name", std::string{"Default"});
+        graphics_pipeline_vertexshader_name            = getOrDefault(node, "resource_graphics_pipeline_vertexshader_name", std::string{"Default"});
+        graphics_pipeline_fragmentshader_name          = getOrDefault(node, "resource_graphics_pipeline_fragmentshader_name", std::string{"Default"});
+        graphics_pipeline_renderpasses_shadowmap       = getOrDefault(node, "renderpasses_shadowmap", false);
+        graphics_pipeline_subpasses_subpass_id         = getOrDefault(node, "subpasses_subpass_id", 0);
+        graphics_pipeline_vertexdatatype               = getOrDefault(node, "resource_graphics_pipeline_vertexdatatype", 2);
+        graphics_pipeline_blend_enable                 = getOrDefault(node, "resource_graphics_pipeline_blend_enable", false);
+        graphics_pipeline_depth_test_enable            = getOrDefault(node, "resource_graphics_pipeline_depth_test_enable", true);
+        graphics_pipeline_depth_write_enable           = getOrDefault(node, "resource_graphics_pipeline_depth_write_enable", true);
+        graphics_pipeline_skybox                       = getOrDefault(node, "resource_graphics_pipeline_skybox", false);
+    }
+};
+
+struct ComputePipelineConfig{
+    std::string compute_pipeline_computeshader_name = "Default";
+
+    void loadFromYaml(const YAML::Node& node) {
+        compute_pipeline_computeshader_name            = getOrDefault(node, "resource_computeshader_name", std::string{"Default"});
+    }
+};
+
 struct AppInfo{
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;
@@ -233,17 +267,9 @@ struct AppInfo{
     std::vector<LightConfig> Lights;
     CameraConfig mainCamera;
     CameraConfig lightCamera;
+    std::vector<GraphicsPipelineConfig> GraphicsPipeline;
+    std::vector<ComputePipelineConfig> ComputePipeline;
 
-    std::unique_ptr<std::vector<std::string>> VertexShader;
-    std::unique_ptr<std::vector<std::string>> FragmentShader;
-    std::unique_ptr<std::vector<bool>> RenderPassShadowmap;
-    std::unique_ptr<std::vector<int>> Subpass;
-    std::unique_ptr<std::vector<int>> VertexDatatype;
-    std::unique_ptr<std::vector<bool>> BlendEnable;
-    std::unique_ptr<std::vector<bool>> DepthTestEnable;
-    std::unique_ptr<std::vector<bool>> DepthWriteEnable;
-    std::unique_ptr<std::vector<bool>> SkyboxEnable;
-    std::unique_ptr<std::vector<std::string>> ComputeShader;
     //RenderModes RenderMode = RenderModes::GRAPHICS;
     int RenderMode = 0;
 };

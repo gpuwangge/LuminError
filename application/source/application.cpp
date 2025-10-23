@@ -1001,8 +1001,10 @@ void Application::CreatePipelines(){
     /****************************
     * Command Buffer
     ****************************/
-    if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
-    if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
+    //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->GraphicsPipeline.size() > 0) renderer.CreateGraphicsCommandBuffer();
+    //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
+    if(appInfo->ComputePipeline.size() > 0) renderer.CreateComputeCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
 
     /****************************
@@ -1031,21 +1033,23 @@ void Application::CreatePipelines(){
     /****************************
     * Create Shaders
     ****************************/
-    if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
-        for(int i = 0; i < appInfo->VertexShader->size(); i++){
-            shaderManager.CreateShader((*appInfo->VertexShader)[i], shaderManager.VERT);
-            shaderManager.CreateShader((*appInfo->FragmentShader)[i], shaderManager.FRAG);
+    //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
+    if(appInfo->GraphicsPipeline.size() > 0){
+        for(int i = 0; i < appInfo->GraphicsPipeline.size(); i++){
+            //std::cout<<appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name<<std::endl;
+            shaderManager.CreateShader(appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name, shaderManager.VERT);
+            shaderManager.CreateShader(appInfo->GraphicsPipeline[i].graphics_pipeline_fragmentshader_name, shaderManager.FRAG);
         }
     }
-    if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0)
-        for(int i = 0; i < appInfo->ComputeShader->size(); i++)
-            shaderManager.CreateShader((*appInfo->ComputeShader)[i], shaderManager.COMP);
+    if(appInfo->ComputePipeline.size() > 0)
+        for(int i = 0; i < appInfo->ComputePipeline.size(); i++)
+            shaderManager.CreateShader(appInfo->ComputePipeline[i].compute_pipeline_computeshader_name, shaderManager.COMP);
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
 
     /****************************
     * Create Pipelines
     ****************************/
-    if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
+    if(appInfo->GraphicsPipeline.size() > 0){
         std::vector<VkDescriptorSetLayout> dsLayouts; //2 sets for graphics
 
         if((CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
@@ -1072,7 +1076,8 @@ void Application::CreatePipelines(){
         //sampler should also be universal
         
         //std::cout<<"Begin create graphics pipeline"<<std::endl;
-        for(int i = 0; i < appInfo->VertexShader->size(); i++){
+        //for(int i = 0; i < appInfo->VertexShader->size(); i++){
+        for(int i = 0; i < appInfo->GraphicsPipeline.size(); i++){
             //std::cout<<"test create pipeline"<<std::endl;
             //! All graphics pipelines use the same dsLayouts
             if(shaderManager.bEnablePushConstant){
@@ -1083,69 +1088,95 @@ void Application::CreatePipelines(){
             else renderProcess.createGraphicsPipelineLayout(dsLayouts, i);
 
             
-            int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
+            //int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
+            int vertexDatatype = appInfo->GraphicsPipeline[i].graphics_pipeline_vertexdatatype;
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
 
             switch(vertexDatatype){
                 case VertexStructureTypes::NoType:
+                    // std::cout<<"graphics_pipeline_subpasses_subpass_id="<<appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id<<std::endl;
+                    // std::cout<<"graphics_pipeline_blend_enable="<<appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable<<std::endl;
+                    // std::cout<<"graphics_pipeline_depth_test_enable="<<appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable<<std::endl;
+                    // std::cout<<"graphics_pipeline_depth_write_enable="<<appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable<<std::endl;
+                    // std::cout<<"graphics_pipeline_skybox="<<appInfo->GraphicsPipeline[i].graphics_pipeline_skybox<<std::endl;
                     renderProcess.createGraphicsPipeline(
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
-                        shaderManager.fragShaderModules[i], i,
-                        (*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
+                        shaderManager.fragShaderModules[i], i, 
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        //(*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
-                    if((*appInfo->RenderPassShadowmap)[i]) {
+                    //if((*appInfo->RenderPassShadowmap)[i]) {
+                    if(appInfo->GraphicsPipeline[i].graphics_pipeline_renderpasses_shadowmap) {
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
-                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
+                            appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipeline[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_shadowmap,
+                            appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
+                            appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        //    (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
+                        //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                     }else{
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
-                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
+                            appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipeline[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_mainscene,
+                            appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
+                            appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                            //(*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
+                        //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
-                    std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
+                    //std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
                     renderProcess.createGraphicsPipeline<Vertex2D>(
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        (*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
-                    std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        //(*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
+                    //std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
                 break;
                 case VertexStructureTypes::ParticleType:
                     renderProcess.createGraphicsPipeline<Particle>(
                         VK_PRIMITIVE_TOPOLOGY_POINT_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        (*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
-                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        //(*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
+                        //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                 break;
                 case VertexStructureTypes::TextQuad:
                     renderProcess.createGraphicsPipeline<TextQuadVertex>(
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, true, i,
-                        (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
-                        (*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        //(*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
+                        //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
                 break;
                 default:
                 break;
             }
+            if(bPipelineVerbose) std::cout<<"Done create one graphics pipeline"<<std::endl;
         }
-        //std::cout<<"Done create graphics pipeline"<<std::endl;
+        
     }
-    if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0){ //for now assume only one compute pipeline
+    if(appInfo->ComputePipeline.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
         renderProcess.createComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
         renderProcess.createComputePipeline(shaderManager.compShaderModules[0]);
