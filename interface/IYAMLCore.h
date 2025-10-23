@@ -17,9 +17,6 @@ namespace LEYAML{
         AppInfo& GetAppInfo() { return appInfo; }
         YAML::Node& GetConfig() { return config; }
 
-        std::vector<int>& GetSamplerMipLevels() { return sampler_miplevels; }
-        std::vector<std::vector<bool>>& GetSamplerUvwRepeats() { return sampler_uvwRepeats; }
-
         int& GetCustomObjectCount() { return customObjectCount; }
         int& GetCustomTextboxCount() { return customTextboxCount; }
         int& GetCustomLightCount() { return customLightCount; }
@@ -27,9 +24,6 @@ namespace LEYAML{
     protected:
         AppInfo appInfo;
         YAML::Node config;
-
-        std::vector<int> sampler_miplevels;
-        std::vector<std::vector<bool>> sampler_uvwRepeats;
 
         int customObjectCount;
         int customTextboxCount;

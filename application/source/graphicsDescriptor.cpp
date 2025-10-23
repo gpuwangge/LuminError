@@ -552,7 +552,7 @@ void CGraphicsDescriptorManager::addVPUniformBuffer(){
 * 6 GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE
 ************/
 std::vector<VkSampler> CGraphicsDescriptorManager::textureImageSamplers;
-void CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(std::vector<int> mipLevels, std::vector<std::vector<bool>> UVWRepeats){
+void CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats){
     graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;//non-static content
     //std::cout<<"addImageSamplerUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 

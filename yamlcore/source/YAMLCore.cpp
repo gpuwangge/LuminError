@@ -25,18 +25,11 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
     if(uniformsNode["Compute"]) appInfo.Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
 
     if (uniformsNode["GraphicsTextureImageSamplers"]) {
-        auto samplersNode = uniformsNode["GraphicsTextureImageSamplers"];
-        //std::vector<int> miplevels;
-        //std::vector<std::vector<bool>> uvwRepeats;
-
-        for (const auto& samplerNode : samplersNode) {
-            std::string name = getOrDefault<std::string>(samplerNode, "uniform_graphics_texture_image_sampler_name", ""); //not used
-            int miplevel = getOrDefault<int>(samplerNode, "uniform_graphics_texture_image_sampler_miplevel", 0);
-            std::vector<bool> uvwRepeat = getOrDefault<std::vector<bool>>(samplerNode, "uniform_graphics_texture_image_sampler_uvwrepeat", {true,true,true});
-
-            sampler_miplevels.push_back(miplevel);
-            sampler_uvwRepeats.push_back(uvwRepeat);
-        }
+        int samplerCount = 0;
+        for(const auto& samplerNode : uniformsNode["GraphicsTextureImageSamplers"]) samplerCount++;
+        appInfo.Samplers.resize(samplerCount);
+        samplerCount = 0;
+        for (const auto& samplerNode : uniformsNode["GraphicsTextureImageSamplers"]) appInfo.Samplers[samplerCount++].loadFromYaml(samplerNode);
     }
 
     for (const auto& resource : config["Resources"]) {

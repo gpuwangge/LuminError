@@ -328,6 +328,18 @@ struct ModelConfig{
     }
 };
 
+struct SamplerConfig{
+    std::string sampler_name;
+    int sampler_miplevels;
+    std::array<bool,3> sampler_uvwRepeats;
+
+    void loadFromYaml(const YAML::Node& node) {
+        sampler_name                                   = getOrDefault(node, "uniform_graphics_texture_image_sampler_name", std::string{"Default"});
+        sampler_miplevels                              = getOrDefault(node, "uniform_graphics_texture_image_sampler_miplevel", 0);
+        sampler_uvwRepeats                             = getOrDefault(node, "uniform_graphics_texture_image_sampler_uvwrepeat", std::array<bool,3>{true, true, true});
+    }
+};
+
 struct AppInfo{
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
@@ -342,6 +354,7 @@ struct AppInfo{
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;
     UniformConfig Uniform;
+    std::vector<SamplerConfig> Samplers;
     
     CameraConfig MainCamera;
     CameraConfig LightCamera;

@@ -14,7 +14,6 @@ namespace LEApplication{
     public:
         virtual ~IApplication() = default;
         virtual void Run(std::string exampleName = "SimpleTriangle") = 0;
-        //virtual void Greet() = 0;
 
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;
@@ -127,13 +126,4 @@ namespace LEApplication{
 
     };
 
-    // #define EXPORT_APPLICATION_FACTORY_FOR(ClassName) \
-    //     extern "C" void* CreateInstance() { return new ClassName(); } \
-    //     extern "C" void DestroyInstance(void* p) { \
-    //         if (p){ \
-    //             static_cast<ClassName*>(p)->DestroyInstance(static_cast<ClassName*>(p)->handle_module_sdlcore,static_cast<ClassName*>(p)->instance_sdlcore); \
-    //             static_cast<ClassName*>(p)->DestroyInstance(static_cast<ClassName*>(p)->handle_module_game,static_cast<ClassName*>(p)->instance_game); \
-    //             delete static_cast<ClassName*>(p); \
-    //         } \
-    //     }
 }

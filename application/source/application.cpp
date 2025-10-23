@@ -771,9 +771,15 @@ void Application::ReadUniforms(){
 
     //std::cout<<"insance_yamlcore->GetMipLevels().size() = "<<instance_yamlcore->GetMipLevels().size()<<std::endl;
     //std::cout<<"insance_yamlcore->GetUvwRepeats().size() = "<<instance_yamlcore->GetUvwRepeats().size()<<std::endl;
-    if(instance_yamlcore->GetSamplerMipLevels().size() > 0){
+    if(appInfo->Samplers.size() > 0){
         CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
-        CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(instance_yamlcore->GetSamplerMipLevels(), instance_yamlcore->GetSamplerUvwRepeats());
+        std::vector<int> mipLevels;
+        std::vector<std::array<bool,3>> UVWRepeats;
+        for(int i = 0; i < appInfo->Samplers.size(); i++){
+            mipLevels.push_back(appInfo->Samplers[i].sampler_miplevels);
+            UVWRepeats.push_back(appInfo->Samplers[i].sampler_uvwRepeats);
+        }
+        CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats);
     }
 
 }
