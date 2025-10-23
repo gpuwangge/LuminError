@@ -1,11 +1,5 @@
 project(example)
 
-include_directories(
-    $ENV{VULKAN_SDK}/Include
-    $ENV{INCLUDE}
-    ${CMAKE_SOURCE_DIR}/vulkanFramework/include
-    ${CMAKE_SOURCE_DIR}/thirdparty)
-
 function(add_example EXAMPLENAME)
     file(GLOB SOURCES "${EXAMPLENAME}/*.cpp")
     #file(GLOB HEADERS "${EXAMPLENAME}/*.h")
@@ -17,8 +11,9 @@ function(add_example EXAMPLENAME)
         PREFIX ""
     )
 
-    #target_include_directories(${EXAMPLENAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    target_link_libraries(${EXAMPLENAME} leinterface lecommon)
+    target_include_directories(${EXAMPLENAME} PRIVATE $ENV{INCLUDE}) #glm
+
+    target_link_libraries(${EXAMPLENAME} PRIVATE leinterface lecommon)
 
     add_custom_command(TARGET ${EXAMPLENAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${EXAMPLENAME}.dll <<<<<<<<<<<<<<<<<<"
