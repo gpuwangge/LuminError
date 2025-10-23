@@ -8,19 +8,19 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
     std::string fullYamlName = YAML_PATH + filename + ".yaml";
     std::cout<<"Loading YAML file: "<<fullYamlName<<std::endl;
     try{
-        config = YAML::LoadFile(fullYamlName);
+        yamlNode = YAML::LoadFile(fullYamlName);
     } catch (...){
         std::cout<<"Error loading yaml file"<<std::endl;
         return;
     }
 
 
-    for(const auto& control : (config)["Controls"])
+    for(const auto& control : (yamlNode)["Controls"])
         if (control["UIContainer"]) appInfo.ControlUIContainer.loadFromYaml(control["UIContainer"]);
 
-    if(config["Features"]) appInfo.Feature.loadFromYaml(config["Features"]);
+    if(yamlNode["Features"]) appInfo.Feature.loadFromYaml(yamlNode["Features"]);
 
-    auto uniformsNode = config["Uniforms"];
+    auto uniformsNode = yamlNode["Uniforms"];
     if(uniformsNode["Graphics"]) appInfo.Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
     if(uniformsNode["Compute"]) appInfo.Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
 
@@ -32,7 +32,7 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
         for (const auto& samplerNode : uniformsNode["GraphicsTextureImageSamplers"]) appInfo.Samplers[samplerCount++].loadFromYaml(samplerNode);
     }
 
-    for (const auto& resource : config["Resources"]) {
+    for (const auto& resource : yamlNode["Resources"]) {
         if (resource["Fonts"]) {
             for (const auto& font : resource["Fonts"]) {
                 appInfo.Font.loadFromYaml(font);
@@ -72,61 +72,61 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
         }
     }
 
-    if(config["Attachments"]) appInfo.Attachment.loadFromYaml(config["Attachments"]);
-    if(config["Subpasses"]) appInfo.Subpass.loadFromYaml(config["Subpasses"]);
+    if(yamlNode["Attachments"]) appInfo.Attachment.loadFromYaml(yamlNode["Attachments"]);
+    if(yamlNode["Subpasses"]) appInfo.Subpass.loadFromYaml(yamlNode["Subpasses"]);
 
 
     int max_object_id = -1;
-    if (config["Objects"]) {
-        for (const auto& obj : config["Objects"]) {
+    if (yamlNode["Objects"]) {
+        for (const auto& obj : yamlNode["Objects"]) {
             int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
             max_object_id = (object_id > max_object_id) ? object_id : max_object_id;
         }
     }
-    customObjectCount = ((max_object_id+1) < config["Objects"].size()) ? (max_object_id+1) : config["Objects"].size();
+    int customObjectCount = ((max_object_id+1) < yamlNode["Objects"].size()) ? (max_object_id+1) : yamlNode["Objects"].size();
     appInfo.Objects.resize(customObjectCount);
-    if (config["Objects"]) {
+    if (yamlNode["Objects"]) {
         //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
-        for (const auto& obj : config["Objects"]) {
+        for (const auto& obj : yamlNode["Objects"]) {
             int object_id = obj["object_id"] ? obj["object_id"].as<int>() : 0;
             appInfo.Objects[object_id].loadFromYaml(obj);
         }
     }
 
     int max_textbox_id = -1;
-    if (config["Textboxes"]) {
-        for (const auto& tb : config["Textboxes"]) {
+    if (yamlNode["Textboxes"]) {
+        for (const auto& tb : yamlNode["Textboxes"]) {
             int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
             max_textbox_id = (textbox_id > max_textbox_id) ? textbox_id : max_textbox_id;
         }
     }
-    customTextboxCount = ((max_textbox_id+1) < config["Textboxes"].size()) ? (max_textbox_id+1) : config["Textboxes"].size();
+    int customTextboxCount = ((max_textbox_id+1) < yamlNode["Textboxes"].size()) ? (max_textbox_id+1) : yamlNode["Textboxes"].size();
     appInfo.Textboxes.resize(customTextboxCount);
-    if (config["Textboxes"]) {
-        for (const auto& tb : config["Textboxes"]) {
+    if (yamlNode["Textboxes"]) {
+        for (const auto& tb : yamlNode["Textboxes"]) {
             int textbox_id = tb["textbox_id"] ? tb["textbox_id"].as<int>() : 0;
             appInfo.Textboxes[textbox_id].loadFromYaml(tb);
         }
     }
 
     int max_light_id = -1;
-    if (config["Lights"]) {
-        for (const auto& light : config["Lights"]) {
+    if (yamlNode["Lights"]) {
+        for (const auto& light : yamlNode["Lights"]) {
             int light_id = light["light_id"] ? light["light_id"].as<int>() : 0;
             max_light_id = (light_id > max_light_id) ? light_id : max_light_id;
         }
     }
-    customLightCount = ((max_light_id+1) < config["Lights"].size())?(max_light_id+1):config["Lights"].size();
+    int customLightCount = ((max_light_id+1) < yamlNode["Lights"].size())?(max_light_id+1):yamlNode["Lights"].size();
     appInfo.Lights.resize(customLightCount);
-    if (config["Lights"]) {
-        for (const auto& light : config["Lights"]) {
+    if (yamlNode["Lights"]) {
+        for (const auto& light : yamlNode["Lights"]) {
             int light_id = light["light_id"] ? light["light_id"].as<int>() : 0;
             appInfo.Lights[light_id].loadFromYaml(light);
         }
     }
 
-    if (config["MainCamera"]) appInfo.MainCamera.loadFromYaml(config["MainCamera"]);
-    if (config["LightCamera"]) appInfo.LightCamera.loadFromYaml(config["LightCamera"]);
+    if (yamlNode["MainCamera"]) appInfo.MainCamera.loadFromYaml(yamlNode["MainCamera"]);
+    if (yamlNode["LightCamera"]) appInfo.LightCamera.loadFromYaml(yamlNode["LightCamera"]);
 
 }//end of ReadYAMLFile()
 

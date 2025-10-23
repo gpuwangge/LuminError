@@ -7,6 +7,8 @@ namespace LEYAML{
         YAMLCore(){}
         ~YAMLCore(){}
         void ReadYAMLFile(const std::string& filename) override;
+    private:
+        YAML::Node yamlNode;
     };
     EXPORT_FACTORY_FOR(YAMLCore);
 }

@@ -302,7 +302,7 @@ namespace LEApplication{
         //Expose functions for Example(SimpleDepthImage) to use
         void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
         void CmdNextSubpass() override { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
-        int GetCustomObjectSize() override { return instance_yamlcore->GetCustomObjectCount(); }
+        int GetCustomObjectSize() override { return appInfo->Objects.size(); }
 
         //Expose functions for Example(SimpleEnvironmentmap) to use
         glm::vec3 GetObjectPosition(int objectId) override { return objects[objectId].Position; }

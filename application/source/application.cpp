@@ -67,7 +67,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //Load YAML Core Module
     LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
     instance_yamlcore = static_cast<LEYAML::IYAMLCore*>(pVoid);
-    instance_yamlcore->SetApplication(this);
+    //instance_yamlcore->SetApplication(this);
 
     appInfo = &instance_yamlcore->GetAppInfo();
     //config = &instance_yamlcore->GetConfig();
@@ -276,15 +276,15 @@ void Application::Initialize(){
     /****************************
     * Precompute size for object/textbox/light
     ****************************/
-    objects.resize(instance_yamlcore->GetCustomObjectCount() + objectCountControl);
+    objects.resize(appInfo->Objects.size() + objectCountControl);
     std::cout<<"Object Size: "<<objects.size()<<std::endl;
     
-    textManager.m_textBoxes.resize(instance_yamlcore->GetCustomTextboxCount() + textboxCountControl);
+    textManager.m_textBoxes.resize(appInfo->Textboxes.size() + textboxCountControl);
     for(int i = 0; i < textManager.m_textBoxes.size(); i++)
         textManager.m_textBoxes[i].p_textManager = &textManager;
     std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
     
-    lights.resize(instance_yamlcore->GetCustomLightCount() + lightCountControl);
+    lights.resize(appInfo->Lights.size() + lightCountControl);
     swapchain.buffer_depthlight.resize(lights.size());
     swapchain.framebuffers_shadowmap.resize(lights.size());
     std::cout<<"Light Size: "<<lights.size()<<std::endl;
@@ -1191,7 +1191,7 @@ void Application::CreatePipelines(){
 }
 
 void Application::ReadRegisterObjects(){
-    for(int i = 0; i < instance_yamlcore->GetCustomObjectCount(); i++){
+    for(int i = 0; i < appInfo->Objects.size(); i++){
         objects[i].m_object_id = appInfo->Objects[i].object_id;
         objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
         objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
@@ -1220,7 +1220,7 @@ void Application::ReadRegisterObjects(){
 
     //register objects for controls
     if(appInfo->Feature.feature_graphics_enable_controls){
-        int indexOffset = instance_yamlcore->GetCustomObjectCount();
+        int indexOffset = appInfo->Objects.size();
         for(int i = 0; i < controlNodes.size(); i++){
             controlNodes[i]->RegisterObject(indexOffset);
             indexOffset += controlNodes[i]->m_object_count;
@@ -1242,7 +1242,7 @@ void Application::ReadRegisterObjects(){
 }
 
 void Application::ReadRegisterTextboxes(){
-    for(int i = 0; i < instance_yamlcore->GetCustomTextboxCount(); i++){
+    for(int i = 0; i < appInfo->Textboxes.size(); i++){
         textManager.m_textBoxes[i].Name = appInfo->Textboxes[i].textbox_name;
         textManager.m_textBoxes[i].m_textBoxID = appInfo->Textboxes[i].textbox_id;
         textManager.m_textBoxes[i].SetPosition(appInfo->Textboxes[i].textbox_position[0], appInfo->Textboxes[i].textbox_position[1], appInfo->Textboxes[i].textbox_position[2]);
@@ -1264,7 +1264,7 @@ void Application::ReadRegisterTextboxes(){
 
     //register textbox for controls
     if(appInfo->Feature.feature_graphics_enable_controls){
-        int indexOffset = instance_yamlcore->GetCustomTextboxCount();
+        int indexOffset = appInfo->Textboxes.size();
         for(int i = 0; i < controlNodes.size(); i++){
             controlNodes[i]->RegisterTextbox(indexOffset);
             indexOffset += controlNodes[i]->m_textbox_count;
@@ -1286,7 +1286,7 @@ void Application::ReadRegisterTextboxes(){
 }
 
 void Application::ReadLightings(){
-    for(int i = 0; i < instance_yamlcore->GetCustomLightCount(); i++){
+    for(int i = 0; i < appInfo->Lights.size(); i++){
         int light_id = appInfo->Lights[i].light_id;
         if(lights[light_id].bRegistered) {
             std::cout<<"WARNING: Trying to register a registered Light id("<<light_id<<")!"<<std::endl;
