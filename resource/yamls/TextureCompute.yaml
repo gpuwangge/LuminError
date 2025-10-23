@@ -2,7 +2,7 @@ Resources:
   - Textures:
     - resource_texture_name: texture.jpg
       resource_texture_miplevels: 1
-      resource_texture_cubmap: false
+      resource_texture_cubemap: false
       uniform_sampler_id: 0
   - ComputeShaders:
     - resource_computeshader_name: textureCompute/shader.comp.spv

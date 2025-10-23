@@ -56,45 +56,27 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
         }
 
         if (resource["Textures"]) {
-            for (const auto& texture : resource["Textures"]) {
-                texture_names.push_back(texture["resource_texture_name"].as<std::string>());
-                texture_miplevels.push_back(texture["resource_texture_miplevels"].as<int>());
-                texture_enableCubemaps.push_back(texture["resource_texture_cubmap"].as<bool>());
-                texture_samplerids.push_back(texture["uniform_sampler_id"].as<int>());
-            }
+            int textureCount = 0;
+            for (const auto& texture : resource["Textures"]) textureCount++;
+            appInfo.Textures.resize(textureCount);
+            textureCount = 0;
+            for (const auto& texture : resource["Textures"]) appInfo.Textures[textureCount++].loadFromYaml(texture);
         }
 
-
-        
         if (resource["Pipelines"]) {
             int graphicsPipelineCount = 0;
             for (const auto& pipeline : resource["Pipelines"]) graphicsPipelineCount++;
-
-            //std::cout<<"YAMLCore: graphicsPipelineCount="<<graphicsPipelineCount<<std::endl;
             appInfo.GraphicsPipelines.resize(graphicsPipelineCount);
             graphicsPipelineCount = 0;
-
-            for (const auto& pipeline : resource["Pipelines"]) {
-                appInfo.GraphicsPipelines[graphicsPipelineCount].loadFromYaml(pipeline);
-
-                graphicsPipelineCount++;
-            }
+            for (const auto& pipeline : resource["Pipelines"]) appInfo.GraphicsPipelines[graphicsPipelineCount++].loadFromYaml(pipeline);
         }
-
         
         if (resource["ComputeShaders"]) {
             int computePipelineCount = 0;
             for (const auto& pipeline : resource["ComputeShaders"]) computePipelineCount++;
-
-            //std::cout<<"YAMLCore: computePipelineCount="<<computePipelineCount<<std::endl;
             appInfo.ComputePipelines.resize(computePipelineCount);
             computePipelineCount = 0;
-
-            for (const auto& computeShader : resource["ComputeShaders"]) {
-                appInfo.ComputePipelines[computePipelineCount].loadFromYaml(computeShader);
-
-                computePipelineCount++;
-            }
+            for (const auto& computeShader : resource["ComputeShaders"]) appInfo.ComputePipelines[computePipelineCount++].loadFromYaml(computeShader);
         }
     }
 

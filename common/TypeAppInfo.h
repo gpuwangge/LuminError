@@ -304,18 +304,37 @@ struct SubpassConfig{
     }
 };
 
+struct TextureConfig{
+    std::string texture_name;
+    int texture_miplevel = 1;
+    bool texture_enableCubemap = false;
+    int texture_samplerid = 0;
+
+    void loadFromYaml(const YAML::Node& node) {
+        texture_name                                   = getOrDefault(node, "resource_texture_name", std::string{"Default"});
+        texture_miplevel                               = getOrDefault(node, "resource_texture_miplevels", 1);
+        texture_enableCubemap                          = getOrDefault(node, "resource_texture_cubemap", false);
+        texture_samplerid                              = getOrDefault(node, "uniform_sampler_id", 0);
+    }
+};
+
 struct AppInfo{
-    FeatureConfig Feature;
-    ControlUIContainerConfig ControlUIContainer;
-    UniformConfig Uniform;
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
-    CameraConfig MainCamera;
-    CameraConfig LightCamera;
+
+    FontConfig Font;
+    std::vector<TextureConfig> Textures;
     std::vector<GraphicsPipelineConfig> GraphicsPipelines;
     std::vector<ComputePipelineConfig> ComputePipelines;
-    FontConfig Font;
+
+    FeatureConfig Feature;
+    ControlUIContainerConfig ControlUIContainer;
+    UniformConfig Uniform;
+    
+    CameraConfig MainCamera;
+    CameraConfig LightCamera;
+
     AttachmentConfig Attachment;
     SubpassConfig Subpass;
 

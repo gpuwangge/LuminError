@@ -851,12 +851,12 @@ void Application::ReadResources(){
         
     }
 
-    if(instance_yamlcore->GetTextureNames().size() > 0){
-        for(int i = 0; i < instance_yamlcore->GetTextureNames().size(); i++){
-            std::string textureName = instance_yamlcore->GetTextureNames()[i];
-            int textureMipLevel = instance_yamlcore->GetTextureMipLevels()[i];
-            bool textureEnableCubemap = instance_yamlcore->GetTextureEnableCubemaps()[i];
-            int textureSamplerId = instance_yamlcore->GetTextureSamplerIds()[i];
+    if(appInfo->Textures.size() > 0){
+        for(int i = 0; i < appInfo->Textures.size(); i++){
+            std::string textureName = appInfo->Textures[i].texture_name;
+            int textureMipLevel = appInfo->Textures[i].texture_miplevel;
+            bool textureEnableCubemap = appInfo->Textures[i].texture_enableCubemap;
+            int textureSamplerId = appInfo->Textures[i].texture_samplerid;
             
             VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 //VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;

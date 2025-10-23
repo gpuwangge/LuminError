@@ -28,11 +28,6 @@ namespace LEYAML{
         std::vector<std::string>& GetModelNames() { return model_names; }
         std::vector<int>& GetModelIds() { return model_ids; }
 
-        std::vector<std::string>& GetTextureNames() { return texture_names; }
-        std::vector<int>& GetTextureMipLevels() { return texture_miplevels; }
-        std::vector<bool>& GetTextureEnableCubemaps() { return texture_enableCubemaps; }
-        std::vector<int>& GetTextureSamplerIds() { return texture_samplerids; }
-
         int& GetCustomObjectCount() { return customObjectCount; }
         int& GetCustomTextboxCount() { return customTextboxCount; }
         int& GetCustomLightCount() { return customLightCount; }
@@ -46,11 +41,6 @@ namespace LEYAML{
 
         std::vector<std::string> model_names;
         std::vector<int> model_ids;
-
-        std::vector<std::string> texture_names;
-        std::vector<int> texture_miplevels;
-        std::vector<bool> texture_enableCubemaps;
-        std::vector<int> texture_samplerids;
 
         int customObjectCount;
         int customTextboxCount;

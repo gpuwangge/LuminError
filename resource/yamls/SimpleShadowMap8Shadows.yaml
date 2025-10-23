@@ -83,15 +83,15 @@ Resources:
   - Textures:
     - resource_texture_name: textbox_cyber.png
       resource_texture_miplevels: 1
-      resource_texture_cubmap: false
+      resource_texture_cubemap: false
       uniform_sampler_id: 0
     - resource_texture_name: metal.jpg
       resource_texture_miplevels: 1
-      resource_texture_cubmap: false
+      resource_texture_cubemap: false
       uniform_sampler_id: 0
     - resource_texture_name: repeat-pattern2.jpg
       resource_texture_miplevels: 9
-      resource_texture_cubmap: false
+      resource_texture_cubemap: false
       uniform_sampler_id: 1
   - Pipelines:
     - resource_graphics_pipeline_name: textboxImagePipeline
