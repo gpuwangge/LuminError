@@ -12,7 +12,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PRIVATE
     include
     $ENV{VULKAN_SDK}/Include
-    ${CMAKE_SOURCE_DIR}/thirdparty)
+    ${CMAKE_SOURCE_DIR}/thirdparty #for yaml-cpp/ headers
+)
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty/yaml-cpp/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE leinterface yaml-cpp lecommon)

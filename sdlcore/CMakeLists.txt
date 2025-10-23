@@ -1,18 +1,5 @@
 project(sdlcore)
  
-include_directories(
-    include
-    $ENV{VULKAN_SDK}/Include
-    $ENV{INCLUDE}
-    ${PROJECT_SOURCE_DIR}/application/include
-    ${PROJECT_SOURCE_DIR}/thirdparty)
-
-link_directories(
-    $ENV{VULKAN_SDK}/Lib #Put this in environment user variable LIB: C:\VulkanSDK\GLFW\lib-static-ucrt  
-    $ENV{LIB}
-    ${CMAKE_SOURCE_DIR}/thirdparty #put SDL3.dll, SDL3_ttf.dll and glfw3.dll in thirdparty/
-    ${CMAKE_SOURCE_DIR}/thirdparty/yaml-cpp/lib) 
-
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
@@ -22,7 +9,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     PREFIX ""
 )
 
-target_link_libraries(${PROJECT_NAME} leinterface SDL3 lecommon)
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    include
+    $ENV{INCLUDE} #for sdl3 headers
+)
+
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty/sdl) #put SDL3.dll, SDL3_ttf.dll 
+target_link_libraries(${PROJECT_NAME} PRIVATE leinterface SDL3 lecommon)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${PROJECT_NAME}.dll <<<<<<<<<<<<<<<<<<"

@@ -18,8 +18,8 @@ add_subdirectory(application)
 add_subdirectory(example)
 add_subdirectory(launcher)
 
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/fonts/NotoSansCJK-VF.otf.ttc DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp/lib/libyaml-cpp.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 
