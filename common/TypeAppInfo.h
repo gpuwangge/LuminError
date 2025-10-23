@@ -274,6 +274,36 @@ struct FontConfig{
     }
 };
 
+struct AttachmentConfig{
+    bool bShadowmapAttachmentDepthLight = false;
+    bool bMainSceneAttachmentDepthLight = false;
+    bool bMainSceneAttachmentDepthCamera = false;
+    bool bMainSceneAttachmentColorResovle = false;
+    bool bMainSceneAttachmentColorPresent = true;
+
+    void loadFromYaml(const YAML::Node& node) {
+        bShadowmapAttachmentDepthLight                 = getOrDefault(node, "ShadowmapRenderpass_attachment_depth_light", false);
+        bMainSceneAttachmentDepthLight                 = getOrDefault(node, "mainsceneRenderpass_attachment_depth_light", false);
+        bMainSceneAttachmentDepthCamera                = getOrDefault(node, "mainsceneRenderpass_attachment_depth_camera", false);
+        bMainSceneAttachmentColorResovle               = getOrDefault(node, "mainsceneRenderpass_attachment_color_resovle", false);
+        bMainSceneAttachmentColorPresent               = getOrDefault(node, "mainsceneRenderpass_attachment_color_present", true);
+    }
+};
+
+struct SubpassConfig{
+    bool bEnableShadowmapRenderpassSubpassShadowmap = false;
+    bool bEnableMainSceneRenderpassSubpassShadowmap = false;
+    bool bEnableMainSceneRenderpassSubpassDraw = true;
+    bool bEnableMainSceneRenderpassSubpassObserve = false;
+
+    void loadFromYaml(const YAML::Node& node) {
+        bEnableShadowmapRenderpassSubpassShadowmap     = getOrDefault(node, "shadowmapRenderpass_subpasses_shadowmap", false);
+        bEnableMainSceneRenderpassSubpassShadowmap     = getOrDefault(node, "mainsceneRenderpass_subpasses_shadowmap", false);
+        bEnableMainSceneRenderpassSubpassDraw          = getOrDefault(node, "mainsceneRenderpass_subpasses_draw", true);
+        bEnableMainSceneRenderpassSubpassObserve       = getOrDefault(node, "mainsceneRenderpass_subpasses_observe", false);
+    }
+};
+
 struct AppInfo{
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;
@@ -286,6 +316,8 @@ struct AppInfo{
     std::vector<GraphicsPipelineConfig> GraphicsPipelines;
     std::vector<ComputePipelineConfig> ComputePipelines;
     FontConfig Font;
+    AttachmentConfig Attachment;
+    SubpassConfig Subpass;
 
     //RenderModes RenderMode = RenderModes::GRAPHICS;
     int RenderMode = 0;

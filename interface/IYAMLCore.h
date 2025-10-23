@@ -33,17 +33,6 @@ namespace LEYAML{
         std::vector<bool>& GetTextureEnableCubemaps() { return texture_enableCubemaps; }
         std::vector<int>& GetTextureSamplerIds() { return texture_samplerids; }
 
-        bool GetShadowmapAttachmentDepthLight() { return bShadowmapAttachmentDepthLight; }
-        bool GetMainSceneAttachmentDepthLight() { return bMainSceneAttachmentDepthLight; }
-        bool GetMainSceneAttachmentDepthCamera() { return bMainSceneAttachmentDepthCamera; }
-        bool GetMainSceneAttachmentColorResovle() { return bMainSceneAttachmentColorResovle; }
-        bool GetMainSceneAttachmentColorPresent() { return bMainSceneAttachmentColorPresent; }
-
-        bool GetEnableShadowmapRenderpassSubpassShadowmap() { return bEnableShadowmapRenderpassSubpassShadowmap; }
-        bool GetEnableMainSceneRenderpassSubpassShadowmap() { return bEnableMainSceneRenderpassSubpassShadowmap; }
-        bool GetEnableMainSceneRenderpassSubpassDraw() { return bEnableMainSceneRenderpassSubpassDraw; }
-        bool GetEnableMainSceneRenderpassSubpassObserve() { return bEnableMainSceneRenderpassSubpassObserve; }
-
         int& GetCustomObjectCount() { return customObjectCount; }
         int& GetCustomTextboxCount() { return customTextboxCount; }
         int& GetCustomLightCount() { return customLightCount; }
@@ -62,17 +51,6 @@ namespace LEYAML{
         std::vector<int> texture_miplevels;
         std::vector<bool> texture_enableCubemaps;
         std::vector<int> texture_samplerids;
-
-        bool bShadowmapAttachmentDepthLight;
-        bool bMainSceneAttachmentDepthLight;
-        bool bMainSceneAttachmentDepthCamera;
-        bool bMainSceneAttachmentColorResovle;
-        bool bMainSceneAttachmentColorPresent;
-
-        bool bEnableShadowmapRenderpassSubpassShadowmap;
-        bool bEnableMainSceneRenderpassSubpassShadowmap;
-        bool bEnableMainSceneRenderpassSubpassDraw;
-        bool bEnableMainSceneRenderpassSubpassObserve;
 
         int customObjectCount;
         int customTextboxCount;
