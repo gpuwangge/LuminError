@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "../../thirdParty/tiny_obj_loader.h"
+#include "../../external/tiny_obj_loader.h"
 
 CModelManager::CModelManager(){}
 CModelManager::~CModelManager(){}

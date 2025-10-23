@@ -5,7 +5,7 @@
 #ifdef WIN32
     #define YAML_CPP_STATIC_DEFINE //to disable lots of yaml warnings
 #endif
-#include "../thirdParty/yaml-cpp/yaml.h"
+#include "../external/yaml-cpp/yaml.h"
 
  /******************
 * Utility Functions

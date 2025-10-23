@@ -18,10 +18,10 @@ add_subdirectory(application)
 add_subdirectory(example)
 add_subdirectory(launcher)
 
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/sdl/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/fonts/NotoSansCJK-VF.otf.ttc DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp/lib/libyaml-cpp.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/external/fonts/NotoSansCJK-VF.otf.ttc DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/external/yaml-cpp/lib/libyaml-cpp.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 
 # 创建 autotest.bat 文件
 file(WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "@echo off\r\n")

@@ -1,7 +1,7 @@
 #include "../include/texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../thirdParty/stb_image.h"
+#include "../../external/stb_image.h"
 #include <SDL3_ttf/SDL_ttf.h>
 
 /*******************

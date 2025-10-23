@@ -14,7 +14,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     $ENV{INCLUDE} #for sdl3 headers
 )
 
-target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/thirdparty/sdl) #put SDL3.dll, SDL3_ttf.dll 
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/sdl) #put SDL3.dll, SDL3_ttf.dll 
 target_link_libraries(${PROJECT_NAME} PRIVATE leinterface SDL3 lecommon)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
