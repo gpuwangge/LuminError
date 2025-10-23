@@ -793,9 +793,9 @@ void Application::ReadResources(){
         textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
     }
 
-    if(instance_yamlcore->GetModelNames().size() > 0){
-        for(int i = 0; i < instance_yamlcore->GetModelNames().size(); i++){
-            std::string modelName = instance_yamlcore->GetModelNames()[i];
+    if(appInfo->Models.size() > 0){
+        for(int i = 0; i < appInfo->Models.size(); i++){
+            std::string modelName = appInfo->Models[i].model_names;
             if(modelName == "CUSTOM3D0"){
                 renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[0].vertices);
                 renderer.CreateIndexBuffer(modelManager.customModels3D[0].indices);

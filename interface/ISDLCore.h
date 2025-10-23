@@ -1,9 +1,11 @@
 #pragma once
-
 #include <string>
 #include <vector>
 #include <memory>
-#include "IApplication.h"
+
+namespace LEApplication{
+    class IApplication;
+}
 
 class CInstance;
 

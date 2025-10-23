@@ -1,6 +1,7 @@
 project(sdlcore)
  
 include_directories(
+    include
     $ENV{VULKAN_SDK}/Include
     $ENV{INCLUDE}
     ${PROJECT_SOURCE_DIR}/application/include

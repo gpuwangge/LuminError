@@ -1,8 +1,8 @@
-#include "../include/SDLCore.h"
+#include "SDLCore.h"
 #include "Foundation.h"
 #include <windows.h>
-//#include <iostream>
 #include "Enum.h"
+#include "IApplication.h"
 
 namespace LESDL{
 

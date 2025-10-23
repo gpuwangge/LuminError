@@ -1,8 +1,6 @@
-#include "../include/YAMLCore.h"
-//#include "Foundation.h"
-//#include <windows.h>
-//#include <iostream>
-//#include "Enum.h"
+#include "YAMLCore.h"
+#include "Foundation.h"
+#include <iostream>
 
 namespace LEYAML{
 
@@ -49,10 +47,11 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
         }
 
         if (resource["Models"]) {
-            for (const auto& model : resource["Models"]) {
-                model_names.push_back(model["resource_model_name"] ? model["resource_model_name"].as<std::string>() : "Default");
-                model_ids.push_back(model["resource_model_id"] ? model["resource_model_id"].as<int>() : 0);
-            }
+            int modelCount = 0;
+            for (const auto& model : resource["Models"]) modelCount++;
+            appInfo.Models.resize(modelCount);
+            modelCount=0;
+            for (const auto& model : resource["Models"]) appInfo.Models[modelCount++].loadFromYaml(model);
         }
 
         if (resource["Textures"]) {

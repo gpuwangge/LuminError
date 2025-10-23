@@ -318,12 +318,23 @@ struct TextureConfig{
     }
 };
 
+struct ModelConfig{
+    std::string model_names;
+    //int model_ids;
+
+    void loadFromYaml(const YAML::Node& node) {
+        model_names                                    = getOrDefault(node, "resource_model_name", std::string{""});
+        //model_ids                                      = getOrDefault(node, "model_ids", 0);
+    }
+};
+
 struct AppInfo{
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
 
     FontConfig Font;
+    std::vector<ModelConfig> Models;
     std::vector<TextureConfig> Textures;
     std::vector<GraphicsPipelineConfig> GraphicsPipelines;
     std::vector<ComputePipelineConfig> ComputePipelines;
