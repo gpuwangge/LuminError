@@ -10,12 +10,8 @@ include_directories(
 link_directories(
     $ENV{VULKAN_SDK}/Lib #Put this in environment user variable LIB: C:\VulkanSDK\GLFW\lib-static-ucrt  
     $ENV{LIB}
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty #put SDL3.dll, SDL3_ttf.dll and glfw3.dll in thirdparty/
-    ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp/lib) 
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    ${CMAKE_SOURCE_DIR}/thirdparty #put SDL3.dll, SDL3_ttf.dll and glfw3.dll in thirdparty/
+    ${CMAKE_SOURCE_DIR}/thirdparty/yaml-cpp/lib) 
 
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")

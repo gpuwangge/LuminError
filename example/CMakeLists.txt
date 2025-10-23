@@ -1,5 +1,11 @@
 project(example)
 
+include_directories(
+    $ENV{VULKAN_SDK}/Include
+    $ENV{INCLUDE}
+    ${CMAKE_SOURCE_DIR}/vulkanFramework/include
+    ${CMAKE_SOURCE_DIR}/thirdparty)
+
 function(add_example EXAMPLENAME)
     file(GLOB SOURCES "${EXAMPLENAME}/*.cpp")
     #file(GLOB HEADERS "${EXAMPLENAME}/*.h")

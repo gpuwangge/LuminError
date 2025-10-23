@@ -760,7 +760,6 @@ void CGraphicsDescriptorManager::DestroyAndFree(){
     vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), depthImageSampler, nullptr);
     vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler, nullptr);
     vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler_hardwareDepthBias, nullptr);
-    //vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler_hardwareDepthBias2, nullptr);
     
     for (size_t i = 0; i < mvpUniformBuffers.size(); i++) 
         mvpUniformBuffers[i].DestroyAndFree();

@@ -57,12 +57,7 @@ Application::Application(){
 #ifndef ANDROID
 void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
-    m_sampleName = exampleName;
-
-    //std::cout<<m_sampleName<<std::endl;
-    //m_sampleName.erase(0, 1);
-    m_sampleName = getPureName(m_sampleName);
-    //std::cout<<m_sampleName<<std::endl;
+    m_sampleName = getPureName(exampleName);
 
     //Load YAML Core Module
     LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
@@ -92,13 +87,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Step 1: Create Window
     *****************/
     
-#ifdef SDL
-   // sdlManager.m_pApp = this;
-    //sdlManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
     instance_sdlcore->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
-#else
-    glfwManager.createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
-#endif
 	PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
 
     /**************** 
@@ -110,12 +99,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Step 3: Select required instance extensions
     *****************/
     std::vector<const char*> requiredInstanceExtensions;
-#ifdef SDL
-    //sdlManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
+
     instance_sdlcore->queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
-#else    
-    glfwManager.queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
-#endif
     if(enableValidationLayers) requiredInstanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     /**************** 
@@ -129,12 +114,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Surface is to store view format information for creating swapchain. 
     * Only third party(glfw or sdl) knows what kind of surface can be attached to its window.
     *****************/
-#ifdef SDL   
-    //sdlManager.createSurface(IN instance, OUT surface);
     instance_sdlcore->createSurface(IN instance, OUT surface);
-#else  
-    glfwManager.createSurface(IN instance, OUT surface);
-#endif
 
     /**************** 
     * General initialization begins
@@ -181,27 +161,12 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //auto durationInitializationTime = std::chrono::duration<float, std::chrono::seconds::period>(endInitializeTime - startInitialzeTime).count() * 1000;
     //std::cout<<"Total Initialization cost: "<<durationInitializationTime<<" milliseconds"<<std::endl;
 
-#ifdef SDL
+
     while(instance_sdlcore->IsRunning()){
         instance_sdlcore->eventHandle();
         if(!NeedToPause) UpdateRecordRender();
         if(NeedToExit) break;
     }
-#else  
-    glfwSwapInterval(1); //set V-Sync. wait a refresh period, normally 16.67ms
-    while (!glfwWindowShouldClose(glfwManager.window)) {
-        glfwPollEvents();
-        if(!NeedToPause) UpdateRecordRender();
-        if(NeedToExit) break;
-
-        if(mainCamera.cameraType == Camera::CameraType::FREE){
-            mainCamera.AngularVelocity.x = 0;
-            mainCamera.AngularVelocity.y = 0;
-        }
-
-        glfwWaitEventsTimeout(1.0 / 60.0);
-    }
-#endif
 
     //std::cout<<"Application: vkDeviceWaitIdle()..."<<std::endl;
 	vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources

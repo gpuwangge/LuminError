@@ -1,5 +1,11 @@
 project(launcher)
 
+include_directories(
+    $ENV{VULKAN_SDK}/Include
+    $ENV{INCLUDE}
+    ${CMAKE_SOURCE_DIR}/vulkanFramework/include
+    ${CMAKE_SOURCE_DIR}/thirdparty)
+
 file(GLOB SOURCES "*.cpp")
 file(GLOB HEADERS "*.h")
 

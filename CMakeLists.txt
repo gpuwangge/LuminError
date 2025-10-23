@@ -5,20 +5,7 @@ project(VulkanPlatform)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE "Debug")
 
-add_definitions(-DSDL)
-
-include_directories(
-    $ENV{VULKAN_SDK}/Include
-    $ENV{INCLUDE}
-    ${PROJECT_SOURCE_DIR}/vulkanFramework/include
-    ${PROJECT_SOURCE_DIR}/thirdparty)
-
-link_directories(
-    $ENV{VULKAN_SDK}/Lib #Put this in environment user variable LIB: C:\VulkanSDK\GLFW\lib-static-ucrt  
-    $ENV{LIB}
-    ${PROJECT_SOURCE_DIR}/thirdparty #put SDL3.dll, SDL3_ttf.dll and glfw3.dll in thirdparty/
-    ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp/lib) 
-
+#Set variables so all cmakelists.txt in sub dirs can access
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib) #this is required in Windows, all dll/exe goes here
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib) #this is not required in windows
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) #all lib goes here
@@ -64,14 +51,16 @@ foreach(example_dir IN LISTS EXAMPLE_DIRECTORIES)
 endforeach()
 file(APPEND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "\r\necho All tests completed!\r\n")
 
-message(STATUS "=====Print Variables=====")
-message(STATUS "ENV{LIB} = $ENV{LIB}")
-message(STATUS "ENV{INCLUDE} = $ENV{INCLUDE}")
-message(STATUS "ENV{VULKAN_SDK} = $ENV{VULKAN_SDK}")
+# message(STATUS "=====Print Variables=====")
+# message(STATUS "ENV{LIB} = $ENV{LIB}")
+# message(STATUS "ENV{INCLUDE} = $ENV{INCLUDE}")
+# message(STATUS "ENV{VULKAN_SDK} = $ENV{VULKAN_SDK}")
+# message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}") #LuminError
+# message(STATUS "PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}") #LuminError
+# message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}") #LuminError/build
+# message(STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY = ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}") #LuminError/build/bin
+# message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY = ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}") #LuminError/build/lib
+# message(STATUS "CMAKE_ARCHIVE_OUTPUT_DIRECTORY = ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}") #LuminError/build/lib
+# message(STATUS "=========================")
+
 #message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}") #same as PROJECT_SOURCE_DIR
-message(STATUS "PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}") #LuminError
-message(STATUS "CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}") #build
-message(STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY = ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-message(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY = ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-message(STATUS "CMAKE_ARCHIVE_OUTPUT_DIRECTORY = ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
-message(STATUS "=========================")
