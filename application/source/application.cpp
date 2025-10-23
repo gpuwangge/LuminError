@@ -779,11 +779,11 @@ void Application::ReadUniforms(){
 }
 
 void Application::ReadResources(){
-    if(instance_yamlcore->GetFontSize() > 0){
-        textManager.SetFontSize(instance_yamlcore->GetFontSize());
-        textManager.SetSamplerID(instance_yamlcore->GetFontSamplerId());
-        textManager.SetOutlineColor(glm::vec4(instance_yamlcore->GetOutlineColor()[0], instance_yamlcore->GetOutlineColor()[1], instance_yamlcore->GetOutlineColor()[2], instance_yamlcore->GetOutlineColor()[3]));
-        textManager.SetTextColor(glm::vec4(instance_yamlcore->GetTextColor()[0], instance_yamlcore->GetTextColor()[1], instance_yamlcore->GetTextColor()[2], instance_yamlcore->GetTextColor()[3]));
+    if( appInfo->Font.font_size > 0){
+        textManager.SetFontSize(appInfo->Font.font_size);
+        textManager.SetSamplerID(appInfo->Font.font_samplerid);
+        textManager.SetOutlineColor(glm::vec4(appInfo->Font.font_outlineColor[0], appInfo->Font.font_outlineColor[1], appInfo->Font.font_outlineColor[2], appInfo->Font.font_outlineColor[3]));
+        textManager.SetTextColor(glm::vec4(appInfo->Font.font_textColor[0], appInfo->Font.font_textColor[1], appInfo->Font.font_textColor[2], appInfo->Font.font_textColor[3]));
         textManager.p_renderer = &renderer;
         textManager.p_textImageManager = &textImageManager;
         textManager.p_modelManager = &modelManager;
@@ -1002,9 +1002,9 @@ void Application::CreatePipelines(){
     * Command Buffer
     ****************************/
     //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
-    if(appInfo->GraphicsPipeline.size() > 0) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->GraphicsPipelines.size() > 0) renderer.CreateGraphicsCommandBuffer();
     //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
-    if(appInfo->ComputePipeline.size() > 0) renderer.CreateComputeCommandBuffer();
+    if(appInfo->ComputePipelines.size() > 0) renderer.CreateComputeCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
 
     /****************************
@@ -1034,22 +1034,22 @@ void Application::CreatePipelines(){
     * Create Shaders
     ****************************/
     //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
-    if(appInfo->GraphicsPipeline.size() > 0){
-        for(int i = 0; i < appInfo->GraphicsPipeline.size(); i++){
+    if(appInfo->GraphicsPipelines.size() > 0){
+        for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
             //std::cout<<appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name<<std::endl;
-            shaderManager.CreateShader(appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name, shaderManager.VERT);
-            shaderManager.CreateShader(appInfo->GraphicsPipeline[i].graphics_pipeline_fragmentshader_name, shaderManager.FRAG);
+            shaderManager.CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_vertexshader_name, shaderManager.VERT);
+            shaderManager.CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_fragmentshader_name, shaderManager.FRAG);
         }
     }
-    if(appInfo->ComputePipeline.size() > 0)
-        for(int i = 0; i < appInfo->ComputePipeline.size(); i++)
-            shaderManager.CreateShader(appInfo->ComputePipeline[i].compute_pipeline_computeshader_name, shaderManager.COMP);
+    if(appInfo->ComputePipelines.size() > 0)
+        for(int i = 0; i < appInfo->ComputePipelines.size(); i++)
+            shaderManager.CreateShader(appInfo->ComputePipelines[i].compute_pipeline_computeshader_name, shaderManager.COMP);
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
 
     /****************************
     * Create Pipelines
     ****************************/
-    if(appInfo->GraphicsPipeline.size() > 0){
+    if(appInfo->GraphicsPipelines.size() > 0){
         std::vector<VkDescriptorSetLayout> dsLayouts; //2 sets for graphics
 
         if((CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
@@ -1077,7 +1077,7 @@ void Application::CreatePipelines(){
         
         //std::cout<<"Begin create graphics pipeline"<<std::endl;
         //for(int i = 0; i < appInfo->VertexShader->size(); i++){
-        for(int i = 0; i < appInfo->GraphicsPipeline.size(); i++){
+        for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
             //std::cout<<"test create pipeline"<<std::endl;
             //! All graphics pipelines use the same dsLayouts
             if(shaderManager.bEnablePushConstant){
@@ -1089,7 +1089,7 @@ void Application::CreatePipelines(){
 
             
             //int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
-            int vertexDatatype = appInfo->GraphicsPipeline[i].graphics_pipeline_vertexdatatype;
+            int vertexDatatype = appInfo->GraphicsPipelines[i].graphics_pipeline_vertexdatatype;
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
 
             switch(vertexDatatype){
@@ -1103,23 +1103,23 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], i, 
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
                         //(*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
                         //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
                     //if((*appInfo->RenderPassShadowmap)[i]) {
-                    if(appInfo->GraphicsPipeline[i].graphics_pipeline_renderpasses_shadowmap) {
+                    if(appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap) {
                         renderProcess.createGraphicsPipeline<Vertex3D>(
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipeline[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_shadowmap,
-                            appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
-                            appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_shadowmap,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
                         //    (*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_shadowmap,
                         //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                     }else{
@@ -1127,9 +1127,9 @@ void Application::CreatePipelines(){
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                             shaderManager.vertShaderModules[i], 
                             shaderManager.fragShaderModules[i], true, false, i,
-                            appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipeline[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_mainscene,
-                            appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
-                            appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_mainscene,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
                             //(*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
                         //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
                     }   
@@ -1140,9 +1140,9 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
                         //(*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
                         //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                     //std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
@@ -1152,9 +1152,9 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_POINT_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, false, i,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
                         //(*appInfo->Subpass)[i], false, renderProcess.renderPass_mainscene,
                         //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);  
                 break;
@@ -1163,9 +1163,9 @@ void Application::CreatePipelines(){
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
                         shaderManager.vertShaderModules[i], 
                         shaderManager.fragShaderModules[i], true, true, i,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_depth_test_enable,
-                        appInfo->GraphicsPipeline[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipeline[i].graphics_pipeline_skybox);
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
                         //(*appInfo->Subpass)[i], (*appInfo->RenderPassShadowmap)[i], renderProcess.renderPass_mainscene,
                         //(*appInfo->BlendEnable)[i],  (*appInfo->DepthTestEnable)[i], (*appInfo->DepthWriteEnable)[i], (*appInfo->SkyboxEnable)[i]);   
                 break;
@@ -1176,7 +1176,7 @@ void Application::CreatePipelines(){
         }
         
     }
-    if(appInfo->ComputePipeline.size() > 0){ //for now assume only one compute pipeline
+    if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
         renderProcess.createComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
         renderProcess.createComputePipeline(shaderManager.compShaderModules[0]);
@@ -1305,17 +1305,17 @@ void Application::ReadLightings(){
 }
 
 void Application::ReadCameras(){
-    mainCamera.cameraType = (CameraType)appInfo->mainCamera.camera_mode;
-    mainCamera.SetPosition(appInfo->mainCamera.camera_position[0], appInfo->mainCamera.camera_position[1],  appInfo->mainCamera.camera_position[2]);
-    mainCamera.SetRotation(appInfo->mainCamera.camera_rotation[0], appInfo->mainCamera.camera_rotation[1],  appInfo->mainCamera.camera_rotation[2]);
-    mainCamera.focusObjectId = appInfo->mainCamera.object_id_target;
-    mainCamera.bEnableOrthographic = appInfo->mainCamera.camera_projection_enable_orthographic;
-    float nearPlane = appInfo->mainCamera.camera_z[0];
-    float farPlane = appInfo->mainCamera.camera_z[1];
-    if(!mainCamera.bEnableOrthographic){ mainCamera.setPerspective(appInfo->mainCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
+    mainCamera.cameraType = (CameraType)appInfo->MainCamera.camera_mode;
+    mainCamera.SetPosition(appInfo->MainCamera.camera_position[0], appInfo->MainCamera.camera_position[1],  appInfo->MainCamera.camera_position[2]);
+    mainCamera.SetRotation(appInfo->MainCamera.camera_rotation[0], appInfo->MainCamera.camera_rotation[1],  appInfo->MainCamera.camera_rotation[2]);
+    mainCamera.focusObjectId = appInfo->MainCamera.object_id_target;
+    mainCamera.bEnableOrthographic = appInfo->MainCamera.camera_projection_enable_orthographic;
+    float nearPlane = appInfo->MainCamera.camera_z[0];
+    float farPlane = appInfo->MainCamera.camera_z[1];
+    if(!mainCamera.bEnableOrthographic){ mainCamera.setPerspective(appInfo->MainCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
     }else{
-        float orthoWidth = appInfo->mainCamera.camera_projection_orthographic_width;
-        float orthoHeight = appInfo->mainCamera.camera_projection_orthographic_height;
+        float orthoWidth = appInfo->MainCamera.camera_projection_orthographic_width;
+        float orthoHeight = appInfo->MainCamera.camera_projection_orthographic_height;
         mainCamera.setOrthographic(
             -orthoWidth / 2.0f, orthoWidth / 2.0f,
             -orthoHeight / 2.0f, orthoHeight / 2.0f,
@@ -1323,20 +1323,20 @@ void Application::ReadCameras(){
     }
     mainCamera.SetRotationSensitivity(200.0f);
 
-    instance_sdlcore->SetKeyboardSensibility(appInfo->mainCamera.camera_keyboard_sensitive);
-    instance_sdlcore->SetMouseSensibility(appInfo->mainCamera.camera_mouse_sensitive);
+    instance_sdlcore->SetKeyboardSensibility(appInfo->MainCamera.camera_keyboard_sensitive);
+    instance_sdlcore->SetMouseSensibility(appInfo->MainCamera.camera_mouse_sensitive);
 
-    lightCameras[0].cameraType = (CameraType)appInfo->lightCamera.camera_mode;
-    lightCameras[0].SetPosition(appInfo->lightCamera.camera_position[0], appInfo->lightCamera.camera_position[1],  appInfo->lightCamera.camera_position[2]);
-    lightCameras[0].SetRotation(appInfo->lightCamera.camera_rotation[0], appInfo->lightCamera.camera_rotation[1],  appInfo->lightCamera.camera_rotation[2]);
-    lightCameras[0].focusObjectId = appInfo->lightCamera.object_id_target;
-    lightCameras[0].bEnableOrthographic = appInfo->lightCamera.camera_projection_enable_orthographic;
-    nearPlane = appInfo->lightCamera.camera_z[0];
-    farPlane = appInfo->lightCamera.camera_z[1];
-    if(!lightCameras[0].bEnableOrthographic){ lightCameras[0].setPerspective(appInfo->lightCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
+    lightCameras[0].cameraType = (CameraType)appInfo->LightCamera.camera_mode;
+    lightCameras[0].SetPosition(appInfo->LightCamera.camera_position[0], appInfo->LightCamera.camera_position[1],  appInfo->LightCamera.camera_position[2]);
+    lightCameras[0].SetRotation(appInfo->LightCamera.camera_rotation[0], appInfo->LightCamera.camera_rotation[1],  appInfo->LightCamera.camera_rotation[2]);
+    lightCameras[0].focusObjectId = appInfo->LightCamera.object_id_target;
+    lightCameras[0].bEnableOrthographic = appInfo->LightCamera.camera_projection_enable_orthographic;
+    nearPlane = appInfo->LightCamera.camera_z[0];
+    farPlane = appInfo->LightCamera.camera_z[1];
+    if(!lightCameras[0].bEnableOrthographic){ lightCameras[0].setPerspective(appInfo->LightCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
     }else{
-        float orthoWidth = appInfo->lightCamera.camera_projection_orthographic_width;
-        float orthoHeight = appInfo->lightCamera.camera_projection_orthographic_height;
+        float orthoWidth = appInfo->LightCamera.camera_projection_orthographic_width;
+        float orthoHeight = appInfo->LightCamera.camera_projection_orthographic_height;
         lightCameras[0].setOrthographic(
             -orthoWidth / 2.0f, orthoWidth / 2.0f,
             -orthoHeight / 2.0f, orthoHeight / 2.0f,

@@ -25,12 +25,6 @@ namespace LEYAML{
         std::vector<int>& GetSamplerMipLevels() { return sampler_miplevels; }
         std::vector<std::vector<bool>>& GetSamplerUvwRepeats() { return sampler_uvwRepeats; }
 
-        std::string& GetFontName() { return font_name; }
-        int& GetFontSamplerId() { return font_samplerid; }
-        std::vector<int>& GetOutlineColor() { return font_outlineColor; }
-        std::vector<int>& GetTextColor() { return font_textColor; }
-        int& GetFontSize() { return font_size; }
-
         std::vector<std::string>& GetModelNames() { return model_names; }
         std::vector<int>& GetModelIds() { return model_ids; }
 
@@ -60,12 +54,6 @@ namespace LEYAML{
 
         std::vector<int> sampler_miplevels;
         std::vector<std::vector<bool>> sampler_uvwRepeats;
-
-        std::string font_name;
-        int font_samplerid;
-        std::vector<int> font_outlineColor;
-        std::vector<int> font_textColor;
-        int font_size;
 
         std::vector<std::string> model_names;
         std::vector<int> model_ids;

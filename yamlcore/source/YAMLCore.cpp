@@ -44,11 +44,7 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
     for (const auto& resource : config["Resources"]) {
         if (resource["Fonts"]) {
             for (const auto& font : resource["Fonts"]) {
-                font_name = font["resource_font_name"].as<std::string>();
-                font_samplerid = font["uniform_sampler_id"].as<int>();
-                font_outlineColor = font["resource_font_outlinecolor"] ? font["resource_font_outlinecolor"].as<std::vector<int>>() : std::vector<int>{255, 255, 255, 255};
-                font_textColor = font["resource_font_textcolor"] ? font["resource_font_textcolor"].as<std::vector<int>>() : std::vector<int>{0, 0, 0, 255};
-                font_size = font["resource_font_size"] ? font["resource_font_size"].as<int>() : 20;
+                appInfo.Font.loadFromYaml(font);
             }
         }
 
@@ -75,11 +71,11 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
             for (const auto& pipeline : resource["Pipelines"]) graphicsPipelineCount++;
 
             //std::cout<<"YAMLCore: graphicsPipelineCount="<<graphicsPipelineCount<<std::endl;
-            appInfo.GraphicsPipeline.resize(graphicsPipelineCount);
+            appInfo.GraphicsPipelines.resize(graphicsPipelineCount);
             graphicsPipelineCount = 0;
 
             for (const auto& pipeline : resource["Pipelines"]) {
-                appInfo.GraphicsPipeline[graphicsPipelineCount].loadFromYaml(pipeline);
+                appInfo.GraphicsPipelines[graphicsPipelineCount].loadFromYaml(pipeline);
 
                 graphicsPipelineCount++;
             }
@@ -91,11 +87,11 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
             for (const auto& pipeline : resource["ComputeShaders"]) computePipelineCount++;
 
             //std::cout<<"YAMLCore: computePipelineCount="<<computePipelineCount<<std::endl;
-            appInfo.ComputePipeline.resize(computePipelineCount);
+            appInfo.ComputePipelines.resize(computePipelineCount);
             computePipelineCount = 0;
 
             for (const auto& computeShader : resource["ComputeShaders"]) {
-                appInfo.ComputePipeline[computePipelineCount].loadFromYaml(computeShader);
+                appInfo.ComputePipelines[computePipelineCount].loadFromYaml(computeShader);
 
                 computePipelineCount++;
             }
@@ -165,8 +161,8 @@ void YAMLCore::ReadYAMLFile(const std::string& filename) {
         }
     }
 
-    if (config["MainCamera"]) appInfo.mainCamera.loadFromYaml(config["MainCamera"]);
-    if (config["LightCamera"]) appInfo.lightCamera.loadFromYaml(config["LightCamera"]);
+    if (config["MainCamera"]) appInfo.MainCamera.loadFromYaml(config["MainCamera"]);
+    if (config["LightCamera"]) appInfo.LightCamera.loadFromYaml(config["LightCamera"]);
 
 }//end of ReadYAMLFile()
 

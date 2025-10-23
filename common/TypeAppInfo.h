@@ -258,6 +258,22 @@ struct ComputePipelineConfig{
     }
 };
 
+struct FontConfig{
+    std::string font_name = "Default";
+    int font_samplerid = 0;
+    std::array<int,4> font_outlineColor{};
+    std::array<int,4> font_textColor{};
+    int font_size = 0;
+
+    void loadFromYaml(const YAML::Node& node) {
+        font_name                                      = getOrDefault(node, "resource_font_name", std::string{"Default"});
+        font_samplerid                                 = getOrDefault(node, "uniform_sampler_id", 0);
+        font_outlineColor                              = getOrDefault(node, "resource_font_outlinecolor", std::array<int,4>{255, 255, 255, 255});
+        font_textColor                                 = getOrDefault(node, "resource_font_textcolor", std::array<int,4>{255, 255, 255, 255});
+        font_size                                      = getOrDefault(node, "resource_font_size", 0);
+    }
+};
+
 struct AppInfo{
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;
@@ -265,10 +281,11 @@ struct AppInfo{
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
-    CameraConfig mainCamera;
-    CameraConfig lightCamera;
-    std::vector<GraphicsPipelineConfig> GraphicsPipeline;
-    std::vector<ComputePipelineConfig> ComputePipeline;
+    CameraConfig MainCamera;
+    CameraConfig LightCamera;
+    std::vector<GraphicsPipelineConfig> GraphicsPipelines;
+    std::vector<ComputePipelineConfig> ComputePipelines;
+    FontConfig Font;
 
     //RenderModes RenderMode = RenderModes::GRAPHICS;
     int RenderMode = 0;
