@@ -4,22 +4,6 @@
 
 namespace LEApplication{
 
-//static class members must be defined outside. 
-//otherwise invoke 'undefined reference' error when linking
-Camera Application::mainCamera;
-bool Application::NeedToExit = false;
-bool Application::NeedToPause = false;
-std::vector<CObject> Application::objects;
-//std::vector<CTextBox> CApplication::textBoxes;
-std::vector<CLight> Application::lights;
-
-Application::Application(){
-    //lightCameras.resize(2); //work
-    lightCameras.resize(LIGHT_MAX); //TODO: for test purpose, create more cameras than needed
-
-    logManager.setLogFile("application.log");
-}
-
 void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
     m_sampleName = GetPureName(exampleName);
@@ -51,7 +35,6 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
-    
     instance_sdlcore->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 	PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
 
@@ -64,14 +47,12 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Step 3: Select required instance extensions
     *****************/
     std::vector<const char*> requiredInstanceExtensions;
-
     instance_sdlcore->queryRequiredInstanceExtensions(OUT requiredInstanceExtensions);
     if(enableValidationLayers) requiredInstanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     /**************** 
     * Step 4: create instance
     *****************/
-    //prepareVulkanDevices();
     instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions);
 
     /**************** 
@@ -103,9 +84,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //std::cout<<vkGetPhysicalDeviceSurfaceCapabilitiesKHR(CContext::GetHandle().GetPhysicalDevice(), surface, pSurfaceCapabilities)<<std::endl;
     //std::cout<<"Surface min extent: width="<<pSurfaceCapabilities->minImageExtent.width<<", Surface min extent: height="<<pSurfaceCapabilities->minImageExtent.height<<std::endl;
     //std::cout<<"Surface max extent: width="<<pSurfaceCapabilities->maxImageExtent.width<<", Surface max extent: height="<<pSurfaceCapabilities->maxImageExtent.height<<std::endl;
-    //lightCameras.resize(2);//work
     swapchain.createSwapchainImages(surface, windowWidth, windowHeight);
-    //lightCameras.resize(2);//not work
 	swapchain.createSwapchainViews(VK_IMAGE_ASPECT_COLOR_BIT);
 
     renderer.CreateCommandPool(surface);
@@ -135,9 +114,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
         if(NeedToExit) break;
     }
 
-    //std::cout<<"Application: vkDeviceWaitIdle()..."<<std::endl;
 	vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
-    //std::cout<<"Application: vkDeviceWaitIdle() finished."<<std::endl;
 }
 
 void Application::Update(){
@@ -300,91 +277,11 @@ void Application::Record_Present(){
     }
 }
 
-
-
-void Application::CleanUp(){
-    //std::cout<<"Begin Cleanup()..."<<std::endl;
-
-    //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;
-    swapchain.CleanUp();
-    //std::cout<<"Application: renderProcess.CleanUp()"<<std::endl;
-    renderProcess.Cleanup();
-
-    //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
-    graphicsDescriptorManager.DestroyAndFree();
-    //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
-    computeDescriptorManager.DestroyAndFree();
-
-    //std::cout<<"Application: textureManager.Destroy()"<<std::endl;
-    textureManager.Destroy();
-    textImageManager.Destroy();
-    textManager.Destroy();
-    //std::cout<<"Application: renderer.Destroy()"<<std::endl;
-    renderer.Destroy();
-
-    //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
-    vkDestroyDevice(CContext::GetHandle().GetLogicalDevice(), nullptr);
-
-    if (enableValidationLayers) DestroyDebugUtilsMessengerEXT(instance->getHandle(), instance->debugMessenger, nullptr);
-
-    vkDestroySurfaceKHR(instance->getHandle(), surface, nullptr);
-    vkDestroyInstance(instance->getHandle(), nullptr);
-    
-    CContext::Quit();
-
-    //std::cout<<"End Cleanup()."<<std::endl;
-}
-
-/*************
- * Helper Functions
- *******/
 void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
-    //CSupervisor::Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     dsSets.push_back(computeDescriptorManager.descriptorSets);
-
     renderer.BindComputeDescriptorSets(renderProcess.computePipelineLayout, dsSets);
-
-    //std::cout<<"Record Compute command buffer. "<<std::endl;
     renderer.Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 }
 
-Application::~Application(){
-    CleanUp();
-
-    if (handle_module_yamlcore) {
-        //std::cout<<"- FreeLibrary: handle_module_yamlcore. (~Application())"<<std::endl;
-        FreeLibrary(handle_module_yamlcore);
-        handle_module_yamlcore = nullptr;
-    }
-
-    if (handle_module_sdlcore) {
-        //std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
-        FreeLibrary(handle_module_sdlcore);
-        handle_module_sdlcore = nullptr;
-    }
-
-    if (handle_module_sdlcore) {
-        //std::cout<<"- FreeLibrary: handle_module_sdlcore. (~Application())"<<std::endl;
-        FreeLibrary(handle_module_sdlcore);
-        handle_module_sdlcore = nullptr;
-    }
-
-    if (handle_module_game) {
-        //std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
-        FreeLibrary(handle_module_game);
-        handle_module_game = nullptr;
-    }
-}
-
-    extern "C" void* CreateInstance(){ return new Application();}
-    extern "C" void DestroyInstance(void *p){ 
-        if(p) {
-            static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->instance_yamlcore);
-            static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
-            static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
-            delete static_cast<Application*>(p);
-            //std::cout<<"- Destroy Instance Application."<<std::endl;
-        } 
-    }
 }

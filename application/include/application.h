@@ -34,8 +34,6 @@
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
 
-
-
 namespace LEApplication{
     class Application : public LEApplication::IApplication{
     public:
@@ -68,21 +66,18 @@ namespace LEApplication{
         int objectCountControl = 0;
         int textboxCountControl = 0;
         int lightCountControl = 0;
-        //static int focusObjectId;
-        static std::vector<CObject> objects;
-        //static std::vector<CTextBox> textBoxes;
-        static std::vector<CLight> lights;
+
+        std::vector<CObject> objects;
+        std::vector<CLight> lights;
 
         void CleanUp();
 
-        //for static class member. But can not define and init them in the header file!
-        static Camera mainCamera; 
-
+        Camera mainCamera; 
         //Camera lightCameras[2]; //works
         std::vector<Camera> lightCameras; 
 
-        static bool NeedToExit;
-        static bool NeedToPause;
+        bool NeedToExit;
+        bool NeedToPause;
 
         /*Clean up Functions*/
         void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
