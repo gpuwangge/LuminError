@@ -111,17 +111,8 @@ namespace LEApplication{
         /******************
         * Helper Functions
         ******************/
-        void CreatePipelines();
-        void ReadRegisterObjects();
-        void ReadRegisterTextboxes();
-        void ReadLightings();
-        void ReadCameras();
         void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);  
-            
-        
 
-
-        //Functions to call example functions
         /******************
         * Core Functions
         ******************/

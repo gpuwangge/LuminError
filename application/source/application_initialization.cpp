@@ -326,59 +326,349 @@ void Application::Initialize(){
     if(bVerboseInitialization) printElapsed("Application: Initialize time for creating uniform descriptors", T6, T7);
 
     /****************************
-    * 6 Create Pipelines
+    * 9 Create Pipelines
     ****************************/
-    CreatePipelines();
+    bool bPipelineVerbose = false;
+
+    /****************************
+    * 9.1 Command Buffer
+    ****************************/
+    //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->GraphicsPipelines.size() > 0) renderer.CreateGraphicsCommandBuffer();
+    //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
+    if(appInfo->ComputePipelines.size() > 0) renderer.CreateComputeCommandBuffer();
+    if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
+    
+    /****************************
+    * 9.2 Create Shaders
+    ****************************/
+    //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0){
+    if(appInfo->GraphicsPipelines.size() > 0){
+        for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
+            //std::cout<<appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name<<std::endl;
+            shaderManager.CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_vertexshader_name, shaderManager.VERT);
+            shaderManager.CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_fragmentshader_name, shaderManager.FRAG);
+        }
+    }
+    if(appInfo->ComputePipelines.size() > 0)
+        for(int i = 0; i < appInfo->ComputePipelines.size(); i++)
+            shaderManager.CreateShader(appInfo->ComputePipelines[i].compute_pipeline_computeshader_name, shaderManager.COMP);
+    if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
+
+    /****************************
+    * 9.3 Create Pipelines
+    ****************************/
+    if(appInfo->GraphicsPipelines.size() > 0){
+        std::vector<VkDescriptorSetLayout> dsLayouts; //2 sets for graphics
+
+        if((CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
+            (CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING) || 
+            (CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) ||
+            (CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP)){
+            if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set0: graphics general layout"<<std::endl;
+            dsLayouts.push_back(CGraphicsDescriptorManager::descriptorSetLayout_general); //set = 0
+        }
+
+        if(CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE) {
+            if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set1: sampler(texture) layout"<<std::endl;
+            dsLayouts.push_back(CGraphicsDescriptorManager::descriptorSetLayout_textureImageSampler); //set = 1
+        }
+  
+        //Different cube can share the same texture descriptor.
+        //suppose we have 100 objects, 100 different textures. cube x 50, sphere x 50. How many texture layouts? How many texture descriptor?
+        //obviously, every objects need a different texture, so bind with objectId
+        //but for layout, can use one. That means texture layout should be object property, while the descriptor set(associate with image) should be cube[i]/sphere[i] bound
+
+        //each object can have muti texture image, multi descriptor set(when creating descritpor set, need a sampler)
+        //all objects share the same descriptor pool and descriptor layout, they are universal
+        //sampler should also be universal
+        
+        for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
+            //std::cout<<"test create pipeline"<<std::endl;
+            //! All graphics pipelines use the same dsLayouts
+            if(shaderManager.bEnablePushConstant){
+                if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create Push Constant Layout"<<std::endl;
+                renderProcess.createGraphicsPipelineLayout(dsLayouts,  shaderManager.pushConstantRange, true, i);
+                if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Push Constant Layout"<<std::endl;
+            }
+            else renderProcess.createGraphicsPipelineLayout(dsLayouts, i);
+
+            
+            //int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
+            int vertexDatatype = appInfo->GraphicsPipelines[i].graphics_pipeline_vertexdatatype;
+            if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
+
+            switch(vertexDatatype){
+                case VertexStructureTypes::NoType:
+                    renderProcess.createGraphicsPipeline(
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                        shaderManager.vertShaderModules[i], 
+                        shaderManager.fragShaderModules[i], i, 
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
+                break;
+                case VertexStructureTypes::ThreeDimension:
+                    //for 2-renderpass case, each pipeline for different renderpass
+                    //if((*appInfo->RenderPassShadowmap)[i]) {
+                    if(appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap) {
+                        renderProcess.createGraphicsPipeline<Vertex3D>(
+                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                            shaderManager.vertShaderModules[i], 
+                            shaderManager.fragShaderModules[i], true, false, i,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_shadowmap,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);  
+                    }else{
+                        renderProcess.createGraphicsPipeline<Vertex3D>(
+                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                            shaderManager.vertShaderModules[i], 
+                            shaderManager.fragShaderModules[i], true, false, i,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap, renderProcess.renderPass_mainscene,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                            appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);  
+                    }   
+                break;
+                case VertexStructureTypes::TwoDimension:
+                    //std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
+                    renderProcess.createGraphicsPipeline<Vertex2D>(
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                        shaderManager.vertShaderModules[i], 
+                        shaderManager.fragShaderModules[i], true, false, i,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
+                break;
+                case VertexStructureTypes::ParticleType:
+                    renderProcess.createGraphicsPipeline<Particle>(
+                        VK_PRIMITIVE_TOPOLOGY_POINT_LIST, 
+                        shaderManager.vertShaderModules[i], 
+                        shaderManager.fragShaderModules[i], true, false, i,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox);
+                break;
+                case VertexStructureTypes::TextQuad:
+                    renderProcess.createGraphicsPipeline<TextQuadVertex>(
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                        shaderManager.vertShaderModules[i], 
+                        shaderManager.fragShaderModules[i], true, true, i,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_subpasses_subpass_id, false, renderProcess.renderPass_mainscene,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_blend_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_depth_test_enable,
+                        appInfo->GraphicsPipelines[i].graphics_pipeline_depth_write_enable,  appInfo->GraphicsPipelines[i].graphics_pipeline_skybox); 
+                break;
+                default:
+                break;
+            }
+            if(bPipelineVerbose) std::cout<<"Done create one graphics pipeline"<<std::endl;
+        }
+        
+    }
+    if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
+        //! only support one compute pipeline
+        renderProcess.createComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
+        renderProcess.createComputePipeline(shaderManager.compShaderModules[0]);
+    }
+    if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 
     TimePoint T8 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for creating pipelines", T7, T8);
 
     /****************************
-    * 7 Read and Register Objects
+    * 10 Register Objects
     ****************************/
-    ReadRegisterObjects();
+    for(int i = 0; i < appInfo->Objects.size(); i++){
+        objects[i].m_object_id = appInfo->Objects[i].object_id;
+        objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
+        objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
+        objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
+        objects[i].Name = appInfo->Objects[i].object_name;
+        objects[i].bSticker = appInfo->Objects[i].object_bSticker;
+        objects[i].SetPosition(appInfo->Objects[i].object_position[0], appInfo->Objects[i].object_position[1], appInfo->Objects[i].object_position[2]);
+        objects[i].SetRotation(appInfo->Objects[i].object_rotation[0], appInfo->Objects[i].object_rotation[1], appInfo->Objects[i].object_rotation[2]);
+        objects[i].SetVelocity(appInfo->Objects[i].object_velocity[0], appInfo->Objects[i].object_velocity[1], appInfo->Objects[i].object_velocity[2]);
+        objects[i].SetAngularVelocity(appInfo->Objects[i].object_angular_velocity[0], appInfo->Objects[i].object_angular_velocity[1], appInfo->Objects[i].object_angular_velocity[2]);
+
+        //must load resources before object register
+        if(objects[i].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+            continue;
+        }
+        objects[i].Register((Application*)this);
+        
+        if(appInfo->Objects[i].object_scale != 1.0f){
+            objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
+        }else{
+            auto object_scale_3 = appInfo->Objects[i].object_scale_3;
+            objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
+        }
+    }
+
+    //register objects for controls
+    if(appInfo->Feature.feature_graphics_enable_controls){
+        int indexOffset = appInfo->Objects.size();
+        for(int i = 0; i < controlNodes.size(); i++){
+            controlNodes[i]->RegisterObject(indexOffset);
+            indexOffset += controlNodes[i]->m_object_count;
+        }
+    }
+
+    for(int i = 0; i < objects.size(); i++){
+        if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
+        logManager.print("Object ID: %d", i);
+        logManager.print("\tName: %s", objects[i].Name.c_str());
+        logManager.print("\tPosition: %f, %f, %f", objects[i].Position);
+        logManager.print("\tLength_original: %f, %f, %f", objects[i].Length_original);
+        logManager.print("\tLengthMin_original: %f, %f, %f", objects[i].LengthMin_original);
+        logManager.print("\tLengthMax_original: %f, %f, %f", objects[i].LengthMax_original);
+        logManager.print("\tScale: %f, %f, %f", objects[i].Scale);
+        logManager.print("\tLength: %f, %f, %f", objects[i].Length);
+    }
 
     TimePoint T9 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for reading register objects", T8, T9);
-
+    if(bVerboseInitialization) printElapsed("Application: Initialize time for register objects", T8, T9);
 
     /****************************
-    * 8 Read and Register Textboxes
+    * 11 Register Textboxes
     ****************************/
-    ReadRegisterTextboxes();
-    
+    for(int i = 0; i < appInfo->Textboxes.size(); i++){
+        textManager.m_textBoxes[i].Name = appInfo->Textboxes[i].textbox_name;
+        textManager.m_textBoxes[i].m_textBoxID = appInfo->Textboxes[i].textbox_id;
+        textManager.m_textBoxes[i].SetPosition(appInfo->Textboxes[i].textbox_position[0], appInfo->Textboxes[i].textbox_position[1], appInfo->Textboxes[i].textbox_position[2]);
+        textManager.m_textBoxes[i].SetRotation(appInfo->Textboxes[i].textbox_rotation[0], appInfo->Textboxes[i].textbox_rotation[1], appInfo->Textboxes[i].textbox_rotation[2]);
+        textManager.m_textBoxes[i].bSticker = appInfo->Textboxes[i].textbox_bSticker;
+        textManager.m_textBoxes[i].SetScale(appInfo->Textboxes[i].textbox_scale);
+        textManager.m_textBoxes[i].SetBoxColor(glm::vec4(appInfo->Textboxes[i].textbox_color[0], appInfo->Textboxes[i].textbox_color[1], appInfo->Textboxes[i].textbox_color[2], appInfo->Textboxes[i].textbox_color[3]));
+        textManager.m_textBoxes[i].m_model_id = appInfo->Textboxes[i].textbox_resource_model_id;
+        textManager.m_textBoxes[i].m_text_content = appInfo->Textboxes[i].textbox_text_content;
+        textManager.m_textBoxes[i].SetTextColor(glm::vec4(appInfo->Textboxes[i].textbox_text_color[0], appInfo->Textboxes[i].textbox_text_color[1], appInfo->Textboxes[i].textbox_text_color[2], appInfo->Textboxes[i].textbox_text_color[3]));
+        textManager.m_textBoxes[i].m_default_graphics_pipeline_id = appInfo->Textboxes[i].textbox_resource_default_graphics_pipeline_id;
+
+        if(textManager.m_textBoxes[i].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Textbox id("<<i<<")!"<<std::endl;
+            continue;
+        }
+        textManager.m_textBoxes[i].Register((Application*)this);
+    }
+
+    //register textbox for controls
+    if(appInfo->Feature.feature_graphics_enable_controls){
+        int indexOffset = appInfo->Textboxes.size();
+        for(int i = 0; i < controlNodes.size(); i++){
+            controlNodes[i]->RegisterTextbox(indexOffset);
+            indexOffset += controlNodes[i]->m_textbox_count;
+        }
+    }
+
+    for(int i = 0; i < textManager.m_textBoxes.size(); i++){
+        if(!textManager.m_textBoxes[i].bRegistered) std::cout<<"WARNING: Textbox id("<<i<<") is not registered!"<<std::endl;
+        logManager.print("Textbox ID: %d", i);
+        logManager.print("\tName: %s", textManager.m_textBoxes[i].Name.c_str());
+        logManager.print("\tPosition: %f, %f, %f", textManager.m_textBoxes[i].Position);
+        logManager.print("\tLength_original: %f, %f, %f", textManager.m_textBoxes[i].Length_original);
+        logManager.print("\tLengthMin_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMin_original);
+        logManager.print("\tLengthMax_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMax_original);
+        logManager.print("\tScale: %f, %f, %f", textManager.m_textBoxes[i].Scale);
+        logManager.print("\tLength: %f, %f, %f", textManager.m_textBoxes[i].Length);
+    }
 
     TimePoint T10 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for reading register textboxes", T9, T10);
+    if(bVerboseInitialization) printElapsed("Application: Initialize time for register textboxes", T9, T10);
 
     /****************************
-    * 9 Read Lightings
+    * 12 Register Lightings
     ****************************/
-    ReadLightings();
+    for(int i = 0; i < appInfo->Lights.size(); i++){
+        int light_id = appInfo->Lights[i].light_id;
+        if(lights[light_id].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Light id("<<light_id<<")!"<<std::endl;
+            continue;
+        }
+        
+        std::string name = appInfo->Lights[i].light_name;
+        auto position = appInfo->Lights[i].light_position;
+        glm::vec3 glm_position(position[0], position[1], position[2]);
+        auto intensity = appInfo->Lights[i].light_intensity;
+        auto color = appInfo->Lights[i].light_color;
+        glm::vec3 glm_color(color[0], color[1], color[2]);
+        auto spotAngle = appInfo->Lights[i].light_spotAngle; //the default value is [180,180] degrees which sets the light to point light instead of spot light
+        float spotInnerAngle = spotAngle[0];
+        float spotOuterAngle = spotAngle[1];
+
+        lights[light_id].Register(name, light_id, glm_position, intensity, glm_color, spotInnerAngle, spotOuterAngle);
+    }
+
+    for(int i = 0; i < lights.size(); i++) if(!lights[i].bRegistered) std::cout<<"WARNING: Light id("<<i<<") is not registered!"<<std::endl;
 
     TimePoint T11 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for reading lightings", T10, T11);
+    if(bVerboseInitialization) printElapsed("Application: Initialize time for register lightings", T10, T11);
     
     /****************************
-    * 9 Read Main Camera
+    * 13 Set Main Camera
     ****************************/
-    ReadCameras();
+    mainCamera.cameraType = (CameraType)appInfo->MainCamera.camera_mode;
+    mainCamera.SetPosition(appInfo->MainCamera.camera_position[0], appInfo->MainCamera.camera_position[1],  appInfo->MainCamera.camera_position[2]);
+    mainCamera.SetRotation(appInfo->MainCamera.camera_rotation[0], appInfo->MainCamera.camera_rotation[1],  appInfo->MainCamera.camera_rotation[2]);
+    mainCamera.focusObjectId = appInfo->MainCamera.object_id_target;
+    mainCamera.bEnableOrthographic = appInfo->MainCamera.camera_projection_enable_orthographic;
+    float nearPlane = appInfo->MainCamera.camera_z[0];
+    float farPlane = appInfo->MainCamera.camera_z[1];
+    if(!mainCamera.bEnableOrthographic){ mainCamera.setPerspective(appInfo->MainCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
+    }else{
+        float orthoWidth = appInfo->MainCamera.camera_projection_orthographic_width;
+        float orthoHeight = appInfo->MainCamera.camera_projection_orthographic_height;
+        mainCamera.setOrthographic(
+            -orthoWidth / 2.0f, orthoWidth / 2.0f,
+            -orthoHeight / 2.0f, orthoHeight / 2.0f,
+            nearPlane, farPlane);
+    }
+    mainCamera.SetRotationSensitivity(200.0f);
+
+    instance_sdlcore->SetKeyboardSensibility(appInfo->MainCamera.camera_keyboard_sensitive);
+    instance_sdlcore->SetMouseSensibility(appInfo->MainCamera.camera_mouse_sensitive);
+
+    lightCameras[0].cameraType = (CameraType)appInfo->LightCamera.camera_mode;
+    lightCameras[0].SetPosition(appInfo->LightCamera.camera_position[0], appInfo->LightCamera.camera_position[1],  appInfo->LightCamera.camera_position[2]);
+    lightCameras[0].SetRotation(appInfo->LightCamera.camera_rotation[0], appInfo->LightCamera.camera_rotation[1],  appInfo->LightCamera.camera_rotation[2]);
+    lightCameras[0].focusObjectId = appInfo->LightCamera.object_id_target;
+    lightCameras[0].bEnableOrthographic = appInfo->LightCamera.camera_projection_enable_orthographic;
+    nearPlane = appInfo->LightCamera.camera_z[0];
+    farPlane = appInfo->LightCamera.camera_z[1];
+    if(!lightCameras[0].bEnableOrthographic){ lightCameras[0].setPerspective(appInfo->LightCamera.camera_projection_perspective_fov, 1.0f, nearPlane, farPlane);
+    }else{
+        float orthoWidth = appInfo->LightCamera.camera_projection_orthographic_width;
+        float orthoHeight = appInfo->LightCamera.camera_projection_orthographic_height;
+        lightCameras[0].setOrthographic(
+            -orthoWidth / 2.0f, orthoWidth / 2.0f,
+            -orthoHeight / 2.0f, orthoHeight / 2.0f,
+            nearPlane, farPlane);
+    }
+    //lightCameras[0].SetRotationSensitivity(100.0f);
+
+    for(int i = 1; i < lights.size(); i++){//lightCameras.size()
+        lightCameras[i].cameraType = lightCameras[0].cameraType; //default to light camera type
+        lightCameras[i].SetPosition(lightCameras[0].Position);
+        lightCameras[i].SetRotation(lightCameras[0].Rotation);
+        lightCameras[i].setPerspective(lightCameras[0].fov,  (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, lightCameras[0].znear, lightCameras[0].zfar);
+        lightCameras[i].setOrthographic(-20, 20, -20, 20, lightCameras[0].znear, lightCameras[0].zfar);
+        lightCameras[i].focusObjectId = lightCameras[0].focusObjectId; //default to main camera focus object id
+        lightCameras[i].bEnableOrthographic = lightCameras[0].bEnableOrthographic; //default to main camera orthographic mode
+        //lightCameras[i].SetRotationSensitivity(100.0f);
+    }
 
     TimePoint T12 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for reading cameras", T11, T12);
+    if(bVerboseInitialization) printElapsed("Application: Initialize time for set cameras", T11, T12);
 
     /****************************
-    * 10 Create Sync Objects and Clean up Shaders (+and call example initialization)
+    * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
     renderer.CreateSyncObjects(swapchain.swapchainImageSize);
     shaderManager.Destroy();
-
 
     TimePoint T13 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for creating sync objects and destroy shaders", T12, T13);
 
     instance_game->PostInitialize();
 }
-
 
 }
