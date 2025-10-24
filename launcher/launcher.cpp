@@ -4,17 +4,9 @@
 //dlopen(), dlerror(), dlsym(), and suffix .so instead of .dll, void* indead of HMODULE
 //Or olternative: Boost.DLL
 #include <windows.h>
-
 #include <iostream>
 
-
 int main(int argc, char* argv[]) {
-    // std::cout << "Number of args: " << argc << "\n";
-    // for (int i = 0; i < argc; ++i) {
-    //     std::cout << "Arg " << i << ": " << argv[i] << "\n";
-    // }
-
-
     HMODULE handle_application = LoadLibraryA("application.dll"); //Windows.h
     if(!handle_application) { 
         std::cerr << "Module load failed! Module Name = application.dll" << std::endl; //Windows.h

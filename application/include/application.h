@@ -47,9 +47,10 @@ namespace LEApplication{
         //VkInstance instance;//01
         std::unique_ptr<CInstance> instance{nullptr};
 
-        int windowWidth, windowHeight;
+        int windowWidth = 0;
+        int windowHeight = 0;
         VkSurfaceKHR surface;//03
-        
+
         //bool framebufferResized = false;
         //bool needWindow = false;
 
@@ -74,21 +75,14 @@ namespace LEApplication{
 
         void CleanUp();
 
-        //void Greet() override {std::cout<<"test greet"<<std::endl;}
-
         //for static class member. But can not define and init them in the header file!
         static Camera mainCamera; 
-
-        //static Camera lightCameras[2];
-        //static std::vector<Camera> lightCameras;
 
         //Camera lightCameras[2]; //works
         std::vector<Camera> lightCameras; 
 
         static bool NeedToExit;
         static bool NeedToPause;
-
-        //static bool PrintFPS;
 
         /*Clean up Functions*/
         void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
@@ -101,33 +95,24 @@ namespace LEApplication{
         double totalInitTime = 0;
 
         std::string m_sampleName = "CSimpleTriangle";
-        
 
         std::vector<std::unique_ptr<CControlNode>> controlNodes;  
-
-        /*Pure virtual function(=0): base class not implment, derived class must implement*/
-        //NA
 
         /******************
         * Helper Functions
         ******************/
-        void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);  
+        void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);
+        std::string GetPureName(const std::string& path);
 
         /******************
         * Core Functions
         ******************/
         void Run(std::string exampleName) override;
-        void UpdateRecordRender();
-
+        void Record_Present();
 
         void Initialize(); //use this to call sample initialization
         void Update(); //base: update time, frame id, camera and ubo
-        //void PostUpdate();
-        void RecordGraphicsCommandBuffer_RenderpassMainscene();
-        void RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex);
-        void RecordComputeCommandBuffer();
-        
-        
+        void RecordGraphicsCommandBuffer_RenderpassMainscene(){ instance_game->Record(); instance_game->RecordGraphicsCommandBuffer_RenderpassMainscene(); }
 
         //Module Related
         HMODULE handle_module_yamlcore;
@@ -139,10 +124,7 @@ namespace LEApplication{
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
         void DestroyInstance(HMODULE handle, void* instance);
 
-        //std::unique_ptr<AppInfo> appInfo;
-        //std::unique_ptr<YAML::Node> config;
         AppInfo* appInfo = nullptr;
-        //YAML::Node* config = nullptr;
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}

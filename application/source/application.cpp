@@ -7,47 +7,13 @@ namespace LEApplication{
 //static class members must be defined outside. 
 //otherwise invoke 'undefined reference' error when linking
 Camera Application::mainCamera;
-//Camera CApplication::lightCameras[2];
-//std::vector<Camera> CApplication::lightCameras;
 bool Application::NeedToExit = false;
 bool Application::NeedToPause = false;
-//bool CApplication::PrintFPS = false;
-//int CApplication::focusObjectId = 0;
 std::vector<CObject> Application::objects;
 //std::vector<CTextBox> CApplication::textBoxes;
 std::vector<CLight> Application::lights;
 
-std::string getPureName(const std::string& path) {
-    std::string result = path;
-    
-    // 移除前导的 .\ 或 ./
-    if (result.size() >= 2 && result[0] == '.' && 
-        (result[1] == '\\' || result[1] == '/')) {
-        result = result.substr(2);
-    }
-    
-    // 找到最后一个路径分隔符
-    size_t lastSlash = result.find_last_of("/\\");
-    if (lastSlash != std::string::npos) {
-        result = result.substr(lastSlash + 1);
-    }
-    
-    // 移除扩展名
-    size_t lastDot = result.find_last_of('.');
-    if (lastDot != std::string::npos) {
-        result = result.substr(0, lastDot);
-    }
-    
-    return result;
-}
-
 Application::Application(){
-    //debugger = new CDebugger("../logs/application.log");
-
-    //NeedToExit = false;
-    windowWidth = 0;
-    windowHeight = 0;
-
     //lightCameras.resize(2); //work
     lightCameras.resize(LIGHT_MAX); //TODO: for test purpose, create more cameras than needed
 
@@ -56,7 +22,7 @@ Application::Application(){
 
 void Application::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
-    m_sampleName = getPureName(exampleName);
+    m_sampleName = GetPureName(exampleName);
 
     //Load YAML Core Module
     LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
@@ -148,22 +114,24 @@ void Application::Run(std::string exampleName){ //Entrance Function
     std::cout<<"======Welcome to Vulkan Platform======="<<std::endl;
     std::cout<<"======================================="<<std::endl;
 
-    //auto startInitialzeTime = std::chrono::high_resolution_clock::now();
-
     TimePoint T0 = now();
+    instance_game->Initialize();
+    instance_yamlcore->ReadYAMLFile(m_sampleName);
     Initialize();
+    instance_game->PostInitialize();
+
     TimePoint T1 = now();
     totalInitTime = printElapsed("Application: Total Initialization cost", T0, T1);
-    //if(textManager.m_textBoxes.size() > 3) textManager.m_textBoxes[3].SetTextContent("Init:" + to_string_prec(totalInitTime) + " ms");
-
-    //auto endInitializeTime = std::chrono::high_resolution_clock::now();
-    //auto durationInitializationTime = std::chrono::duration<float, std::chrono::seconds::period>(endInitializeTime - startInitialzeTime).count() * 1000;
-    //std::cout<<"Total Initialization cost: "<<durationInitializationTime<<" milliseconds"<<std::endl;
-
 
     while(instance_sdlcore->IsRunning()){
         instance_sdlcore->eventHandle();
-        if(!NeedToPause) UpdateRecordRender();
+        if(!NeedToPause) {
+            instance_game->Update();
+            Update();
+            Record_Present();
+            instance_game->PostUpdate();
+            renderer.Update(); //update currentFrame
+        }
         if(NeedToExit) break;
     }
 
@@ -173,8 +141,6 @@ void Application::Run(std::string exampleName){ //Entrance Function
 }
 
 void Application::Update(){
-    instance_game->Update();
-
     static TimePoint startTimePoint = now();
     static TimePoint lastTimePoint = now();
     TimePoint currentTimePoint = now();
@@ -201,20 +167,7 @@ void Application::Update(){
     frameCount++;
 }
 
-//void Application::PostUpdate(){ instance_game->PostUpdate();}
-
-void Application::RecordGraphicsCommandBuffer_RenderpassMainscene(){
-    instance_game->Record();
-    instance_game->RecordGraphicsCommandBuffer_RenderpassMainscene();
-    //for(int i = 0; i < objects.size(); i++) objects[i].Draw();
-	//textManager.Draw();
-}
-void Application::RecordGraphicsCommandBuffer_RenderpassShadowmap(int renderpassIndex){instance_game->RecordGraphicsCommandBuffer_RenderpassShadowmap(renderpassIndex);}
-void Application::RecordComputeCommandBuffer(){instance_game->RecordComputeCommandBuffer();}
-
-void Application::UpdateRecordRender(){
-    Update();
-
+void Application::Record_Present(){
     /**************************
      * 
      * Universial Render Functions
@@ -258,7 +211,8 @@ void Application::UpdateRecordRender(){
                 renderer.BeginRenderPass(renderProcess.renderPass_shadowmap, swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, renderProcess.clearValues_shadowmap, true);
                 renderer.SetViewport(swapchain.swapChainExtent);
                 renderer.SetScissor(swapchain.swapChainExtent);
-                RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
+                //RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
+                instance_game->RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
                 renderer.EndRenderPass();
             }
 
@@ -287,7 +241,7 @@ void Application::UpdateRecordRender(){
             //std::cout<<"Application: vkResetCommandBuffer"<<std::endl;
 
             renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-            RecordComputeCommandBuffer();
+            instance_game->RecordComputeCommandBuffer();
             renderer.EndRecordComputeCommandBuffer();
             //std::cout<<"Application: recordComputeCommandBuffer()"<<std::endl;
 
@@ -326,7 +280,7 @@ void Application::UpdateRecordRender(){
             vkResetCommandBuffer(renderer.commandBuffers[renderer.computeCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
             
             renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-            RecordComputeCommandBuffer();
+            instance_game->RecordComputeCommandBuffer();
             renderer.EndRecordComputeCommandBuffer();
 
             renderer.StartRecordGraphicsCommandBuffer(
@@ -344,18 +298,9 @@ void Application::UpdateRecordRender(){
         default:
         break;
     }
-
-    instance_game->PostUpdate();
-
-    renderer.Update(); //update currentFrame
 }
 
-void Application::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if (func != nullptr) {
-        func(instance, debugMessenger, pAllocator);
-    }
-}
+
 
 void Application::CleanUp(){
     //std::cout<<"Begin Cleanup()..."<<std::endl;
@@ -380,10 +325,7 @@ void Application::CleanUp(){
     //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
     vkDestroyDevice(CContext::GetHandle().GetLogicalDevice(), nullptr);
 
-#ifndef ANDROID
-    if (enableValidationLayers) 
-        DestroyDebugUtilsMessengerEXT(instance->getHandle(), instance->debugMessenger, nullptr);
-#endif
+    if (enableValidationLayers) DestroyDebugUtilsMessengerEXT(instance->getHandle(), instance->debugMessenger, nullptr);
 
     vkDestroySurfaceKHR(instance->getHandle(), surface, nullptr);
     vkDestroyInstance(instance->getHandle(), nullptr);
@@ -405,46 +347,6 @@ void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGr
 
     //std::cout<<"Record Compute command buffer. "<<std::endl;
     renderer.Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
-}
-
-void Application::LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName){
-    handle = LoadLibraryA(moduleName.c_str()); 
-    if(!handle) { 
-        std::cerr << "Module load failed! Module Name = " << moduleName << std::endl; 
-        return; 
-    }
-
-    using CreateInstanceFunc = void*(*)();
-    auto CreateInstance =  (CreateInstanceFunc)GetProcAddress(handle, "CreateInstance");
-    if(!CreateInstance) { 
-        std::cerr << "GetProcAddress failed! (CreateInstance_Module) Module Name = " << moduleName << std::endl;
-        FreeLibrary(handle);
-        instance = nullptr;
-        return;
-    }
-    
-    instance = CreateInstance();
-    if (!instance) {
-        std::cerr << "CreateInstance failed!" << std::endl;
-        FreeLibrary(handle);
-        handle = nullptr;
-        return;
-    }
-
-}
-
-void Application::DestroyInstance(HMODULE handle, void* instance){
-    if (instance) {
-        using DestroyInstanceFunc = void(*)(void*);
-        auto DestroyInstance =  (DestroyInstanceFunc)GetProcAddress(handle, "DestroyInstance");
-        if(!DestroyInstance) { 
-            std::cerr << "GetProcAddress failed! (DestroyInstance)" << std::endl;
-            FreeLibrary(handle);
-            return;
-        }
-        DestroyInstance(instance);
-        instance = nullptr;
-    }
 }
 
 Application::~Application(){

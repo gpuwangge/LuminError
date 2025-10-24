@@ -3,13 +3,8 @@
 namespace LEApplication{
 
 void Application::Initialize(){
-    instance_game->Initialize();
-
     bool bVerboseInitialization = false;
     TimePoint T0 = now();
-
-    instance_yamlcore->ReadYAMLFile(m_sampleName);
-
     /****************************
     * 1 Process blend and push constant
     ****************************/   
@@ -667,8 +662,6 @@ void Application::Initialize(){
 
     TimePoint T13 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for creating sync objects and destroy shaders", T12, T13);
-
-    instance_game->PostInitialize();
 }
 
 }
