@@ -111,8 +111,6 @@ namespace LEApplication{
         /******************
         * Helper Functions
         ******************/
-        //void ReadControls();
-        void ReadFeatures();
         void ReadUniforms();
         void ReadAttachments();
         void ReadSubpasses();
