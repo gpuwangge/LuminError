@@ -111,11 +111,6 @@ namespace LEApplication{
         /******************
         * Helper Functions
         ******************/
-        void ReadUniforms();
-        void ReadAttachments();
-        void ReadSubpasses();
-        void ReadResources();
-        void CreateUniformDescriptors(bool b_uniform_graphics, bool b_uniform_compute);
         void CreatePipelines();
         void ReadRegisterObjects();
         void ReadRegisterTextboxes();
