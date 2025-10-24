@@ -5,21 +5,19 @@
 namespace LEApplication{
 
 void Application::Run(std::string exampleName){ //Entrance Function
+    /**************** 
+    * Module Related
+    *****************/
     void* pVoid = nullptr;
-    m_sampleName = GetPureName(exampleName);
 
     //Load YAML Core Module
     LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
     instance_yamlcore = static_cast<LEYAML::IYAMLCore*>(pVoid);
-    //instance_yamlcore->SetApplication(this);
-
     appInfo = &instance_yamlcore->GetAppInfo();
-    //config = &instance_yamlcore->GetConfig();
     
     //Load SDL Core Module
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
     instance_sdlcore = static_cast<LESDL::ISDLCore*>(pVoid);
-    //instance_sdlcore->greet();
     instance_sdlcore->SetApplication(this);
 
     //Load Game(Example) Module
@@ -27,14 +25,14 @@ void Application::Run(std::string exampleName){ //Entrance Function
     instance_game = static_cast<LuminError::IGame*>(pVoid);
     instance_game->SetApplication(this);
 
-    instance_game->PreInitialize();
-
     CContext::Init();
+    instance_game->PreInitialize();
 
     /**************** 
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
+    m_sampleName = GetPureName(exampleName);
     instance_sdlcore->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 	PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
 
@@ -79,7 +77,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
 
-    //query  basic capabilities of surface
+    //query basic capabilities of surface
     //VkSurfaceCapabilitiesKHR*                   pSurfaceCapabilities;
     //std::cout<<vkGetPhysicalDeviceSurfaceCapabilitiesKHR(CContext::GetHandle().GetPhysicalDevice(), surface, pSurfaceCapabilities)<<std::endl;
     //std::cout<<"Surface min extent: width="<<pSurfaceCapabilities->minImageExtent.width<<", Surface min extent: height="<<pSurfaceCapabilities->minImageExtent.height<<std::endl;
@@ -146,9 +144,7 @@ void Application::Update(){
 
 void Application::Record_Present(){
     /**************************
-     * 
      * Universial Render Functions
-     * 
      * ***********************/
     switch(renderer.m_renderMode){
         case RenderModes::GRAPHICS:

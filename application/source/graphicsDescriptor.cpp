@@ -691,7 +691,7 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
     VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler_hardwareDepthBias);
 }
 
-/************
+/*************
  * 10 GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2
  ************/
 /*

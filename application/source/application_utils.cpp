@@ -1,7 +1,7 @@
 #include "../include/application.h"
 
 namespace LEApplication{
-/*************
+/**************
  * Helper Functions
  ************/
 Application::Application(){
