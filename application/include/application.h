@@ -122,159 +122,100 @@ namespace LEApplication{
         AppInfo* appInfo = nullptr;
 
         //Expose functions for SDL Core to use
-        bool Get_feature_graphics_enable_controls() override {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}
-        bool Get_feature_graphics_show_all_metric_controls() override {return appInfo->Feature.feature_graphics_show_all_metric_controls;}
-        bool Get_feature_graphics_show_performance_control() override {return appInfo->Feature.feature_graphics_show_performance_control;}
-        void Set_feature_graphics_enable_controls(bool value) override {appInfo->Feature.feature_graphics_enable_controls = value;}
-        void Set_feature_graphics_show_all_metric_controls(bool value) override {appInfo->Feature.feature_graphics_show_all_metric_controls = value;}
-        void Set_feature_graphics_show_performance_control(bool value) override {appInfo->Feature.feature_graphics_show_performance_control = value;}
+        bool Get_feature_graphics_enable_controls() override;
+        bool Get_feature_graphics_show_all_metric_controls() override;
+        bool Get_feature_graphics_show_performance_control() override;
+        void Set_feature_graphics_enable_controls(bool value) override;
+        void Set_feature_graphics_show_all_metric_controls(bool value) override;
+        void Set_feature_graphics_show_performance_control(bool value) override;
 
-        int GetControlNodeSize() override { return controlNodes.size();}
-        void SetControlNodeVisible(int nodeId, bool value) override { controlNodes[nodeId]->bVisible = value;}
-        void* GetInstanceHandle() override {return instance->getHandle();}
+        int GetControlNodeSize() override;
+        void SetControlNodeVisible(int nodeId, bool value) override;
+        void* GetInstanceHandle() override;
         
-        int GetObjectSize() override { return objects.size(); }
-        int GetCustomObjectSize() override { return appInfo->Objects.size(); }
-        void SetObjectVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetVelocity(vx, vy, vz);}
-        void SetObjectVelocity(int objectId, glm::vec3 v) override {objects[objectId].SetVelocity(v);}
-        void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) override {objects[objectId].SetAngularVelocity(vx, vy, vz); }
-        void SetObjectPosition(int objectId, float px, float py, float pz) override { objects[objectId].SetPosition(px, py, pz); }
-        void SetObjectPosition(int objectId, glm::vec3 p) override { objects[objectId].SetPosition(p); }
-        void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
-        glm::vec3 GetObjectPosition(int objectId) override { return objects[objectId].Position; }
+        int GetObjectSize() override;
+        int GetCustomObjectSize() override;
+        void SetObjectVelocity(int objectId, float vx, float vy, float vz) override;
+        void SetObjectVelocity(int objectId, glm::vec3 v) override;
+        void SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) override;
+        void SetObjectPosition(int objectId, float px, float py, float pz) override;
+        void SetObjectPosition(int objectId, glm::vec3 p) override;
+        void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override;
+        glm::vec3 GetObjectPosition(int objectId) override;
 
-        int GetLightSize() override { return lights.size(); }
-        glm::vec3 GetLightPosition(int lightId) override { return lights[lightId].GetLightPosition(); }
-        void SetLightPosition(int lightId, float px, float py, float pz) override { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }
-        void SetLightPosition(int lightId, glm::vec3 p) override { lights[lightId].SetLightPosition(p); }
+        int GetLightSize() override;
+        glm::vec3 GetLightPosition(int lightId) override;
+        void SetLightPosition(int lightId, float px, float py, float pz) override;
+        void SetLightPosition(int lightId, glm::vec3 p) override;
 
-        void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) override {modelManager.CreateCustomModel2D(vertices2D);}
-        void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) override {
-            modelManager.CreateCustomModel3D(vertices3D, indices3D, isTextboxImage);
-        }
+        void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) override;
+        void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) override;
 
-        void DrawObject(int objectId) override { objects[objectId].Draw(); }
-        void DrawTexts() override { textManager.Draw(); }
-        void DrawObjects() override { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
-        void DrawObjects(int startObjectId, int endObjectId) override { 
-            for(int i = startObjectId; i <= endObjectId && i < objects.size(); i++)  objects[i].Draw(); 
-        }
-        void DrawObject(int objectId, int pipelineId) override { objects[objectId].Draw(pipelineId); }
-        void DrawObject(int objectId, int pipelineId, int numVertex) override { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
-        void DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) override {
-            objects[objectId].Draw(computeDescriptorManager.storageBuffers, -1, particleCount);
-        }
+        void DrawObject(int objectId) override;
+        void DrawTexts() override;
+        void DrawObjects() override;
+        void DrawObjects(int startObjectId, int endObjectId) override;
+        void DrawObject(int objectId, int pipelineId) override;
+        void DrawObject(int objectId, int pipelineId, int numVertex) override;
+        void DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) override;
 
-        void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override {
-            Dispatch(numWorkGroupsX,numWorkGroupsY,numWorkGroupsZ);
-        }
+        void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
-        void SetComputeCustomSize(int size) override { appInfo->Uniform.ComputeCustom.Size = size; }
-        void SetComputeCustomBinding(void* binding) override {
-            VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
-            if (bindingPtr) appInfo->Uniform.ComputeCustom.Binding = *bindingPtr;
-        }
-        void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override {
-            computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
-        }
-        void SetComputeStorageBufferSize(int size) override { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
-        void SetComputeStorageBufferUsage(int usage) override {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
-        void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override {
-            computeDescriptorManager.uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
-        }
-        void DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) override {
-            computeDescriptorManager.downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
-        }
+        void SetComputeCustomSize(int size) override;
+        void SetComputeCustomBinding(void* binding) override;
+        void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override;
+        void SetComputeStorageBufferSize(int size) override;
+        void SetComputeStorageBufferUsage(int usage) override;
+        void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
 
-        void SetGraphicsCustomSize(int size) override { appInfo->Uniform.GraphicsCustom.Size = size; }
-        void SetGraphicsCustomBinding(void* binding) override {
-            VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
-            if (bindingPtr) appInfo->Uniform.GraphicsCustom.Binding = *bindingPtr;
-        }
-        void UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override {
-            graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
-        }
+        void SetGraphicsCustomSize(int size) override;
+        void SetGraphicsCustomBinding(void* binding) override ;
+        void UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override;
 
-        void SetMainCameraVelocityX(float value) override { mainCamera.Velocity.x = value; }
-        void SetMainCameraVelocityY(float value) override { mainCamera.Velocity.y = value; }
-        void SetMainCameraVelocityZ(float value) override { mainCamera.Velocity.z = value; }
-        void SetMainCameraAngularVelocityX(float value) override { mainCamera.AngularVelocity.x = value; }
-        void SetMainCameraAngularVelocityY(float value) override { mainCamera.AngularVelocity.y = value; }
-        void SetMainCameraAngularVelocityZ(float value) override { mainCamera.AngularVelocity.z = value; }
-        void SetMainCameraType(int type) override { mainCamera.cameraType = (CameraType)type; }
-        int GetMainCameraType() override { return mainCamera.cameraType; }
-        void SetMainCameraFocusObjectId(int objectId) override { mainCamera.focusObjectId = objectId; }
-        int GetMainCameraFocusObjectId() override { return mainCamera.focusObjectId; }
-        void MoveMainCameraLeft(float distance, float speed) override { mainCamera.MoveLeft(distance, speed); }
-        void MoveMainCameraRight(float distance, float speed) override { mainCamera.MoveRight(distance, speed); }
-        void MoveMainCameraForward(float distance, float speed) override { mainCamera.MoveForward(distance, speed); }
-        void MoveMainCameraBackward(float distance, float speed) override { mainCamera.MoveBackward(distance, speed); }
-        glm::vec3 GetMainCameraPosition() override { return mainCamera.Position; }
-        void SetMainCameraSensitivity(float sensitivity) override { mainCamera.SetRotationSensitivity(sensitivity); }
+        void SetMainCameraVelocityX(float value) override;
+        void SetMainCameraVelocityY(float value) override;
+        void SetMainCameraVelocityZ(float value) override;
+        void SetMainCameraAngularVelocityX(float value) override;
+        void SetMainCameraAngularVelocityY(float value) override;
+        void SetMainCameraAngularVelocityZ(float value) override;
+        void SetMainCameraType(int type) override;
+        int GetMainCameraType() override;
+        void SetMainCameraFocusObjectId(int objectId) override;
+        int GetMainCameraFocusObjectId() override;
+        void MoveMainCameraLeft(float distance, float speed) override;
+        void MoveMainCameraRight(float distance, float speed) override;
+        void MoveMainCameraForward(float distance, float speed) override;
+        void MoveMainCameraBackward(float distance, float speed) override;
+        glm::vec3 GetMainCameraPosition() override;
+        void SetMainCameraSensitivity(float sensitivity) override;
 
-        void SetLightCameraPosition(int lightCameraId, glm::vec3 p) override { lightCameras[lightCameraId].SetPosition(p); }
-        void SetLightCameraFocusObjectId(int lightCameraId, int objectId) override { lightCameras[lightCameraId].focusObjectId = objectId; }
-        int GetLightCameraFocusObjectId(int lightCameraId) override { return lightCameras[lightCameraId].focusObjectId; }
+        void SetLightCameraPosition(int lightCameraId, glm::vec3 p) override;
+        void SetLightCameraFocusObjectId(int lightCameraId, int objectId) override;
+        int GetLightCameraFocusObjectId(int lightCameraId) override;
 
-        void LogContext(std::string s, float *n, int size) override { CContext::GetHandle().logManager.print(s, n, size);}
-        void LogContext(std::string s) override { CContext::GetHandle().logManager.print(s); }
-        void LogContext(std::string s, float n) override {CContext::GetHandle().logManager.print(s, n);}
-        void LogContext(std::string s, int n1, int n2) override {CContext::GetHandle().logManager.print(s, n1, n2);}
+        void LogContext(std::string s, float *n, int size) override;
+        void LogContext(std::string s) override;
+        void LogContext(std::string s, float n) override;
+        void LogContext(std::string s, int n1, int n2) override;
 
-        void SetRenderMode(int mode) override { appInfo->RenderMode = (RenderModes)mode; }
-        void SetPause(bool value) override { NeedToPause = value; }
-        int GetWindowWidth() override { return windowWidth; }
-        int GetWindowHeight() override { return windowHeight; }
-        int GetCurrentFrame() override { return renderer.currentFrame;}
-        double GetElapseTime() override { return elapseTime;}
-        double GetDeltaTime() override { return deltaTime; }
+        void SetRenderMode(int mode) override;
+        void SetPause(bool value) override;
+        int GetWindowWidth() override;
+        int GetWindowHeight() override;
+        int GetCurrentFrame() override;
+        double GetElapseTime() override;
+        double GetDeltaTime() override;
 
-        void CmdNextSubpass() override { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
-        void SetSwapchainImageSize(int size) override { swapchain.swapchainImageSize = size; }
-        void EnableComputeSwapChainImage(bool enable) override { swapchain.bComputeSwapChainImage = enable; }
-        void DeviceWaitIdle() override { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
+        void CmdNextSubpass() override;
+        void SetSwapchainImageSize(int size) override;
+        void EnableComputeSwapChainImage(bool enable) override;
+        void DeviceWaitIdle() override;
 
-        void PushConstantToCommand(void* pcData, int pipelineId) override {
-            renderer.PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
-        }
-        void CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) override {
-            vkCmdSetDepthBias(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
-        }
+        void PushConstantToCommand(void* pcData, int pipelineId) override;
+        void CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) override;
 
-        void CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override {
-            std::vector<VkCommandBuffer> &commandBuffers = renderer.commandBuffers[renderer.computeCmdId];
-            std::vector<VkImage> &swapChainImages = swapchain.swapchain_images;
-
-            for (size_t i = 0; i < commandBuffers.size(); i++) {
-                renderer.currentFrame = i;
-                //std::cout<<"commandbuffer i: "<<i<<std::endl;
-                VkCommandBufferBeginInfo beginInfo{};
-                beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-                //if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-                //    throw std::runtime_error("failed to begin recording command buffer!");
-                //}
-                renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-
-                renderer.RecordImageBarrier(commandBuffers[i], swapChainImages[i],
-                    VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
-                    VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
-                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-
-                Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
-
-                renderer.RecordImageBarrier(commandBuffers[i], swapChainImages[i],
-                    VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                    VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
-                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-
-                //if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-                //    throw std::runtime_error("failed to record command buffer!");
-                //}
-                renderer.EndRecordComputeCommandBuffer();
-            }
-            renderer.currentFrame = 0;
-        } 
+        void CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
     };
 

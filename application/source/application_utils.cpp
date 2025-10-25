@@ -154,5 +154,161 @@ extern "C" void DestroyInstance(void *p){
 } 
 }
 
+
+
+bool Application::Get_feature_graphics_enable_controls()  {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}
+bool Application::Get_feature_graphics_show_all_metric_controls()  {return appInfo->Feature.feature_graphics_show_all_metric_controls;}
+bool Application::Get_feature_graphics_show_performance_control()  {return appInfo->Feature.feature_graphics_show_performance_control;}
+void Application::Set_feature_graphics_enable_controls(bool value)  {appInfo->Feature.feature_graphics_enable_controls = value;}
+void Application::Set_feature_graphics_show_all_metric_controls(bool value) {appInfo->Feature.feature_graphics_show_all_metric_controls = value;}
+void Application::Set_feature_graphics_show_performance_control(bool value) {appInfo->Feature.feature_graphics_show_performance_control = value;}
+
+int Application::GetControlNodeSize() { return controlNodes.size();}
+void Application::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}
+void* Application::GetInstanceHandle() {return instance->getHandle();}
+
+int Application::GetObjectSize() { return objects.size(); }
+int Application::GetCustomObjectSize() { return appInfo->Objects.size(); }
+void Application::SetObjectVelocity(int objectId, float vx, float vy, float vz) {objects[objectId].SetVelocity(vx, vy, vz);}
+void Application::SetObjectVelocity(int objectId, glm::vec3 v) {objects[objectId].SetVelocity(v);}
+void Application::SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) {objects[objectId].SetAngularVelocity(vx, vy, vz); }
+void Application::SetObjectPosition(int objectId, float px, float py, float pz) { objects[objectId].SetPosition(px, py, pz); }
+void Application::SetObjectPosition(int objectId, glm::vec3 p) { objects[objectId].SetPosition(p); }
+void Application::SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
+glm::vec3 Application::GetObjectPosition(int objectId) { return objects[objectId].Position; }
+
+int Application::GetLightSize() { return lights.size(); }
+glm::vec3 Application::GetLightPosition(int lightId) { return lights[lightId].GetLightPosition(); }
+void Application::SetLightPosition(int lightId, float px, float py, float pz) { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }
+void Application::SetLightPosition(int lightId, glm::vec3 p) { lights[lightId].SetLightPosition(p); }
+
+void Application::CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) {modelManager.CreateCustomModel2D(vertices2D);}
+void Application::CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) {
+    modelManager.CreateCustomModel3D(vertices3D, indices3D, isTextboxImage);
+}
+
+void Application::DrawObject(int objectId) { objects[objectId].Draw(); }
+void Application::DrawTexts() { textManager.Draw(); }
+void Application::DrawObjects() { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
+void Application::DrawObjects(int startObjectId, int endObjectId) { 
+    for(int i = startObjectId; i <= endObjectId && i < objects.size(); i++)  objects[i].Draw(); 
+}
+void Application::DrawObject(int objectId, int pipelineId) { objects[objectId].Draw(pipelineId); }
+void Application::DrawObject(int objectId, int pipelineId, int numVertex) { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
+void Application::DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) {
+    objects[objectId].Draw(computeDescriptorManager.storageBuffers, -1, particleCount);
+}
+
+void Application::ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
+    Dispatch(numWorkGroupsX,numWorkGroupsY,numWorkGroupsZ);
+}
+
+void Application::SetComputeCustomSize(int size) { appInfo->Uniform.ComputeCustom.Size = size; }
+void Application::SetComputeCustomBinding(void* binding) {
+    VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
+    if (bindingPtr) appInfo->Uniform.ComputeCustom.Binding = *bindingPtr;
+}
+void Application::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
+    computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+}
+void Application::SetComputeStorageBufferSize(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
+void Application::SetComputeStorageBufferUsage(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
+void Application::UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
+    computeDescriptorManager.uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+}
+void Application::DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
+    computeDescriptorManager.downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+}
+
+void Application::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }
+void Application::SetGraphicsCustomBinding(void* binding) {
+    VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
+    if (bindingPtr) appInfo->Uniform.GraphicsCustom.Binding = *bindingPtr;
+}
+void Application::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
+    graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+}
+
+void Application::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }
+void Application::SetMainCameraVelocityY(float value) { mainCamera.Velocity.y = value; }
+void Application::SetMainCameraVelocityZ(float value) { mainCamera.Velocity.z = value; }
+void Application::SetMainCameraAngularVelocityX(float value) { mainCamera.AngularVelocity.x = value; }
+void Application::SetMainCameraAngularVelocityY(float value) { mainCamera.AngularVelocity.y = value; }
+void Application::SetMainCameraAngularVelocityZ(float value) { mainCamera.AngularVelocity.z = value; }
+void Application::SetMainCameraType(int type) { mainCamera.cameraType = (CameraType)type; }
+int Application::GetMainCameraType() { return mainCamera.cameraType; }
+void Application::SetMainCameraFocusObjectId(int objectId) { mainCamera.focusObjectId = objectId; }
+int Application::GetMainCameraFocusObjectId() { return mainCamera.focusObjectId; }
+void Application::MoveMainCameraLeft(float distance, float speed) { mainCamera.MoveLeft(distance, speed); }
+void Application::MoveMainCameraRight(float distance, float speed) { mainCamera.MoveRight(distance, speed); }
+void Application::MoveMainCameraForward(float distance, float speed) { mainCamera.MoveForward(distance, speed); }
+void Application::MoveMainCameraBackward(float distance, float speed) { mainCamera.MoveBackward(distance, speed); }
+glm::vec3 Application::GetMainCameraPosition() { return mainCamera.Position; }
+void Application::SetMainCameraSensitivity(float sensitivity) { mainCamera.SetRotationSensitivity(sensitivity); }
+
+void Application::SetLightCameraPosition(int lightCameraId, glm::vec3 p) { lightCameras[lightCameraId].SetPosition(p); }
+void Application::SetLightCameraFocusObjectId(int lightCameraId, int objectId) { lightCameras[lightCameraId].focusObjectId = objectId; }
+int Application::GetLightCameraFocusObjectId(int lightCameraId) { return lightCameras[lightCameraId].focusObjectId; }
+
+void Application::LogContext(std::string s, float *n, int size) { CContext::GetHandle().logManager.print(s, n, size);}
+void Application::LogContext(std::string s) { CContext::GetHandle().logManager.print(s); }
+void Application::LogContext(std::string s, float n) {CContext::GetHandle().logManager.print(s, n);}
+void Application::LogContext(std::string s, int n1, int n2) {CContext::GetHandle().logManager.print(s, n1, n2);}
+
+void Application::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)mode; }
+void Application::SetPause(bool value) { NeedToPause = value; }
+int Application::GetWindowWidth() { return windowWidth; }
+int Application::GetWindowHeight() { return windowHeight; }
+int Application::GetCurrentFrame() { return renderer.currentFrame;}
+double Application::GetElapseTime() { return elapseTime;}
+double Application::GetDeltaTime() { return deltaTime; }
+
+void Application::CmdNextSubpass() { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
+void Application::SetSwapchainImageSize(int size) { swapchain.swapchainImageSize = size; }
+void Application::EnableComputeSwapChainImage(bool enable) { swapchain.bComputeSwapChainImage = enable; }
+void Application::DeviceWaitIdle() { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
+
+void Application::PushConstantToCommand(void* pcData, int pipelineId) {
+    renderer.PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
+}
+void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
+    vkCmdSetDepthBias(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+}
+
+void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
+    std::vector<VkCommandBuffer> &commandBuffers = renderer.commandBuffers[renderer.computeCmdId];
+    std::vector<VkImage> &swapChainImages = swapchain.swapchain_images;
+
+    for (size_t i = 0; i < commandBuffers.size(); i++) {
+        renderer.currentFrame = i;
+        //std::cout<<"commandbuffer i: "<<i<<std::endl;
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        //if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+        //    throw std::runtime_error("failed to begin recording command buffer!");
+        //}
+        renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+
+        renderer.RecordImageBarrier(commandBuffers[i], swapChainImages[i],
+            VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
+            VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+
+        Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+
+        renderer.RecordImageBarrier(commandBuffers[i], swapChainImages[i],
+            VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+            VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+
+        //if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+        //    throw std::runtime_error("failed to record command buffer!");
+        //}
+        renderer.EndRecordComputeCommandBuffer();
+    }
+    renderer.currentFrame = 0;
+}
+
 }
 
