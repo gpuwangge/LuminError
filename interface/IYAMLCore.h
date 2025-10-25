@@ -5,6 +5,8 @@ namespace LEApplication{
     class IApplication;
 }
 
+class AppInfo;
+
 namespace LEYAML{
     class IYAMLCore {
     public:

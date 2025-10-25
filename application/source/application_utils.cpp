@@ -151,7 +151,7 @@ extern "C" void DestroyInstance(void *p){
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
         delete static_cast<Application*>(p);
         //std::cout<<"- Destroy Instance Application."<<std::endl;
-} 
+    } 
 }
 
 

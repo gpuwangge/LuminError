@@ -18,24 +18,28 @@ struct Vertex3D {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+    static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[0].binding = 0;  //binding is in use in vertex shader(default is using 0)
         attributeDescriptions[0].location = 0; //location is in use in vertex shader
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[0].offset = offsetof(Vertex3D, pos);
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[1].binding = 0;
         attributeDescriptions[1].location = 1;
         attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[1].offset = offsetof(Vertex3D, color);
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].location = 2;
         attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
         attributeDescriptions[2].offset = offsetof(Vertex3D, texCoord);
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[3].binding = 0;
         attributeDescriptions[3].location = 3;
         attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -62,14 +66,16 @@ struct Vertex2D {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+    static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[0].offset = offsetof(Vertex2D, pos);
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[1].binding = 0;
         attributeDescriptions[1].location = 1;
         attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -148,14 +154,16 @@ struct Particle {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+    static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
         attributeDescriptions[0].offset = offsetof(Particle, position);
 
+        attributeDescriptions.push_back({});
         attributeDescriptions[1].binding = 0;
         attributeDescriptions[1].location = 1;
         attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
