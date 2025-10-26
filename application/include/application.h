@@ -29,6 +29,7 @@
 
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
+#include "IRendererCore.h"
 
 //added this to remove windows.h
 #ifdef _WIN32
@@ -124,6 +125,8 @@ namespace LEApplication{
         LESDL::ISDLCore *instance_sdlcore = NULL;
         HMODULE handle_module_game;
         LuminError::IGame *instance_game = NULL;
+        HMODULE handle_module_renderercore;
+        LERenderer::IRendererCore *instance_renderercore = NULL;
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
         void DestroyInstance(HMODULE handle, void* instance);
 

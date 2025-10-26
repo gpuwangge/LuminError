@@ -10,9 +10,9 @@ namespace LEApplication{
 class CInstance;
 
 namespace LESDL{
-    struct ISDLCore {
+    class ISDLCore {
+    public:
         virtual ~ISDLCore() = default;
-        LEApplication::IApplication* game;
         void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
 
         virtual bool IsRunning() = 0;
@@ -23,6 +23,8 @@ namespace LESDL{
 
         virtual void SetMouseSensibility(float value) = 0;
         virtual void SetKeyboardSensibility(float value) = 0;
+    protected:
+        LEApplication::IApplication* game;
     };
 
     #define EXPORT_FACTORY_FOR(ClassName) \

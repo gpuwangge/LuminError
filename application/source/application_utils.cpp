@@ -142,6 +142,12 @@ Application::~Application(){
         FreeLibrary(handle_module_game);
         handle_module_game = nullptr;
     }
+
+    if (handle_module_renderercore) {
+        //std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
+        FreeLibrary(handle_module_renderercore);
+        handle_module_renderercore = nullptr;
+    }
 }
 
 extern "C" void* CreateInstance(){ return new Application();}
@@ -150,6 +156,7 @@ extern "C" void DestroyInstance(void *p){
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->instance_yamlcore);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
+        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_renderercore);
         delete static_cast<Application*>(p);
         //std::cout<<"- Destroy Instance Application."<<std::endl;
     } 

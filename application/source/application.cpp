@@ -28,6 +28,12 @@ void Application::Run(std::string exampleName){ //Entrance Function
     instance_game = static_cast<LuminError::IGame*>(pVoid);
     instance_game->SetApplication(this);
 
+    //Load Renderer Core Module
+    LoadModuleAndInstance(handle_module_renderercore, pVoid, "renderercore.dll");
+    instance_renderercore = static_cast<LERenderer::IRendererCore*>(pVoid);
+    instance_renderercore->SetApplication(this);
+    instance_renderercore->greet();
+
     CContext::Init();
     instance_game->PreInitialize();
 

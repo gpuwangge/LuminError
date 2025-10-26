@@ -1,10 +1,6 @@
 #pragma once
 #include "TypeAppInfo.h"
 
-namespace LEApplication{
-    class IApplication;
-}
-
 class AppInfo;
 
 namespace LEYAML{
