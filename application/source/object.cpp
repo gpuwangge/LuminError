@@ -1,5 +1,6 @@
-#include "../include/object.h"
-#include "../include/application.h"
+#include "object.h"
+#include "application.h"
+#include "renderer.h"
 
 /******************
 * Object

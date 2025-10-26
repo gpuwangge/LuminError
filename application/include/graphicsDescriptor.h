@@ -7,6 +7,7 @@
 #include <vector>
 #include "TypeLight.h"
 #include "TypeUniform.h"
+#include "TypeBuffer.h"
 
 class CGraphicsDescriptorManager{
 public:

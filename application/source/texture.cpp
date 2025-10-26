@@ -4,6 +4,7 @@
 #include "../../external/stb_image.h"
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Foundation.h"
+#include "TypeBuffer.h"
 
 /*******************
 *	Texture Manager: to manage a vector of CTextureImages

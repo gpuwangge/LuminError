@@ -15,6 +15,7 @@ namespace LEApplication{
     class Application;
 }
 class CControlNode;
+class CRenderer;
 
 class CObject : public CEntity {
     //std::vector<int> m_text_ids;
