@@ -454,7 +454,7 @@ void CGraphicsDescriptorManager::addMVPUniformBuffer(){
     mvpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = mvpUniformBuffers[i].init(sizeof(MVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        VkResult result = mvpUniformBuffers[i].init(sizeof(MVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), mvpUniformBuffers[i].deviceMemory, 0, sizeof(MVPUniformBufferObject), 0, &mvpUniformBuffersMapped[i]);
     }
 }
@@ -473,7 +473,7 @@ void CGraphicsDescriptorManager::addTextMVPUniformBuffer(){
     textMVPUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = textMVPUniformBuffers[i].init(sizeof(TextMVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        VkResult result = textMVPUniformBuffers[i].init(sizeof(TextMVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), textMVPUniformBuffers[i].deviceMemory, 0, sizeof(TextMVPUniformBufferObject), 0, &textMVPUniformBuffersMapped[i]);
     }
 }
@@ -495,7 +495,7 @@ void CGraphicsDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUnifo
 	m_customUniformBufferSize = customUniformBufferSize;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
 		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
 	}
 }
@@ -526,7 +526,7 @@ void CGraphicsDescriptorManager::addLightingUniformBuffer(){
     //std::cout<<"addLightingUniformBuffer::m_lightingUniformBufferSize = " << m_lightingUniformBufferSize<<std::endl;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = m_lightingUniformBuffers[i].init( m_lightingUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+		VkResult result = m_lightingUniformBuffers[i].init( m_lightingUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
 		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_lightingUniformBuffers[i].deviceMemory, 0,  m_lightingUniformBufferSize, 0, & m_lightingUniformBuffersMapped[i]);
 	}
 }
@@ -544,7 +544,7 @@ void CGraphicsDescriptorManager::addVPUniformBuffer(){
     vpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), vpUniformBuffers[i].deviceMemory, 0, sizeof(VPUniformBufferObject), 0, &vpUniformBuffersMapped[i]);
     }
 }
@@ -769,19 +769,19 @@ void CGraphicsDescriptorManager::DestroyAndFree(){
     vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler_hardwareDepthBias, nullptr);
     
     for (size_t i = 0; i < mvpUniformBuffers.size(); i++) 
-        mvpUniformBuffers[i].DestroyAndFree();
+        mvpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 
     for (size_t i = 0; i < textMVPUniformBuffers.size(); i++) 
-        textMVPUniformBuffers[i].DestroyAndFree();
+        textMVPUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 
     for (size_t i = 0; i < customUniformBuffers.size(); i++) 
-        customUniformBuffers[i].DestroyAndFree();
+        customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 
     for (size_t i = 0; i < vpUniformBuffers.size(); i++) 
-        vpUniformBuffers[i].DestroyAndFree();
+        vpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     
     for (size_t i = 0; i < m_lightingUniformBuffers.size(); i++) 
-        m_lightingUniformBuffers[i].DestroyAndFree();
+        m_lightingUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     
     //no need to destroy descriptorSets, because they are from descriptorPool
     vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), graphicsDescriptorPool, nullptr);//to be move to base class

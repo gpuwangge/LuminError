@@ -10,6 +10,7 @@
 #include "TypeBuffer.h"
 #include "TypeText.h"
 #include <map>
+#include "IRendererCore.h"
 
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
@@ -28,7 +29,9 @@ class CControlNode;
 class CTextManager;
 
 class CTextbox : public CEntity {
-    CRenderer *p_renderer;
+    //CRenderer *p_renderer;
+    LERenderer::IRendererCore *instance_renderercore = NULL;
+
     CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
     std::vector<VkDescriptorSet> descriptorSets_graphics_texture_image_sampler;
@@ -66,7 +69,7 @@ public:
 
     CTextbox(){}
     //~CTextbox(){}
-    void Destroy(){instanceDataBuffer.DestroyAndFree();}
+    void Destroy(){instanceDataBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());}
 
     //void SetText(std::string text_content){m_text_content = text_content;}
     void SetBoxColor(glm::vec4 color){m_boxColor = color;}
@@ -91,7 +94,9 @@ class CTextManager {
 public:
     std::vector<CTextbox> m_textBoxes;
 
-    CRenderer *p_renderer = NULL;
+    //CRenderer *p_renderer = NULL;
+    LERenderer::IRendererCore *instance_renderercore = NULL;
+
     CTextImageManager *p_textImageManager = NULL;
     CModelManager *p_modelManager = NULL;
 

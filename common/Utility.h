@@ -1,4 +1,6 @@
 #pragma once
+#include <optional>
+
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -11,3 +13,14 @@
 
 // #define GLM_ENABLE_EXPERIMENTAL
 //#include <glm/gtx/hash.hpp>
+
+struct QueueFamilyIndices {
+	std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> computeFamily;
+    std::optional<uint32_t> graphicsAndComputeFamily;
+	std::optional<uint32_t> presentFamily;
+
+	bool isComplete() {
+		return graphicsAndComputeFamily.has_value() && graphicsFamily.has_value() && presentFamily.has_value() && computeFamily.has_value();
+	}
+};

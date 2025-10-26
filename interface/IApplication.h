@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "Utility.h"
+#include <vulkan/vulkan.h> //todo: replace with forward declaration
 
 class CControlNode;
 class CObject;
@@ -123,6 +124,16 @@ namespace LEApplication{
         
         //Expose functions for Example(SimpleVertexBuffer) to use
         virtual void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) = 0;
+
+        //Expose for renderer core
+        //virtual VkPhysicalDevice GetPhysicalDevice();
+        virtual QueueFamilyIndices GetQueueFamilyIndices() = 0;
+        virtual VkDevice GetLogicalDevice() = 0;
+        virtual VkPhysicalDevice GetPhysicalDevice() = 0;
+
+        virtual VkQueue GetGraphicsQueue() = 0;
+        virtual VkQueue GetPresentQueue() = 0;
+        virtual VkQueue GetComputeQueue() = 0;
 
     };
 

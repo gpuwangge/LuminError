@@ -266,7 +266,7 @@ void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUnifor
 	m_customUniformBufferSize = customUniformBufferSize;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
 		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
 	}    
 }
@@ -298,7 +298,7 @@ void CComputeDescriptorManager::addStorageBuffer(VkDeviceSize storageBufferSize,
         //VkResult result = InitDataBufferHelper(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, &shaderStorageBuffers_compute[i]);// Create a staging buffer used to upload data to the gpu
         //FillDataBufferHelper(shaderStorageBuffers_compute[i], (void *)(particles.data()));// Copy initial particle data to all storage buffers
         //shaderStorageBuffers_compute[i].init(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-        storageBuffers[i].init(storageBufferSize, usage);
+        storageBuffers[i].init(storageBufferSize, usage, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers[i].deviceMemory, 0, storageBufferSize, 0, &storageBuffersMapped[i]);
     }
 }
@@ -345,10 +345,10 @@ int CComputeDescriptorManager::getSetSize(){
 
 void CComputeDescriptorManager::DestroyAndFree(){
     for (size_t i = 0; i < customUniformBuffers.size(); i++) {
-        customUniformBuffers[i].DestroyAndFree();
+        customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
     for (size_t i = 0; i < storageBuffers.size(); i++) {
-        storageBuffers[i].DestroyAndFree();
+        storageBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
 
     vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), computeDescriptorPool, nullptr);

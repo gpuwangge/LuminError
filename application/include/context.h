@@ -1,6 +1,12 @@
 #ifndef H_CONTEXT
 #define H_CONTEXT
 
+// #ifdef PROJECTA_EXPORTS
+//     #define PROJECTA_API __declspec(dllexport)
+// #else
+//     #define PROJECTA_API __declspec(dllimport)
+// #endif
+
 #include "physicalDevice.h"
 #include "logManager.h"
 #include <vulkan/vulkan.h>

@@ -70,6 +70,7 @@ void Application::LoadModuleAndInstance(HMODULE &handle, void* &instance, const 
 }
 
 void Application::DestroyInstance(HMODULE handle, void* instance){
+    //std::cout<<"Application::DestroyInstance()"<<std::endl;
     if (instance) {
         using DestroyInstanceFunc = void(*)(void*);
         auto DestroyInstance =  (DestroyInstanceFunc)GetProcAddress(handle, "DestroyInstance");
@@ -84,7 +85,7 @@ void Application::DestroyInstance(HMODULE handle, void* instance){
 }
 
 void Application::CleanUp(){
-    //std::cout<<"Begin Cleanup()..."<<std::endl;
+    //std::cout<<"Application Begin Cleanup()..."<<std::endl;
 
     //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;
     swapchain.CleanUp();
@@ -100,8 +101,10 @@ void Application::CleanUp(){
     textureManager.Destroy();
     textImageManager.Destroy();
     textManager.Destroy();
-    //std::cout<<"Application: renderer.Destroy()"<<std::endl;
-    renderer.Destroy();
+
+    //std::cout<<"Application: instance_renderercore begin Destroy()"<<std::endl;
+    instance_renderercore->Destroy();
+    //std::cout<<"Application: instance_renderercore end Destroy()"<<std::endl;
 
     //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
     vkDestroyDevice(CContext::GetHandle().GetLogicalDevice(), nullptr);
@@ -113,11 +116,11 @@ void Application::CleanUp(){
     
     CContext::Quit();
 
-    //std::cout<<"End Cleanup()."<<std::endl;
+    //std::cout<<"Application End Cleanup()."<<std::endl;
 }
 
 Application::~Application(){
-    CleanUp();
+    //std::cout<<"Application::~Application()"<<std::endl;
 
     if (handle_module_yamlcore) {
         //std::cout<<"- FreeLibrary: handle_module_yamlcore. (~Application())"<<std::endl;
@@ -153,6 +156,7 @@ Application::~Application(){
 extern "C" void* CreateInstance(){ return new Application();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
+        static_cast<Application*>(p)->CleanUp();
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->instance_yamlcore);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
@@ -267,28 +271,29 @@ void Application::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)m
 void Application::SetPause(bool value) { NeedToPause = value; }
 int Application::GetWindowWidth() { return windowWidth; }
 int Application::GetWindowHeight() { return windowHeight; }
-int Application::GetCurrentFrame() { return renderer.currentFrame;}
+int Application::GetCurrentFrame() { return instance_renderercore->GetCurrentFrame();}
 double Application::GetElapseTime() { return elapseTime;}
 double Application::GetDeltaTime() { return deltaTime; }
 
-void Application::CmdNextSubpass() { vkCmdNextSubpass(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], VK_SUBPASS_CONTENTS_INLINE); }
+void Application::CmdNextSubpass() { vkCmdNextSubpass(instance_renderercore->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
 void Application::SetSwapchainImageSize(int size) { swapchain.swapchainImageSize = size; }
 void Application::EnableComputeSwapChainImage(bool enable) { swapchain.bComputeSwapChainImage = enable; }
 void Application::DeviceWaitIdle() { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
 
 void Application::PushConstantToCommand(void* pcData, int pipelineId) {
-    renderer.PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
+    instance_renderercore->PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
 }
 void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
-    vkCmdSetDepthBias(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+    vkCmdSetDepthBias(instance_renderercore->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 }
 
 void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
-    std::vector<VkCommandBuffer> &commandBuffers = renderer.commandBuffers[renderer.computeCmdId];
+    std::vector<VkCommandBuffer> &commandBuffers = instance_renderercore->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
     std::vector<VkImage> &swapChainImages = swapchain.swapchain_images;
 
     for (size_t i = 0; i < commandBuffers.size(); i++) {
-        renderer.currentFrame = i;
+        //renderer.currentFrame = i;
+        instance_renderercore->SetCurrentFrame(i);
         //std::cout<<"commandbuffer i: "<<i<<std::endl;
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -296,16 +301,17 @@ void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numW
         //if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
         //    throw std::runtime_error("failed to begin recording command buffer!");
         //}
-        renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+        //renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+        instance_renderercore->StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
 
-        renderer.RecordImageBarrier(commandBuffers[i], swapChainImages[i],
+        instance_renderercore->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
             VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
             VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 
         Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 
-        renderer.RecordImageBarrier(commandBuffers[i], swapChainImages[i],
+        instance_renderercore->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
             VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
             VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
@@ -313,9 +319,10 @@ void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numW
         //if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
         //    throw std::runtime_error("failed to record command buffer!");
         //}
-        renderer.EndRecordComputeCommandBuffer();
+        instance_renderercore->EndRecordComputeCommandBuffer();
     }
-    renderer.currentFrame = 0;
+    //renderer.currentFrame = 0;
+    instance_renderercore->SetCurrentFrame(0);
 }
 
 }

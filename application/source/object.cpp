@@ -172,7 +172,9 @@ void CObject::Register(LEApplication::Application *p_app){
     //std::cout<<"LengthMax = "<<LengthMax.x<<", "<<LengthMax.y<<", "<<LengthMax.z<<std::endl;
     
     //Prepare pointers for drawcall
-    p_renderer = &(p_app->renderer);
+    //p_renderer = &(p_app->renderer);
+    instance_renderercore = p_app->instance_renderercore;
+
     p_renderProcess = &(p_app->renderProcess);
     //p_graphicsPipelineLayout = &(p_app->renderProcess.graphicsPipelineLayouts[m_graphics_pipeline_id]);
     p_descriptorSets_graphics_general = &(p_app->graphicsDescriptorManager.descriptorSets_general);//?
@@ -209,7 +211,8 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
     int current_graphics_pipeline_id = (graphicsPipelineId == -1) ? m_default_graphics_pipeline_id : graphicsPipelineId;
 
     VkPipelineLayout *p_graphicsPipelineLayout = &(p_renderProcess->graphicsPipelineLayouts[current_graphics_pipeline_id]);
-    p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
+    //p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
+    instance_renderercore->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
 
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     //set = 0 is for general uniform; set = 1 is for texture sampler uniform
@@ -223,11 +226,13 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
         //int dynamicObjectMVPOffset = -1; //-1 means not use dynamic offset (no MVP/VP used)
         //if(bUseMVP_VP) 
     int dynamicObjectMVPOffset = m_object_id; //assume descriptor uniform(MVP/VP) offset is m_id
-    p_renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
+    //p_renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
+    instance_renderercore->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
     //}//else std::cout<<"No Descritpor is used."<<std::endl;
     //std::cout<<"test4."<<std::endl;
     //if(!vertices3D.empty() || !vertices2D.empty()){
-    p_renderer->BindVertexBuffer(m_model_id);
+    //p_renderer->BindVertexBuffer(m_model_id);
+    instance_renderercore->BindVertexBuffer(m_model_id);
     //}//else std::cout<<"No vertex buffer is used."<<std::endl;
     //std::cout<<"test5."<<std::endl;
     //if(indices3D.empty()){
@@ -236,8 +241,8 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
     //    p_renderer->Draw(n);
     //}else{
         //std::cout<<"CObject::Draw():"<<" m_object_id="<<m_object_id<<", m_model_id="<<m_model_id<<std::endl;
-    p_renderer->BindIndexBuffer(m_model_id);
-    p_renderer->DrawIndexed(m_model_id);
+    instance_renderercore->BindIndexBuffer(m_model_id);
+    instance_renderercore->DrawIndexed(m_model_id);
     //}
 
 }
@@ -249,9 +254,9 @@ void CObject::Draw_NoIndexNoSet(int graphicsPipelineId, uint32_t n){
 
     //std::cout<<"CObject::Draw_NoIndexNoSet():"<<" m_object_id="<<m_object_id<<", m_model_id="<<m_model_id<<", current_graphics_pipeline_id="<<current_graphics_pipeline_id<<std::endl;
 
-    p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
-    p_renderer->BindVertexBuffer(m_model_id);
-    p_renderer->Draw(n);
+    instance_renderercore->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
+    instance_renderercore->BindVertexBuffer(m_model_id);
+    instance_renderercore->Draw(n);
 }
 
 
@@ -274,7 +279,7 @@ void CObject::Draw(std::vector<CWxjBuffer> &buffer, int graphicsPipelineId, uint
     // }
     
     int current_graphics_pipeline_id = (graphicsPipelineId == -1) ? m_default_graphics_pipeline_id : graphicsPipelineId;
-    p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
+    instance_renderercore->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[current_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
 
     //this function is used in sample:simpleparticle only
     //std::cout<<"testdraw1,"<<m_graphics_pipeline_id<<","<<p_renderer->graphicsCmdId<<std::endl;
@@ -289,7 +294,7 @@ void CObject::Draw(std::vector<CWxjBuffer> &buffer, int graphicsPipelineId, uint
 
     //VkDeviceSize offsets[] = { 0 };
     //vkCmdBindVertexBuffers(p_renderer->commandBuffers[p_renderer->graphicsCmdId][p_renderer->currentFrame], 0, 1, &buffer[p_renderer->currentFrame].buffer, offsets);
-    p_renderer->BindExternalBuffer(buffer);
-    p_renderer->Draw(n);
+    instance_renderercore->BindExternalBuffer(buffer);
+    instance_renderercore->Draw(n);
     //std::cout<<"testdraw3"<<std::endl;
 }

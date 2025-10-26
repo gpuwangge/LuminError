@@ -229,6 +229,14 @@ namespace LEApplication{
 
         void CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
+        //VkPhysicalDevice GetPhysicalDevice() override { return CContext::GetHandle().physicalDevice->get()->getHandle();}
+        QueueFamilyIndices GetQueueFamilyIndices() override { return CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating command pool"); }
+        VkDevice GetLogicalDevice() override { return CContext::GetHandle().GetLogicalDevice(); }
+        VkPhysicalDevice GetPhysicalDevice() override { return CContext::GetHandle().GetPhysicalDevice(); }
+
+        VkQueue GetGraphicsQueue() override{ return CContext::GetHandle().GetGraphicsQueue(); }
+        VkQueue GetPresentQueue() override{ return CContext::GetHandle().GetPresentQueue(); }
+        VkQueue GetComputeQueue() override{ return CContext::GetHandle().GetComputeQueue(); }
     };
 
 

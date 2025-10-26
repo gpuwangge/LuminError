@@ -8,7 +8,8 @@ void Application::Initialize(){
     /****************************
     * 1 Process blend and push constant
     ****************************/   
-    renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
+    //renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
+    instance_renderercore->SetRenderMode(appInfo->RenderMode);
     if(appInfo->Feature.b_feature_graphics_push_constant)
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     if(appInfo->Feature.b_feature_graphics_global_blend)
@@ -72,15 +73,18 @@ void Application::Initialize(){
     if(appInfo->Uniform.b_uniform_graphics_lighting) CGraphicsDescriptorManager::addLightingUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_object_mvp){
         CGraphicsDescriptorManager::addMVPUniformBuffer();
-        renderer.bUseObjectMVP = true;
+        //renderer.bUseObjectMVP = true;
+        instance_renderercore->SetEnableObjectMVP(true);
     }
     if(appInfo->Uniform.b_uniform_graphics_text_mvp){
         CGraphicsDescriptorManager::addTextMVPUniformBuffer();
-        renderer.bUseTextboxMVP = true;
+        //renderer.bUseTextboxMVP = true;
+        instance_renderercore->SetEnableTextboxMVP(true);
     }   
     if(appInfo->Uniform.b_uniform_graphics_object_vp){
         CGraphicsDescriptorManager::addVPUniformBuffer();
-        renderer.bUseObjectMVP = true; //reuse MVP bool
+        //renderer.bUseObjectMVP = true; //reuse MVP bool
+        instance_renderercore->SetEnableObjectMVP(true);
     }
     if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) CGraphicsDescriptorManager::addDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer();
@@ -186,7 +190,8 @@ void Application::Initialize(){
         textManager.SetSamplerID(appInfo->Font.font_samplerid);
         textManager.SetOutlineColor(glm::vec4(appInfo->Font.font_outlineColor[0], appInfo->Font.font_outlineColor[1], appInfo->Font.font_outlineColor[2], appInfo->Font.font_outlineColor[3]));
         textManager.SetTextColor(glm::vec4(appInfo->Font.font_textColor[0], appInfo->Font.font_textColor[1], appInfo->Font.font_textColor[2], appInfo->Font.font_textColor[3]));
-        textManager.p_renderer = &renderer;
+        //textManager.p_renderer = &renderer;
+        textManager.instance_renderercore = instance_renderercore;
         textManager.p_textImageManager = &textImageManager;
         textManager.p_modelManager = &modelManager;
 
@@ -200,8 +205,8 @@ void Application::Initialize(){
             std::string modelName = appInfo->Models[i].model_names;
             //std::cout<<"test:"<<i<<", modelName="<<modelName<<std::endl;
             if(modelName == "CUSTOM3D0"){
-                renderer.CreateVertexBuffer(modelManager.customModels3D[0].vertices.data(), sizeof(Vertex3D), modelManager.customModels3D[0].vertices.size());
-                renderer.CreateIndexBuffer(modelManager.customModels3D[0].indices);
+                instance_renderercore->CreateVertexBuffer(modelManager.customModels3D[0].vertices.data(), sizeof(Vertex3D), modelManager.customModels3D[0].vertices.size());
+                instance_renderercore->CreateIndexBuffer(modelManager.customModels3D[0].indices);
                 
                 modelManager.modelLengths.push_back(modelManager.customModels3D[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.customModels3D[0].lengthMin);
@@ -214,8 +219,8 @@ void Application::Initialize(){
             //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
             //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
             }else if(modelName == "TEXTBOXIMAGE"){
-                renderer.CreateVertexBuffer(modelManager.textboxImageModels[0].vertices.data(), sizeof(Vertex3D), modelManager.textboxImageModels[0].vertices.size());
-                renderer.CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
+                instance_renderercore->CreateVertexBuffer(modelManager.textboxImageModels[0].vertices.data(), sizeof(Vertex3D), modelManager.textboxImageModels[0].vertices.size());
+                instance_renderercore->CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
                 
                 modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
@@ -223,9 +228,9 @@ void Application::Initialize(){
             }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
                 //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
                 //std::cout<<"Application: Load "<<std::endl;
-                renderer.CreateVertexBuffer(modelManager.textQuadModels[0].vertices.data(), sizeof(TextQuadVertex), modelManager.textQuadModels[0].vertices.size());
+                instance_renderercore->CreateVertexBuffer(modelManager.textQuadModels[0].vertices.data(), sizeof(TextQuadVertex), modelManager.textQuadModels[0].vertices.size());
                 //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
-                renderer.CreateIndexBuffer(modelManager.textQuadModels[0].indices);
+                instance_renderercore->CreateIndexBuffer(modelManager.textQuadModels[0].indices);
 
                 //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
                 //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
@@ -237,7 +242,7 @@ void Application::Initialize(){
                 modelManager.modelLengthsMax.push_back(v);
             }else if(modelName == "CUSTOM2D0"){
                 //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
-                renderer.CreateVertexBuffer(modelManager.customModels2D[0].vertices.data(), sizeof(Vertex2D), modelManager.customModels2D[0].vertices.size()); 
+                instance_renderercore->CreateVertexBuffer(modelManager.customModels2D[0].vertices.data(), sizeof(Vertex2D), modelManager.customModels2D[0].vertices.size()); 
 
                 modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
@@ -247,8 +252,8 @@ void Application::Initialize(){
                 std::vector<Vertex3D> modelVertices3D;
                 std::vector<uint32_t> modelIndices3D;
                 modelManager.LoadObjModel(modelName, modelVertices3D, modelIndices3D);
-                renderer.CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
-                renderer.CreateIndexBuffer(modelIndices3D);
+                instance_renderercore->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
+                instance_renderercore->CreateIndexBuffer(modelIndices3D);
             }
             //std::cout<<"test end"<<std::endl;
         }
@@ -270,11 +275,11 @@ void Application::Initialize(){
                     else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 
                 if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, renderer.commandPool, textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
-                    else textureManager.CreateTextureImage(textureName, usage, renderer.commandPool, textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
+                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
+                    else textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
                 }else{ //48bpt
                     //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                    textureManager.CreateTextureImage(textureName, usage, renderer.commandPool, textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+                    textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
                 }
                 
                 if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
@@ -331,9 +336,9 @@ void Application::Initialize(){
     * 9.1 Command Buffer
     ****************************/
     //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
-    if(appInfo->GraphicsPipelines.size() > 0) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->GraphicsPipelines.size() > 0) instance_renderercore->CreateGraphicsCommandBuffer();
     //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
-    if(appInfo->ComputePipelines.size() > 0) renderer.CreateComputeCommandBuffer();
+    if(appInfo->ComputePipelines.size() > 0) instance_renderercore->CreateComputeCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
     
     /****************************
@@ -635,7 +640,7 @@ void Application::Initialize(){
     /****************************
     * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
-    renderer.CreateSyncObjects(swapchain.swapchainImageSize);
+    instance_renderercore->CreateSyncObjects(swapchain.swapchainImageSize);
     shaderManager.Destroy();
 
     TimePoint T13 = now();

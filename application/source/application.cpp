@@ -94,7 +94,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     swapchain.createSwapchainImages(surface, windowWidth, windowHeight);
 	swapchain.createSwapchainViews(VK_IMAGE_ASPECT_COLOR_BIT);
 
-    renderer.CreateCommandPool(surface);
+    instance_renderercore->CreateCommandPool(surface);
 
     std::cout<<"======================================="<<std::endl;
     std::cout<<"======Welcome to Vulkan Platform======="<<std::endl;
@@ -116,7 +116,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
             Update();
             Record_Present();
             instance_game->PostUpdate();
-            renderer.Update(); //update currentFrame
+            instance_renderercore->Update(); //update currentFrame
         }
         if(NeedToExit) break;
     }
@@ -142,9 +142,9 @@ void Application::Update(){
         lightCameras[i].update(deltaTime);
     }
 
-    for(int i = 0; i < objects.size(); i++) objects[i].Update(deltaTime, renderer.currentFrame, mainCamera); 
-    textManager.Update(deltaTime, renderer.currentFrame, mainCamera);
-    for(int i = 0; i < lights.size(); i++) lights[i].Update(deltaTime, renderer.currentFrame, mainCamera, lightCameras[i]);
+    for(int i = 0; i < objects.size(); i++) objects[i].Update(deltaTime, instance_renderercore->GetCurrentFrame(), mainCamera); 
+    textManager.Update(deltaTime, instance_renderercore->GetCurrentFrame(), mainCamera);
+    for(int i = 0; i < lights.size(); i++) lights[i].Update(deltaTime, instance_renderercore->GetCurrentFrame(), mainCamera, lightCameras[i]);
     if(appInfo->Feature.feature_graphics_enable_controls)
         for(int i = 0; i < controlNodes.size(); i++) controlNodes[i]->Update();
 
@@ -154,80 +154,84 @@ void Application::Update(){
 void Application::Record_Present(){
     /**************************
      * Universial Render Functions
-     * ***********************/
-    switch(renderer.m_renderMode){
+     *************************/
+    switch(instance_renderercore->GetRenderMode()){
         case RenderModes::GRAPHICS:
         //case renderer.RENDER_GRAPHICS_Mode:
             //std::cout<<"RENDER_GRAPHICS_Mode"<<std::endl;
 
             //must wait for fence before record command buffer
-            renderer.WaitForGraphicsFence();
+            instance_renderercore->WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer.AquireSwapchainImage(swapchain.getHandle()); 
+            instance_renderercore->AquireSwapchainImage(swapchain.getHandle()); 
 
-            vkResetCommandBuffer(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+            vkResetCommandBuffer(instance_renderercore->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
-            renderer.StartRecordGraphicsCommandBuffer(
+            instance_renderercore->StartRecordGraphicsCommandBuffer(
                 renderProcess.renderPass_mainscene, 
                 swapchain.framebuffers_mainscene,swapchain.swapChainExtent, 
                 renderProcess.clearValues);
             RecordGraphicsCommandBuffer_RenderpassMainscene();
-            renderer.EndRecordGraphicsCommandBuffer();
+            instance_renderercore->EndRecordGraphicsCommandBuffer();
 
-            renderer.SubmitGraphics();
+            instance_renderercore->SubmitGraphics();
 
-            renderer.PresentSwapchainImage(swapchain.getHandle());
+            instance_renderercore->PresentSwapchainImage(swapchain.getHandle());
         break;
         case RenderModes::GRAPHICS_SHADOWMAP:
             //must wait for fence before record command buffer
-            renderer.WaitForGraphicsFence();
+            instance_renderercore->WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer.AquireSwapchainImage(swapchain.getHandle()); 
+            instance_renderercore->AquireSwapchainImage(swapchain.getHandle()); 
 
-            vkResetCommandBuffer(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+            vkResetCommandBuffer(instance_renderercore->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
-            renderer.BeginCommandBuffer(renderer.graphicsCmdId);
+            //renderer.BeginCommandBuffer(renderer.graphicsCmdId);
+            instance_renderercore->BeginGraphicsCommandBuffer();
 
             for(int i = 0; i < swapchain.framebuffers_shadowmap.size(); i++){
                 //std::cout<<"Application: Begin Shadowmap"<<i<<" Render Pass."<<std::endl;
-                renderer.BeginRenderPass(renderProcess.renderPass_shadowmap, swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, renderProcess.clearValues_shadowmap, true);
-                renderer.SetViewport(swapchain.swapChainExtent);
-                renderer.SetScissor(swapchain.swapChainExtent);
+                instance_renderercore->BeginRenderPass(renderProcess.renderPass_shadowmap, swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, renderProcess.clearValues_shadowmap, true);
+                instance_renderercore->SetViewport(swapchain.swapChainExtent);
+                instance_renderercore->SetScissor(swapchain.swapChainExtent);
                 //RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
                 instance_game->RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
-                renderer.EndRenderPass();
+                //renderer.EndRenderPass();
+                instance_renderercore->EndGraphicsRenderPass();
             }
 
             //std::cout<<"Application: Begin Mainscene Render Pass."<<std::endl;
-            renderer.BeginRenderPass(renderProcess.renderPass_mainscene, swapchain.framebuffers_mainscene, swapchain.swapChainExtent, renderProcess.clearValues, false);
-            renderer.SetViewport(swapchain.swapChainExtent);
-            renderer.SetScissor(swapchain.swapChainExtent);
+            instance_renderercore->BeginRenderPass(renderProcess.renderPass_mainscene, swapchain.framebuffers_mainscene, swapchain.swapChainExtent, renderProcess.clearValues, false);
+            instance_renderercore->SetViewport(swapchain.swapChainExtent);
+            instance_renderercore->SetScissor(swapchain.swapChainExtent);
             RecordGraphicsCommandBuffer_RenderpassMainscene();
-            renderer.EndRenderPass();
+            //renderer.EndRenderPass();
+            instance_renderercore->EndGraphicsRenderPass();
 
-	        renderer.EndCommandBuffer(renderer.graphicsCmdId);
+	        //renderer.EndCommandBuffer(renderer.graphicsCmdId);
+            instance_renderercore->EndGraphicsCommandBuffer();
 
-            renderer.SubmitGraphics();
+            instance_renderercore->SubmitGraphics();
 
-            renderer.PresentSwapchainImage(swapchain.getHandle());
+            instance_renderercore->PresentSwapchainImage(swapchain.getHandle());
 
 
         break;
         case RenderModes::COMPUTE:
         //case renderer.RENDER_COMPUTE_Mode:
             //std::cout<<"Application: RENDER_COMPUTE_Mode."<<std::endl;
-            renderer.WaitForComputeFence();//must wait for fence before record
+            instance_renderercore->WaitForComputeFence();//must wait for fence before record
             //std::cout<<"Application: renderer.WaitForComputeFence()"<<std::endl;
 
-            vkResetCommandBuffer(renderer.commandBuffers[renderer.computeCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+            vkResetCommandBuffer(instance_renderercore->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             //std::cout<<"Application: vkResetCommandBuffer"<<std::endl;
 
-            renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+            instance_renderercore->StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
             instance_game->RecordComputeCommandBuffer();
-            renderer.EndRecordComputeCommandBuffer();
+            instance_renderercore->EndRecordComputeCommandBuffer();
             //std::cout<<"Application: recordComputeCommandBuffer()"<<std::endl;
 
-            renderer.SubmitCompute();
+            instance_renderercore->SubmitCompute();
             //std::cout<<"Application: renderer.SubmitCompute()"<<std::endl;
 
            // renderer.PresentSwapchainImage(swapchain); //???
@@ -235,9 +239,9 @@ void Application::Record_Present(){
         case RenderModes::COMPUTE_SWAPCHAIN:
         //case renderer.RENDER_COMPUTE_SWAPCHAIN_Mode:
             //must wait for fence before record
-            renderer.WaitForComputeFence();
+            instance_renderercore->WaitForComputeFence();
             //must aquire swap image before record command buffer
-            renderer.AquireSwapchainImage(swapchain.getHandle());
+            instance_renderercore->AquireSwapchainImage(swapchain.getHandle());
             //std::cout<<"Application: renderer.imageIndex = "<<renderer.imageIndex<< std::endl;
             //std::cout<<"Application: renderer.currentFrame = "<<renderer.currentFrame<< std::endl;
 
@@ -248,34 +252,34 @@ void Application::Record_Present(){
             //recordComputeCommandBuffer();
             //renderer.EndRecordComputeCommandBuffer();
 
-            renderer.SubmitCompute(); 
+            instance_renderercore->SubmitCompute(); 
 
-            renderer.PresentSwapchainImage(swapchain.getHandle()); 
+            instance_renderercore->PresentSwapchainImage(swapchain.getHandle()); 
         break;
         case RenderModes::COMPUTE_GRAPHICS:
         //case renderer.RENDER_COMPUTE_GRAPHICS_Mode:
-            renderer.WaitForComputeFence();//must wait for fence before record
-            renderer.WaitForGraphicsFence();//must wait for fence before record
-            renderer.AquireSwapchainImage(swapchain.getHandle());//must aquire swap image before record command buffer
+            instance_renderercore->WaitForComputeFence();//must wait for fence before record
+            instance_renderercore->WaitForGraphicsFence();//must wait for fence before record
+            instance_renderercore->AquireSwapchainImage(swapchain.getHandle());//must aquire swap image before record command buffer
 
-            vkResetCommandBuffer(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
-            vkResetCommandBuffer(renderer.commandBuffers[renderer.computeCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+            vkResetCommandBuffer(instance_renderercore->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
+            vkResetCommandBuffer(instance_renderercore->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             
-            renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+            instance_renderercore->StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
             instance_game->RecordComputeCommandBuffer();
-            renderer.EndRecordComputeCommandBuffer();
+            instance_renderercore->EndRecordComputeCommandBuffer();
 
-            renderer.StartRecordGraphicsCommandBuffer(
+            instance_renderercore->StartRecordGraphicsCommandBuffer(
                 renderProcess.renderPass_mainscene,
                 swapchain.framebuffers_mainscene, swapchain.swapChainExtent,
                 renderProcess.clearValues);
             RecordGraphicsCommandBuffer_RenderpassMainscene();
-            renderer.EndRecordGraphicsCommandBuffer();
+            instance_renderercore->EndRecordGraphicsCommandBuffer();
             
-            renderer.SubmitCompute(); 
-            renderer.SubmitGraphics(); 
+            instance_renderercore->SubmitCompute(); 
+            instance_renderercore->SubmitGraphics(); 
 
-            renderer.PresentSwapchainImage(swapchain.getHandle()); 
+            instance_renderercore->PresentSwapchainImage(swapchain.getHandle()); 
         break;
         default:
         break;
@@ -285,8 +289,8 @@ void Application::Record_Present(){
 void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     dsSets.push_back(computeDescriptorManager.descriptorSets);
-    renderer.BindComputeDescriptorSets(renderProcess.computePipelineLayout, dsSets);
-    renderer.Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+    instance_renderercore->BindComputeDescriptorSets(renderProcess.computePipelineLayout, dsSets);
+    instance_renderercore->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 }
 
 }

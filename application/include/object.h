@@ -7,6 +7,7 @@
 #include "camera.hpp"
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "IRendererCore.h"
 
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
@@ -25,7 +26,9 @@ class CObject : public CEntity {
     //bool bUseMVP_VP = false;
 
     //These will be used when recording draw cmd
-    CRenderer *p_renderer;
+    //CRenderer *p_renderer;
+    LERenderer::IRendererCore *instance_renderercore = NULL;
+
     CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
     //VkPipelineLayout *p_graphicsPipelineLayout;

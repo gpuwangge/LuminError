@@ -206,8 +206,8 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 	//std::cout<<"m_mipLevels: "<<m_mipLevels<<std::endl;
 
 	CWxjBuffer stagingBuffer;
-	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-	stagingBuffer.fill(m_pTexels);
+	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+	stagingBuffer.fill(m_pTexels, CContext::GetHandle().GetLogicalDevice());
 
 	if(useSTBI) stbi_image_free(m_pTexels);
 
@@ -230,7 +230,7 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 		copyBufferToImage(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
-	stagingBuffer.DestroyAndFree();
+	stagingBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 }
 
 void CTextureImage::CreateImageView(VkImageAspectFlags aspectFlags){
@@ -351,8 +351,8 @@ void CTextureImage::CreateTextureImage_cubemap() {
 	//mipLevels = bEnableMipMap ? (static_cast<uint32_t>(std::floor(std::log2(std::max(m_texWidth, m_texHeight)))) + 1) : 1;
 
 	CWxjBuffer stagingBuffer;
-	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-	stagingBuffer.fill(m_pTexels);
+	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+	stagingBuffer.fill(m_pTexels, CContext::GetHandle().GetLogicalDevice());
 
 	stbi_image_free(m_pTexels);
 
@@ -374,7 +374,7 @@ void CTextureImage::CreateTextureImage_cubemap() {
 		copyBufferToImage_cubemap(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
-	stagingBuffer.DestroyAndFree();
+	stagingBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 }
 
 void CTextureImage::CreateImageView_cubemap(VkImageAspectFlags aspectFlags){
@@ -662,8 +662,8 @@ void CTextureImage::CreateTextureImage_rainbow_mipmap(void* texels, VkImageUsage
 	//mipLevels = bEnableMipMap ? (static_cast<uint32_t>(std::floor(std::log2(std::max(m_texWidth, m_texHeight)))) + 1) : 1;
 
 	CWxjBuffer stagingBuffer;
-	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-	stagingBuffer.fill(texels);
+	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+	stagingBuffer.fill(texels, CContext::GetHandle().GetLogicalDevice());
 
 	stbi_image_free(texels);
 
@@ -680,7 +680,7 @@ void CTextureImage::CreateTextureImage_rainbow_mipmap(void* texels, VkImageUsage
 		copyBufferToImage(stagingBuffer.buffer, imageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
-	stagingBuffer.DestroyAndFree();
+	stagingBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 }
 
 void CTextureImage::generateMipmaps(std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage){ //rainbow mipmaps case
