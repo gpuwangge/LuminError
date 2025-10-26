@@ -16,6 +16,7 @@
 #include "timer.h"
 #include "controlNode.h"
 #include "shaderManager.h"
+#include "swapchain.h"
 
 #include "IApplication.h"
 #include "IGame.h"

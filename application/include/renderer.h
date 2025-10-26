@@ -1,29 +1,27 @@
 #ifndef H_RENDERER
 #define H_RENDERER
 
-#include "context.h"
-#include "swapchain.h"
-#include "textManager.h"
+//#include "context.h"
+//#include "swapchain.h"
+//#include "textManager.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeBuffer.h"
+#include "Enum.h"
 
 class CTextbox;
+class CSwapchain;
 
 class CRenderer final{
 public:
-    CRenderer();
-    ~CRenderer();
+    CRenderer(){};
+    ~CRenderer(){};
 
     /**************************
-     * 
      * Universial Render Functions
-     * 
      * ***********************/
 
     RenderModes m_renderMode = GRAPHICS;
-    //void RecordCompute();
-    //void RecordGraphics();
 
     bool bUseObjectMVP = false;
     bool bUseTextboxMVP = false;
@@ -37,14 +35,8 @@ public:
 
 
     /**************************
-     * 
      * Graphics Functions
-     * 
      * ***********************/
-
-    //void preRecordGraphicsCommandBuffer(CSwapchain &swapchain); //prepareCurrentFrameAndAcquireImageIndex
-    //void postRecordGraphicsCommandBuffer(CSwapchain &swapchain);
-
     //Create start() and end() to make sample command recording simple
     void StartRecordGraphicsCommandBuffer(VkRenderPass &renderPass, 
         std::vector<VkFramebuffer> &swapChainFramebuffers, VkExtent2D &extent,
@@ -81,18 +73,8 @@ public:
 
 
     /**************************
-     * 
      * Compute Shader Functions
-     * 
      * ***********************/
-
-    //std::vector<VkCommandBuffer> commandBuffers_compute; 
-    //void CreateComputeCommandBuffers();
-    //void preRecordComputeCommandBuffer(CSwapchain &swapchain); //prepareCurrentFrame
-    //void postRecordComputeCommandBuffer(CSwapchain &swapchain);
-    //void drawComputeFrame(VkPipeline &computePipeline, VkPipelineLayout &pipelineLayout_compute, std::vector<VkDescriptorSet> &descriptorSets_compute);
-    //void recordComputeCommandBuffer0(VkPipeline &computePipeline, VkPipelineLayout &pipelineLayout_compute, std::vector<VkDescriptorSet> &descriptorSets_compute);
-    
     void StartRecordComputeCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout);
     void EndRecordComputeCommandBuffer();
 
@@ -100,20 +82,14 @@ public:
 
 
     /**************************
-     * 
      * Utility Functions
-     * 
      * ***********************/
-
     void RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
             VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind);
 
     /**************************
-     * 
      * MISC Functions
-     * 
      * ***********************/
-
     template <typename T>
     void CreateVertexBuffer(IN std::vector<T> &input){
         CWxjBuffer vertexDataBuffer;
@@ -133,8 +109,8 @@ public:
     void CreateIndexBuffer(std::vector<uint32_t> &indices3D);
     //void CreateInstanceBuffer(std::vector<TextInstanceData> &instanceData);
 
-    int graphicsCmdId;
-    int computeCmdId;
+    int graphicsCmdId = 0;
+    int computeCmdId = 0;
     void CreateCommandPool(VkSurfaceKHR &surface);
     void CreateGraphicsCommandBuffer();
     void CreateComputeCommandBuffer();
@@ -144,8 +120,8 @@ public:
 
     void Destroy();
 
-    uint32_t currentFrame;
-    uint32_t imageIndex;
+    uint32_t currentFrame = 0;
+    uint32_t imageIndex = 0;
     void Update(); //update currentFrame
 
     std::vector<CWxjBuffer> vertexDataBuffers;  //each buffer object is for one model object, the index in this vector is object.id
@@ -159,12 +135,11 @@ public:
     std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;
-   // std::vector<VkFence> imagesInFlight;/////////
 
     std::vector<VkSemaphore> computeFinishedSemaphores;
     std::vector<VkFence> computeInFlightFences;
-private:
-    //CDebugger * debugger;
+
+
 };
 
 #endif
