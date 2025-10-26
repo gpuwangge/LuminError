@@ -495,6 +495,11 @@ void RendererCore::BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout, s
     BindDescriptorSets(pipelineLayout, descriptorSets, VK_PIPELINE_BIND_POINT_COMPUTE, computeCmdId);
 }
 
+void RendererCore::PushConstantToCommand(void* pcData, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange) {
+    vkCmdPushConstants(commandBuffers[graphicsCmdId][currentFrame], graphicsPipelineLayout, 
+                pushConstantRange.stageFlags, pushConstantRange.offset, 
+                pushConstantRange.size, pcData);
+}
 void RendererCore::DrawIndexed(int model_id){
 	//vkCmdDrawIndexed(commandBuffers[graphicsCmdId][currentFrame], static_cast<uint32_t>(indices3D.size()), 1, 0, 0, 0);
     vkCmdDrawIndexed(commandBuffers[graphicsCmdId][currentFrame], static_cast<uint32_t>(indices3Ds[model_id].size()), 1, 0, 0, 0);

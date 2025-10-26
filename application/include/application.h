@@ -7,7 +7,6 @@
 #include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
 #include "renderProcess.h"
-#include "renderer.h"
 #include "texture.h" //this includes imageManager.h
 #include "modelManager.h"
 #include "object.h"
@@ -67,7 +66,6 @@ namespace LEApplication{
         CShaderManager shaderManager;
         CGraphicsDescriptorManager graphicsDescriptorManager;
         CComputeDescriptorManager computeDescriptorManager;
-        CRenderer renderer;
         CModelManager modelManager;
         CTextureManager textureManager;
         CTextImageManager textImageManager;

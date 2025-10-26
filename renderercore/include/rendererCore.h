@@ -71,11 +71,7 @@ namespace LERenderer{
         void BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) override;
 
         //Draw
-        void PushConstantToCommand(void* pcData, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange) override {
-            vkCmdPushConstants(commandBuffers[graphicsCmdId][currentFrame], graphicsPipelineLayout, 
-                        pushConstantRange.stageFlags, pushConstantRange.offset, 
-                        pushConstantRange.size, pcData);
-        }
+        void PushConstantToCommand(void* pcData, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange) override;
         void DrawIndexed(int model_id) override;//std::vector<uint32_t> &indices3D
         void Draw(uint32_t n) override;
         void DrawInstanceIndexed(int model_id, int instanceCount) override;

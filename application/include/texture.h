@@ -2,7 +2,6 @@
 #define H_TEXTURE
 
 #include "imageBuffer.h"
-//#include "renderer.h"
 #include "context.h"
 #include "logManager.h"
 #include "timer.h"
