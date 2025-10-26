@@ -499,6 +499,13 @@ void CGraphicsDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUnifo
 		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
 	}
 }
+void CGraphicsDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
+    if (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) {
+        if (data && dataSize > 0) {
+            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+        }
+    }
+}
 
 /************
 * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING

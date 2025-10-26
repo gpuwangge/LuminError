@@ -60,21 +60,7 @@ public:
 	static std::vector<void*> customUniformBuffersMapped;
     static VkDeviceSize m_customUniformBufferSize;
     static void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
-    //legacy function(template)
-    // template <typename T>
-    // void updateCustomUniformBuffer(uint32_t currentFrame, T customUniformBufferObject){
-    //     //std::cout<<"sizeof(customUniformBufferObject)="<<sizeof(customUniformBufferObject)<<std::endl;
-    //     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM)
-    //         memcpy(customUniformBuffersMapped[currentFrame], &customUniformBufferObject, sizeof(customUniformBufferObject));
-    // }
-    //alternative(no template)
-    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
-        if (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) {
-            if (data && dataSize > 0) {
-                memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
-            }
-        }
-    }
+    static void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
      * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING

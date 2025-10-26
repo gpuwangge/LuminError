@@ -133,11 +133,6 @@ public:
 
     using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
     using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
-    // void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
-    //     VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
-    //     int graphcisPipeline_id, int subpass_id, bool bEnableDepthBias, VkRenderPass renderPass,
-    //     bool blendEnable, bool depthTestEnable, bool depthWriteEnable, bool skyboxEnable);
-
     void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
         VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
         VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo);

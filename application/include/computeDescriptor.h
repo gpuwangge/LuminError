@@ -42,18 +42,7 @@ public:
 	static std::vector<void*> customUniformBuffersMapped;
     static VkDeviceSize m_customUniformBufferSize;
     static void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
-    // template <typename T>
-    // void uploadCustomUniformBuffer(uint32_t currentFrame, T customUniformBufferObject){
-    //     if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM)
-    //         memcpy(customUniformBuffersMapped[currentFrame], &customUniformBufferObject, sizeof(customUniformBufferObject));
-    // }
-    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
-        if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
-            if (data && dataSize > 0) {
-                memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
-            }
-        }
-    }
+    static void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
 
     /************
@@ -64,21 +53,8 @@ public:
     static std::vector<void*> storageBuffersMapped;
     static VkDeviceSize m_storageBufferSize;
     static void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT); //the same function to add storage 1&2
-    // template <typename T>
-    // void updateStorageBuffer(uint32_t currentFrame, T storageBufferObject){ 
-    //     memcpy(storageBuffersMapped[currentFrame], &storageBufferObject, sizeof(storageBufferObject));
-    // }
-    void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) {
-        if (data && size > 0) {
-            //std::cout<<"updateStorageBuffer: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
-            memcpy(storageBuffersMapped[currentFrame], data, size);
-        }
-    }
-    void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size) {
-        if (data && size > 0) {
-            memcpy(data, storageBuffersMapped[currentFrame], size);
-        }
-    }
+    static void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size);
+    static void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size);
 
 
     /************

@@ -270,6 +270,13 @@ void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUnifor
 		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
 	}    
 }
+void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
+    if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
+        if (data && dataSize > 0) {
+            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+        }
+    }
+}
 
 
 /************
@@ -295,7 +302,17 @@ void CComputeDescriptorManager::addStorageBuffer(VkDeviceSize storageBufferSize,
         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers[i].deviceMemory, 0, storageBufferSize, 0, &storageBuffersMapped[i]);
     }
 }
-
+void CComputeDescriptorManager::uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) {
+    if (data && size > 0) {
+        //std::cout<<"updateStorageBuffer: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped[currentFrame], data, size);
+    }
+}
+void CComputeDescriptorManager::downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size) {
+    if (data && size > 0) {
+        memcpy(data, storageBuffersMapped[currentFrame], size);
+    }
+}
 
 /************
  * 3 COMPUTE_STORAGEIMAGE_TEXTURE
