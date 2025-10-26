@@ -455,6 +455,7 @@ void CRenderProcess::createGraphicsPipelineLayout(std::vector<VkDescriptorSetLay
 void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
 	VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
 	VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo){
+	bool bVerbose = false;
 	//HERE_I_AM("CreateGraphicsPipeline");
 	bCreateGraphicsPipeline = true;
 
@@ -483,6 +484,10 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 	
 	/*********2 Asemble Vertex Info**********/
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+	VkVertexInputBindingDescription bindingDescription{}; //must declare these outside of blocks
+	std::vector<VkVertexInputAttributeDescription> attributeDescriptions; //must declare these outside of blocks
+
+	if(bVerbose) std::cout<<"createGraphicsPipeline(): bUseInstanceBuffer = "<<bUseInstanceBuffer<<", bUseVertexBuffer = "<<bUseVertexBuffer<<std::endl;
 	if(bUseInstanceBuffer){ //use two bindings together
 		auto bindingDescriptions = std::array{
 			TextQuadVertex::getBindingDescription(),
@@ -501,9 +506,9 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 	}else if(bUseVertexBuffer){ //use one binding
-		auto bindingDescription = getBindingDesc();
-		auto attributeDescriptions = getAttributeDesc();
-		
+		bindingDescription = getBindingDesc();
+		attributeDescriptions = getAttributeDesc();
+
 		vertexInputInfo.vertexBindingDescriptionCount = 1;
 		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
@@ -632,9 +637,9 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 	/*********Create Graphics Pipeline**********/
 	VkPipeline newpipeline;
 	graphicsPipelines.push_back(newpipeline);
-	//std::cout<<"begin create graphics pipeline "<<std::endl;
+	if(bVerbose) std::cout<<"begin create graphics pipeline... "<<std::endl;
 	result = vkCreateGraphicsPipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipelines[graphcisPipeline_id]);
-	//std::cout<<"done create graphcis pipeline "<<std::endl;
+	if(bVerbose) std::cout<<"done create graphcis pipeline "<<std::endl;
 	//result = vkCreateGraphicsPipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create graphics pipeline!");
 	//REPORT("vkCreateGraphicsPipelines");

@@ -136,6 +136,7 @@ public:
     void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
         VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
         VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo);
+
 };
 
 
