@@ -6,8 +6,6 @@
 #include "TypeBuffer.h"
 #include "Enum.h"
 
-class CSwapchain;
-
 class CRenderer final{
 public:
     CRenderer(){};
@@ -22,12 +20,12 @@ public:
     bool bUseObjectMVP = false;
     bool bUseTextboxMVP = false;
 
-    void AquireSwapchainImage(CSwapchain &swapchain);
+    void AquireSwapchainImage(VkSwapchainKHR swapchainHandle);
     void WaitForComputeFence();
     void SubmitCompute();
     void WaitForGraphicsFence();
     void SubmitGraphics();
-    void PresentSwapchainImage(CSwapchain &swapchain); 
+    void PresentSwapchainImage(VkSwapchainKHR swapchainHandle); 
 
 
     /**************************

@@ -1,7 +1,6 @@
 #include "renderer.h"
 #include "Config.h"
 #include <iostream>
-#include "swapchain.h"
 
 void CRenderer::Update(){
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -86,8 +85,9 @@ void CRenderer::CreateCommandBuffers() {
 /**************************
  * Universial Render Functions
  * ***********************/
-void CRenderer::AquireSwapchainImage(CSwapchain &swapchain){
-    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchain.getHandle(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+//void CRenderer::AquireSwapchainImage(CSwapchain &swapchain){
+void CRenderer::AquireSwapchainImage(VkSwapchainKHR swapchainHandle){
+    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 }
 
 void CRenderer::WaitForComputeFence(){
@@ -228,7 +228,7 @@ void CRenderer::SubmitGraphics(){
     //vkResetCommandBuffer(commandBuffers[graphicsCmdId][currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
 }
 
-void CRenderer::PresentSwapchainImage(CSwapchain &swapchain){
+void CRenderer::PresentSwapchainImage(VkSwapchainKHR swapchainHandle){
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -261,7 +261,7 @@ void CRenderer::PresentSwapchainImage(CSwapchain &swapchain){
 
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = { swapchain.getHandle() };
+    VkSwapchainKHR swapChains[] = { swapchainHandle };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
 

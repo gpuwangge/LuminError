@@ -163,7 +163,7 @@ void Application::Record_Present(){
             //must wait for fence before record command buffer
             renderer.WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer.AquireSwapchainImage(swapchain); 
+            renderer.AquireSwapchainImage(swapchain.getHandle()); 
 
             vkResetCommandBuffer(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -176,13 +176,13 @@ void Application::Record_Present(){
 
             renderer.SubmitGraphics();
 
-            renderer.PresentSwapchainImage(swapchain);
+            renderer.PresentSwapchainImage(swapchain.getHandle());
         break;
         case RenderModes::GRAPHICS_SHADOWMAP:
             //must wait for fence before record command buffer
             renderer.WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer.AquireSwapchainImage(swapchain); 
+            renderer.AquireSwapchainImage(swapchain.getHandle()); 
 
             vkResetCommandBuffer(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -209,7 +209,7 @@ void Application::Record_Present(){
 
             renderer.SubmitGraphics();
 
-            renderer.PresentSwapchainImage(swapchain);
+            renderer.PresentSwapchainImage(swapchain.getHandle());
 
 
         break;
@@ -237,7 +237,7 @@ void Application::Record_Present(){
             //must wait for fence before record
             renderer.WaitForComputeFence();
             //must aquire swap image before record command buffer
-            renderer.AquireSwapchainImage(swapchain);
+            renderer.AquireSwapchainImage(swapchain.getHandle());
             //std::cout<<"Application: renderer.imageIndex = "<<renderer.imageIndex<< std::endl;
             //std::cout<<"Application: renderer.currentFrame = "<<renderer.currentFrame<< std::endl;
 
@@ -250,13 +250,13 @@ void Application::Record_Present(){
 
             renderer.SubmitCompute(); 
 
-            renderer.PresentSwapchainImage(swapchain); 
+            renderer.PresentSwapchainImage(swapchain.getHandle()); 
         break;
         case RenderModes::COMPUTE_GRAPHICS:
         //case renderer.RENDER_COMPUTE_GRAPHICS_Mode:
             renderer.WaitForComputeFence();//must wait for fence before record
             renderer.WaitForGraphicsFence();//must wait for fence before record
-            renderer.AquireSwapchainImage(swapchain);//must aquire swap image before record command buffer
+            renderer.AquireSwapchainImage(swapchain.getHandle());//must aquire swap image before record command buffer
 
             vkResetCommandBuffer(renderer.commandBuffers[renderer.graphicsCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
             vkResetCommandBuffer(renderer.commandBuffers[renderer.computeCmdId][renderer.currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
@@ -275,7 +275,7 @@ void Application::Record_Present(){
             renderer.SubmitCompute(); 
             renderer.SubmitGraphics(); 
 
-            renderer.PresentSwapchainImage(swapchain); 
+            renderer.PresentSwapchainImage(swapchain.getHandle()); 
         break;
         default:
         break;
