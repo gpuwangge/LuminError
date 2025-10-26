@@ -6,6 +6,17 @@ void CRenderer::Update(){
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+void CRenderer::CreateVertexBuffer(void* data, size_t elementSize, size_t elementCount) {
+    CWxjBuffer vertexDataBuffer;
+    VkDeviceSize bufferSize = elementSize * elementCount;
+
+    VkResult result = vertexDataBuffer.init(bufferSize, 
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
+    vertexDataBuffer.fill(data);
+    vertexDataBuffers.push_back(vertexDataBuffer);
+}
+
 void CRenderer::CreateIndexBuffer(std::vector<uint32_t> &indices3D){
     //Init05CreateIndexBuffer();
     CWxjBuffer indexDataBuffer;

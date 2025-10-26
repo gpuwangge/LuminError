@@ -14,7 +14,6 @@ public:
     /**************************
      * Universial Render Functions
      * ***********************/
-
     RenderModes m_renderMode = GRAPHICS;
 
     bool bUseObjectMVP = false;
@@ -84,22 +83,7 @@ public:
     /**************************
      * MISC Functions
      * ***********************/
-    template <typename T>
-    void CreateVertexBuffer(IN std::vector<T> &input){
-        CWxjBuffer vertexDataBuffer;
-        //HERE_I_AM("Init05CreateVertexBuffer");
-        VkDeviceSize bufferSize = sizeof(input[0]) * input.size();
-
-        //VK_BUFFER_USAGE_TRANSFER_SRC_BIT
-        //VkResult result = InitDataBufferHelper(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, &vertexDataBuffer);//allocate vertexDataBuffer bufferSize(decided by vertices3D) memory
-        VkResult result = vertexDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-
-        //REPORT("InitVertexDataBuffer");
-        //FillDataBufferHelper(vertexDataBuffer, (void *)(input.data()));//copy vertices3D to vertexDataBuffer
-        vertexDataBuffer.fill((void *)(input.data()));
-
-        vertexDataBuffers.push_back(vertexDataBuffer);
-    }
+    void CreateVertexBuffer(void* data, size_t elementSize, size_t elementCount);
     void CreateIndexBuffer(std::vector<uint32_t> &indices3D);
     //void CreateInstanceBuffer(std::vector<TextInstanceData> &instanceData);
 

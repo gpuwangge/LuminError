@@ -198,8 +198,9 @@ void Application::Initialize(){
     if(appInfo->Models.size() > 0){
         for(int i = 0; i < appInfo->Models.size(); i++){
             std::string modelName = appInfo->Models[i].model_names;
+            //std::cout<<"test:"<<i<<", modelName="<<modelName<<std::endl;
             if(modelName == "CUSTOM3D0"){
-                renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[0].vertices);
+                renderer.CreateVertexBuffer(modelManager.customModels3D[0].vertices.data(), sizeof(Vertex3D), modelManager.customModels3D[0].vertices.size());
                 renderer.CreateIndexBuffer(modelManager.customModels3D[0].indices);
                 
                 modelManager.modelLengths.push_back(modelManager.customModels3D[0].length);
@@ -213,7 +214,7 @@ void Application::Initialize(){
             //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
             //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
             }else if(modelName == "TEXTBOXIMAGE"){
-                renderer.CreateVertexBuffer<Vertex3D>(modelManager.textboxImageModels[0].vertices);
+                renderer.CreateVertexBuffer(modelManager.textboxImageModels[0].vertices.data(), sizeof(Vertex3D), modelManager.textboxImageModels[0].vertices.size());
                 renderer.CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
                 
                 modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
@@ -222,7 +223,7 @@ void Application::Initialize(){
             }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
                 //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
                 //std::cout<<"Application: Load "<<std::endl;
-                renderer.CreateVertexBuffer<TextQuadVertex>(modelManager.textQuadModels[0].vertices);
+                renderer.CreateVertexBuffer(modelManager.textQuadModels[0].vertices.data(), sizeof(TextQuadVertex), modelManager.textQuadModels[0].vertices.size());
                 //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
                 renderer.CreateIndexBuffer(modelManager.textQuadModels[0].indices);
 
@@ -236,7 +237,7 @@ void Application::Initialize(){
                 modelManager.modelLengthsMax.push_back(v);
             }else if(modelName == "CUSTOM2D0"){
                 //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
-                renderer.CreateVertexBuffer<Vertex2D>(modelManager.customModels2D[0].vertices); 
+                renderer.CreateVertexBuffer(modelManager.customModels2D[0].vertices.data(), sizeof(Vertex2D), modelManager.customModels2D[0].vertices.size()); 
 
                 modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
@@ -246,11 +247,12 @@ void Application::Initialize(){
                 std::vector<Vertex3D> modelVertices3D;
                 std::vector<uint32_t> modelIndices3D;
                 modelManager.LoadObjModel(modelName, modelVertices3D, modelIndices3D);
-                renderer.CreateVertexBuffer<Vertex3D>(modelVertices3D); 
+                renderer.CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
                 renderer.CreateIndexBuffer(modelIndices3D);
             }
+            //std::cout<<"test end"<<std::endl;
         }
-        
+
     }
 
     if(appInfo->Textures.size() > 0){
