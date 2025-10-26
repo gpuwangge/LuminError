@@ -111,7 +111,7 @@ void CTextbox::Draw(){
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", binding vertex and index buffer."<<"modelID: "<<m_model_id<<std::endl;
     //std::cout<<"vertex size:"<<p_renderer->vertexDataBuffers.size()<<" instance size: "<<p_renderer->instanceDataBuffers.size()<<std::endl;
     //p_renderer->BindVertexInstanceBuffer(m_model_id, m_textBoxID);
-    p_renderer->BindVertexInstanceBuffer(m_model_id, *this);
+    p_renderer->BindVertexInstanceBuffer(m_model_id, &(instanceDataBuffer.buffer));
       //hack
     //if(m_textBoxID != 0) return;
 

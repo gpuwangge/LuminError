@@ -1,15 +1,11 @@
 #ifndef H_RENDERER
 #define H_RENDERER
 
-//#include "context.h"
-//#include "swapchain.h"
-//#include "textManager.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeBuffer.h"
 #include "Enum.h"
 
-class CTextbox;
 class CSwapchain;
 
 class CRenderer final{
@@ -50,7 +46,7 @@ public:
     void SetViewport(VkExtent2D &extent);
     void SetScissor(VkExtent2D &extent);
     void BindVertexBuffer(int modelId);
-    void BindVertexInstanceBuffer(int modelId, CTextbox &textbox);
+    void BindVertexInstanceBuffer(int modelId, VkBuffer *pBuffer);
     void BindIndexBuffer(int modelId);
     void BindExternalBuffer(std::vector<CWxjBuffer> &buffer);
     void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectMVPOffset = -1, uint32_t dynamicTextboxMVPOffset = -1);

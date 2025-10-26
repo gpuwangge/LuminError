@@ -1,7 +1,6 @@
 #include "renderer.h"
 #include "Config.h"
 #include <iostream>
-#include "textManager.h"
 #include "swapchain.h"
 
 void CRenderer::Update(){
@@ -388,10 +387,10 @@ void CRenderer::BindVertexBuffer(int modelId){
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers(commandBuffers[graphicsCmdId][currentFrame], 0, 1, vertexBuffers, offsets);
 }
-void CRenderer::BindVertexInstanceBuffer(int modelId, CTextbox &textbox){
+void CRenderer::BindVertexInstanceBuffer(int modelId, VkBuffer *pBuffer){    
     //std::cout<<"objectId="<<objectId<<", vertexDataBuffers.size()="<<vertexDataBuffers.size()<<", instanceDataBuffers.size()="<<instanceDataBuffers.size()<<std::endl;
     if(vertexDataBuffers.size() <= 0) return;
-	VkBuffer vertexBuffers[] = {vertexDataBuffers[modelId].buffer, textbox.instanceDataBuffer.buffer};
+	VkBuffer vertexBuffers[] = {vertexDataBuffers[modelId].buffer, *pBuffer}; //textbox.instanceDataBuffer.buffer
 	//std::cout<<"BindVertexInstanceBuffer: objectId="<<objectId<<", vertexDataBuffers.size()="<<vertexDataBuffers.size()<<", instanceBuffers.size()="<<instanceDataBuffers.size()<<std::endl;
     VkDeviceSize offsets[] = { 0, 0 };
 	vkCmdBindVertexBuffers(commandBuffers[graphicsCmdId][currentFrame], 0, 2, vertexBuffers, offsets); //vertexBuffers here contains both vertex and instance buffer
