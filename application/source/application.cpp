@@ -1,6 +1,9 @@
 #include "application.h"
 #include "Foundation.h"
 #include <locale>
+#include <iomanip>
+#include <iostream>
+//#include "shaderManager.h"
 
 namespace LEApplication{
 

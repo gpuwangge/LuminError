@@ -1,4 +1,4 @@
-#include "../include/graphicsDescriptor.h"
+#include "graphicsDescriptor.h"
 
 //Declare static variables here:
 /************

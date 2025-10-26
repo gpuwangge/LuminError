@@ -3,12 +3,10 @@
 
 #include "camera.hpp"
 #include "instance.h"
-#include "swapchain.h"
 #include "context.h"
 #include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
 #include "renderProcess.h"
-#include "shaderManager.h"
 #include "renderer.h"
 #include "texture.h" //this includes imageManager.h
 #include "modelManager.h"
@@ -17,14 +15,12 @@
 #include "light.h"
 #include "timer.h"
 #include "controlNode.h"
+#include "shaderManager.h"
 
-#include <windows.h>
 #include "IApplication.h"
 #include "IGame.h"
 #include "Utility.h"
 #include <vector>
-#include <iomanip>
-#include <iostream>
 #include "Enum.h"
 
 //Macro to convert the macro value to a string
@@ -33,6 +29,18 @@
 
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
+
+//added this to remove windows.h
+#ifdef _WIN32
+// 前向声明 HMODULE
+//typedef void* HMODULE;
+// 或者更精确的方式：
+struct HINSTANCE__;
+typedef HINSTANCE__* HMODULE;
+#endif
+
+class CSwapchain;
+//class CShaderManager;
 
 namespace LEApplication{
     class Application : public LEApplication::IApplication{

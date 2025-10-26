@@ -1,6 +1,7 @@
-#include "../include/controlNode.h"
-#include "../include/application.h"
+#include "controlNode.h"
+#include "application.h"
 #include <iostream>
+#include <iomanip>
 
 inline std::string to_string_prec(double value, int prec = 1) {
     std::ostringstream oss;
