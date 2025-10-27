@@ -1,6 +1,7 @@
 #include "YAMLCore.h"
 #include "Foundation.h"
 #include <iostream>
+#include "TypeAppInfo.impl.h"
 
 namespace LEYAML{
 

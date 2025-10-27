@@ -1,22 +1,18 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <string>
+#include <array>
 
-#ifdef WIN32
-    #define YAML_CPP_STATIC_DEFINE //to disable lots of yaml warnings
-#endif
-#include "../external/yaml-cpp/yaml.h"
+namespace YAML{
+    class Node;
+}
 
  /******************
 * Utility Functions
 ******************/
 template <typename T>
-T getOrDefault(const YAML::Node& node, const std::string& key, const T& defaultValue) {
-    if (node[key]) {
-        return node[key].as<T>();
-    }
-    return defaultValue;
-}
+T getOrDefault(const YAML::Node& node, const std::string& key, const T& defaultValue);
 
 /*************
  * APP INFO
