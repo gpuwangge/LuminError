@@ -6,7 +6,7 @@
 #include "context.h"
 #include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
-#include "renderProcess.h"
+//#include "renderProcess.h"
 #include "texture.h" //this includes imageManager.h
 #include "modelManager.h"
 #include "object.h"
@@ -62,7 +62,7 @@ namespace LEApplication{
         //bool needWindow = false;
 
         CSwapchain swapchain;
-        CRenderProcess renderProcess;
+        //CRenderProcess renderProcess;
         CShaderManager shaderManager;
         CGraphicsDescriptorManager graphicsDescriptorManager;
         CComputeDescriptorManager computeDescriptorManager;

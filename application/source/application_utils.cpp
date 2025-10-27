@@ -90,7 +90,8 @@ void Application::CleanUp(){
     //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;
     swapchain.CleanUp();
     //std::cout<<"Application: renderProcess.CleanUp()"<<std::endl;
-    renderProcess.Cleanup();
+    //renderProcess.Cleanup();
+    instance_renderercore->RenderProcessCleanup();
 
     //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
     graphicsDescriptorManager.DestroyAndFree();
@@ -281,7 +282,7 @@ void Application::EnableComputeSwapChainImage(bool enable) { swapchain.bComputeS
 void Application::DeviceWaitIdle() { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
 
 void Application::PushConstantToCommand(void* pcData, int pipelineId) {
-    instance_renderercore->PushConstantToCommand(pcData, renderProcess.graphicsPipelineLayouts[pipelineId], shaderManager.pushConstantRange);
+    instance_renderercore->PushConstantToCommand(pcData, instance_renderercore->GetGraphicsPipelineLayout(pipelineId), shaderManager.pushConstantRange);
 }
 void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
     vkCmdSetDepthBias(instance_renderercore->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
@@ -302,7 +303,7 @@ void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numW
         //    throw std::runtime_error("failed to begin recording command buffer!");
         //}
         //renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-        instance_renderercore->StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+        instance_renderercore->StartRecordComputeCommandBuffer(instance_renderercore->GetComputePipeline(), instance_renderercore->GetComputePipelineLayout());
 
         instance_renderercore->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
             VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL

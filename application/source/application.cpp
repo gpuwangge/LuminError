@@ -32,7 +32,6 @@ void Application::Run(std::string exampleName){ //Entrance Function
     LoadModuleAndInstance(handle_module_renderercore, pVoid, "renderercore.dll");
     instance_renderercore = static_cast<LERenderer::IRendererCore*>(pVoid);
     instance_renderercore->SetApplication(this);
-    instance_renderercore->greet();
 
     CContext::Init();
     instance_game->PreInitialize();
@@ -168,9 +167,9 @@ void Application::Record_Present(){
             vkResetCommandBuffer(instance_renderercore->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
             instance_renderercore->StartRecordGraphicsCommandBuffer(
-                renderProcess.renderPass_mainscene, 
+                instance_renderercore->GetRenderpass_mainscene(),
                 swapchain.framebuffers_mainscene,swapchain.swapChainExtent, 
-                renderProcess.clearValues);
+                instance_renderercore->GetClearValues());
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             instance_renderercore->EndRecordGraphicsCommandBuffer();
 
@@ -191,7 +190,7 @@ void Application::Record_Present(){
 
             for(int i = 0; i < swapchain.framebuffers_shadowmap.size(); i++){
                 //std::cout<<"Application: Begin Shadowmap"<<i<<" Render Pass."<<std::endl;
-                instance_renderercore->BeginRenderPass(renderProcess.renderPass_shadowmap, swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, renderProcess.clearValues_shadowmap, true);
+                instance_renderercore->BeginRenderPass(instance_renderercore->GetRenderpass_shadowmap(), swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, instance_renderercore->GetClearValues_shadowmap(), true);
                 instance_renderercore->SetViewport(swapchain.swapChainExtent);
                 instance_renderercore->SetScissor(swapchain.swapChainExtent);
                 //RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
@@ -201,7 +200,7 @@ void Application::Record_Present(){
             }
 
             //std::cout<<"Application: Begin Mainscene Render Pass."<<std::endl;
-            instance_renderercore->BeginRenderPass(renderProcess.renderPass_mainscene, swapchain.framebuffers_mainscene, swapchain.swapChainExtent, renderProcess.clearValues, false);
+            instance_renderercore->BeginRenderPass(instance_renderercore->GetRenderpass_mainscene(), swapchain.framebuffers_mainscene, swapchain.swapChainExtent, instance_renderercore->GetClearValues(), false);
             instance_renderercore->SetViewport(swapchain.swapChainExtent);
             instance_renderercore->SetScissor(swapchain.swapChainExtent);
             RecordGraphicsCommandBuffer_RenderpassMainscene();
@@ -226,7 +225,7 @@ void Application::Record_Present(){
             vkResetCommandBuffer(instance_renderercore->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             //std::cout<<"Application: vkResetCommandBuffer"<<std::endl;
 
-            instance_renderercore->StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+            instance_renderercore->StartRecordComputeCommandBuffer(instance_renderercore->GetComputePipeline(), instance_renderercore->GetComputePipelineLayout());
             instance_game->RecordComputeCommandBuffer();
             instance_renderercore->EndRecordComputeCommandBuffer();
             //std::cout<<"Application: recordComputeCommandBuffer()"<<std::endl;
@@ -265,14 +264,14 @@ void Application::Record_Present(){
             vkResetCommandBuffer(instance_renderercore->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             vkResetCommandBuffer(instance_renderercore->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             
-            instance_renderercore->StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+            instance_renderercore->StartRecordComputeCommandBuffer(instance_renderercore->GetComputePipeline(), instance_renderercore->GetComputePipelineLayout());
             instance_game->RecordComputeCommandBuffer();
             instance_renderercore->EndRecordComputeCommandBuffer();
 
             instance_renderercore->StartRecordGraphicsCommandBuffer(
-                renderProcess.renderPass_mainscene,
+                instance_renderercore->GetRenderpass_mainscene(),
                 swapchain.framebuffers_mainscene, swapchain.swapChainExtent,
-                renderProcess.clearValues);
+                instance_renderercore->GetClearValues());
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             instance_renderercore->EndRecordGraphicsCommandBuffer();
             
@@ -289,7 +288,7 @@ void Application::Record_Present(){
 void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     dsSets.push_back(computeDescriptorManager.descriptorSets);
-    instance_renderercore->BindComputeDescriptorSets(renderProcess.computePipelineLayout, dsSets);
+    instance_renderercore->BindComputeDescriptorSets(instance_renderercore->GetComputePipelineLayout(), dsSets);
     instance_renderercore->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 }
 

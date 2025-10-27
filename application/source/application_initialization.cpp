@@ -13,7 +13,7 @@ void Application::Initialize(){
     if(appInfo->Feature.b_feature_graphics_push_constant)
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     if(appInfo->Feature.b_feature_graphics_global_blend)
-        renderProcess.addColorBlendAttachment(
+        instance_renderercore->AddColorBlendAttachment(
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO);        
 
@@ -111,40 +111,42 @@ void Application::Initialize(){
     /****************************
     * 5 Initialize attachments
     ****************************/
-    renderProcess.iShadowmapAttachmentDepthLight = appInfo->Attachment.bShadowmapAttachmentDepthLight ? 0 : -1; //shadowmap renderpass attachment depth light, only one attachment, so id is 0
+    //renderProcess.iShadowmapAttachmentDepthLight = appInfo->Attachment.bShadowmapAttachmentDepthLight ? 0 : -1; //shadowmap renderpass attachment depth light, only one attachment, so id is 0
+    instance_renderercore->SetShadowmapAttachmentDepthLight(appInfo->Attachment.bShadowmapAttachmentDepthLight ? 0 : -1);
 
     int AttachmentCount = 0;
-    renderProcess.iMainSceneAttachmentDepthLight = appInfo->Attachment.bMainSceneAttachmentDepthLight ? AttachmentCount++ : -1;
-    renderProcess.iMainSceneAttachmentDepthCamera = appInfo->Attachment.bMainSceneAttachmentDepthCamera ? AttachmentCount++ : -1;
-    renderProcess.iMainSceneAttachmentColorResovle = appInfo->Attachment.bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1;
-    renderProcess.iMainSceneAttachmentColorPresent = appInfo->Attachment.bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1;
+    instance_renderercore->SetMainSceneAttachmentDepthLight(appInfo->Attachment.bMainSceneAttachmentDepthLight ? AttachmentCount++ : -1);
+    instance_renderercore->SetMainSceneAttachmentDepthCamera(appInfo->Attachment.bMainSceneAttachmentDepthCamera ? AttachmentCount++ : -1);
+    instance_renderercore->SetMainSceneAttachmentColorResovle(appInfo->Attachment.bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1);
+    instance_renderercore->SetMainSceneAttachmentColorPresent(appInfo->Attachment.bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1);
 
-    swapchain.iShadowmapAttachmentDepthLight = renderProcess.iShadowmapAttachmentDepthLight;
-    swapchain.iMainSceneAttachmentDepthLight = renderProcess.iMainSceneAttachmentDepthLight;
-    swapchain.iMainSceneAttachmentDepthCamera = renderProcess.iMainSceneAttachmentDepthCamera;
-    swapchain.iMainSceneAttachmentColorResovle = renderProcess.iMainSceneAttachmentColorResovle;
-    swapchain.iMainSceneAttachmentColorPresent = renderProcess.iMainSceneAttachmentColorPresent;
+
+    swapchain.iShadowmapAttachmentDepthLight = instance_renderercore->GetShadowmapAttachmentDepthLight();
+    swapchain.iMainSceneAttachmentDepthLight = instance_renderercore->GetMainSceneAttachmentDepthLight();
+    swapchain.iMainSceneAttachmentDepthCamera = instance_renderercore->GetMainSceneAttachmentDepthCamera();
+    swapchain.iMainSceneAttachmentColorResovle = instance_renderercore->GetMainSceneAttachmentColorResovle();
+    swapchain.iMainSceneAttachmentColorPresent = instance_renderercore->GetMainSceneAttachmentColorPresent();
 
     //when creating attachment resource, need 1.create attachment description in renderProcess; 2.create attachment buffer in swapchain
     if(swapchain.iMainSceneAttachmentColorResovle >= 0) swapchain.GetMaxUsableSampleCount(); //calcuate max sampler count first
 
     if(swapchain.iShadowmapAttachmentDepthLight >= 0){ //if shadowmap renderpass attachment depth light is enabled
         swapchain.create_attachment_resource_depthlight(VK_SAMPLE_COUNT_1_BIT); //hardware bias todo
-        renderProcess.create_attachmentdescription_shadowmap_depthlight(swapchain.depthFormat); 
+        instance_renderercore->Create_attachmentdescription_shadowmap_depthlight(swapchain.depthFormat);
     }else if(swapchain.iMainSceneAttachmentDepthLight >= 0){
         swapchain.create_attachment_resource_depthlight(swapchain.msaaSamples);
-        renderProcess.create_attachmentdescription_mainscene_depthlight(swapchain.depthFormat, swapchain.msaaSamples);
+        instance_renderercore->Create_attachmentdescription_mainscene_depthlight(swapchain.depthFormat, swapchain.msaaSamples);
     }
     if(swapchain.iMainSceneAttachmentDepthCamera >= 0){//If enable MSAA, must also enable Depth Test
         swapchain.create_attachment_resource_depthcamera();
-        renderProcess.create_attachmentdescription_mainscene_depthcamera(swapchain.depthFormat, swapchain.msaaSamples);
+        instance_renderercore->Create_attachmentdescription_mainscene_depthcamera(swapchain.depthFormat, swapchain.msaaSamples);
     }
     if(swapchain.iMainSceneAttachmentColorResovle >= 0){
         swapchain.create_attachment_resource_colorresolve();
-        renderProcess.create_attachmentdescription_mainscene_colorresolve(swapchain.swapChainImageFormat, swapchain.msaaSamples, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        instance_renderercore->Create_attachmentdescription_mainscene_colorresolve(swapchain.swapChainImageFormat, swapchain.msaaSamples, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     }
     if(swapchain.iMainSceneAttachmentColorPresent >= 0) //dont need create swapchain attachment resource here
-        renderProcess.create_attachmentdescription_mainscene_colorpresent(swapchain.swapChainImageFormat);
+        instance_renderercore->Create_attachmentdescription_mainscene_colorpresent(swapchain.swapChainImageFormat);
 
     TimePoint T4 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for attachements", T3, T4);
@@ -153,30 +155,29 @@ void Application::Initialize(){
     /****************************
     * 6 Initialize Subpasses
     ****************************/
-    renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = appInfo->Subpass.bEnableShadowmapRenderpassSubpassShadowmap;
-    renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = appInfo->Subpass.bEnableMainSceneRenderpassSubpassShadowmap;
-    renderProcess.bEnableMainSceneRenderpassSubpassDraw = appInfo->Subpass.bEnableMainSceneRenderpassSubpassDraw;
-    renderProcess.bEnableMainSceneRenderpassSubpassObserve = appInfo->Subpass.bEnableMainSceneRenderpassSubpassObserve;
-
+    instance_renderercore->SetEnableShadowmapRenderpassSubpassShadowmap(appInfo->Subpass.bEnableShadowmapRenderpassSubpassShadowmap);
+    instance_renderercore->SetEnableMainSceneRenderpassSubpassShadowmap(appInfo->Subpass.bEnableMainSceneRenderpassSubpassShadowmap);
+    instance_renderercore->SetEnableMainSceneRenderpassSubpassDraw(appInfo->Subpass.bEnableMainSceneRenderpassSubpassDraw);
+    instance_renderercore->SetEnableMainSceneRenderpassSubpassObserve(appInfo->Subpass.bEnableMainSceneRenderpassSubpassObserve);
     //for shadowmap renderpass (this renderpass is optional)
-    if(renderProcess.bEnableShadowmapRenderpassSubpassShadowmap){
+    //if(renderProcess.bEnableShadowmapRenderpassSubpassShadowmap){
+    if(instance_renderercore->GetEnableShadowmapRenderpassSubpassShadowmap()){
         // std::cout<<"Application: Create Shadowmap Render Pass."<<std::endl;
-        renderProcess.createSubpass_shadowmap();
-        renderProcess.createDependency_shadowmap();
-        renderProcess.createRenderPass_shadowmap();
+        instance_renderercore->CreateSubpass_shadowmap();
+        instance_renderercore->CreateDependency_shadowmap();
+        instance_renderercore->CreateRenderPass_shadowmap();
 
         // std::cout<<"Application: Create Shadowmap Framebuffer."<<std::endl;
         for(int i = 0; i < swapchain.framebuffers_shadowmap.size(); i++)
-            swapchain.CreateFramebuffer_shadowmap(renderProcess.renderPass_shadowmap, i);
+            swapchain.CreateFramebuffer_shadowmap(instance_renderercore->GetRenderpass_shadowmap(), i);
     }
-
+    
     //for mainscene renderpass (this renderpass is mandatory)
-    renderProcess.createSubpass_mainscene(appInfo->Feature.feature_graphics_observe_attachment_id);
-    renderProcess.createDependency_mainscene();
-    renderProcess.createRenderPass_mainscene();
-
+    instance_renderercore->CreateSubpass_mainscene(appInfo->Feature.feature_graphics_observe_attachment_id);
+    instance_renderercore->CreateDependency_mainscene();
+    instance_renderercore->CreateRenderPass_mainscene();
     //create framebuffer
-    swapchain.CreateFramebuffer_mainscene(renderProcess.renderPass_mainscene);
+    swapchain.CreateFramebuffer_mainscene(instance_renderercore->GetRenderpass_mainscene());
 
     TimePoint T5 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for reading subpasses", T4, T5);
@@ -330,7 +331,7 @@ void Application::Initialize(){
     /****************************
     * 9 Create Pipelines
     ****************************/
-    bool bPipelineVerbose = false;
+    bool bPipelineVerbose = bVerboseInitialization;
 
     /****************************
     * 9.1 Command Buffer
@@ -390,10 +391,10 @@ void Application::Initialize(){
             //! All graphics pipelines use the same dsLayouts
             if(shaderManager.bEnablePushConstant){
                 if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create Push Constant Layout"<<std::endl;
-                renderProcess.createGraphicsPipelineLayout(dsLayouts,  shaderManager.pushConstantRange, true, i);
+                instance_renderercore->CreateGraphicsPipelineLayout(dsLayouts,  shaderManager.pushConstantRange, true, i);
                 if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Push Constant Layout"<<std::endl;
             }
-            else renderProcess.createGraphicsPipelineLayout(dsLayouts, i);
+            else instance_renderercore->CreateGraphicsPipelineLayout(dsLayouts, i);
 
             
             //int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
@@ -402,38 +403,38 @@ void Application::Initialize(){
 
             switch(vertexDatatype){
                 case VertexStructureTypes::NoType:
-                    renderProcess.createGraphicsPipeline(NULL, NULL,
+                    instance_renderercore->CreateGraphicsPipeline(NULL, NULL,
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], false, false, 
-                        renderProcess.renderPass_mainscene, i, appInfo);
+                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
                     //if((*appInfo->RenderPassShadowmap)[i]) {
                     if(appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap) {
-                        renderProcess.createGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
+                        instance_renderercore->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                            renderProcess.renderPass_shadowmap, i, appInfo); 
+                            instance_renderercore->GetRenderpass_shadowmap(), i, appInfo); 
                     }else{
-                        renderProcess.createGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
+                        instance_renderercore->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                            renderProcess.renderPass_mainscene, i, appInfo);
+                            instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
                     //std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
-                    renderProcess.createGraphicsPipeline(Vertex2D::getBindingDescription, Vertex2D::getAttributeDescriptions, 
+                    instance_renderercore->CreateGraphicsPipeline(Vertex2D::getBindingDescription, Vertex2D::getAttributeDescriptions, 
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                        renderProcess.renderPass_mainscene, i, appInfo);
+                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::ParticleType:
-                    renderProcess.createGraphicsPipeline(Particle::getBindingDescription, Particle::getAttributeDescriptions, 
+                    instance_renderercore->CreateGraphicsPipeline(Particle::getBindingDescription, Particle::getAttributeDescriptions, 
                         VK_PRIMITIVE_TOPOLOGY_POINT_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                        renderProcess.renderPass_mainscene, i, appInfo);
+                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::TextQuad:
-                    renderProcess.createGraphicsPipeline(NULL, NULL, //TextQuadVertex::getBindingDescription, TextQuadVertex::getAttributeDescriptions, 
+                    instance_renderercore->CreateGraphicsPipeline(NULL, NULL, //TextQuadVertex::getBindingDescription, TextQuadVertex::getAttributeDescriptions, 
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, true, 
-                        renderProcess.renderPass_mainscene, i, appInfo);
+                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 default:
                 break;
@@ -444,8 +445,8 @@ void Application::Initialize(){
     }
     if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
-        renderProcess.createComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
-        renderProcess.createComputePipeline(shaderManager.compShaderModules[0]);
+        instance_renderercore->CreateComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
+        instance_renderercore->CreateComputePipeline(shaderManager.compShaderModules[0]);
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 

@@ -89,9 +89,11 @@ void CTextbox::Draw(){
     if(p_controlNode != NULL && !p_controlNode->bVisible) return;
 
     //std::cout<<"Drawing TextBox ID: "<<m_textBoxID<<", text: "<<m_text_content<<std::endl;
-    VkPipelineLayout *p_graphicsPipelineLayout = &(p_renderProcess->graphicsPipelineLayouts[m_default_graphics_pipeline_id]);
+    //VkPipelineLayout *p_graphicsPipelineLayout = &(p_renderProcess->graphicsPipelineLayouts[m_default_graphics_pipeline_id]);
+    VkPipelineLayout *p_graphicsPipelineLayout = &(instance_renderercore->GetGraphicsPipelineLayout(m_default_graphics_pipeline_id));
     //p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[m_default_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
-    instance_renderercore->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[m_default_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
+    //instance_renderercore->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[m_default_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
+    instance_renderercore->BindGraphicsPipeline(instance_renderercore->GetGraphicsPipeline(m_default_graphics_pipeline_id), VK_PIPELINE_BIND_POINT_GRAPHICS);
 
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", instanceCount: "<<m_instanceCount<<std::endl;
 
@@ -144,7 +146,7 @@ void CTextbox::Register(LEApplication::Application *p_app){
     //ch.SetInstanceCount(m_instanceCount);
     //p_renderer = &(p_app->renderer);
     instance_renderercore = p_app->instance_renderercore;
-    p_renderProcess = &(p_app->renderProcess);
+    //p_renderProcess = &(p_app->renderProcess);
     p_descriptorSets_graphics_general = &(p_app->graphicsDescriptorManager.descriptorSets_general);
     //ch.descriptorSets_graphics_texture_image_sampler;
     p_textImageManager = &(p_app->textImageManager);

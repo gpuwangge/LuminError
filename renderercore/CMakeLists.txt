@@ -13,7 +13,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     include
     $ENV{INCLUDE} #for glm
     $ENV{VULKAN_SDK}/Include
-    #${CMAKE_SOURCE_DIR}/external #for yaml-cpp/ headers
+    ${CMAKE_SOURCE_DIR}/external #for yaml headers
 )
 
 target_link_directories(${PROJECT_NAME} PRIVATE

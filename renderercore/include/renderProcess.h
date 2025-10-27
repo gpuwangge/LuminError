@@ -1,7 +1,6 @@
-#ifndef H_RENDERPROCESS
-#define H_RENDERPROCESS
+#pragma once
 
-#include "context.h"
+//#include "context.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeText.h"
@@ -10,7 +9,14 @@
 //renderProcess constains all attachment descriptions
 //when creating renderPass, it will use these attachment descriptions (as well as subpasses and dependencies) 
 
+namespace LEApplication{
+    class IApplication;
+}
+
 class AppInfo;
+
+
+namespace LERenderer{
 
 class CRenderProcess final{
 public:
@@ -18,6 +24,8 @@ public:
     ~CRenderProcess(){};
 
     void Cleanup();
+
+    LEApplication::IApplication* game;
 
     /**************************
     * Attachments(Description) 
@@ -130,7 +138,6 @@ public:
     std::vector<VkPipeline> graphicsPipelines;  
     
     void createComputePipeline(VkShaderModule &computeShaderModule);
-
     using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
     using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
     void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
@@ -140,4 +147,4 @@ public:
 };
 
 
-#endif
+}//namespace

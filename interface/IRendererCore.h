@@ -9,15 +9,14 @@ namespace LEApplication{
     class IApplication;
 }
 
-//class AppInfo;
+class AppInfo;
 
 namespace LERenderer{
     class IRendererCore {
     public:
         virtual ~IRendererCore() = default;
         LEApplication::IApplication* game;
-        void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
-        void greet() {std::cout<<"rendere greet!"<<std::endl;}
+        virtual void SetApplication(LEApplication::IApplication* pApplication) = 0;
 
         virtual void SetRenderMode(int value) = 0;
         virtual int GetRenderMode() = 0;
@@ -89,6 +88,78 @@ namespace LERenderer{
 
         virtual void Destroy() = 0;
         //AppInfo& GetAppInfo() { return appInfo; }
+
+        //RenderProcess related(for attachement and subpass)
+        virtual void SetShadowmapAttachmentDepthLight(int value) = 0;
+        virtual void SetMainSceneAttachmentDepthLight(int value) = 0;
+        virtual void SetMainSceneAttachmentDepthCamera(int value) = 0;
+        virtual void SetMainSceneAttachmentColorResovle(int value) = 0;
+        virtual void SetMainSceneAttachmentColorPresent(int value) = 0;
+        virtual int GetShadowmapAttachmentDepthLight() = 0;
+        virtual int GetMainSceneAttachmentDepthLight() = 0;
+        virtual int GetMainSceneAttachmentDepthCamera() = 0;
+        virtual int GetMainSceneAttachmentColorResovle() = 0;
+        virtual int GetMainSceneAttachmentColorPresent() = 0;
+
+        virtual void Create_attachmentdescription_shadowmap_depthlight(VkFormat depthFormat) = 0;
+        virtual void Create_attachmentdescription_mainscene_depthlight(VkFormat depthFormat, VkSampleCountFlagBits msaaSamples) = 0;
+        virtual void Create_attachmentdescription_mainscene_depthcamera(VkFormat depthFormat, VkSampleCountFlagBits msaaSamples) = 0;
+        virtual void Create_attachmentdescription_mainscene_colorresolve(VkFormat swapChainImageFormat,VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) = 0;
+        virtual void Create_attachmentdescription_mainscene_colorpresent(VkFormat swapChainImageFormat) = 0;
+
+        virtual void SetEnableShadowmapRenderpassSubpassShadowmap(bool value) = 0;
+        virtual void SetEnableMainSceneRenderpassSubpassShadowmap(bool value) = 0;
+        virtual void SetEnableMainSceneRenderpassSubpassDraw(bool value) = 0;
+        virtual void SetEnableMainSceneRenderpassSubpassObserve(bool value) = 0;
+        virtual bool GetEnableShadowmapRenderpassSubpassShadowmap() = 0;
+        virtual bool GetEnableMainSceneRenderpassSubpassShadowmap() = 0;
+        virtual bool GetEnableMainSceneRenderpassSubpassDraw() = 0;
+        virtual bool GetEnableMainSceneRenderpassSubpassObserve() = 0;
+
+        virtual void CreateSubpass_shadowmap() = 0;
+        virtual void CreateSubpass_mainscene(int attachment_id_to_observe) = 0;
+        virtual void CreateSubpass_mainscene_lightdepth() = 0;
+        virtual void CreateSubpass_mainscene_draw() = 0;
+        virtual void CreateSubpass_mainscene_observe(int attachment_id_to_observe) = 0;
+
+        virtual void CreateDependency_shadowmap() = 0;
+        virtual void CreateDependency_mainscene() = 0;
+        
+        virtual void CreateRenderPass_shadowmap() = 0;
+        virtual void CreateRenderPass_mainscene() = 0;
+
+        virtual VkRenderPass& GetRenderpass_shadowmap() = 0;
+        virtual VkRenderPass& GetRenderpass_mainscene() = 0;
+
+        virtual void CreateComputePipelineLayout(VkDescriptorSetLayout &descriptorSetLayout) = 0;
+        virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id) = 0;
+        virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id) = 0;
+        virtual void CreateComputePipeline(VkShaderModule &computeShaderModule) = 0;
+        using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
+        using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
+        virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
+            VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
+            VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo) = 0;
+
+        virtual void AddColorBlendAttachment(VkBlendOp colorBlendOp, VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, 
+								 VkBlendOp alphaBlendOp, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor) = 0;
+
+        virtual VkPipelineLayout& GetComputePipelineLayout() = 0;
+        virtual VkPipeline& GetComputePipeline() = 0;
+
+        virtual VkPipelineLayout& GetGraphicsPipelineLayout(int pipelineId) = 0;
+        virtual VkPipeline& GetGraphicsPipeline(int pipelineId) = 0;
+        virtual std::vector<VkPipelineLayout> GetGraphicsPipelineLayouts() = 0;
+        virtual std::vector<VkPipeline> GetGraphicsPipelines() = 0;
+
+        virtual std::vector<VkClearValue>& GetClearValues() = 0;
+        virtual std::vector<VkClearValue>& GetClearValues_shadowmap() = 0;
+
+
+        virtual void RenderProcessCleanup() = 0;
+
+
+
     protected:
         //AppInfo appInfo;
     };

@@ -1,10 +1,10 @@
 #pragma once
 #include "IRendererCore.h"
-
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeBuffer.h"
 #include "Enum.h"
+#include "renderProcess.h"
 
 namespace LERenderer{
     class RendererCore final : public IRendererCore{
@@ -134,6 +134,90 @@ namespace LERenderer{
         std::vector<VkSemaphore> computeFinishedSemaphores;
         std::vector<VkFence> computeInFlightFences;
 
+        /**************************
+         * RenderProcess
+         * ***********************/
+        CRenderProcess renderProcess;
+        void SetApplication(LEApplication::IApplication* pApplication) override {
+            game = pApplication;
+            renderProcess.game = game; 
+        }
+
+        void SetShadowmapAttachmentDepthLight(int value) override { renderProcess.iShadowmapAttachmentDepthLight = value; }
+        void SetMainSceneAttachmentDepthLight(int value) override { renderProcess.iMainSceneAttachmentDepthLight = value; }
+        void SetMainSceneAttachmentDepthCamera(int value) override { renderProcess.iMainSceneAttachmentDepthCamera = value; }
+        void SetMainSceneAttachmentColorResovle(int value) override { renderProcess.iMainSceneAttachmentColorResovle = value; }
+        void SetMainSceneAttachmentColorPresent(int value) override { renderProcess.iMainSceneAttachmentColorPresent = value; }
+        int GetShadowmapAttachmentDepthLight() override { return renderProcess.iShadowmapAttachmentDepthLight; }
+        int GetMainSceneAttachmentDepthLight() override { return renderProcess.iMainSceneAttachmentDepthLight; }
+        int GetMainSceneAttachmentDepthCamera() override { return renderProcess.iMainSceneAttachmentDepthCamera; }
+        int GetMainSceneAttachmentColorResovle() override { return renderProcess.iMainSceneAttachmentColorResovle; }
+        int GetMainSceneAttachmentColorPresent() override { return renderProcess.iMainSceneAttachmentColorPresent; }
+
+        void Create_attachmentdescription_shadowmap_depthlight(VkFormat depthFormat) override { renderProcess.create_attachmentdescription_shadowmap_depthlight(depthFormat); }
+        void Create_attachmentdescription_mainscene_depthlight(VkFormat depthFormat, VkSampleCountFlagBits msaaSamples) override { renderProcess.create_attachmentdescription_mainscene_depthlight(depthFormat, msaaSamples); }
+        void Create_attachmentdescription_mainscene_depthcamera(VkFormat depthFormat, VkSampleCountFlagBits msaaSamples) override { renderProcess.create_attachmentdescription_mainscene_depthcamera(depthFormat, msaaSamples); }
+        void Create_attachmentdescription_mainscene_colorresolve(VkFormat swapChainImageFormat,VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) override { 
+            renderProcess.create_attachmentdescription_mainscene_colorresolve(swapChainImageFormat, msaaSamples, imageLayout); }
+        void Create_attachmentdescription_mainscene_colorpresent(VkFormat swapChainImageFormat) override { renderProcess.create_attachmentdescription_mainscene_colorpresent(swapChainImageFormat); }
+
+        void SetEnableShadowmapRenderpassSubpassShadowmap(bool value) override { renderProcess.bEnableShadowmapRenderpassSubpassShadowmap = value; }
+        void SetEnableMainSceneRenderpassSubpassShadowmap(bool value) override { renderProcess.bEnableMainSceneRenderpassSubpassShadowmap = value; }
+        void SetEnableMainSceneRenderpassSubpassDraw(bool value) override { renderProcess.bEnableMainSceneRenderpassSubpassDraw = value; }
+        void SetEnableMainSceneRenderpassSubpassObserve(bool value) override { renderProcess.bEnableMainSceneRenderpassSubpassObserve = value; }
+        bool GetEnableShadowmapRenderpassSubpassShadowmap() override { return renderProcess.bEnableShadowmapRenderpassSubpassShadowmap; }
+        bool GetEnableMainSceneRenderpassSubpassShadowmap() override { return renderProcess.bEnableMainSceneRenderpassSubpassShadowmap; }
+        bool GetEnableMainSceneRenderpassSubpassDraw() override { return renderProcess.bEnableMainSceneRenderpassSubpassDraw; }
+        bool GetEnableMainSceneRenderpassSubpassObserve() override { return renderProcess.bEnableMainSceneRenderpassSubpassObserve; }
+
+        void CreateSubpass_shadowmap() override { renderProcess.createSubpass_shadowmap(); }
+        void CreateSubpass_mainscene(int attachment_id_to_observe) override { renderProcess.createSubpass_mainscene(attachment_id_to_observe); }
+        void CreateSubpass_mainscene_lightdepth() override { renderProcess.createSubpass_mainscene_lightdepth(); }
+        void CreateSubpass_mainscene_draw() override { renderProcess.createSubpass_mainscene_draw(); }
+        void CreateSubpass_mainscene_observe(int attachment_id_to_observe) override { renderProcess.createSubpass_mainscene_observe(attachment_id_to_observe); }
+
+        void CreateDependency_shadowmap() override { renderProcess.createDependency_shadowmap(); }
+        void CreateDependency_mainscene() override { renderProcess.createDependency_mainscene(); }
+        
+        void CreateRenderPass_shadowmap() override { renderProcess.createRenderPass_shadowmap(); }
+        void CreateRenderPass_mainscene() override { renderProcess.createRenderPass_mainscene(); }
+
+        VkRenderPass& GetRenderpass_shadowmap() override { return renderProcess.renderPass_shadowmap; }
+        VkRenderPass& GetRenderpass_mainscene() override { return renderProcess.renderPass_mainscene; }
+
+        void CreateComputePipelineLayout(VkDescriptorSetLayout &descriptorSetLayout) override { renderProcess.createComputePipelineLayout(descriptorSetLayout); }
+        void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id) override { renderProcess.createGraphicsPipelineLayout(descriptorSetLayouts, graphicsPipelineLayout_id); }
+        void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id) override {
+            renderProcess.createGraphicsPipelineLayout(descriptorSetLayouts, pushConstantRange, bUsePushConstant, graphicsPipelineLayout_id);
+        }
+        void CreateComputePipeline(VkShaderModule &computeShaderModule) override { renderProcess.createComputePipeline(computeShaderModule); }
+        using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
+        using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
+        void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
+            VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
+            VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo) override{
+                renderProcess.createGraphicsPipeline(getBindingDesc, getAttributeDesc, topology, vertShaderModule, fragShaderModule, bUseVertexBuffer, bUseInstanceBuffer, renderPass, graphcisPipeline_id, appInfo);
+            }
+        
+        void AddColorBlendAttachment(VkBlendOp colorBlendOp, VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, 
+								 VkBlendOp alphaBlendOp, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor) override {
+            renderProcess.addColorBlendAttachment(colorBlendOp, srcColorBlendFactor, dstColorBlendFactor,
+                                                alphaBlendOp, srcAlphaBlendFactor, dstAlphaBlendFactor);
+        }
+
+        VkPipelineLayout& GetComputePipelineLayout() override { return renderProcess.computePipelineLayout; }
+        VkPipeline& GetComputePipeline() override { return renderProcess.computePipeline; }
+        
+        VkPipelineLayout& GetGraphicsPipelineLayout(int pipelineId) override { return renderProcess.graphicsPipelineLayouts[pipelineId]; }
+        VkPipeline& GetGraphicsPipeline(int pipelineId) override { return renderProcess.graphicsPipelines[pipelineId]; }
+        std::vector<VkPipelineLayout> GetGraphicsPipelineLayouts() override { return renderProcess.graphicsPipelineLayouts; }
+        std::vector<VkPipeline> GetGraphicsPipelines() override { return renderProcess.graphicsPipelines; }
+
+        std::vector<VkClearValue>& GetClearValues() override { return renderProcess.clearValues; }
+        std::vector<VkClearValue>& GetClearValues_shadowmap() override { return renderProcess.clearValues_shadowmap; }
+
+
+        void RenderProcessCleanup() { renderProcess.Cleanup(); }
     private:
         //YAML::Node yamlNode;
     };

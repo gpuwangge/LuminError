@@ -3,7 +3,7 @@
 
 #include "graphicsDescriptor.h"
 #include "entity.h"
-#include "renderProcess.h"
+//#include "renderProcess.h"
 #include "camera.hpp"
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -29,7 +29,7 @@ class CObject : public CEntity {
     //CRenderer *p_renderer;
     LERenderer::IRendererCore *instance_renderercore = NULL;
 
-    CRenderProcess *p_renderProcess;
+    //CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
     //VkPipelineLayout *p_graphicsPipelineLayout;
     CTextureManager *p_textureManager;
