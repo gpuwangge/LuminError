@@ -1,5 +1,4 @@
 #pragma once
-//#include "TypeAppInfo.h"
 #include <iostream>
 #include <vulkan/vulkan.h>
 #include <vector>

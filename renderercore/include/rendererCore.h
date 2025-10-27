@@ -11,7 +11,6 @@ namespace LERenderer{
     public:
         RendererCore(){}
         ~RendererCore(){}
-        //void ReadYAMLFile() override;
 
         //Expose to application
         void SetRenderMode(int value) override { m_renderMode = (RenderModes)value; }
@@ -218,8 +217,7 @@ namespace LERenderer{
 
 
         void RenderProcessCleanup() { renderProcess.Cleanup(); }
-    private:
-        //YAML::Node yamlNode;
+
     };
     EXPORT_FACTORY_FOR(RendererCore);
 }

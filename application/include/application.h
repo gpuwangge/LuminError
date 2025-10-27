@@ -6,7 +6,6 @@
 #include "context.h"
 #include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
-//#include "renderProcess.h"
 #include "texture.h" //this includes imageManager.h
 #include "modelManager.h"
 #include "object.h"

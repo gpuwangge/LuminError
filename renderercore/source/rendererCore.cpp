@@ -1,8 +1,6 @@
 #include "rendererCore.h"
 #include <iostream>
-#include "../../application/include/context.h"
-#include "IApplication.h"
-//#include <vulkan/vulkan.h>
+#include "IApplication.h" //context
 
 namespace LERenderer{
 

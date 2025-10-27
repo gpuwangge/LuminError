@@ -1,6 +1,4 @@
 #pragma once
-
-//#include "context.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeText.h"

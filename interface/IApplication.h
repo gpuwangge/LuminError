@@ -125,8 +125,7 @@ namespace LEApplication{
         //Expose functions for Example(SimpleVertexBuffer) to use
         virtual void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) = 0;
 
-        //Expose for renderer core
-        //virtual VkPhysicalDevice GetPhysicalDevice();
+        //Expose for renderer core to get context
         virtual QueueFamilyIndices GetQueueFamilyIndices() = 0;
         virtual VkDevice GetLogicalDevice() = 0;
         virtual VkPhysicalDevice GetPhysicalDevice() = 0;
