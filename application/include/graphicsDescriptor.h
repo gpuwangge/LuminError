@@ -8,8 +8,6 @@
 #include "TypeLight.h"
 
 class CWxjBuffer;
-class CWxjImageBuffer;
-class LightingUniformBufferObject;
 
 class CGraphicsDescriptorManager{
 public:
