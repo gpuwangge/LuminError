@@ -2,7 +2,7 @@
 #include "IRendererCore.h"
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "TypeBuffer.h"
+#include "TypeDataBuffer.h"
 #include "Enum.h"
 #include "renderProcess.h"
 

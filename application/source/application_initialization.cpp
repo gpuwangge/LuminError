@@ -63,6 +63,8 @@ void Application::Initialize(){
 
     CGraphicsDescriptorManager::m_lightingUBO.lightNum = lights.size(); //update light number to ubo
 
+    swapchain.SetDevice();
+    
     TimePoint T2 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for object/textbox/light", T1, T2);
 
@@ -187,6 +189,7 @@ void Application::Initialize(){
     * When creating texture resource, need uniform information, so must read uniforms before read resources
     ****************************/
     if( appInfo->Font.font_size > 0){
+        //std::cout<<"textManager"<<std::endl;
         textManager.SetFontSize(appInfo->Font.font_size);
         textManager.SetSamplerID(appInfo->Font.font_samplerid);
         textManager.SetOutlineColor(glm::vec4(appInfo->Font.font_outlineColor[0], appInfo->Font.font_outlineColor[1], appInfo->Font.font_outlineColor[2], appInfo->Font.font_outlineColor[3]));
@@ -263,6 +266,7 @@ void Application::Initialize(){
 
     if(appInfo->Textures.size() > 0){
         for(int i = 0; i < appInfo->Textures.size(); i++){
+            //std::cout<<"test Textures:"<<i<<std::endl;
             std::string textureName = appInfo->Textures[i].texture_name;
             int textureMipLevel = appInfo->Textures[i].texture_miplevel;
             bool textureEnableCubemap = appInfo->Textures[i].texture_enableCubemap;
@@ -290,6 +294,7 @@ void Application::Initialize(){
 
         }
     }
+
 
     TimePoint T6 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for resources", T5, T6);

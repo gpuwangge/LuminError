@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "TypeBuffer.h"
+#include "TypeDataBuffer.h"
 
 namespace LEApplication{
     class IApplication;

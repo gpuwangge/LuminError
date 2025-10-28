@@ -188,7 +188,7 @@ void CSwapchain::createSwapchainViews(VkImageAspectFlags aspectFlags){
     // present views for the double-buffering:
     swapchain_views.resize(swapchainImageSize);
     for (size_t i = 0; i < swapchainImageSize; i++) {
-        CWxjImageBuffer dummyImageBuffer; //dummyImageBuffer doesn't really matter here, just use it's create function
+        CWxjImageBuffer dummyImageBuffer(CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice()); //dummyImageBuffer doesn't really matter here, just use it's create function
 		swapchain_views[i] = dummyImageBuffer.createImageView_swapchain(swapchain_images[i], swapChainImageFormat, aspectFlags, 1);
     }
 }

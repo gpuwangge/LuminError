@@ -4,10 +4,10 @@
 #include "vulkan\vulkan.h"
 #include "physicalDevice.h"
 #include "context.h"
-#include "imageBuffer.h"
 #include "logManager.h"
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "TypeImageBuffer.h"
 
 //Swapchain has all attachment resources(images, imageViews) for rendering
 //frambuffer wraps the swapchain imageViews, so that it can be used in renderPass
@@ -18,6 +18,17 @@ public:
     CSwapchain();
     ~CSwapchain();
     void CleanUp();
+
+    void SetDevice(){
+        for(int i = 0; i < buffer_depthlight.size(); i++){
+            buffer_depthlight[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
+            buffer_depthlight[i].physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
+        }
+        buffer_depthcamera.logicalDevice = CContext::GetHandle().GetLogicalDevice();
+        buffer_depthcamera.physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
+        buffer_colorresolve.logicalDevice = CContext::GetHandle().GetLogicalDevice();
+        buffer_colorresolve.physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
+    }
 
     /**********************
     * Attachment IDs
@@ -48,7 +59,7 @@ public:
     //Resource#3.buffer_colorresolve
     //for iMainSceneAttachmentColorResovle to use
     VkSampleCountFlagBits msaaSamples;
-    CWxjImageBuffer  buffer_colorresolve;
+    CWxjImageBuffer buffer_colorresolve;
     void create_attachment_resource_colorresolve();
 
     //Resource#4.swapchain_images and swapchain_views

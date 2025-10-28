@@ -1,7 +1,4 @@
-#ifndef H_IMAGEMANAGER
-#define H_IMAGEMANAGER
-
-#include "context.h"
+#pragma once
 #include <vulkan/vulkan.h>
 
 //3 places use image buffer: depth, MSAA color, texture. 
@@ -11,6 +8,7 @@
 class CWxjImageBuffer final{
 public:
     CWxjImageBuffer() {}
+    CWxjImageBuffer(VkDevice LogicalDevice, VkPhysicalDevice PhysicalDevice) : logicalDevice(LogicalDevice), physicalDevice(PhysicalDevice) {}
     ~CWxjImageBuffer() {}
 
     void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, 
@@ -41,26 +39,26 @@ public:
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         
 
-        if (vkCreateImage(CContext::GetHandle().GetLogicalDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create image!");
+        if (vkCreateImage(logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+            //throw std::runtime_error("failed to create image!");
         }
         //printf("Created VkImage: %p\n", image);
 
         VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(CContext::GetHandle().GetLogicalDevice(), image, &memRequirements);//this is different from buffer allocation
+        vkGetImageMemoryRequirements(logicalDevice, image, &memRequirements);//this is different from buffer allocation
 
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(CContext::GetHandle().GetLogicalDevice(), &allocInfo, nullptr, &deviceMemory) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate image memory!");
+        if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &deviceMemory) != VK_SUCCESS) {
+            //throw std::runtime_error("failed to allocate image memory!");
         }
 
         size = allocInfo.allocationSize;
 
-        vkBindImageMemory(CContext::GetHandle().GetLogicalDevice(), image, deviceMemory, 0);
+        vkBindImageMemory(logicalDevice, image, deviceMemory, 0);
     }
     
     //Create 2 versions of this function. The void version is for texture, msaaImage, depthImage. VkImageView version is for swapchain imageview
@@ -100,8 +98,8 @@ public:
         viewInfo.subresourceRange.baseArrayLayer = 0;
 
         VkImageView imageView;
-        if (vkCreateImageView(CContext::GetHandle().GetLogicalDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create texture image view!");
+        if (vkCreateImageView(logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+            //throw std::runtime_error("failed to create texture image view!");
         }
 
         return imageView;
@@ -137,8 +135,8 @@ public:
         viewInfo.subresourceRange.baseArrayLayer = 0;
 
         VkImageView imageView;
-        if (vkCreateImageView(CContext::GetHandle().GetLogicalDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create texture image view!");
+        if (vkCreateImageView(logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+            //throw std::runtime_error("failed to create texture image view!");
         }
 
         return imageView;
@@ -148,7 +146,7 @@ public:
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties){
         VkPhysicalDeviceMemoryProperties memProperties;
-        vkGetPhysicalDeviceMemoryProperties(CContext::GetHandle().GetPhysicalDevice(), &memProperties);
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
 
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
             if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -156,15 +154,16 @@ public:
             }
         }
 
-        throw std::runtime_error("failed to find suitable memory type!");
+        //throw std::runtime_error("failed to find suitable memory type!");
+        return 0;
     }
 
     void destroy(){
         if(size != (VkDeviceSize)0){
-        vkDestroyImage(CContext::GetHandle().GetLogicalDevice(), image, nullptr);
-        vkFreeMemory(CContext::GetHandle().GetLogicalDevice(), deviceMemory, nullptr);
+        vkDestroyImage(logicalDevice, image, nullptr);
+        vkFreeMemory(logicalDevice, deviceMemory, nullptr);
         if(view != NULL)
-            vkDestroyImageView(CContext::GetHandle().GetLogicalDevice(), view, nullptr);
+            vkDestroyImageView(logicalDevice, view, nullptr);
         }
     }
 
@@ -172,6 +171,8 @@ public:
 	VkDeviceMemory deviceMemory;
 	VkDeviceSize size = 0;
     VkImageView view = NULL;
+    VkDevice logicalDevice;
+    VkPhysicalDevice physicalDevice;
 };
 
-#endif
+

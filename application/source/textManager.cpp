@@ -406,6 +406,7 @@ void CTextManager::CreateTextImage(){
     //std::cout << "Text Surface '" << 123 << "' Width: " << width << ", Height: " << height << ", Pitch: " << pitch << std::endl;
 
     CTextureImage textureImage;
+    textureImage.SetDevice();
     textureImage.m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R8G8B8A8_SRGB;
     textureImage.m_mipLevels = 1;
     textureImage.m_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;

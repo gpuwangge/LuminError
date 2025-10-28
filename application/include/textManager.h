@@ -8,7 +8,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <SDL3_ttf/SDL_ttf.h>
-#include "TypeBuffer.h"
+#include "TypeDataBuffer.h"
 #include "TypeText.h"
 #include <map>
 #include "IRendererCore.h"

@@ -6,7 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeUniform.h"
-#include "TypeBuffer.h"
+#include "TypeDataBuffer.h"
 
 class CComputeDescriptorManager{
 public:

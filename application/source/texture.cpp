@@ -4,21 +4,15 @@
 #include "../../external/stb_image.h"
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Foundation.h"
-#include "TypeBuffer.h"
+#include "TypeDataBuffer.h"
 
 /*******************
 *	Texture Manager: to manage a vector of CTextureImages
 ********************/
 CTextureManager::CTextureManager(){
-	//std::cout<<"CTextureManager::CTextureManager()"<<std::endl;
-	//textureImages.resize(1);
-#ifndef ANDROID
     logManager.setLogFile("textureManager.log");
-#endif	
 }
-CTextureManager::~CTextureManager(){
-	//std::cout<<"CTextureManager::~CTextureManager()"<<std::endl;
-}
+CTextureManager::~CTextureManager(){}
 
 //The main entrance to create texture image
 void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
@@ -27,6 +21,7 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 	TimePoint startTimePoint = now();
 
 	CTextureImage textureImage;
+	textureImage.SetDevice();
 	textureImage.m_imageFormat = imageFormat;
 	//textureImage.bEnableMipMap = bEnableMipmap; 
 	//textureImage.bEnableCubemap = bCubemap;
@@ -103,9 +98,7 @@ CTextureImage::CTextureImage(){
 	m_dstTexChannels = STBI_rgb_alpha;
 	//debugger = new CDebugger("../logs/texture.log");
 }
-CTextureImage::~CTextureImage(){
-	//if (!debugger) delete debugger;
-}
+CTextureImage::~CTextureImage(){}
 void CTextureImage::Destroy(){
     m_textureImageBuffer.destroy();
 }
@@ -688,6 +681,8 @@ void CTextureImage::generateMipmaps(std::string rainbowCheckerboardTexturePath, 
 
 	std::array<CWxjImageBuffer, MIPMAP_TEXTURE_COUNT> tmpTextureBufferForRainbowMipmaps;//create temp mipmaps
 	for (int i = 0; i < MIPMAP_TEXTURE_COUNT; i++) {//fill temp mipmaps
+		tmpTextureBufferForRainbowMipmaps[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
+		tmpTextureBufferForRainbowMipmaps[i].physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
 		int texChannels;
 #ifndef ANDROID
 		std::string fullTexturePath = TEXTURE_PATH + rainbowCheckerboardTexturePath + std::to_string(i) + ".png";

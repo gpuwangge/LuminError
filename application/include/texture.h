@@ -1,12 +1,12 @@
 #ifndef H_TEXTURE
 #define H_TEXTURE
 
-#include "imageBuffer.h"
 #include "context.h"
 #include "logManager.h"
 #include "timer.h"
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "TypeImageBuffer.h"
 
 class CTextureImage final{
 public:
@@ -16,6 +16,11 @@ public:
     CTextureImage();
     ~CTextureImage();
     void Destroy();
+
+    void SetDevice(){
+        m_textureImageBuffer.logicalDevice = CContext::GetHandle().GetLogicalDevice();
+	    m_textureImageBuffer.physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
+    }
 
     /*******************
     *	Texture Image: Load
