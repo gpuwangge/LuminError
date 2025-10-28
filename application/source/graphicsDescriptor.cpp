@@ -1,4 +1,7 @@
 #include "graphicsDescriptor.h"
+#include <iostream>
+#include "TypeBuffer.h"
+
 
 //Declare static variables here:
 /************
@@ -225,7 +228,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_TextureImageSampler()
 /************
 * Set
 ************/
-void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthImageView, std::vector<CWxjImageBuffer> &lightDepthBuffers){
+void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews){
     //Descriptor Step 3/3
     //HERE_I_AM("wxjCreateDescriptorSets");
 
@@ -360,7 +363,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             //std::cout<<"createDescriptorSets_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
 
             lightDepthImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;//VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;//VK_IMAGE_LAYOUT_GENERAL; 
-            lightDepthImageInfo.imageView = lightDepthBuffers[0].view; //lightDepthImageView0; //depth image from swapchain
+            lightDepthImageInfo.imageView = depthlight_imageviews[0]; //lightDepthImageView0; //depth image from swapchain
             lightDepthImageInfo.sampler = lightDepthImageSampler; 
 
             // if(j < m_texture_ids.size()){
@@ -383,15 +386,15 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
         VkDescriptorImageInfo lightDepthImage_hardware_Info[LIGHT_MAX] = {};
         if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS){
             //std::cout<<"createDescriptorSets_General():GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS"<<std::endl;
-            int lightBufferSize = lightDepthBuffers.size();
+            int lightBufferSize = depthlight_imageviews.size();
             for(int i = 0; i < LIGHT_MAX; i++){
                 if(i < lightBufferSize){
                     lightDepthImage_hardware_Info[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    lightDepthImage_hardware_Info[i].imageView = lightDepthBuffers[i].view; 
+                    lightDepthImage_hardware_Info[i].imageView = depthlight_imageviews[i]; 
                     lightDepthImage_hardware_Info[i].sampler = lightDepthImageSampler_hardwareDepthBias;
                 }else{
                     lightDepthImage_hardware_Info[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    lightDepthImage_hardware_Info[i].imageView = lightDepthBuffers[0].view; 
+                    lightDepthImage_hardware_Info[i].imageView = depthlight_imageviews[0]; 
                     lightDepthImage_hardware_Info[i].sampler = lightDepthImageSampler_hardwareDepthBias;
                 }
             }

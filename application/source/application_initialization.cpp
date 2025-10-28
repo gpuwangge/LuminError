@@ -316,7 +316,9 @@ void Application::Initialize(){
     }
 
     //UNIFORM STEP 3/3 (Set)
-    if(b_uniform_graphics) graphicsDescriptorManager.createDescriptorSets_General(swapchain.buffer_depthcamera.view, swapchain.buffer_depthlight);
+    std::vector<VkImageView> depthlight_imageviews;
+    for(int i = 0; i < swapchain.buffer_depthlight.size(); i++) depthlight_imageviews.push_back(swapchain.buffer_depthlight[i].view);
+    if(b_uniform_graphics) graphicsDescriptorManager.createDescriptorSets_General(swapchain.buffer_depthcamera.view, depthlight_imageviews);
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage)

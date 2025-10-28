@@ -1,6 +1,4 @@
-#include "../include/light.h"
-
-//#include "../include/application.h"
+#include "light.h"
 
 void CLight::Update(float deltaTime, int currentFrame, Camera &mainCamera, Camera &lightCamera){
     if(!bRegistered) return;

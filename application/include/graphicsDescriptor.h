@@ -2,12 +2,14 @@
 #define H_GRAPHICSDESCRIPTOR
 
 #include "context.h"
-#include "../include/texture.h"
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "TypeLight.h"
 #include "TypeUniform.h"
-#include "TypeBuffer.h"
+#include "TypeLight.h"
+
+class CWxjBuffer;
+class CWxjImageBuffer;
+class LightingUniformBufferObject;
 
 class CGraphicsDescriptorManager{
 public:
@@ -36,7 +38,7 @@ public:
      ************/
     std::vector<VkDescriptorSet> descriptorSets_general; //one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
     //void createDescriptorSets_General(VkImageView depthImageView, VkImageView lightDepthImageView0, VkImageView lightDepthImageView1);
-    void createDescriptorSets_General(VkImageView depthImageView, std::vector<CWxjImageBuffer> &lightDepthBuffers);
+    void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews);
 
     /************
      * 1 GRAPHCIS_UNIFORMBUFFER_MVP
