@@ -221,23 +221,23 @@ void CControlAttachment::Update(){
 
     if(firstTime){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
-        if(m_pApp->instance_renderercore->GetShadowmapAttachmentDepthLight()>=0) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->renderer->GetShadowmapAttachmentDepthLight()>=0) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Depth(Light)");
 
-        if(m_pApp->instance_renderercore->GetMainSceneAttachmentDepthLight()>=0) m_pTextboxes[4]->bFlash = true;
+        if(m_pApp->renderer->GetMainSceneAttachmentDepthLight()>=0) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Depth(Light)");
 
-        if(m_pApp->instance_renderercore->GetMainSceneAttachmentDepthCamera()>=0) m_pTextboxes[5]->bFlash = true;
+        if(m_pApp->renderer->GetMainSceneAttachmentDepthCamera()>=0) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
         m_pTextboxes[5]->SetTextContent("Depth(Camera)");
 
-        if(m_pApp->instance_renderercore->GetMainSceneAttachmentColorResovle()>=0) m_pTextboxes[6]->bFlash = true;
+        if(m_pApp->renderer->GetMainSceneAttachmentColorResovle()>=0) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
         m_pTextboxes[6]->SetTextContent("Color(Resolve)");
 
-        if(m_pApp->instance_renderercore->GetMainSceneAttachmentColorPresent()>=0) m_pTextboxes[7]->bFlash = true;
+        if(m_pApp->renderer->GetMainSceneAttachmentColorPresent()>=0) m_pTextboxes[7]->bFlash = true;
         else m_pTextboxes[7]->SetTextColor(greyColor);
         m_pTextboxes[7]->SetTextContent("Color(Present)");
 
@@ -539,19 +539,19 @@ void CControlSubpass::Update(){
 
     if(firstTime){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
-        if(m_pApp->instance_renderercore->GetEnableShadowmapRenderpassSubpassShadowmap()) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->renderer->GetEnableShadowmapRenderpassSubpassShadowmap()) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Shadowmap");
 
-        if(m_pApp->instance_renderercore->GetEnableMainSceneRenderpassSubpassShadowmap()) m_pTextboxes[4]->bFlash = true;
+        if(m_pApp->renderer->GetEnableMainSceneRenderpassSubpassShadowmap()) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Shadowmap");
 
-        if(m_pApp->instance_renderercore->GetEnableMainSceneRenderpassSubpassDraw()) m_pTextboxes[5]->bFlash = true;
+        if(m_pApp->renderer->GetEnableMainSceneRenderpassSubpassDraw()) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
         m_pTextboxes[5]->SetTextContent("Draw");
 
-        if(m_pApp->instance_renderercore->GetEnableMainSceneRenderpassSubpassObserve()) m_pTextboxes[6]->bFlash = true;
+        if(m_pApp->renderer->GetEnableMainSceneRenderpassSubpassObserve()) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
         m_pTextboxes[6]->SetTextContent("Observe");
 

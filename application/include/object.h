@@ -27,7 +27,7 @@ class CObject : public CEntity {
 
     //These will be used when recording draw cmd
     //CRenderer *p_renderer;
-    LERenderer::IRendererCore *instance_renderercore = NULL;
+    LERenderer::IRendererCore *renderer = NULL;
 
     //CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;

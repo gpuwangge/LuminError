@@ -109,17 +109,17 @@ namespace LEApplication{
 
         void Initialize(); //use this to call sample initialization
         void Update(); //base: update time, frame id, camera and ubo
-        void RecordGraphicsCommandBuffer_RenderpassMainscene(){ instance_game->Record(); instance_game->RecordGraphicsCommandBuffer_RenderpassMainscene(); }
+        void RecordGraphicsCommandBuffer_RenderpassMainscene(){ gamer->Record(); gamer->RecordGraphicsCommandBuffer_RenderpassMainscene(); }
 
         //Module Related
         HMODULE handle_module_yamlcore;
-        LEYAML::IYAMLCore *instance_yamlcore = NULL;
+        LEYAML::IYAMLCore *yamler = NULL;
         HMODULE handle_module_sdlcore;
-        LESDL::ISDLCore *instance_sdlcore = NULL;
+        LESDL::ISDLCore *sdler = NULL;
         HMODULE handle_module_game;
-        LuminError::IGame *instance_game = NULL;
+        LuminError::IGame *gamer = NULL;
         HMODULE handle_module_renderercore;
-        LERenderer::IRendererCore *instance_renderercore = NULL;
+        LERenderer::IRendererCore *renderer = NULL;
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
         void DestroyInstance(HMODULE handle, void* instance);
 

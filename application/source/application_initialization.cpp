@@ -9,11 +9,11 @@ void Application::Initialize(){
     * 1 Process blend and push constant
     ****************************/   
     //renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
-    instance_renderercore->SetRenderMode(appInfo->RenderMode);
+    renderer->SetRenderMode(appInfo->RenderMode);
     if(appInfo->Feature.b_feature_graphics_push_constant)
         shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     if(appInfo->Feature.b_feature_graphics_global_blend)
-        instance_renderercore->AddColorBlendAttachment(
+        renderer->AddColorBlendAttachment(
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO);        
 
@@ -71,41 +71,41 @@ void Application::Initialize(){
     /****************************
     * 4 Initialize Uniforms
     ****************************/
-    if(appInfo->Uniform.b_uniform_graphics_custom) instance_renderercore->addGraphicsCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
-    if(appInfo->Uniform.b_uniform_graphics_lighting) instance_renderercore->addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
+    if(appInfo->Uniform.b_uniform_graphics_custom) renderer->addGraphicsCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
+    if(appInfo->Uniform.b_uniform_graphics_lighting) renderer->addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
     if(appInfo->Uniform.b_uniform_graphics_object_mvp){
-        instance_renderercore->addMVPUniformBuffer(CObjectManager::mvpUniformBuffersMapped);
+        renderer->addMVPUniformBuffer(CObjectManager::mvpUniformBuffersMapped);
         //renderer.bUseObjectMVP = true;
-        instance_renderercore->SetEnableObjectMVP(true);
+        renderer->SetEnableObjectMVP(true);
     }
     if(appInfo->Uniform.b_uniform_graphics_text_mvp){
-        instance_renderercore->addTextMVPUniformBuffer(CTextManager::textMVPUniformBuffersMapped);
+        renderer->addTextMVPUniformBuffer(CTextManager::textMVPUniformBuffersMapped);
         //renderer.bUseTextboxMVP = true;
-        instance_renderercore->SetEnableTextboxMVP(true);
+        renderer->SetEnableTextboxMVP(true);
     }   
     if(appInfo->Uniform.b_uniform_graphics_object_vp){
-        instance_renderercore->addVPUniformBuffer(CObjectManager::vpUniformBuffersMapped);
+        renderer->addVPUniformBuffer(CObjectManager::vpUniformBuffersMapped);
         //renderer.bUseObjectMVP = true; //reuse MVP bool
-        instance_renderercore->SetEnableObjectMVP(true);
+        renderer->SetEnableObjectMVP(true);
     }
-    if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) instance_renderercore->addDepthImageSamplerUniformBuffer();
-    if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) instance_renderercore->addLightDepthImageSamplerUniformBuffer();
-    if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) instance_renderercore->addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
-    if(appInfo->Uniform.b_uniform_compute_custom) instance_renderercore->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
-    if(appInfo->Uniform.b_uniform_compute_storage) instance_renderercore->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
-    if(appInfo->Uniform.b_uniform_compute_texture_storage) instance_renderercore->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
-    if(appInfo->Uniform.b_uniform_compute_swapchain_storage) instance_renderercore->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
+    if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) renderer->addDepthImageSamplerUniformBuffer();
+    if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) renderer->addLightDepthImageSamplerUniformBuffer();
+    if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) renderer->addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
+    if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
+    if(appInfo->Uniform.b_uniform_compute_storage) renderer->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
+    if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
+    if(appInfo->Uniform.b_uniform_compute_swapchain_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
 
     if(appInfo->Samplers.size() > 0){
         //CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
-        instance_renderercore->SetGraphicsUniformTypes(instance_renderercore->GetGraphicsUniformTypes() | GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE);
+        renderer->SetGraphicsUniformTypes(renderer->GetGraphicsUniformTypes() | GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE);
         std::vector<int> mipLevels;
         std::vector<std::array<bool,3>> UVWRepeats;
         for(int i = 0; i < appInfo->Samplers.size(); i++){
             mipLevels.push_back(appInfo->Samplers[i].sampler_miplevels);
             UVWRepeats.push_back(appInfo->Samplers[i].sampler_uvwRepeats);
         }
-        instance_renderercore->addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats);
+        renderer->addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats);
     }
 
     TimePoint T3 = now();
@@ -115,41 +115,41 @@ void Application::Initialize(){
     * 5 Initialize attachments
     ****************************/
     //renderProcess.iShadowmapAttachmentDepthLight = appInfo->Attachment.bShadowmapAttachmentDepthLight ? 0 : -1; //shadowmap renderpass attachment depth light, only one attachment, so id is 0
-    instance_renderercore->SetShadowmapAttachmentDepthLight(appInfo->Attachment.bShadowmapAttachmentDepthLight ? 0 : -1);
+    renderer->SetShadowmapAttachmentDepthLight(appInfo->Attachment.bShadowmapAttachmentDepthLight ? 0 : -1);
 
     int AttachmentCount = 0;
-    instance_renderercore->SetMainSceneAttachmentDepthLight(appInfo->Attachment.bMainSceneAttachmentDepthLight ? AttachmentCount++ : -1);
-    instance_renderercore->SetMainSceneAttachmentDepthCamera(appInfo->Attachment.bMainSceneAttachmentDepthCamera ? AttachmentCount++ : -1);
-    instance_renderercore->SetMainSceneAttachmentColorResovle(appInfo->Attachment.bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1);
-    instance_renderercore->SetMainSceneAttachmentColorPresent(appInfo->Attachment.bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1);
+    renderer->SetMainSceneAttachmentDepthLight(appInfo->Attachment.bMainSceneAttachmentDepthLight ? AttachmentCount++ : -1);
+    renderer->SetMainSceneAttachmentDepthCamera(appInfo->Attachment.bMainSceneAttachmentDepthCamera ? AttachmentCount++ : -1);
+    renderer->SetMainSceneAttachmentColorResovle(appInfo->Attachment.bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1);
+    renderer->SetMainSceneAttachmentColorPresent(appInfo->Attachment.bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1);
 
 
-    swapchain.iShadowmapAttachmentDepthLight = instance_renderercore->GetShadowmapAttachmentDepthLight();
-    swapchain.iMainSceneAttachmentDepthLight = instance_renderercore->GetMainSceneAttachmentDepthLight();
-    swapchain.iMainSceneAttachmentDepthCamera = instance_renderercore->GetMainSceneAttachmentDepthCamera();
-    swapchain.iMainSceneAttachmentColorResovle = instance_renderercore->GetMainSceneAttachmentColorResovle();
-    swapchain.iMainSceneAttachmentColorPresent = instance_renderercore->GetMainSceneAttachmentColorPresent();
+    swapchain.iShadowmapAttachmentDepthLight = renderer->GetShadowmapAttachmentDepthLight();
+    swapchain.iMainSceneAttachmentDepthLight = renderer->GetMainSceneAttachmentDepthLight();
+    swapchain.iMainSceneAttachmentDepthCamera = renderer->GetMainSceneAttachmentDepthCamera();
+    swapchain.iMainSceneAttachmentColorResovle = renderer->GetMainSceneAttachmentColorResovle();
+    swapchain.iMainSceneAttachmentColorPresent = renderer->GetMainSceneAttachmentColorPresent();
 
     //when creating attachment resource, need 1.create attachment description in renderProcess; 2.create attachment buffer in swapchain
     if(swapchain.iMainSceneAttachmentColorResovle >= 0) swapchain.GetMaxUsableSampleCount(); //calcuate max sampler count first
 
     if(swapchain.iShadowmapAttachmentDepthLight >= 0){ //if shadowmap renderpass attachment depth light is enabled
         swapchain.create_attachment_resource_depthlight(VK_SAMPLE_COUNT_1_BIT); //hardware bias todo
-        instance_renderercore->Create_attachmentdescription_shadowmap_depthlight(swapchain.depthFormat);
+        renderer->Create_attachmentdescription_shadowmap_depthlight(swapchain.depthFormat);
     }else if(swapchain.iMainSceneAttachmentDepthLight >= 0){
         swapchain.create_attachment_resource_depthlight(swapchain.msaaSamples);
-        instance_renderercore->Create_attachmentdescription_mainscene_depthlight(swapchain.depthFormat, swapchain.msaaSamples);
+        renderer->Create_attachmentdescription_mainscene_depthlight(swapchain.depthFormat, swapchain.msaaSamples);
     }
     if(swapchain.iMainSceneAttachmentDepthCamera >= 0){//If enable MSAA, must also enable Depth Test
         swapchain.create_attachment_resource_depthcamera();
-        instance_renderercore->Create_attachmentdescription_mainscene_depthcamera(swapchain.depthFormat, swapchain.msaaSamples);
+        renderer->Create_attachmentdescription_mainscene_depthcamera(swapchain.depthFormat, swapchain.msaaSamples);
     }
     if(swapchain.iMainSceneAttachmentColorResovle >= 0){
         swapchain.create_attachment_resource_colorresolve();
-        instance_renderercore->Create_attachmentdescription_mainscene_colorresolve(swapchain.swapChainImageFormat, swapchain.msaaSamples, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        renderer->Create_attachmentdescription_mainscene_colorresolve(swapchain.swapChainImageFormat, swapchain.msaaSamples, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     }
     if(swapchain.iMainSceneAttachmentColorPresent >= 0) //dont need create swapchain attachment resource here
-        instance_renderercore->Create_attachmentdescription_mainscene_colorpresent(swapchain.swapChainImageFormat);
+        renderer->Create_attachmentdescription_mainscene_colorpresent(swapchain.swapChainImageFormat);
 
     TimePoint T4 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for attachements", T3, T4);
@@ -158,29 +158,29 @@ void Application::Initialize(){
     /****************************
     * 6 Initialize Subpasses
     ****************************/
-    instance_renderercore->SetEnableShadowmapRenderpassSubpassShadowmap(appInfo->Subpass.bEnableShadowmapRenderpassSubpassShadowmap);
-    instance_renderercore->SetEnableMainSceneRenderpassSubpassShadowmap(appInfo->Subpass.bEnableMainSceneRenderpassSubpassShadowmap);
-    instance_renderercore->SetEnableMainSceneRenderpassSubpassDraw(appInfo->Subpass.bEnableMainSceneRenderpassSubpassDraw);
-    instance_renderercore->SetEnableMainSceneRenderpassSubpassObserve(appInfo->Subpass.bEnableMainSceneRenderpassSubpassObserve);
+    renderer->SetEnableShadowmapRenderpassSubpassShadowmap(appInfo->Subpass.bEnableShadowmapRenderpassSubpassShadowmap);
+    renderer->SetEnableMainSceneRenderpassSubpassShadowmap(appInfo->Subpass.bEnableMainSceneRenderpassSubpassShadowmap);
+    renderer->SetEnableMainSceneRenderpassSubpassDraw(appInfo->Subpass.bEnableMainSceneRenderpassSubpassDraw);
+    renderer->SetEnableMainSceneRenderpassSubpassObserve(appInfo->Subpass.bEnableMainSceneRenderpassSubpassObserve);
     //for shadowmap renderpass (this renderpass is optional)
     //if(renderProcess.bEnableShadowmapRenderpassSubpassShadowmap){
-    if(instance_renderercore->GetEnableShadowmapRenderpassSubpassShadowmap()){
+    if(renderer->GetEnableShadowmapRenderpassSubpassShadowmap()){
         // std::cout<<"Application: Create Shadowmap Render Pass."<<std::endl;
-        instance_renderercore->CreateSubpass_shadowmap();
-        instance_renderercore->CreateDependency_shadowmap();
-        instance_renderercore->CreateRenderPass_shadowmap();
+        renderer->CreateSubpass_shadowmap();
+        renderer->CreateDependency_shadowmap();
+        renderer->CreateRenderPass_shadowmap();
 
         // std::cout<<"Application: Create Shadowmap Framebuffer."<<std::endl;
         for(int i = 0; i < swapchain.framebuffers_shadowmap.size(); i++)
-            swapchain.CreateFramebuffer_shadowmap(instance_renderercore->GetRenderpass_shadowmap(), i);
+            swapchain.CreateFramebuffer_shadowmap(renderer->GetRenderpass_shadowmap(), i);
     }
     
     //for mainscene renderpass (this renderpass is mandatory)
-    instance_renderercore->CreateSubpass_mainscene(appInfo->Feature.feature_graphics_observe_attachment_id);
-    instance_renderercore->CreateDependency_mainscene();
-    instance_renderercore->CreateRenderPass_mainscene();
+    renderer->CreateSubpass_mainscene(appInfo->Feature.feature_graphics_observe_attachment_id);
+    renderer->CreateDependency_mainscene();
+    renderer->CreateRenderPass_mainscene();
     //create framebuffer
-    swapchain.CreateFramebuffer_mainscene(instance_renderercore->GetRenderpass_mainscene());
+    swapchain.CreateFramebuffer_mainscene(renderer->GetRenderpass_mainscene());
 
     TimePoint T5 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for reading subpasses", T4, T5);
@@ -196,7 +196,7 @@ void Application::Initialize(){
         textManager.SetOutlineColor(glm::vec4(appInfo->Font.font_outlineColor[0], appInfo->Font.font_outlineColor[1], appInfo->Font.font_outlineColor[2], appInfo->Font.font_outlineColor[3]));
         textManager.SetTextColor(glm::vec4(appInfo->Font.font_textColor[0], appInfo->Font.font_textColor[1], appInfo->Font.font_textColor[2], appInfo->Font.font_textColor[3]));
         //textManager.p_renderer = &renderer;
-        textManager.instance_renderercore = instance_renderercore;
+        textManager.renderer = renderer;
         textManager.p_textImageManager = &textImageManager;
         textManager.p_modelManager = &modelManager;
 
@@ -210,8 +210,8 @@ void Application::Initialize(){
             std::string modelName = appInfo->Models[i].model_names;
             //std::cout<<"test:"<<i<<", modelName="<<modelName<<std::endl;
             if(modelName == "CUSTOM3D0"){
-                instance_renderercore->CreateVertexBuffer(modelManager.customModels3D[0].vertices.data(), sizeof(Vertex3D), modelManager.customModels3D[0].vertices.size());
-                instance_renderercore->CreateIndexBuffer(modelManager.customModels3D[0].indices);
+                renderer->CreateVertexBuffer(modelManager.customModels3D[0].vertices.data(), sizeof(Vertex3D), modelManager.customModels3D[0].vertices.size());
+                renderer->CreateIndexBuffer(modelManager.customModels3D[0].indices);
                 
                 modelManager.modelLengths.push_back(modelManager.customModels3D[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.customModels3D[0].lengthMin);
@@ -224,8 +224,8 @@ void Application::Initialize(){
             //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
             //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
             }else if(modelName == "TEXTBOXIMAGE"){
-                instance_renderercore->CreateVertexBuffer(modelManager.textboxImageModels[0].vertices.data(), sizeof(Vertex3D), modelManager.textboxImageModels[0].vertices.size());
-                instance_renderercore->CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
+                renderer->CreateVertexBuffer(modelManager.textboxImageModels[0].vertices.data(), sizeof(Vertex3D), modelManager.textboxImageModels[0].vertices.size());
+                renderer->CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
                 
                 modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
@@ -233,9 +233,9 @@ void Application::Initialize(){
             }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
                 //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
                 //std::cout<<"Application: Load "<<std::endl;
-                instance_renderercore->CreateVertexBuffer(modelManager.textQuadModels[0].vertices.data(), sizeof(TextQuadVertex), modelManager.textQuadModels[0].vertices.size());
+                renderer->CreateVertexBuffer(modelManager.textQuadModels[0].vertices.data(), sizeof(TextQuadVertex), modelManager.textQuadModels[0].vertices.size());
                 //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
-                instance_renderercore->CreateIndexBuffer(modelManager.textQuadModels[0].indices);
+                renderer->CreateIndexBuffer(modelManager.textQuadModels[0].indices);
 
                 //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
                 //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
@@ -247,7 +247,7 @@ void Application::Initialize(){
                 modelManager.modelLengthsMax.push_back(v);
             }else if(modelName == "CUSTOM2D0"){
                 //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
-                instance_renderercore->CreateVertexBuffer(modelManager.customModels2D[0].vertices.data(), sizeof(Vertex2D), modelManager.customModels2D[0].vertices.size()); 
+                renderer->CreateVertexBuffer(modelManager.customModels2D[0].vertices.data(), sizeof(Vertex2D), modelManager.customModels2D[0].vertices.size()); 
 
                 modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
                 modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
@@ -257,8 +257,8 @@ void Application::Initialize(){
                 std::vector<Vertex3D> modelVertices3D;
                 std::vector<uint32_t> modelIndices3D;
                 modelManager.LoadObjModel(modelName, modelVertices3D, modelIndices3D);
-                instance_renderercore->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
-                instance_renderercore->CreateIndexBuffer(modelIndices3D);
+                renderer->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
+                renderer->CreateIndexBuffer(modelIndices3D);
             }
             //std::cout<<"test end"<<std::endl;
         }
@@ -277,15 +277,15 @@ void Application::Initialize(){
                 if(textureMipLevel > 1) //mipmap
                     usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 else 
-                    if(instance_renderercore->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
                     else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 
                 if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                    if(instance_renderercore->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
-                    else textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
+                    else textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
                 }else{ //48bpt
                     //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                    textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+                    textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
                 }
                 
                 if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
@@ -306,37 +306,37 @@ void Application::Initialize(){
     bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_mvp || appInfo->Uniform.b_uniform_graphics_text_mvp || appInfo->Uniform.b_uniform_graphics_object_vp;
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_uniform_compute_storage || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     //UNIFORM STEP 1/3 (Pool)
-    instance_renderercore->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
-    instance_renderercore->createComputeDescriptorPool();
+    renderer->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
+    renderer->createComputeDescriptorPool();
 
     //UNIFORM STEP 2/3 (Layer)
     if(b_uniform_graphics){
         if(appInfo->Uniform.b_uniform_graphics_custom){
-            instance_renderercore->createGraphicsDescriptorSetLayout_General(&appInfo->Uniform.GraphicsCustom.Binding);
+            renderer->createGraphicsDescriptorSetLayout_General(&appInfo->Uniform.GraphicsCustom.Binding);
         }
         else {
-            instance_renderercore->createGraphicsDescriptorSetLayout_General();
+            renderer->createGraphicsDescriptorSetLayout_General();
         }
-        if(instance_renderercore->GetTextureImageSamplersSize() > 0) instance_renderercore->createGraphicsDescriptorSetLayout_TextureImageSampler(); 
+        if(renderer->GetTextureImageSamplersSize() > 0) renderer->createGraphicsDescriptorSetLayout_TextureImageSampler(); 
     }
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_custom) {
-            instance_renderercore->createComputeDescriptorSetLayout(&appInfo->Uniform.ComputeCustom.Binding);
+            renderer->createComputeDescriptorSetLayout(&appInfo->Uniform.ComputeCustom.Binding);
         }else {
-            instance_renderercore->createComputeDescriptorSetLayout();
+            renderer->createComputeDescriptorSetLayout();
         }
     }
 
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
     for(int i = 0; i < swapchain.buffer_depthlight.size(); i++) depthlight_imageviews.push_back(swapchain.buffer_depthlight[i].view);
-    if(b_uniform_graphics) instance_renderercore->createGraphicsDescriptorSets_General(swapchain.buffer_depthcamera.view, depthlight_imageviews);
+    if(b_uniform_graphics) renderer->createGraphicsDescriptorSets_General(swapchain.buffer_depthcamera.view, depthlight_imageviews);
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage)
-                instance_renderercore->createComputeDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(swapchain.swapchain_views));//this must be called after texture resource is loaded
-            else instance_renderercore->createComputeDescriptorSets(NULL, &(swapchain.swapchain_views));
-        }else instance_renderercore->createComputeDescriptorSets();
+                renderer->createComputeDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(swapchain.swapchain_views));//this must be called after texture resource is loaded
+            else renderer->createComputeDescriptorSets(NULL, &(swapchain.swapchain_views));
+        }else renderer->createComputeDescriptorSets();
     }
 
     TimePoint T7 = now();
@@ -351,9 +351,9 @@ void Application::Initialize(){
     * 9.1 Command Buffer
     ****************************/
     //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
-    if(appInfo->GraphicsPipelines.size() > 0) instance_renderercore->CreateGraphicsCommandBuffer();
+    if(appInfo->GraphicsPipelines.size() > 0) renderer->CreateGraphicsCommandBuffer();
     //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
-    if(appInfo->ComputePipelines.size() > 0) instance_renderercore->CreateComputeCommandBuffer();
+    if(appInfo->ComputePipelines.size() > 0) renderer->CreateComputeCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
     
     /****************************
@@ -378,19 +378,19 @@ void Application::Initialize(){
     if(appInfo->GraphicsPipelines.size() > 0){
         std::vector<VkDescriptorSetLayout> dsLayouts; //2 sets for graphics
 
-        int type = instance_renderercore->GetGraphicsUniformTypes();
+        int type = renderer->GetGraphicsUniformTypes();
 
         if((type & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
             (type & GRAPHCIS_UNIFORMBUFFER_LIGHTING) || 
             (type & GRAPHCIS_UNIFORMBUFFER_MVP) ||
             (type & GRAPHCIS_UNIFORMBUFFER_VP)){
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set0: graphics general layout"<<std::endl;
-            dsLayouts.push_back(instance_renderercore->GetDescriptorSetLayout_General()); //set = 0
+            dsLayouts.push_back(renderer->GetDescriptorSetLayout_General()); //set = 0
         }
 
         if(type & GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE) {
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set1: sampler(texture) layout"<<std::endl;
-            dsLayouts.push_back(instance_renderercore->GetDescriptorSetLayout_TextureImageSampler()); //set = 1
+            dsLayouts.push_back(renderer->GetDescriptorSetLayout_TextureImageSampler()); //set = 1
         }
   
         //Different cube can share the same texture descriptor.
@@ -407,10 +407,10 @@ void Application::Initialize(){
             //! All graphics pipelines use the same dsLayouts
             if(shaderManager.bEnablePushConstant){
                 if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create Push Constant Layout"<<std::endl;
-                instance_renderercore->CreateGraphicsPipelineLayout(dsLayouts,  shaderManager.pushConstantRange, true, i);
+                renderer->CreateGraphicsPipelineLayout(dsLayouts,  shaderManager.pushConstantRange, true, i);
                 if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Push Constant Layout"<<std::endl;
             }
-            else instance_renderercore->CreateGraphicsPipelineLayout(dsLayouts, i);
+            else renderer->CreateGraphicsPipelineLayout(dsLayouts, i);
 
             
             //int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
@@ -419,38 +419,38 @@ void Application::Initialize(){
 
             switch(vertexDatatype){
                 case VertexStructureTypes::NoType:
-                    instance_renderercore->CreateGraphicsPipeline(NULL, NULL,
+                    renderer->CreateGraphicsPipeline(NULL, NULL,
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], false, false, 
-                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
+                        renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::ThreeDimension:
                     //for 2-renderpass case, each pipeline for different renderpass
                     //if((*appInfo->RenderPassShadowmap)[i]) {
                     if(appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap) {
-                        instance_renderercore->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
+                        renderer->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                            instance_renderercore->GetRenderpass_shadowmap(), i, appInfo); 
+                            renderer->GetRenderpass_shadowmap(), i, appInfo); 
                     }else{
-                        instance_renderercore->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
+                        renderer->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
                             VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                            instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
+                            renderer->GetRenderpass_mainscene(), i, appInfo);
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
                     //std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
-                    instance_renderercore->CreateGraphicsPipeline(Vertex2D::getBindingDescription, Vertex2D::getAttributeDescriptions, 
+                    renderer->CreateGraphicsPipeline(Vertex2D::getBindingDescription, Vertex2D::getAttributeDescriptions, 
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
+                        renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::ParticleType:
-                    instance_renderercore->CreateGraphicsPipeline(Particle::getBindingDescription, Particle::getAttributeDescriptions, 
+                    renderer->CreateGraphicsPipeline(Particle::getBindingDescription, Particle::getAttributeDescriptions, 
                         VK_PRIMITIVE_TOPOLOGY_POINT_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
-                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
+                        renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::TextQuad:
-                    instance_renderercore->CreateGraphicsPipeline(NULL, NULL, //TextQuadVertex::getBindingDescription, TextQuadVertex::getAttributeDescriptions, 
+                    renderer->CreateGraphicsPipeline(NULL, NULL, //TextQuadVertex::getBindingDescription, TextQuadVertex::getAttributeDescriptions, 
                         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, true, 
-                        instance_renderercore->GetRenderpass_mainscene(), i, appInfo);
+                        renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 default:
                 break;
@@ -461,8 +461,8 @@ void Application::Initialize(){
     }
     if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
-        instance_renderercore->CreateComputePipelineLayout(instance_renderercore->GetComputeDescriptorSetLayout());
-        instance_renderercore->CreateComputePipeline(shaderManager.compShaderModules[0]);
+        renderer->CreateComputePipelineLayout(renderer->GetComputeDescriptorSetLayout());
+        renderer->CreateComputePipeline(shaderManager.compShaderModules[0]);
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 
@@ -619,8 +619,8 @@ void Application::Initialize(){
     }
     mainCamera.SetRotationSensitivity(200.0f);
 
-    instance_sdlcore->SetKeyboardSensibility(appInfo->MainCamera.camera_keyboard_sensitive);
-    instance_sdlcore->SetMouseSensibility(appInfo->MainCamera.camera_mouse_sensitive);
+    sdler->SetKeyboardSensibility(appInfo->MainCamera.camera_keyboard_sensitive);
+    sdler->SetMouseSensibility(appInfo->MainCamera.camera_mouse_sensitive);
 
     lightCameras[0].cameraType = (CameraType)appInfo->LightCamera.camera_mode;
     lightCameras[0].SetPosition(appInfo->LightCamera.camera_position[0], appInfo->LightCamera.camera_position[1],  appInfo->LightCamera.camera_position[2]);
@@ -657,7 +657,7 @@ void Application::Initialize(){
     /****************************
     * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
-    instance_renderercore->CreateSyncObjects(swapchain.swapchainImageSize);
+    renderer->CreateSyncObjects(swapchain.swapchainImageSize);
     shaderManager.Destroy();
 
     TimePoint T13 = now();

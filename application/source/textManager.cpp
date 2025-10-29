@@ -93,24 +93,24 @@ void CTextbox::Draw(){
 
     //std::cout<<"Drawing TextBox ID: "<<m_textBoxID<<", text: "<<m_text_content<<std::endl;
     //VkPipelineLayout *p_graphicsPipelineLayout = &(p_renderProcess->graphicsPipelineLayouts[m_default_graphics_pipeline_id]);
-    VkPipelineLayout *p_graphicsPipelineLayout = &(instance_renderercore->GetGraphicsPipelineLayout(m_default_graphics_pipeline_id));
+    VkPipelineLayout *p_graphicsPipelineLayout = &(renderer->GetGraphicsPipelineLayout(m_default_graphics_pipeline_id));
     //p_renderer->BindPipeline(p_renderProcess->graphicsPipelines[m_default_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS, p_renderer->graphicsCmdId);
-    //instance_renderercore->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[m_default_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
-    instance_renderercore->BindGraphicsPipeline(instance_renderercore->GetGraphicsPipeline(m_default_graphics_pipeline_id), VK_PIPELINE_BIND_POINT_GRAPHICS);
+    //renderer->BindGraphicsPipeline(p_renderProcess->graphicsPipelines[m_default_graphics_pipeline_id], VK_PIPELINE_BIND_POINT_GRAPHICS);
+    renderer->BindGraphicsPipeline(renderer->GetGraphicsPipeline(m_default_graphics_pipeline_id), VK_PIPELINE_BIND_POINT_GRAPHICS);
 
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", instanceCount: "<<m_instanceCount<<std::endl;
 
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     //set = 0 is for general uniform; set = 1 is for texture sampler uniform
     
-    if(instance_renderercore->GetSetSize_General() > 0) dsSets.push_back(*p_descriptorSets_graphics_general); 
-    if(instance_renderercore->GetTextureImageSamplersSize() > 0) dsSets.push_back(descriptorSets_graphics_texture_image_sampler); 
+    if(renderer->GetSetSize_General() > 0) dsSets.push_back(*p_descriptorSets_graphics_general); 
+    if(renderer->GetTextureImageSamplersSize() > 0) dsSets.push_back(descriptorSets_graphics_texture_image_sampler); 
 
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", descriptorSets size: "<<dsSets.size()<<std::endl;
 
     if(dsSets.size() > 0){
         int dynamicTextboxMVPOffset = m_textBoxID; //use offset for textboxID=0
-        instance_renderercore->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, 0, dynamicTextboxMVPOffset);
+        renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, 0, dynamicTextboxMVPOffset);
     }
 
   
@@ -118,15 +118,15 @@ void CTextbox::Draw(){
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", binding vertex and index buffer."<<"modelID: "<<m_model_id<<std::endl;
     //std::cout<<"vertex size:"<<p_renderer->vertexDataBuffers.size()<<" instance size: "<<p_renderer->instanceDataBuffers.size()<<std::endl;
     //p_renderer->BindVertexInstanceBuffer(m_model_id, m_textBoxID);
-    instance_renderercore->BindVertexInstanceBuffer(m_model_id, &(instanceDataBuffer.buffer));
+    renderer->BindVertexInstanceBuffer(m_model_id, &(instanceDataBuffer.buffer));
       //hack
     //if(m_textBoxID != 0) return;
 
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", binding index buffer and drawing."<<std::endl;
-    instance_renderercore->BindIndexBuffer(m_model_id);
+    renderer->BindIndexBuffer(m_model_id);
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", drawing indexed."<<std::endl;
     //p_renderer->DrawInstanceIndexed(m_model_id, instanceData.size());
-    instance_renderercore->DrawInstanceIndexed(m_model_id, m_currentCharCount);
+    renderer->DrawInstanceIndexed(m_model_id, m_currentCharCount);
     //std::cout<<"TextBox ID: "<<m_textBoxID<<" drawn."<<std::endl;
 }
 
@@ -149,9 +149,9 @@ void CTextbox::Register(LEApplication::Application *p_app){
     //for(auto& ch : m_characters){
     //ch.SetInstanceCount(m_instanceCount);
     //p_renderer = &(p_app->renderer);
-    instance_renderercore = p_app->instance_renderercore;
+    renderer = p_app->renderer;
     //p_renderProcess = &(p_app->renderProcess);
-    p_descriptorSets_graphics_general = &(instance_renderercore->GetDescriptorSets_General());
+    p_descriptorSets_graphics_general = &(renderer->GetDescriptorSets_General());
     //ch.descriptorSets_graphics_texture_image_sampler;
     p_textImageManager = &(p_app->textImageManager);
     //p_textManager = &(p_app->textManager); //set this outside register function
@@ -160,9 +160,9 @@ void CTextbox::Register(LEApplication::Application *p_app){
         //CGraphicsDescriptorManager::graphicsDescriptorPool,
         //CGraphicsDescriptorManager::descriptorSetLayout_textureImageSampler,
         //CGraphicsDescriptorManager::textureImageSamplers
-        instance_renderercore->GetGraphicsDescriptorPool(),
-        instance_renderercore->GetDescriptorSetLayout_TextureImageSampler(),
-        instance_renderercore->GetTextureImageSamplers()
+        renderer->GetGraphicsDescriptorPool(),
+        renderer->GetDescriptorSetLayout_TextureImageSampler(),
+        renderer->GetTextureImageSamplers()
     );
     //}
     //std::cout<<"TextBox ID: "<<m_textBoxID<<" registered."<<std::endl;
@@ -320,7 +320,7 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     /********************************
     * Calculate model matrix based on Translation, Rotation and Scale
     ********************************/
-   if(instance_renderercore->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
+   if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
         if(p_controlNode == NULL)  CTextManager::textMVPUBO.mvpData[m_textBoxID].model = ModelMatrix;
         else CTextManager::textMVPUBO.mvpData[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
 
@@ -418,7 +418,7 @@ void CTextManager::CreateTextImage(){
     textureImage.m_mipLevels = 1;
     textureImage.m_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     //textureImage.m_pCommandPool = &(p_renderer->commandPool);
-    textureImage.m_pCommandPool = &instance_renderercore->GetCommandPool();
+    textureImage.m_pCommandPool = &renderer->GetCommandPool();
 
     //textureImage.GetTexels(texturePath);
     textureImage.m_pTexels = pixels;

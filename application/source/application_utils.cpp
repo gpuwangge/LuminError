@@ -91,22 +91,22 @@ void Application::CleanUp(){
     swapchain.CleanUp();
     //std::cout<<"Application: renderProcess.CleanUp()"<<std::endl;
     //renderProcess.Cleanup();
-    instance_renderercore->RenderProcessCleanup();
+    renderer->RenderProcessCleanup();
 
     //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
     //graphicsDescriptorManager.DestroyAndFree();
-    instance_renderercore->GraphicsDescriptorManagerDestroyAndFree();
+    renderer->GraphicsDescriptorManagerDestroyAndFree();
     //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
-    instance_renderercore->ComputeDescriptorManagerDestroyAndFree();
+    renderer->ComputeDescriptorManagerDestroyAndFree();
 
     //std::cout<<"Application: textureManager.Destroy()"<<std::endl;
     textureManager.Destroy();
     textImageManager.Destroy();
     textManager.Destroy();
 
-    //std::cout<<"Application: instance_renderercore begin Destroy()"<<std::endl;
-    instance_renderercore->Destroy();
-    //std::cout<<"Application: instance_renderercore end Destroy()"<<std::endl;
+    //std::cout<<"Application: renderer begin Destroy()"<<std::endl;
+    renderer->Destroy();
+    //std::cout<<"Application: renderer end Destroy()"<<std::endl;
 
     //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
     vkDestroyDevice(CContext::GetHandle().GetLogicalDevice(), nullptr);
@@ -159,10 +159,10 @@ extern "C" void* CreateInstance(){ return new Application();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
         static_cast<Application*>(p)->CleanUp();
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->instance_yamlcore);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->instance_sdlcore);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_game);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->instance_renderercore);
+        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->yamler);
+        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->sdler);
+        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->gamer);
+        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->renderer);
         delete static_cast<Application*>(p);
         //std::cout<<"- Destroy Instance Application."<<std::endl;
     } 
@@ -170,7 +170,7 @@ extern "C" void DestroyInstance(void *p){
 
 
 
-bool Application::Get_feature_graphics_enable_controls()  {return instance_yamlcore->GetAppInfo().Feature.feature_graphics_enable_controls;}
+bool Application::Get_feature_graphics_enable_controls()  {return yamler->GetAppInfo().Feature.feature_graphics_enable_controls;}
 bool Application::Get_feature_graphics_show_all_metric_controls()  {return appInfo->Feature.feature_graphics_show_all_metric_controls;}
 bool Application::Get_feature_graphics_show_performance_control()  {return appInfo->Feature.feature_graphics_show_performance_control;}
 void Application::Set_feature_graphics_enable_controls(bool value)  {appInfo->Feature.feature_graphics_enable_controls = value;}
@@ -210,7 +210,7 @@ void Application::DrawObjects(int startObjectId, int endObjectId) {
 void Application::DrawObject(int objectId, int pipelineId) { objects[objectId].Draw(pipelineId); }
 void Application::DrawObject(int objectId, int pipelineId, int numVertex) { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
 void Application::DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) {
-    objects[objectId].Draw(instance_renderercore->GetStorageBuffers(), -1, particleCount);
+    objects[objectId].Draw(renderer->GetStorageBuffers(), -1, particleCount);
 }
 
 void Application::ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
@@ -223,15 +223,15 @@ void Application::SetComputeCustomBinding(void* binding) {
     if (bindingPtr) appInfo->Uniform.ComputeCustom.Binding = *bindingPtr;
 }
 void Application::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
-    instance_renderercore->uploadComputeCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+    renderer->uploadComputeCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 void Application::SetComputeStorageBufferSize(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
 void Application::SetComputeStorageBufferUsage(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
 void Application::UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
-    instance_renderercore->uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+    renderer->uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
 }
 void Application::DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
-    instance_renderercore->downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+    renderer->downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
 }
 
 void Application::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }
@@ -241,7 +241,7 @@ void Application::SetGraphicsCustomBinding(void* binding) {
 }
 void Application::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
     //graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
-    instance_renderercore->uploadGraphicsCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+    renderer->uploadGraphicsCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 
 void Application::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }
@@ -274,29 +274,29 @@ void Application::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)m
 void Application::SetPause(bool value) { NeedToPause = value; }
 int Application::GetWindowWidth() { return windowWidth; }
 int Application::GetWindowHeight() { return windowHeight; }
-int Application::GetCurrentFrame() { return instance_renderercore->GetCurrentFrame();}
+int Application::GetCurrentFrame() { return renderer->GetCurrentFrame();}
 double Application::GetElapseTime() { return elapseTime;}
 double Application::GetDeltaTime() { return deltaTime; }
 
-void Application::CmdNextSubpass() { vkCmdNextSubpass(instance_renderercore->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
+void Application::CmdNextSubpass() { vkCmdNextSubpass(renderer->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
 void Application::SetSwapchainImageSize(int size) { swapchain.swapchainImageSize = size; }
 void Application::EnableComputeSwapChainImage(bool enable) { swapchain.bComputeSwapChainImage = enable; }
 void Application::DeviceWaitIdle() { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
 
 void Application::PushConstantToCommand(void* pcData, int pipelineId) {
-    instance_renderercore->PushConstantToCommand(pcData, instance_renderercore->GetGraphicsPipelineLayout(pipelineId), shaderManager.pushConstantRange);
+    renderer->PushConstantToCommand(pcData, renderer->GetGraphicsPipelineLayout(pipelineId), shaderManager.pushConstantRange);
 }
 void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
-    vkCmdSetDepthBias(instance_renderercore->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+    vkCmdSetDepthBias(renderer->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 }
 
 void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
-    std::vector<VkCommandBuffer> &commandBuffers = instance_renderercore->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
+    std::vector<VkCommandBuffer> &commandBuffers = renderer->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
     std::vector<VkImage> &swapChainImages = swapchain.swapchain_images;
 
     for (size_t i = 0; i < commandBuffers.size(); i++) {
         //renderer.currentFrame = i;
-        instance_renderercore->SetCurrentFrame(i);
+        renderer->SetCurrentFrame(i);
         //std::cout<<"commandbuffer i: "<<i<<std::endl;
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -305,16 +305,16 @@ void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numW
         //    throw std::runtime_error("failed to begin recording command buffer!");
         //}
         //renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
-        instance_renderercore->StartRecordComputeCommandBuffer(instance_renderercore->GetComputePipeline(), instance_renderercore->GetComputePipelineLayout());
+        renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
 
-        instance_renderercore->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
+        renderer->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
             VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
             VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 
         Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 
-        instance_renderercore->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
+        renderer->RecordImageBarrier(commandBuffers[i], swapChainImages[i],
             VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
             VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
@@ -322,10 +322,10 @@ void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numW
         //if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
         //    throw std::runtime_error("failed to record command buffer!");
         //}
-        instance_renderercore->EndRecordComputeCommandBuffer();
+        renderer->EndRecordComputeCommandBuffer();
     }
     //renderer.currentFrame = 0;
-    instance_renderercore->SetCurrentFrame(0);
+    renderer->SetCurrentFrame(0);
 }
 
 }

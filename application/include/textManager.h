@@ -31,7 +31,7 @@ class CTextManager;
 
 class CTextbox : public CEntity {
     //CRenderer *p_renderer;
-    LERenderer::IRendererCore *instance_renderercore = NULL;
+    LERenderer::IRendererCore *renderer = NULL;
 
     //CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
@@ -99,7 +99,7 @@ public:
     std::vector<CTextbox> m_textBoxes;
 
     //CRenderer *p_renderer = NULL;
-    LERenderer::IRendererCore *instance_renderercore = NULL;
+    LERenderer::IRendererCore *renderer = NULL;
 
     CTextImageManager *p_textImageManager = NULL;
     CModelManager *p_modelManager = NULL;
