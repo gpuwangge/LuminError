@@ -2,7 +2,6 @@
 #define H_COMPUTEDESCRIPTOR
 
 #include "context.h"
-#include "../include/texture.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeUniform.h"
@@ -33,7 +32,7 @@ public:
      * Set
      ************/
     std::vector<VkDescriptorSet> descriptorSets; //one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
-    void createDescriptorSets(std::vector<CTextureImage> *textureImages = NULL, std::vector<VkImageView> *swapchainImageViews = NULL);
+    void createDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL);
 
 
     /************

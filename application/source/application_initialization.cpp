@@ -331,7 +331,7 @@ void Application::Initialize(){
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage)
-                computeDescriptorManager.createDescriptorSets(&(textureManager.textureImages), &(swapchain.swapchain_views));//this must be called after texture resource is loaded
+                computeDescriptorManager.createDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(swapchain.swapchain_views));//this must be called after texture resource is loaded
             else computeDescriptorManager.createDescriptorSets(NULL, &(swapchain.swapchain_views));
         }else computeDescriptorManager.createDescriptorSets();
     }

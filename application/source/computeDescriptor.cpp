@@ -1,4 +1,5 @@
-#include "../include/computeDescriptor.h"
+#include "computeDescriptor.h"
+#include <iostream>
 
 //Declare static variables here:
 /************
@@ -126,7 +127,7 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
 /************
  * Set
  ************/
-void CComputeDescriptorManager::createDescriptorSets(std::vector<CTextureImage> *textureImages, std::vector<VkImageView> *swapchainImageViews){
+void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageView, std::vector<VkImageView> *swapchainImageViews){
     //Descriptor Step 3/3
     //HERE_I_AM("wxjCreateDescriptorSets");
 
@@ -210,7 +211,7 @@ void CComputeDescriptorManager::createDescriptorSets(std::vector<CTextureImage> 
         if(computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE){
             VkDescriptorImageInfo storageImageInfo{};
             storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-            storageImageInfo.imageView = (*textureImages)[0].m_textureImageBuffer.view;
+            storageImageInfo.imageView = textureImageView;
             storageImageInfo.sampler = VK_NULL_HANDLE; //textureSamplers[0];
 
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
