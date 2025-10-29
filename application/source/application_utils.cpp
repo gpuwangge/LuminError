@@ -97,7 +97,7 @@ void Application::CleanUp(){
     //graphicsDescriptorManager.DestroyAndFree();
     instance_renderercore->GraphicsDescriptorManagerDestroyAndFree();
     //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
-    computeDescriptorManager.DestroyAndFree();
+    instance_renderercore->ComputeDescriptorManagerDestroyAndFree();
 
     //std::cout<<"Application: textureManager.Destroy()"<<std::endl;
     textureManager.Destroy();
@@ -210,7 +210,7 @@ void Application::DrawObjects(int startObjectId, int endObjectId) {
 void Application::DrawObject(int objectId, int pipelineId) { objects[objectId].Draw(pipelineId); }
 void Application::DrawObject(int objectId, int pipelineId, int numVertex) { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
 void Application::DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) {
-    objects[objectId].Draw(computeDescriptorManager.storageBuffers, -1, particleCount);
+    objects[objectId].Draw(instance_renderercore->GetStorageBuffers(), -1, particleCount);
 }
 
 void Application::ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
@@ -223,15 +223,15 @@ void Application::SetComputeCustomBinding(void* binding) {
     if (bindingPtr) appInfo->Uniform.ComputeCustom.Binding = *bindingPtr;
 }
 void Application::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
-    computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+    instance_renderercore->uploadComputeCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 void Application::SetComputeStorageBufferSize(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
 void Application::SetComputeStorageBufferUsage(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
 void Application::UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
-    computeDescriptorManager.uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+    instance_renderercore->uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
 }
 void Application::DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
-    computeDescriptorManager.downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+    instance_renderercore->downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
 }
 
 void Application::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }
@@ -241,7 +241,7 @@ void Application::SetGraphicsCustomBinding(void* binding) {
 }
 void Application::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
     //graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
-    instance_renderercore->uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+    instance_renderercore->uploadGraphicsCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 
 void Application::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }

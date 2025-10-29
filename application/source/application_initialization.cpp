@@ -71,7 +71,7 @@ void Application::Initialize(){
     /****************************
     * 4 Initialize Uniforms
     ****************************/
-    if(appInfo->Uniform.b_uniform_graphics_custom) instance_renderercore->addCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
+    if(appInfo->Uniform.b_uniform_graphics_custom) instance_renderercore->addGraphicsCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
     if(appInfo->Uniform.b_uniform_graphics_lighting) instance_renderercore->addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
     if(appInfo->Uniform.b_uniform_graphics_object_mvp){
         instance_renderercore->addMVPUniformBuffer(CObjectManager::mvpUniformBuffersMapped);
@@ -91,10 +91,10 @@ void Application::Initialize(){
     if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) instance_renderercore->addDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) instance_renderercore->addLightDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) instance_renderercore->addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
-    if(appInfo->Uniform.b_uniform_compute_custom) CComputeDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
-    if(appInfo->Uniform.b_uniform_compute_storage) CComputeDescriptorManager::addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
-    if(appInfo->Uniform.b_uniform_compute_texture_storage) CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
-    if(appInfo->Uniform.b_uniform_compute_swapchain_storage) CComputeDescriptorManager::addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
+    if(appInfo->Uniform.b_uniform_compute_custom) instance_renderercore->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
+    if(appInfo->Uniform.b_uniform_compute_storage) instance_renderercore->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
+    if(appInfo->Uniform.b_uniform_compute_texture_storage) instance_renderercore->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
+    if(appInfo->Uniform.b_uniform_compute_swapchain_storage) instance_renderercore->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
 
     if(appInfo->Samplers.size() > 0){
         //CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
@@ -277,11 +277,11 @@ void Application::Initialize(){
                 if(textureMipLevel > 1) //mipmap
                     usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 else 
-                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+                    if(instance_renderercore->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
                     else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 
                 if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                    if(CComputeDescriptorManager::computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
+                    if(instance_renderercore->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
                     else textureManager.CreateTextureImage(textureName, usage, instance_renderercore->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
                 }else{ //48bpt
                     //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
@@ -306,34 +306,37 @@ void Application::Initialize(){
     bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_mvp || appInfo->Uniform.b_uniform_graphics_text_mvp || appInfo->Uniform.b_uniform_graphics_object_vp;
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_uniform_compute_storage || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     //UNIFORM STEP 1/3 (Pool)
-    instance_renderercore->createDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
-    CComputeDescriptorManager::createDescriptorPool();
+    instance_renderercore->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
+    instance_renderercore->createComputeDescriptorPool();
 
     //UNIFORM STEP 2/3 (Layer)
     if(b_uniform_graphics){
         if(appInfo->Uniform.b_uniform_graphics_custom){
-            instance_renderercore->createDescriptorSetLayout_General(&appInfo->Uniform.GraphicsCustom.Binding);
+            instance_renderercore->createGraphicsDescriptorSetLayout_General(&appInfo->Uniform.GraphicsCustom.Binding);
         }
         else {
-            instance_renderercore->createDescriptorSetLayout_General();
+            instance_renderercore->createGraphicsDescriptorSetLayout_General();
         }
-        if(instance_renderercore->GetTextureImageSamplersSize() > 0) instance_renderercore->createDescriptorSetLayout_TextureImageSampler(); 
+        if(instance_renderercore->GetTextureImageSamplersSize() > 0) instance_renderercore->createGraphicsDescriptorSetLayout_TextureImageSampler(); 
     }
     if(b_uniform_compute){
-        if(appInfo->Uniform.b_uniform_compute_custom) CComputeDescriptorManager::createDescriptorSetLayout(&appInfo->Uniform.ComputeCustom.Binding);
-        else CComputeDescriptorManager::createDescriptorSetLayout();
+        if(appInfo->Uniform.b_uniform_compute_custom) {
+            instance_renderercore->createComputeDescriptorSetLayout(&appInfo->Uniform.ComputeCustom.Binding);
+        }else {
+            instance_renderercore->createComputeDescriptorSetLayout();
+        }
     }
 
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
     for(int i = 0; i < swapchain.buffer_depthlight.size(); i++) depthlight_imageviews.push_back(swapchain.buffer_depthlight[i].view);
-    if(b_uniform_graphics) instance_renderercore->createDescriptorSets_General(swapchain.buffer_depthcamera.view, depthlight_imageviews);
+    if(b_uniform_graphics) instance_renderercore->createGraphicsDescriptorSets_General(swapchain.buffer_depthcamera.view, depthlight_imageviews);
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage)
-                computeDescriptorManager.createDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(swapchain.swapchain_views));//this must be called after texture resource is loaded
-            else computeDescriptorManager.createDescriptorSets(NULL, &(swapchain.swapchain_views));
-        }else computeDescriptorManager.createDescriptorSets();
+                instance_renderercore->createComputeDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(swapchain.swapchain_views));//this must be called after texture resource is loaded
+            else instance_renderercore->createComputeDescriptorSets(NULL, &(swapchain.swapchain_views));
+        }else instance_renderercore->createComputeDescriptorSets();
     }
 
     TimePoint T7 = now();
@@ -458,7 +461,7 @@ void Application::Initialize(){
     }
     if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
-        instance_renderercore->CreateComputePipelineLayout(CComputeDescriptorManager::descriptorSetLayout);
+        instance_renderercore->CreateComputePipelineLayout(instance_renderercore->GetComputeDescriptorSetLayout());
         instance_renderercore->CreateComputePipeline(shaderManager.compShaderModules[0]);
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;

@@ -287,7 +287,7 @@ void Application::Record_Present(){
 
 void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
-    dsSets.push_back(computeDescriptorManager.descriptorSets);
+    dsSets.push_back(instance_renderercore->GetDescriptorSets());
     instance_renderercore->BindComputeDescriptorSets(instance_renderercore->GetComputePipelineLayout(), dsSets);
     instance_renderercore->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 }

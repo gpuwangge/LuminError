@@ -6,6 +6,7 @@
 #include "Enum.h"
 #include "renderProcess.h"
 #include "graphicsDescriptor.h"
+#include "computeDescriptor.h"
 
 namespace LERenderer{
     class RendererCore final : public IRendererCore{
@@ -134,15 +135,17 @@ namespace LERenderer{
         std::vector<VkSemaphore> computeFinishedSemaphores;
         std::vector<VkFence> computeInFlightFences;
 
-        /**************************
-         * RenderProcess
-         * ***********************/
-        CRenderProcess renderProcess;
         void SetApplication(LEApplication::IApplication* pApplication) override {
             game = pApplication;
             renderProcess.game = game;
             graphicsDescriptorManager.game = game;
+            computeDescriptorManager.game = game;
         }
+
+        /**************************
+         * RenderProcess
+         * ***********************/
+        CRenderProcess renderProcess;
 
         void SetShadowmapAttachmentDepthLight(int value) override { renderProcess.iShadowmapAttachmentDepthLight = value; }
         void SetMainSceneAttachmentDepthLight(int value) override { renderProcess.iMainSceneAttachmentDepthLight = value; }
@@ -236,15 +239,15 @@ namespace LERenderer{
         //VkDescriptorSetLayout& GetDescriptorSetLayout_TextureImageSampler() override { return graphicsDescriptorManager.descriptorSetLayout_textureImageSampler; }
         std::vector<VkSampler>& GetTextureImageSamplers() override { return graphicsDescriptorManager.textureImageSamplers; }
 
-        void createDescriptorPool(unsigned int object_textbox_count = 0) override { graphicsDescriptorManager.createDescriptorPool(object_textbox_count); }
-        void createDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { graphicsDescriptorManager.createDescriptorSetLayout_General(customBinding); }
-        void createDescriptorSetLayout_TextureImageSampler() override { graphicsDescriptorManager.createDescriptorSetLayout_TextureImageSampler(); }
-        void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) override { graphicsDescriptorManager.createDescriptorSets_General(depthImageView, depthlight_imageviews); }
+        void createGraphicsDescriptorPool(unsigned int object_textbox_count = 0) override { graphicsDescriptorManager.createDescriptorPool(object_textbox_count); }
+        void createGraphicsDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { graphicsDescriptorManager.createDescriptorSetLayout_General(customBinding); }
+        void createGraphicsDescriptorSetLayout_TextureImageSampler() override { graphicsDescriptorManager.createDescriptorSetLayout_TextureImageSampler(); }
+        void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) override { graphicsDescriptorManager.createDescriptorSets_General(depthImageView, depthlight_imageviews); }
 
         void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped) override { graphicsDescriptorManager.addMVPUniformBuffer(mvpUniformBuffersMapped); }
         void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped) override { graphicsDescriptorManager.addTextMVPUniformBuffer(textMVPUniformBuffersMapped); }
-        void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { graphicsDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
-        void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
+        void addGraphicsCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { graphicsDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
+        void uploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
         void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) override { graphicsDescriptorManager.addLightingUniformBuffer(lightingUniformBuffersMapped); }
         void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) override { graphicsDescriptorManager.addVPUniformBuffer(vpUniformBuffersMapped); }
         void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) override { graphicsDescriptorManager.addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats); }
@@ -253,6 +256,29 @@ namespace LERenderer{
         void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() override { graphicsDescriptorManager.addLightDepthImageSamplerUniformBuffer_hardwareDepthBias(); }
 
         virtual void GraphicsDescriptorManagerDestroyAndFree() override { graphicsDescriptorManager.DestroyAndFree(); }
+
+        /**************************
+         * Compute Descriptor
+         * ***********************/
+        CComputeDescriptorManager computeDescriptorManager;
+
+        int GetComputeUniformTypes() override { return computeDescriptorManager.computeUniformTypes; }
+        VkDescriptorSetLayout& GetComputeDescriptorSetLayout() override { return computeDescriptorManager.descriptorSetLayout; }
+        std::vector<CWxjBuffer>& GetStorageBuffers() override { return computeDescriptorManager.storageBuffers; }
+        std::vector<VkDescriptorSet>& GetDescriptorSets() override { return computeDescriptorManager.descriptorSets; }
+
+        void createComputeDescriptorPool() override { computeDescriptorManager.createDescriptorPool(); }
+        void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { computeDescriptorManager.createDescriptorSetLayout(customBinding); }
+        void createComputeDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL) override { computeDescriptorManager.createDescriptorSets(textureImageView, swapchainImageViews); }
+
+        void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { computeDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
+        void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
+        void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer(storageBufferSize, usage); }
+        void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer(currentFrame, data, size); }
+        void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer(currentFrame, data, size); }
+        void addStorageImage(VkBufferUsageFlags usage) override { computeDescriptorManager.addStorageImage(usage); }
+
+	    void ComputeDescriptorManagerDestroyAndFree() override { computeDescriptorManager.DestroyAndFree(); }
 
     };
     EXPORT_FACTORY_FOR(RendererCore);

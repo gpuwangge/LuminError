@@ -171,23 +171,17 @@ namespace LERenderer{
 
         virtual std::vector<VkDescriptorSet>& GetDescriptorSets_General() = 0;
         virtual VkDescriptorPool& GetGraphicsDescriptorPool() = 0;
-        //virtual VkDescriptorSetLayout& GetDescriptorSetLayout_TextureImageSampler() = 0;
         virtual std::vector<VkSampler>& GetTextureImageSamplers() = 0;
-        //std::vector<VkDescriptorSet> descriptorSets_general;
-        //static VkDescriptorPool graphicsDescriptorPool;
-        //static VkDescriptorSetLayout descriptorSetLayout_textureImageSampler;
-        //static std::vector<VkSampler> textureImageSamplers;
 
-
-        virtual void createDescriptorPool(unsigned int object_textbox_count = 0) = 0;
-        virtual void createDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
-        virtual void createDescriptorSetLayout_TextureImageSampler() = 0;
-        virtual void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) = 0;
+        virtual void createGraphicsDescriptorPool(unsigned int object_textbox_count = 0) = 0;
+        virtual void createGraphicsDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
+        virtual void createGraphicsDescriptorSetLayout_TextureImageSampler() = 0;
+        virtual void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) = 0;
 
         virtual void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped) = 0;
         virtual void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped) = 0;
-        virtual void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
-        virtual void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
+        virtual void addGraphicsCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
+        virtual void uploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) = 0;
         virtual void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) = 0;
         virtual void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) = 0;
@@ -196,6 +190,27 @@ namespace LERenderer{
         virtual void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() = 0;
 
         virtual void GraphicsDescriptorManagerDestroyAndFree() = 0;
+
+        /**************************
+         * Compute Descriptor
+         * ***********************/
+        virtual int GetComputeUniformTypes() = 0;
+        virtual VkDescriptorSetLayout& GetComputeDescriptorSetLayout() = 0;
+        virtual std::vector<CWxjBuffer>& GetStorageBuffers() = 0;
+        virtual std::vector<VkDescriptorSet>& GetDescriptorSets() = 0;
+
+        virtual void createComputeDescriptorPool() = 0;
+        virtual void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
+        virtual void createComputeDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL) = 0;
+
+        virtual void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
+        virtual void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
+        virtual void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) = 0; //the same function to add storage 1&2
+        virtual void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size) = 0;
+        virtual void addStorageImage(VkBufferUsageFlags usage) = 0;
+
+	    virtual void ComputeDescriptorManagerDestroyAndFree() = 0;
 
     protected:
         //AppInfo appInfo;
