@@ -466,9 +466,9 @@ void CGraphicsDescriptorManager::addMVPUniformBuffer(std::vector<void*>& mvpUnif
 * 2 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP
 ************/
 std::vector<CWxjBuffer> CGraphicsDescriptorManager::textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-std::vector<void*> CGraphicsDescriptorManager::textMVPUniformBuffersMapped;
-TextMVPUniformBufferObject CGraphicsDescriptorManager::textMVPUBO;
-void CGraphicsDescriptorManager::addTextMVPUniformBuffer(){
+//std::vector<void*> CGraphicsDescriptorManager::textMVPUniformBuffersMapped;
+//TextMVPUniformBufferObject CGraphicsDescriptorManager::textMVPUBO;
+void CGraphicsDescriptorManager::addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_TEXT_MVP;
     //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 

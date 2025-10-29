@@ -50,9 +50,7 @@ public:
      * 2 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP
      ************/
     static std::vector<CWxjBuffer> textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-	static std::vector<void*> textMVPUniformBuffersMapped;
-    static void addTextMVPUniformBuffer();
-    static TextMVPUniformBufferObject textMVPUBO;
+    static void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped);
 
     /************
      * 3 GRAPHCIS_UNIFORMBUFFER_CUSTOM

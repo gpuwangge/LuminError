@@ -1,7 +1,6 @@
 #ifndef H_TEXTMANAGER
 #define H_TEXTMANAGER
 
-//#include "renderProcess.h"
 #include "context.h"
 #include "camera.hpp"
 #include "utility.h"
@@ -12,6 +11,7 @@
 #include "TypeText.h"
 #include <map>
 #include "IRendererCore.h"
+#include "TypeUniform.h"
 
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
@@ -93,6 +93,9 @@ class CTextManager {
     glm::vec4 m_textcolor = glm::vec4(0.0f);
     
 public:
+    inline static std::vector<void*> textMVPUniformBuffersMapped;
+    inline static TextMVPUniformBufferObject textMVPUBO;
+
     std::vector<CTextbox> m_textBoxes;
 
     //CRenderer *p_renderer = NULL;

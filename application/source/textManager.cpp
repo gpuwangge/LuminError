@@ -1,7 +1,10 @@
-#include "../include/textManager.h"
-#include "../include/application.h"
+#include "textManager.h"
 #include "Foundation.h"
 #include "Config.h"
+#include "texture.h"
+#include "controlNode.h"
+#include "modelManager.h"
+#include "application.h"
 
 /*************
 * Change from CCharacter(no use) to CTextBox
@@ -314,8 +317,8 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     * Calculate model matrix based on Translation, Rotation and Scale
     ********************************/
    if(CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
-        if(p_controlNode == NULL)  CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].model = ModelMatrix;
-        else CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
+        if(p_controlNode == NULL)  CTextManager::textMVPUBO.mvpData[m_textBoxID].model = ModelMatrix;
+        else CTextManager::textMVPUBO.mvpData[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
 
         //std::cout<< "TextBox ID: " << m_textBoxID << " Model Matrix: " << glm::to_string(CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].model) << std::endl;
         // std::cout<< "TextBox ID: " << m_textBoxID << " TranslateMatrix: " << glm::to_string(TranslateMatrix) << std::endl;
@@ -329,14 +332,14 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
         //std::cout<< "Delta Time: " << deltaTime << std::endl;
 
         if(!bSticker){
-            CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = mainCamera.matrices.projection;
-            CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = mainCamera.matrices.view;
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = mainCamera.matrices.projection;
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = mainCamera.matrices.view;
         }else{
-            CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = glm::mat4(1.0f);
-            CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = glm::mat4(1.0f);
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = glm::mat4(1.0f);
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = glm::mat4(1.0f);
         }
 
-        memcpy(CGraphicsDescriptorManager::textMVPUniformBuffersMapped[currentFrame], &CGraphicsDescriptorManager::textMVPUBO, sizeof(CGraphicsDescriptorManager::textMVPUBO));
+        memcpy(CTextManager::textMVPUniformBuffersMapped[currentFrame], &CTextManager::textMVPUBO, sizeof(CTextManager::textMVPUBO));
    }
     //for(auto& ch : m_characters){ 
         //ch.Update();

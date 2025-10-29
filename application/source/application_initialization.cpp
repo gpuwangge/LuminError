@@ -79,7 +79,7 @@ void Application::Initialize(){
         instance_renderercore->SetEnableObjectMVP(true);
     }
     if(appInfo->Uniform.b_uniform_graphics_text_mvp){
-        CGraphicsDescriptorManager::addTextMVPUniformBuffer();
+        CGraphicsDescriptorManager::addTextMVPUniformBuffer(CTextManager::textMVPUniformBuffersMapped);
         //renderer.bUseTextboxMVP = true;
         instance_renderercore->SetEnableTextboxMVP(true);
     }   
