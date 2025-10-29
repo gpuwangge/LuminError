@@ -447,9 +447,9 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
 * 1 GRAPHCIS_UNIFORMBUFFER_MVP
 ************/
 std::vector<CWxjBuffer> CGraphicsDescriptorManager::mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-std::vector<void*> CGraphicsDescriptorManager::mvpUniformBuffersMapped;
-MVPUniformBufferObject CGraphicsDescriptorManager::mvpUBO;
-void CGraphicsDescriptorManager::addMVPUniformBuffer(){
+//std::vector<void*> CGraphicsDescriptorManager::mvpUniformBuffersMapped;
+//MVPUniformBufferObject CGraphicsDescriptorManager::mvpUBO;
+void CGraphicsDescriptorManager::addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_MVP;
     //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
@@ -538,9 +538,9 @@ void CGraphicsDescriptorManager::addLightingUniformBuffer(std::vector<void*>& li
 * 5 GRAPHCIS_UNIFORMBUFFER_VP
 ************/
 std::vector<CWxjBuffer> CGraphicsDescriptorManager::vpUniformBuffers; 
-std::vector<void*> CGraphicsDescriptorManager::vpUniformBuffersMapped;
-VPUniformBufferObject CGraphicsDescriptorManager::vpUBO;
-void CGraphicsDescriptorManager::addVPUniformBuffer(){
+//std::vector<void*> CGraphicsDescriptorManager::vpUniformBuffersMapped;
+//VPUniformBufferObject CGraphicsDescriptorManager::vpUBO;
+void CGraphicsDescriptorManager::addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_VP;
 
     vpUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);

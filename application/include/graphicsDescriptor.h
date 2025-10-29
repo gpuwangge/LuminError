@@ -42,9 +42,9 @@ public:
      * 1 GRAPHCIS_UNIFORMBUFFER_MVP
      ************/
     static std::vector<CWxjBuffer> mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-	static std::vector<void*> mvpUniformBuffersMapped;
-    static void addMVPUniformBuffer();
-    static MVPUniformBufferObject mvpUBO;
+	//static std::vector<void*> mvpUniformBuffersMapped;
+    static void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped);
+    //static MVPUniformBufferObject mvpUBO;
 
     /************
      * 2 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP
@@ -76,9 +76,9 @@ public:
      * 5 GRAPHCIS_UNIFORMBUFFER_VP
      ************/
     static std::vector<CWxjBuffer> vpUniformBuffers; 
-	static std::vector<void*> vpUniformBuffersMapped;
-    static void addVPUniformBuffer();
-    static VPUniformBufferObject vpUBO;
+	//static std::vector<void*> vpUniformBuffersMapped;
+    static void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped);
+    //static VPUniformBufferObject vpUBO;
     //static bool CheckMVP(); //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
 
     /************

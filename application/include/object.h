@@ -1,13 +1,13 @@
 #ifndef H_OBJECT
 #define H_OBJECT
 
-#include "graphicsDescriptor.h"
 #include "entity.h"
 #include "camera.hpp"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "IRendererCore.h"
 #include "texture.h"
+#include "TypeUniform.h"
 
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
@@ -80,6 +80,15 @@ public:
     void Draw_NoIndexNoSet(int graphicsPipelineId = -1, uint32_t n = 0);
     //draw with external buffers
     void Draw(std::vector<CWxjBuffer> &buffer, int graphicsPipelineId = -1, uint32_t n = 0); //const VkBuffer *pBuffers
+};
+
+class CObjectManager{
+public:
+    inline static MVPUniformBufferObject mvpUBO;
+	inline static std::vector<void*> mvpUniformBuffersMapped;
+
+    inline static VPUniformBufferObject vpUBO;
+	inline static std::vector<void*> vpUniformBuffersMapped;
 };
 
 #endif

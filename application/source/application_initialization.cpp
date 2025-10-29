@@ -74,7 +74,7 @@ void Application::Initialize(){
     if(appInfo->Uniform.b_uniform_graphics_custom) CGraphicsDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
     if(appInfo->Uniform.b_uniform_graphics_lighting) CGraphicsDescriptorManager::addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
     if(appInfo->Uniform.b_uniform_graphics_object_mvp){
-        CGraphicsDescriptorManager::addMVPUniformBuffer();
+        CGraphicsDescriptorManager::addMVPUniformBuffer(CObjectManager::mvpUniformBuffersMapped);
         //renderer.bUseObjectMVP = true;
         instance_renderercore->SetEnableObjectMVP(true);
     }
@@ -84,7 +84,7 @@ void Application::Initialize(){
         instance_renderercore->SetEnableTextboxMVP(true);
     }   
     if(appInfo->Uniform.b_uniform_graphics_object_vp){
-        CGraphicsDescriptorManager::addVPUniformBuffer();
+        CGraphicsDescriptorManager::addVPUniformBuffer(CObjectManager::vpUniformBuffersMapped);
         //renderer.bUseObjectMVP = true; //reuse MVP bool
         instance_renderercore->SetEnableObjectMVP(true);
     }

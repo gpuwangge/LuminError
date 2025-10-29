@@ -14,10 +14,10 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     if(CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP){
         //update model matrix to ubo
         if(p_controlNode == NULL) {
-            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model = ModelMatrix;
+            CObjectManager::mvpUBO.mvpData[m_object_id].model = ModelMatrix;
         //    std::cout<<"CObject::Update: object id="<<m_object_id<<" has no control node, use its own model matrix"<<std::endl;
         }else {
-            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model = p_controlNode->ModelMatrix * ModelMatrix;
+            CObjectManager::mvpUBO.mvpData[m_object_id].model = p_controlNode->ModelMatrix * ModelMatrix;
         //     std::cout<<"CObject::Update: object id="<<m_object_id<<" use control node model matrix"<<std::endl;
         //     std::cout<<"p_controlNode->ModelMatrix:"<<std::endl;
         //     std::cout<<p_controlNode->ModelMatrix[0][0]<<","<<p_controlNode->ModelMatrix[0][1]<<","<<p_controlNode->ModelMatrix[0][2]<<","<<p_controlNode->ModelMatrix[0][3]<<std::endl;
@@ -33,12 +33,12 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
 
         //update view and perspective matrices to ubo
         if(!bSticker){
-            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraProj = mainCamera.matrices.projection;
+            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraProj = mainCamera.matrices.projection;
             //if(bSkybox) CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(glm::mat3(mainCamera.matrices.view)); //update: remove translate in shader instead
-            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = mainCamera.matrices.view;
+            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraView = mainCamera.matrices.view;
         }else{
-            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraProj = glm::mat4(1.0f);
-            CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(1.0f);
+            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraProj = glm::mat4(1.0f);
+            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(1.0f);
         }
 
         // std::cout<<"myUBO.mvpDATA["<<m_object_id<<"] lightCameraProj:"<<std::endl;
@@ -61,13 +61,13 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
 
 
         //memcpy to GPU memory
-        memcpy(CGraphicsDescriptorManager::mvpUniformBuffersMapped[currentFrame], &CGraphicsDescriptorManager::mvpUBO, sizeof(CGraphicsDescriptorManager::mvpUBO));
+        memcpy(CObjectManager::mvpUniformBuffersMapped[currentFrame], &CObjectManager::mvpUBO, sizeof(CObjectManager::mvpUBO));
     }
 
     if(CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
-        CGraphicsDescriptorManager::vpUBO.view = mainCamera.matrices.view;
-        CGraphicsDescriptorManager::vpUBO.proj = mainCamera.matrices.projection;
-        memcpy(CGraphicsDescriptorManager::vpUniformBuffersMapped[currentFrame], &CGraphicsDescriptorManager::vpUBO, sizeof(CGraphicsDescriptorManager::vpUBO));
+        CObjectManager::vpUBO.view = mainCamera.matrices.view;
+        CObjectManager::vpUBO.proj = mainCamera.matrices.projection;
+        memcpy(CObjectManager::vpUniformBuffersMapped[currentFrame], &CObjectManager::vpUBO, sizeof(CObjectManager::vpUBO));
     }
 }
 
