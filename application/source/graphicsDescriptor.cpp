@@ -131,10 +131,10 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 	}
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING){
         graphicsBindings[bindingCounter].binding = bindingCounter;
-		graphicsBindings[bindingCounter].descriptorCount = m_lightingUBO.GetBinding().descriptorCount;
-		graphicsBindings[bindingCounter].descriptorType = m_lightingUBO.GetBinding().descriptorType;
-		graphicsBindings[bindingCounter].pImmutableSamplers = m_lightingUBO.GetBinding().pImmutableSamplers;
-		graphicsBindings[bindingCounter].stageFlags = m_lightingUBO.GetBinding().stageFlags;
+		graphicsBindings[bindingCounter].descriptorCount = LightingUniformBufferObject::GetBinding().descriptorCount; // m_lightingUBO.GetBinding().descriptorCount;
+		graphicsBindings[bindingCounter].descriptorType = LightingUniformBufferObject::GetBinding().descriptorType; // m_lightingUBO.GetBinding().descriptorType;
+		graphicsBindings[bindingCounter].pImmutableSamplers = LightingUniformBufferObject::GetBinding().pImmutableSamplers; // m_lightingUBO.GetBinding().pImmutableSamplers;
+		graphicsBindings[bindingCounter].stageFlags = LightingUniformBufferObject::GetBinding().stageFlags; // m_lightingUBO.GetBinding().stageFlags;
 		bindingCounter++;
         //std::cout<<"created lighting bindings "<<std::endl;
 	}
@@ -513,16 +513,16 @@ void CGraphicsDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame
 /************
 * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING
 ************/
-LightingUniformBufferObject CGraphicsDescriptorManager::m_lightingUBO;
+//LightingUniformBufferObject CGraphicsDescriptorManager::m_lightingUBO; move to light.h
 std::vector<CWxjBuffer> CGraphicsDescriptorManager::m_lightingUniformBuffers; 
-std::vector<void*> CGraphicsDescriptorManager::m_lightingUniformBuffersMapped;
+//std::vector<void*> CGraphicsDescriptorManager::m_lightingUniformBuffersMapped; move to light.h
 VkDeviceSize CGraphicsDescriptorManager::m_lightingUniformBufferSize;
-void CGraphicsDescriptorManager::addLightingUniformBuffer(){
+void CGraphicsDescriptorManager::addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_LIGHTING;
     //std::cout<<"addCustomUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
 	m_lightingUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	m_lightingUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+	lightingUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
 	//m_customUniformBufferSize = customUniformBufferSize;
     m_lightingUniformBufferSize = sizeof(LightingUniformBufferObject);
@@ -530,7 +530,7 @@ void CGraphicsDescriptorManager::addLightingUniformBuffer(){
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		VkResult result = m_lightingUniformBuffers[i].init( m_lightingUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_lightingUniformBuffers[i].deviceMemory, 0,  m_lightingUniformBufferSize, 0, & m_lightingUniformBuffersMapped[i]);
+		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_lightingUniformBuffers[i].deviceMemory, 0,  m_lightingUniformBufferSize, 0, & lightingUniformBuffersMapped[i]);
 	}
 }
 

@@ -1,11 +1,11 @@
 #ifndef H_LIGHT
 #define H_LIGHT
 
-#include "graphicsDescriptor.h"
 #include <string>
 #include <vector>
 #include "camera.hpp"
 #include "utility.h"
+#include "TypeLight.h"
 
 class CLight {
     std::string m_name;
@@ -34,6 +34,12 @@ public:
 
     bool bRegistered = false;
     void Register(std::string lightName, int lightId, glm::vec3 lightPos, std::vector<float> &lightIntensity, glm::vec3 lightColor, float spotInnerAngle, float spotOuterAngle); 
+};
+
+class CLightManager {
+public:
+    inline static LightingUniformBufferObject m_lightingUBO;
+    inline static std::vector<void*> m_lightingUniformBuffersMapped;
 };
 
 #endif

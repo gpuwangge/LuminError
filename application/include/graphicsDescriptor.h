@@ -66,11 +66,11 @@ public:
     /************
      * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING
      ************/
-    static LightingUniformBufferObject m_lightingUBO;
+    //static LightingUniformBufferObject m_lightingUBO;
     static std::vector<CWxjBuffer> m_lightingUniformBuffers; 
-	static std::vector<void*> m_lightingUniformBuffersMapped;
+	//static std::vector<void*> m_lightingUniformBuffersMapped;
     static VkDeviceSize m_lightingUniformBufferSize;
-    static void addLightingUniformBuffer();
+    static void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped);
 
     /************
      * 5 GRAPHCIS_UNIFORMBUFFER_VP

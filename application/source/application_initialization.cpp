@@ -61,7 +61,7 @@ void Application::Initialize(){
     swapchain.framebuffers_shadowmap.resize(lights.size());
     std::cout<<"Light Size: "<<lights.size()<<std::endl;
 
-    CGraphicsDescriptorManager::m_lightingUBO.lightNum = lights.size(); //update light number to ubo
+    CLightManager::m_lightingUBO.lightNum = lights.size(); //update light number to ubo
 
     swapchain.SetDevice();
     
@@ -72,7 +72,7 @@ void Application::Initialize(){
     * 4 Initialize Uniforms
     ****************************/
     if(appInfo->Uniform.b_uniform_graphics_custom) CGraphicsDescriptorManager::addCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
-    if(appInfo->Uniform.b_uniform_graphics_lighting) CGraphicsDescriptorManager::addLightingUniformBuffer();
+    if(appInfo->Uniform.b_uniform_graphics_lighting) CGraphicsDescriptorManager::addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
     if(appInfo->Uniform.b_uniform_graphics_object_mvp){
         CGraphicsDescriptorManager::addMVPUniformBuffer();
         //renderer.bUseObjectMVP = true;
