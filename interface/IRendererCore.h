@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <array>
 #include "TypeDataBuffer.h"
 
 namespace LEApplication{
@@ -88,7 +89,9 @@ namespace LERenderer{
         virtual void Destroy() = 0;
         //AppInfo& GetAppInfo() { return appInfo; }
 
-        //RenderProcess related(for attachement and subpass)
+        /**************************
+         * RenderProcess
+         * ***********************/
         virtual void SetShadowmapAttachmentDepthLight(int value) = 0;
         virtual void SetMainSceneAttachmentDepthLight(int value) = 0;
         virtual void SetMainSceneAttachmentDepthCamera(int value) = 0;
@@ -154,10 +157,45 @@ namespace LERenderer{
         virtual std::vector<VkClearValue>& GetClearValues() = 0;
         virtual std::vector<VkClearValue>& GetClearValues_shadowmap() = 0;
 
-
         virtual void RenderProcessCleanup() = 0;
 
+        /**************************
+         * Graphics Descriptor
+         * ***********************/
+        virtual int GetTextureImageSamplersSize() = 0;
+        virtual int GetGraphicsUniformTypes() = 0;
+        virtual void SetGraphicsUniformTypes(int value) = 0;
+        virtual VkDescriptorSetLayout GetDescriptorSetLayout_General() = 0;
+        virtual VkDescriptorSetLayout& GetDescriptorSetLayout_TextureImageSampler() = 0;
+        virtual int GetSetSize_General() = 0;
 
+        virtual std::vector<VkDescriptorSet>& GetDescriptorSets_General() = 0;
+        virtual VkDescriptorPool& GetGraphicsDescriptorPool() = 0;
+        //virtual VkDescriptorSetLayout& GetDescriptorSetLayout_TextureImageSampler() = 0;
+        virtual std::vector<VkSampler>& GetTextureImageSamplers() = 0;
+        //std::vector<VkDescriptorSet> descriptorSets_general;
+        //static VkDescriptorPool graphicsDescriptorPool;
+        //static VkDescriptorSetLayout descriptorSetLayout_textureImageSampler;
+        //static std::vector<VkSampler> textureImageSamplers;
+
+
+        virtual void createDescriptorPool(unsigned int object_textbox_count = 0) = 0;
+        virtual void createDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
+        virtual void createDescriptorSetLayout_TextureImageSampler() = 0;
+        virtual void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) = 0;
+
+        virtual void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped) = 0;
+        virtual void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped) = 0;
+        virtual void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
+        virtual void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
+        virtual void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) = 0;
+        virtual void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) = 0;
+        virtual void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) = 0;
+        virtual void addDepthImageSamplerUniformBuffer() = 0;
+        virtual void addLightDepthImageSamplerUniformBuffer() = 0;
+        virtual void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() = 0;
+
+        virtual void GraphicsDescriptorManagerDestroyAndFree() = 0;
 
     protected:
         //AppInfo appInfo;

@@ -1,8 +1,9 @@
 #include "graphicsDescriptor.h"
 #include <iostream>
 #include "TypeDataBuffer.h"
+#include "IApplication.h"
 
-
+namespace LERenderer{
 //Declare static variables here:
 /************
 * Pool
@@ -85,7 +86,7 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
 	poolInfo.pPoolSizes = graphicsDescriptorPoolSizes.data();
 	poolInfo.maxSets = ((counter==0)?1:counter)*50*static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);///!!!TODO: currently support 50 sets?
 
-	VkResult result = vkCreateDescriptorPool(CContext::GetHandle().GetLogicalDevice(), &poolInfo, nullptr, &graphicsDescriptorPool);
+	VkResult result = vkCreateDescriptorPool(game->GetLogicalDevice(), &poolInfo, nullptr, &graphicsDescriptorPool);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create descriptor pool!");
 }
 
@@ -100,6 +101,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     graphicsBindings.resize(getLayoutSize_General());
 	int bindingCounter = 0;
     std::cout<<"Layout(Graphics General) size = " << graphicsBindings.size()<<std::endl;
+    //std::cout<<"graphicsUniformTypes = " << graphicsUniformTypes<<std::endl;
 
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP){
         VkDescriptorSetLayoutBinding binding = MVPUniformBufferObject::GetBinding();
@@ -110,7 +112,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
         graphicsBindings[bindingCounter].pImmutableSamplers = binding.pImmutableSamplers;
         graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
         bindingCounter++;
-    }
+    }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
         VkDescriptorSetLayoutBinding binding = MVPUniformBufferObject::GetBinding();
         //std::cout<<"DEBUG: MVP Layout binding="<<counter<<std::endl;
@@ -120,15 +122,16 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
         graphicsBindings[bindingCounter].pImmutableSamplers = binding.pImmutableSamplers;
         graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
         bindingCounter++;
-    }
+    }//std::cout<<"!";
 	if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM){
+        std::cout<<"?";
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = customBinding->descriptorCount;
 		graphicsBindings[bindingCounter].descriptorType = customBinding->descriptorType;
 		graphicsBindings[bindingCounter].pImmutableSamplers = customBinding->pImmutableSamplers;
 		graphicsBindings[bindingCounter].stageFlags = customBinding->stageFlags;
 		bindingCounter++;
-	}
+	}//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING){
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = LightingUniformBufferObject::GetBinding().descriptorCount; // m_lightingUBO.GetBinding().descriptorCount;
@@ -137,7 +140,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].stageFlags = LightingUniformBufferObject::GetBinding().stageFlags; // m_lightingUBO.GetBinding().stageFlags;
 		bindingCounter++;
         //std::cout<<"created lighting bindings "<<std::endl;
-	}
+	}//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
         VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
@@ -146,7 +149,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].pImmutableSamplers = binding.pImmutableSamplers;
 		graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
 		bindingCounter++;
-    }
+    }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
         VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
@@ -156,7 +159,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
 		graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindingCounter++;
-    }
+    }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
         VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
@@ -166,7 +169,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
 		graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindingCounter++;
-    }
+    }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
         VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
@@ -176,7 +179,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
 		graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindingCounter++;
-    }
+    }//std::cout<<"!";
     /*
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
@@ -194,7 +197,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 	layoutInfo.bindingCount = static_cast<uint32_t>(graphicsBindings.size());
 	layoutInfo.pBindings = graphicsBindings.data();
 
-	VkResult result = vkCreateDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), &layoutInfo, nullptr, OUT &descriptorSetLayout_general);
+	VkResult result = vkCreateDescriptorSetLayout(game->GetLogicalDevice(), &layoutInfo, nullptr, OUT &descriptorSetLayout_general);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create descriptor set layout!");
 	//REPORT("vkCreateDescriptorSetLayout");
     //std::cout<<"created bindings DONE"<<std::endl;
@@ -221,7 +224,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_TextureImageSampler()
 	layoutInfo.bindingCount = static_cast<uint32_t>(graphicsBindings.size());
 	layoutInfo.pBindings = graphicsBindings.data();
 
-	VkResult result = vkCreateDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), &layoutInfo, nullptr, OUT &descriptorSetLayout_textureImageSampler);
+	VkResult result = vkCreateDescriptorSetLayout(game->GetLogicalDevice(), &layoutInfo, nullptr, OUT &descriptorSetLayout_textureImageSampler);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create descriptor set layout!");
 }
 
@@ -246,7 +249,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
 
     descriptorSets_general.resize(MAX_FRAMES_IN_FLIGHT);///!!!
     //Step 3
-    result = vkAllocateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), &allocInfo, descriptorSets_general.data());
+    result = vkAllocateDescriptorSets(game->GetLogicalDevice(), &allocInfo, descriptorSets_general.data());
     if (result != VK_SUCCESS) throw std::runtime_error("failed to allocate descriptor sets!");
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {///!!!
@@ -435,7 +438,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
         }*/
 
         //Step 4
-        vkUpdateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(game->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
     }
 
@@ -457,8 +460,8 @@ void CGraphicsDescriptorManager::addMVPUniformBuffer(std::vector<void*>& mvpUnif
     mvpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = mvpUniformBuffers[i].init(sizeof(MVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), mvpUniformBuffers[i].deviceMemory, 0, sizeof(MVPUniformBufferObject), 0, &mvpUniformBuffersMapped[i]);
+        VkResult result = mvpUniformBuffers[i].init(sizeof(MVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+        vkMapMemory(game->GetLogicalDevice(), mvpUniformBuffers[i].deviceMemory, 0, sizeof(MVPUniformBufferObject), 0, &mvpUniformBuffersMapped[i]);
     }
 }
 
@@ -476,8 +479,8 @@ void CGraphicsDescriptorManager::addTextMVPUniformBuffer(std::vector<void*>& tex
     textMVPUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = textMVPUniformBuffers[i].init(sizeof(TextMVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), textMVPUniformBuffers[i].deviceMemory, 0, sizeof(TextMVPUniformBufferObject), 0, &textMVPUniformBuffersMapped[i]);
+        VkResult result = textMVPUniformBuffers[i].init(sizeof(TextMVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+        vkMapMemory(game->GetLogicalDevice(), textMVPUniformBuffers[i].deviceMemory, 0, sizeof(TextMVPUniformBufferObject), 0, &textMVPUniformBuffersMapped[i]);
     }
 }
 
@@ -498,8 +501,8 @@ void CGraphicsDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUnifo
 	m_customUniformBufferSize = customUniformBufferSize;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
+		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+		vkMapMemory(game->GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
 	}
 }
 void CGraphicsDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
@@ -529,8 +532,8 @@ void CGraphicsDescriptorManager::addLightingUniformBuffer(std::vector<void*>& li
     //std::cout<<"addLightingUniformBuffer::m_lightingUniformBufferSize = " << m_lightingUniformBufferSize<<std::endl;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = m_lightingUniformBuffers[i].init( m_lightingUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_lightingUniformBuffers[i].deviceMemory, 0,  m_lightingUniformBufferSize, 0, & lightingUniformBuffersMapped[i]);
+		VkResult result = m_lightingUniformBuffers[i].init( m_lightingUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+		vkMapMemory(game->GetLogicalDevice(), m_lightingUniformBuffers[i].deviceMemory, 0,  m_lightingUniformBufferSize, 0, & lightingUniformBuffersMapped[i]);
 	}
 }
 
@@ -547,8 +550,8 @@ void CGraphicsDescriptorManager::addVPUniformBuffer(std::vector<void*>& vpUnifor
     vpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), vpUniformBuffers[i].deviceMemory, 0, sizeof(VPUniformBufferObject), 0, &vpUniformBuffersMapped[i]);
+        VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+        vkMapMemory(game->GetLogicalDevice(), vpUniformBuffers[i].deviceMemory, 0, sizeof(VPUniformBufferObject), 0, &vpUniformBuffersMapped[i]);
     }
 }
 // bool CGraphicsDescriptorManager::CheckMVP(){ //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
@@ -570,7 +573,7 @@ void CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(std::vector
 
     for(int i = 0; i < mipLevels.size(); i++){
         VkPhysicalDeviceProperties properties{};
-        vkGetPhysicalDeviceProperties(CContext::GetHandle().GetPhysicalDevice(), &properties);
+        vkGetPhysicalDeviceProperties(game->GetPhysicalDevice(), &properties);
 
         VkSamplerCreateInfo samplerInfo{};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -595,7 +598,7 @@ void CGraphicsDescriptorManager::addTextureImageSamplerUniformBuffer(std::vector
         }
 
         VkSampler sampler;
-        VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &sampler);
+        VkResult result = vkCreateSampler(game->GetLogicalDevice(), &samplerInfo, nullptr, &sampler);
         //textureSamplers[textureSamplerCount++]
         textureImageSamplers.push_back(sampler);
         //samplerCount++;
@@ -612,7 +615,7 @@ void CGraphicsDescriptorManager::addDepthImageSamplerUniformBuffer(){
     //std::cout<<"depthImageSampler()" << std::endl;
 
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(CContext::GetHandle().GetPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(game->GetPhysicalDevice(), &properties);
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -637,7 +640,7 @@ void CGraphicsDescriptorManager::addDepthImageSamplerUniformBuffer(){
     // }
 
     //VkSampler sampler;
-    VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &depthImageSampler);
+    VkResult result = vkCreateSampler(game->GetLogicalDevice(), &samplerInfo, nullptr, &depthImageSampler);
     //textureSamplers[textureSamplerCount++]
     //textureImageSamplers.push_back(sampler);
 }
@@ -651,7 +654,7 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer(){
     //std::cout<<"depthImageSampler()" << std::endl;
 
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(CContext::GetHandle().GetPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(game->GetPhysicalDevice(), &properties);
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -669,7 +672,7 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer(){
     //samplerInfo.compareEnable = VK_TRUE; //for hardware shadowmap
    // samplerInfo.compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
-    VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler);
+    VkResult result = vkCreateSampler(game->GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler);
 }
 
 /************
@@ -681,7 +684,7 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
     //std::cout<<"8 GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS()" << std::endl;
 
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(CContext::GetHandle().GetPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(game->GetPhysicalDevice(), &properties);
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -698,7 +701,7 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
     samplerInfo.compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-    VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler_hardwareDepthBias);
+    VkResult result = vkCreateSampler(game->GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler_hardwareDepthBias);
 }
 
 /*************
@@ -766,28 +769,30 @@ int CGraphicsDescriptorManager::getSetSize_General(){
 }
 void CGraphicsDescriptorManager::DestroyAndFree(){
     for(int i = 0; i < textureImageSamplers.size(); i++)
-        vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), textureImageSamplers[i], nullptr);
-    vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), depthImageSampler, nullptr);
-    vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler, nullptr);
-    vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler_hardwareDepthBias, nullptr);
+        vkDestroySampler(game->GetLogicalDevice(), textureImageSamplers[i], nullptr);
+    vkDestroySampler(game->GetLogicalDevice(), depthImageSampler, nullptr);
+    vkDestroySampler(game->GetLogicalDevice(), lightDepthImageSampler, nullptr);
+    vkDestroySampler(game->GetLogicalDevice(), lightDepthImageSampler_hardwareDepthBias, nullptr);
     
     for (size_t i = 0; i < mvpUniformBuffers.size(); i++) 
-        mvpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+        mvpUniformBuffers[i].DestroyAndFree(game->GetLogicalDevice());
 
     for (size_t i = 0; i < textMVPUniformBuffers.size(); i++) 
-        textMVPUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+        textMVPUniformBuffers[i].DestroyAndFree(game->GetLogicalDevice());
 
     for (size_t i = 0; i < customUniformBuffers.size(); i++) 
-        customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+        customUniformBuffers[i].DestroyAndFree(game->GetLogicalDevice());
 
     for (size_t i = 0; i < vpUniformBuffers.size(); i++) 
-        vpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+        vpUniformBuffers[i].DestroyAndFree(game->GetLogicalDevice());
     
     for (size_t i = 0; i < m_lightingUniformBuffers.size(); i++) 
-        m_lightingUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+        m_lightingUniformBuffers[i].DestroyAndFree(game->GetLogicalDevice());
     
     //no need to destroy descriptorSets, because they are from descriptorPool
-    vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), graphicsDescriptorPool, nullptr);//to be move to base class
-    vkDestroyDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), descriptorSetLayout_general, nullptr);
-    vkDestroyDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), descriptorSetLayout_textureImageSampler, nullptr);
+    vkDestroyDescriptorPool(game->GetLogicalDevice(), graphicsDescriptorPool, nullptr);//to be move to base class
+    vkDestroyDescriptorSetLayout(game->GetLogicalDevice(), descriptorSetLayout_general, nullptr);
+    vkDestroyDescriptorSetLayout(game->GetLogicalDevice(), descriptorSetLayout_textureImageSampler, nullptr);
 }
+
+}//namespace

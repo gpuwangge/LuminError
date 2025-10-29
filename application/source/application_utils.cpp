@@ -94,7 +94,8 @@ void Application::CleanUp(){
     instance_renderercore->RenderProcessCleanup();
 
     //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
-    graphicsDescriptorManager.DestroyAndFree();
+    //graphicsDescriptorManager.DestroyAndFree();
+    instance_renderercore->GraphicsDescriptorManagerDestroyAndFree();
     //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
     computeDescriptorManager.DestroyAndFree();
 
@@ -239,7 +240,8 @@ void Application::SetGraphicsCustomBinding(void* binding) {
     if (bindingPtr) appInfo->Uniform.GraphicsCustom.Binding = *bindingPtr;
 }
 void Application::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
-    graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+    //graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
+    instance_renderercore->uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 
 void Application::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }

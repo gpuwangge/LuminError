@@ -4,7 +4,7 @@
 #include "camera.hpp"
 #include "instance.h"
 #include "context.h"
-#include "graphicsDescriptor.h"
+//#include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
 #include "texture.h" //this includes imageManager.h
 #include "modelManager.h"
@@ -63,7 +63,7 @@ namespace LEApplication{
         CSwapchain swapchain;
         //CRenderProcess renderProcess;
         CShaderManager shaderManager;
-        CGraphicsDescriptorManager graphicsDescriptorManager;
+        //CGraphicsDescriptorManager graphicsDescriptorManager;
         CComputeDescriptorManager computeDescriptorManager;
         CModelManager modelManager;
         CTextureManager textureManager;

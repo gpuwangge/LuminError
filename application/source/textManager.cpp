@@ -102,8 +102,9 @@ void CTextbox::Draw(){
 
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     //set = 0 is for general uniform; set = 1 is for texture sampler uniform
-    if(CGraphicsDescriptorManager::getSetSize_General() > 0) dsSets.push_back(*p_descriptorSets_graphics_general); 
-    if(CGraphicsDescriptorManager::textureImageSamplers.size() > 0) dsSets.push_back(descriptorSets_graphics_texture_image_sampler); 
+    
+    if(instance_renderercore->GetSetSize_General() > 0) dsSets.push_back(*p_descriptorSets_graphics_general); 
+    if(instance_renderercore->GetTextureImageSamplersSize() > 0) dsSets.push_back(descriptorSets_graphics_texture_image_sampler); 
 
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", descriptorSets size: "<<dsSets.size()<<std::endl;
 
@@ -150,15 +151,18 @@ void CTextbox::Register(LEApplication::Application *p_app){
     //p_renderer = &(p_app->renderer);
     instance_renderercore = p_app->instance_renderercore;
     //p_renderProcess = &(p_app->renderProcess);
-    p_descriptorSets_graphics_general = &(p_app->graphicsDescriptorManager.descriptorSets_general);
+    p_descriptorSets_graphics_general = &(instance_renderercore->GetDescriptorSets_General());
     //ch.descriptorSets_graphics_texture_image_sampler;
     p_textImageManager = &(p_app->textImageManager);
     //p_textManager = &(p_app->textManager); //set this outside register function
 
     CreateDescriptorSets_TextureImageSampler(
-        CGraphicsDescriptorManager::graphicsDescriptorPool,
-        CGraphicsDescriptorManager::descriptorSetLayout_textureImageSampler,
-        CGraphicsDescriptorManager::textureImageSamplers
+        //CGraphicsDescriptorManager::graphicsDescriptorPool,
+        //CGraphicsDescriptorManager::descriptorSetLayout_textureImageSampler,
+        //CGraphicsDescriptorManager::textureImageSamplers
+        instance_renderercore->GetGraphicsDescriptorPool(),
+        instance_renderercore->GetDescriptorSetLayout_TextureImageSampler(),
+        instance_renderercore->GetTextureImageSamplers()
     );
     //}
     //std::cout<<"TextBox ID: "<<m_textBoxID<<" registered."<<std::endl;
@@ -316,7 +320,7 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     /********************************
     * Calculate model matrix based on Translation, Rotation and Scale
     ********************************/
-   if(CGraphicsDescriptorManager::graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
+   if(instance_renderercore->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
         if(p_controlNode == NULL)  CTextManager::textMVPUBO.mvpData[m_textBoxID].model = ModelMatrix;
         else CTextManager::textMVPUBO.mvpData[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
 
