@@ -7,6 +7,7 @@
 #include "renderProcess.h"
 #include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
+#include "swapchain.h"
 
 namespace LERenderer{
     class RendererCore final : public IRendererCore{
@@ -140,6 +141,7 @@ namespace LERenderer{
             renderProcess.game = game;
             graphicsDescriptorManager.game = game;
             computeDescriptorManager.game = game;
+            swapchain.game = game;
         }
 
         /**************************
@@ -279,6 +281,55 @@ namespace LERenderer{
         void addStorageImage(VkBufferUsageFlags usage) override { computeDescriptorManager.addStorageImage(usage); }
 
 	    void ComputeDescriptorManagerDestroyAndFree() override { computeDescriptorManager.DestroyAndFree(); }
+
+        /**************************
+         * Swapchain
+         * ***********************/
+        CSwapchain swapchain;
+
+        void ResizeSwapchain_buffer_depthlight(int size) override { swapchain.buffer_depthlight.resize(size); }
+        void ResizeSwapchain_framebuffers_shadowmap(int size) override { swapchain.framebuffers_shadowmap.resize(size); }
+
+        VkSampleCountFlagBits GetSwapchainMSAASamples() override { return swapchain.msaaSamples; }
+        VkFormat GetSwapchainDepthFormat() override { return swapchain.depthFormat; }
+        VkFormat GetSwapchainImageFormat() override { return swapchain.swapChainImageFormat; }
+        int GetSwapchain_FrameBuffersSize_Shadowmap() override { return swapchain.framebuffers_shadowmap.size(); }
+        int GetSwapchain_BufferSize_Depthlight() override { return swapchain.buffer_depthlight.size(); }
+        int GetSwapchain_ImageSize() override { return swapchain.swapchainImageSize; }
+        void SetSwapchain_ImageSize(int value) override { swapchain.swapchainImageSize = value; }
+        void SetSwapchain_Compute_Image(bool value) override { swapchain.bComputeSwapChainImage = value; }
+        void GetSwapchainMaxUsableSampleCount() override { swapchain.GetMaxUsableSampleCount(); }
+
+        void CreateSwapchain_attachment_resource_depthlight(VkSampleCountFlagBits msaaSamples) override { swapchain.create_attachment_resource_depthlight(msaaSamples); }
+        void CreateSwapchain_attachment_resource_depthcamera() override { swapchain.create_attachment_resource_depthcamera(); }
+        void CreateSwapchain_attachment_resource_colorresolve() override { swapchain.create_attachment_resource_colorresolve(); }
+        void CreateSwapchainImages(VkSurfaceKHR surface, int width, int height) override { swapchain.createSwapchainImages(surface, width, height); }
+        void CreateSwapchainViews(VkImageAspectFlags aspectFlags) override { swapchain.createSwapchainViews(aspectFlags); }
+        void CreateFramebuffer_shadowmap(VkRenderPass &renderPass, int shadowmapIndex) override { swapchain.CreateFramebuffer_shadowmap(renderPass, shadowmapIndex); }
+        void CreateFramebuffer_mainscene(VkRenderPass &renderPass) override { swapchain.CreateFramebuffer_mainscene(renderPass); }  //will use Resource#1/2/3/4
+
+        void SetSwapchain_ShadowmapAttachmentDepthLight(int value) override { swapchain.iShadowmapAttachmentDepthLight = value; }
+        void SetSwapchain_MainSceneAttachmentDepthLight(int value) override { swapchain.iMainSceneAttachmentDepthLight = value; }
+        void SetSwapchain_MainSceneAttachmentDepthCamera(int value) override { swapchain.iMainSceneAttachmentDepthCamera = value; }
+        void SetSwapchain_MainSceneAttachmentColorResolve(int value) override { swapchain.iMainSceneAttachmentColorResovle = value; }
+        void SetSwapchain_MainSceneAttachmentColorPresent(int value) override { swapchain.iMainSceneAttachmentColorPresent = value; }
+        int GetSwapchain_ShadowmapAttachmentDepthLight() override { return swapchain.iShadowmapAttachmentDepthLight; }
+        int GetSwapchain_MainSceneAttachmentDepthLight() override { return swapchain.iMainSceneAttachmentDepthLight; }
+        int GetSwapchain_MainSceneAttachmentDepthCamera() override { return swapchain.iMainSceneAttachmentDepthCamera; }
+        int GetSwapchain_MainSceneAttachmentColorResolve() override { return swapchain.iMainSceneAttachmentColorResovle; }
+        int GetSwapchain_MainSceneAttachmentColorPresent() override { return swapchain.iMainSceneAttachmentColorPresent; }
+
+        VkImageView GetSwapchain_Buffer_DepthLight_View(int index) override { return swapchain.buffer_depthlight[index].view; }
+        VkImageView GetSwapchain_Buffer_DepthCamera_View() override { return swapchain.buffer_depthcamera.view; }
+        std::vector<VkImageView>& GetSwapchain_Views() override { return swapchain.swapchain_views; }
+        std::vector<VkImage>& GetSwapchain_Images() override { return swapchain.swapchain_images; }
+        VkSwapchainKHR GetSwapchainHandle() override { return swapchain.getHandle(); }
+        std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() override { return swapchain.framebuffers_mainscene; }
+        std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) override { return swapchain.framebuffers_shadowmap[index]; }
+        VkExtent2D& GetSwapchainExtent() override { return swapchain.swapChainExtent; }
+
+        void SetSwapchainDevice() override { swapchain.SetDevice(); }
+        void SwapchainCleanup() override { swapchain.CleanUp(); }
 
     };
     EXPORT_FACTORY_FOR(RendererCore);

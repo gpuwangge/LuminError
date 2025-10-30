@@ -90,8 +90,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //std::cout<<vkGetPhysicalDeviceSurfaceCapabilitiesKHR(CContext::GetHandle().GetPhysicalDevice(), surface, pSurfaceCapabilities)<<std::endl;
     //std::cout<<"Surface min extent: width="<<pSurfaceCapabilities->minImageExtent.width<<", Surface min extent: height="<<pSurfaceCapabilities->minImageExtent.height<<std::endl;
     //std::cout<<"Surface max extent: width="<<pSurfaceCapabilities->maxImageExtent.width<<", Surface max extent: height="<<pSurfaceCapabilities->maxImageExtent.height<<std::endl;
-    swapchain.createSwapchainImages(surface, windowWidth, windowHeight);
-	swapchain.createSwapchainViews(VK_IMAGE_ASPECT_COLOR_BIT);
+    renderer->CreateSwapchainImages(surface, windowWidth, windowHeight);
+    renderer->CreateSwapchainViews(VK_IMAGE_ASPECT_COLOR_BIT);
 
     renderer->CreateCommandPool(surface);
 
@@ -162,37 +162,38 @@ void Application::Record_Present(){
             //must wait for fence before record command buffer
             renderer->WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer->AquireSwapchainImage(swapchain.getHandle()); 
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle()); 
 
             vkResetCommandBuffer(renderer->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
             renderer->StartRecordGraphicsCommandBuffer(
                 renderer->GetRenderpass_mainscene(),
-                swapchain.framebuffers_mainscene,swapchain.swapChainExtent, 
+                renderer->GetSwapchain_FrameBuffers_Mainscene(),
+                renderer->GetSwapchainExtent(),
                 renderer->GetClearValues());
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer->EndRecordGraphicsCommandBuffer();
 
             renderer->SubmitGraphics();
 
-            renderer->PresentSwapchainImage(swapchain.getHandle());
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
         break;
         case RenderModes::GRAPHICS_SHADOWMAP:
             //must wait for fence before record command buffer
             renderer->WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer->AquireSwapchainImage(swapchain.getHandle()); 
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle()); 
 
             vkResetCommandBuffer(renderer->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
             //renderer.BeginCommandBuffer(renderer.graphicsCmdId);
             renderer->BeginGraphicsCommandBuffer();
 
-            for(int i = 0; i < swapchain.framebuffers_shadowmap.size(); i++){
+            for(int i = 0; i < renderer->GetSwapchain_FrameBuffersSize_Shadowmap(); i++){
                 //std::cout<<"Application: Begin Shadowmap"<<i<<" Render Pass."<<std::endl;
-                renderer->BeginRenderPass(renderer->GetRenderpass_shadowmap(), swapchain.framebuffers_shadowmap[i], swapchain.swapChainExtent, renderer->GetClearValues_shadowmap(), true);
-                renderer->SetViewport(swapchain.swapChainExtent);
-                renderer->SetScissor(swapchain.swapChainExtent);
+                renderer->BeginRenderPass(renderer->GetRenderpass_shadowmap(), renderer->GetSwapchain_FrameBuffer_Shadowmap(i), renderer->GetSwapchainExtent(), renderer->GetClearValues_shadowmap(), true);
+                renderer->SetViewport(renderer->GetSwapchainExtent());
+                renderer->SetScissor(renderer->GetSwapchainExtent());
                 //RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
                 gamer->RecordGraphicsCommandBuffer_RenderpassShadowmap(i);
                 //renderer.EndRenderPass();
@@ -200,9 +201,9 @@ void Application::Record_Present(){
             }
 
             //std::cout<<"Application: Begin Mainscene Render Pass."<<std::endl;
-            renderer->BeginRenderPass(renderer->GetRenderpass_mainscene(), swapchain.framebuffers_mainscene, swapchain.swapChainExtent, renderer->GetClearValues(), false);
-            renderer->SetViewport(swapchain.swapChainExtent);
-            renderer->SetScissor(swapchain.swapChainExtent);
+            renderer->BeginRenderPass(renderer->GetRenderpass_mainscene(), renderer->GetSwapchain_FrameBuffers_Mainscene(), renderer->GetSwapchainExtent(), renderer->GetClearValues(), false);
+            renderer->SetViewport(renderer->GetSwapchainExtent());
+            renderer->SetScissor(renderer->GetSwapchainExtent());
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             //renderer.EndRenderPass();
             renderer->EndGraphicsRenderPass();
@@ -212,7 +213,7 @@ void Application::Record_Present(){
 
             renderer->SubmitGraphics();
 
-            renderer->PresentSwapchainImage(swapchain.getHandle());
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
 
 
         break;
@@ -240,7 +241,7 @@ void Application::Record_Present(){
             //must wait for fence before record
             renderer->WaitForComputeFence();
             //must aquire swap image before record command buffer
-            renderer->AquireSwapchainImage(swapchain.getHandle());
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle());
             //std::cout<<"Application: renderer.imageIndex = "<<renderer.imageIndex<< std::endl;
             //std::cout<<"Application: renderer.currentFrame = "<<renderer.currentFrame<< std::endl;
 
@@ -253,13 +254,13 @@ void Application::Record_Present(){
 
             renderer->SubmitCompute(); 
 
-            renderer->PresentSwapchainImage(swapchain.getHandle()); 
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle()); 
         break;
         case RenderModes::COMPUTE_GRAPHICS:
         //case renderer.RENDER_COMPUTE_GRAPHICS_Mode:
             renderer->WaitForComputeFence();//must wait for fence before record
             renderer->WaitForGraphicsFence();//must wait for fence before record
-            renderer->AquireSwapchainImage(swapchain.getHandle());//must aquire swap image before record command buffer
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle());//must aquire swap image before record command buffer
 
             vkResetCommandBuffer(renderer->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
@@ -270,7 +271,7 @@ void Application::Record_Present(){
 
             renderer->StartRecordGraphicsCommandBuffer(
                 renderer->GetRenderpass_mainscene(),
-                swapchain.framebuffers_mainscene, swapchain.swapChainExtent,
+                renderer->GetSwapchain_FrameBuffers_Mainscene(), renderer->GetSwapchainExtent(),
                 renderer->GetClearValues());
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer->EndRecordGraphicsCommandBuffer();
@@ -278,7 +279,7 @@ void Application::Record_Present(){
             renderer->SubmitCompute(); 
             renderer->SubmitGraphics(); 
 
-            renderer->PresentSwapchainImage(swapchain.getHandle()); 
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle()); 
         break;
         default:
         break;

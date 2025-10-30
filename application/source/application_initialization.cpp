@@ -57,13 +57,13 @@ void Application::Initialize(){
     std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
     
     lights.resize(appInfo->Lights.size() + lightCountControl);
-    swapchain.buffer_depthlight.resize(lights.size());
-    swapchain.framebuffers_shadowmap.resize(lights.size());
+    renderer->ResizeSwapchain_buffer_depthlight(lights.size());
+    renderer->ResizeSwapchain_framebuffers_shadowmap(lights.size());
     std::cout<<"Light Size: "<<lights.size()<<std::endl;
 
     CLightManager::m_lightingUBO.lightNum = lights.size(); //update light number to ubo
 
-    swapchain.SetDevice();
+    renderer->SetSwapchainDevice();
     
     TimePoint T2 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for object/textbox/light", T1, T2);
@@ -123,33 +123,32 @@ void Application::Initialize(){
     renderer->SetMainSceneAttachmentColorResovle(appInfo->Attachment.bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1);
     renderer->SetMainSceneAttachmentColorPresent(appInfo->Attachment.bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1);
 
-
-    swapchain.iShadowmapAttachmentDepthLight = renderer->GetShadowmapAttachmentDepthLight();
-    swapchain.iMainSceneAttachmentDepthLight = renderer->GetMainSceneAttachmentDepthLight();
-    swapchain.iMainSceneAttachmentDepthCamera = renderer->GetMainSceneAttachmentDepthCamera();
-    swapchain.iMainSceneAttachmentColorResovle = renderer->GetMainSceneAttachmentColorResovle();
-    swapchain.iMainSceneAttachmentColorPresent = renderer->GetMainSceneAttachmentColorPresent();
+    renderer->SetSwapchain_ShadowmapAttachmentDepthLight(renderer->GetShadowmapAttachmentDepthLight());
+    renderer->SetSwapchain_MainSceneAttachmentDepthLight(renderer->GetMainSceneAttachmentDepthLight());
+    renderer->SetSwapchain_MainSceneAttachmentDepthCamera(renderer->GetMainSceneAttachmentDepthCamera());
+    renderer->SetSwapchain_MainSceneAttachmentColorResolve(renderer->GetMainSceneAttachmentColorResovle());
+    renderer->SetSwapchain_MainSceneAttachmentColorPresent(renderer->GetMainSceneAttachmentColorPresent());
 
     //when creating attachment resource, need 1.create attachment description in renderProcess; 2.create attachment buffer in swapchain
-    if(swapchain.iMainSceneAttachmentColorResovle >= 0) swapchain.GetMaxUsableSampleCount(); //calcuate max sampler count first
+    if(renderer->GetMainSceneAttachmentColorResovle() >= 0) renderer->GetSwapchainMaxUsableSampleCount(); //calcuate max sampler count first
 
-    if(swapchain.iShadowmapAttachmentDepthLight >= 0){ //if shadowmap renderpass attachment depth light is enabled
-        swapchain.create_attachment_resource_depthlight(VK_SAMPLE_COUNT_1_BIT); //hardware bias todo
-        renderer->Create_attachmentdescription_shadowmap_depthlight(swapchain.depthFormat);
-    }else if(swapchain.iMainSceneAttachmentDepthLight >= 0){
-        swapchain.create_attachment_resource_depthlight(swapchain.msaaSamples);
-        renderer->Create_attachmentdescription_mainscene_depthlight(swapchain.depthFormat, swapchain.msaaSamples);
+    if(renderer->GetShadowmapAttachmentDepthLight() >= 0){ //if shadowmap renderpass attachment depth light is enabled
+        renderer->CreateSwapchain_attachment_resource_depthlight(VK_SAMPLE_COUNT_1_BIT); //hardware bias todo
+        renderer->Create_attachmentdescription_shadowmap_depthlight(renderer->GetSwapchainDepthFormat());
+    }else if(renderer->GetMainSceneAttachmentDepthLight() >= 0){
+        renderer->CreateSwapchain_attachment_resource_depthlight(renderer->GetSwapchainMSAASamples());
+        renderer->Create_attachmentdescription_mainscene_depthlight(renderer->GetSwapchainDepthFormat(), renderer->GetSwapchainMSAASamples());
     }
-    if(swapchain.iMainSceneAttachmentDepthCamera >= 0){//If enable MSAA, must also enable Depth Test
-        swapchain.create_attachment_resource_depthcamera();
-        renderer->Create_attachmentdescription_mainscene_depthcamera(swapchain.depthFormat, swapchain.msaaSamples);
+    if(renderer->GetMainSceneAttachmentDepthCamera() >= 0){//If enable MSAA, must also enable Depth Test
+        renderer->CreateSwapchain_attachment_resource_depthcamera();
+        renderer->Create_attachmentdescription_mainscene_depthcamera(renderer->GetSwapchainDepthFormat(), renderer->GetSwapchainMSAASamples());
     }
-    if(swapchain.iMainSceneAttachmentColorResovle >= 0){
-        swapchain.create_attachment_resource_colorresolve();
-        renderer->Create_attachmentdescription_mainscene_colorresolve(swapchain.swapChainImageFormat, swapchain.msaaSamples, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    if(renderer->GetMainSceneAttachmentColorResovle() >= 0){
+        renderer->CreateSwapchain_attachment_resource_colorresolve();
+        renderer->Create_attachmentdescription_mainscene_colorresolve(renderer->GetSwapchainImageFormat(), renderer->GetSwapchainMSAASamples(), VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     }
-    if(swapchain.iMainSceneAttachmentColorPresent >= 0) //dont need create swapchain attachment resource here
-        renderer->Create_attachmentdescription_mainscene_colorpresent(swapchain.swapChainImageFormat);
+    if(renderer->GetMainSceneAttachmentColorPresent() >= 0) //dont need create swapchain attachment resource here
+        renderer->Create_attachmentdescription_mainscene_colorpresent(renderer->GetSwapchainImageFormat());
 
     TimePoint T4 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for attachements", T3, T4);
@@ -171,8 +170,8 @@ void Application::Initialize(){
         renderer->CreateRenderPass_shadowmap();
 
         // std::cout<<"Application: Create Shadowmap Framebuffer."<<std::endl;
-        for(int i = 0; i < swapchain.framebuffers_shadowmap.size(); i++)
-            swapchain.CreateFramebuffer_shadowmap(renderer->GetRenderpass_shadowmap(), i);
+        for(int i = 0; i < renderer->GetSwapchain_FrameBuffersSize_Shadowmap(); i++)
+            renderer->CreateFramebuffer_shadowmap(renderer->GetRenderpass_shadowmap(), i);
     }
     
     //for mainscene renderpass (this renderpass is mandatory)
@@ -180,7 +179,7 @@ void Application::Initialize(){
     renderer->CreateDependency_mainscene();
     renderer->CreateRenderPass_mainscene();
     //create framebuffer
-    swapchain.CreateFramebuffer_mainscene(renderer->GetRenderpass_mainscene());
+    renderer->CreateFramebuffer_mainscene(renderer->GetRenderpass_mainscene());
 
     TimePoint T5 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for reading subpasses", T4, T5);
@@ -281,7 +280,7 @@ void Application::Initialize(){
                     else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                 
                 if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, swapchain.swapChainImageFormat);
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, renderer->GetSwapchainImageFormat());
                     else textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
                 }else{ //48bpt
                     //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
@@ -329,13 +328,13 @@ void Application::Initialize(){
 
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
-    for(int i = 0; i < swapchain.buffer_depthlight.size(); i++) depthlight_imageviews.push_back(swapchain.buffer_depthlight[i].view);
-    if(b_uniform_graphics) renderer->createGraphicsDescriptorSets_General(swapchain.buffer_depthcamera.view, depthlight_imageviews);
+    for(int i = 0; i < renderer->GetSwapchain_BufferSize_Depthlight(); i++) depthlight_imageviews.push_back(renderer->GetSwapchain_Buffer_DepthLight_View(i));
+    if(b_uniform_graphics) renderer->createGraphicsDescriptorSets_General(renderer->GetSwapchain_Buffer_DepthCamera_View(), depthlight_imageviews);
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage)
-                renderer->createComputeDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(swapchain.swapchain_views));//this must be called after texture resource is loaded
-            else renderer->createComputeDescriptorSets(NULL, &(swapchain.swapchain_views));
+                renderer->createComputeDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(renderer->GetSwapchain_Views()));//this must be called after texture resource is loaded
+            else renderer->createComputeDescriptorSets(NULL, &(renderer->GetSwapchain_Views()));
         }else renderer->createComputeDescriptorSets();
     }
 
@@ -657,7 +656,7 @@ void Application::Initialize(){
     /****************************
     * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
-    renderer->CreateSyncObjects(swapchain.swapchainImageSize);
+    renderer->CreateSyncObjects(renderer->GetSwapchain_ImageSize());
     shaderManager.Destroy();
 
     TimePoint T13 = now();

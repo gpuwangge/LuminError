@@ -15,14 +15,6 @@
 
 //class CInstance;//forward declaration
 
-
-
-struct SwapChainSupportDetails {
-	VkSurfaceCapabilitiesKHR capabilities;
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
-};
-
 class CPhysicalDevice{
 public:
     //CInstance *m_instance;
@@ -39,8 +31,10 @@ public:
     //void setInstance(CInstance *instance);
 
     QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface, std::string s);
-    bool checkDeviceExtensionSupport(const std::vector<const char*>  requireDeviceExtensions);
+    VkSampleCountFlagBits getMaxUsableSampleCount();
     SwapChainSupportDetails querySwapChainSupport(VkSurfaceKHR surface);
+
+    bool checkDeviceExtensionSupport(const std::vector<const char*>  requireDeviceExtensions);
 
     std::vector<std::unique_ptr<CLogicalDevice>> logicalDevices;
     void createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions);
@@ -49,7 +43,7 @@ public:
     VkQueue getPresentQueue()   {return logicalDevices.back().get()->presentQueue;  }
     VkQueue getComputeQueue()   {return logicalDevices.back().get()->computeQueue;  }
 
-    VkSampleCountFlagBits getMaxUsableSampleCount();
+    
 
     void displayPhysicalDevices();
     

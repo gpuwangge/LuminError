@@ -134,6 +134,10 @@ namespace LEApplication{
         virtual VkQueue GetPresentQueue() = 0;
         virtual VkQueue GetComputeQueue() = 0;
 
+        virtual QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) = 0;
+        virtual VkSampleCountFlagBits GetMaxUsableSampleCount() = 0;
+        virtual SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) = 0;
+
     };
 
 }

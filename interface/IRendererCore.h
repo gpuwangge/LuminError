@@ -212,6 +212,53 @@ namespace LERenderer{
 
 	    virtual void ComputeDescriptorManagerDestroyAndFree() = 0;
 
+        /**************************
+         * Swapchain
+         * ***********************/
+        virtual void ResizeSwapchain_buffer_depthlight(int size) = 0;
+        virtual void ResizeSwapchain_framebuffers_shadowmap(int size) = 0;
+
+        virtual VkSampleCountFlagBits GetSwapchainMSAASamples() = 0;
+        virtual VkFormat GetSwapchainDepthFormat() = 0;
+        virtual VkFormat GetSwapchainImageFormat() = 0;
+        virtual int GetSwapchain_FrameBuffersSize_Shadowmap() = 0;
+        virtual int GetSwapchain_BufferSize_Depthlight() = 0;
+        virtual int GetSwapchain_ImageSize() = 0;
+        virtual void SetSwapchain_ImageSize(int value) = 0;
+        virtual void SetSwapchain_Compute_Image(bool value) = 0;
+        virtual void GetSwapchainMaxUsableSampleCount() = 0;
+
+        virtual void CreateSwapchain_attachment_resource_depthlight(VkSampleCountFlagBits msaaSamples) = 0;
+        virtual void CreateSwapchain_attachment_resource_depthcamera() = 0;
+        virtual void CreateSwapchain_attachment_resource_colorresolve() = 0;
+        virtual void CreateSwapchainImages(VkSurfaceKHR surface, int width, int height) = 0;
+        virtual void CreateSwapchainViews(VkImageAspectFlags aspectFlags) = 0;
+        virtual void CreateFramebuffer_shadowmap(VkRenderPass &renderPass, int shadowmapIndex) = 0; //will use Resource#1
+        virtual void CreateFramebuffer_mainscene(VkRenderPass &renderPass) = 0;  //will use Resource#1/2/3/4
+
+        virtual void SetSwapchain_ShadowmapAttachmentDepthLight(int value) = 0;
+        virtual void SetSwapchain_MainSceneAttachmentDepthLight(int value) = 0;
+        virtual void SetSwapchain_MainSceneAttachmentDepthCamera(int value) = 0;
+        virtual void SetSwapchain_MainSceneAttachmentColorResolve(int value) = 0;
+        virtual void SetSwapchain_MainSceneAttachmentColorPresent(int value) = 0;
+        virtual int GetSwapchain_ShadowmapAttachmentDepthLight() = 0;
+        virtual int GetSwapchain_MainSceneAttachmentDepthLight() = 0;
+        virtual int GetSwapchain_MainSceneAttachmentDepthCamera() = 0;
+        virtual int GetSwapchain_MainSceneAttachmentColorResolve() = 0;
+        virtual int GetSwapchain_MainSceneAttachmentColorPresent() = 0;
+
+        virtual VkImageView GetSwapchain_Buffer_DepthLight_View(int index) = 0;
+        virtual VkImageView GetSwapchain_Buffer_DepthCamera_View() = 0;
+        virtual std::vector<VkImageView>& GetSwapchain_Views() = 0;
+        virtual std::vector<VkImage>& GetSwapchain_Images() = 0;
+        virtual VkSwapchainKHR GetSwapchainHandle() = 0;
+        virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() = 0;
+        virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) = 0;
+        virtual VkExtent2D& GetSwapchainExtent() = 0;
+
+        virtual void SetSwapchainDevice() = 0;
+        virtual void SwapchainCleanup() = 0;
+
     protected:
         //AppInfo appInfo;
     };

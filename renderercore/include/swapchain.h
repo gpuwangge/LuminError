@@ -1,16 +1,19 @@
-#ifndef H_SWAPCHAIN
-#define H_SWAPCHAIN
-
-#include "vulkan\vulkan.h"
-#include "physicalDevice.h"
-#include "context.h"
-#include "logManager.h"
+#pragma once
+//#include "physicalDevice.h"
+//#include "logManager.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeImageBuffer.h"
+#include "Utility.h"
 
 //Swapchain has all attachment resources(images, imageViews) for rendering
 //frambuffer wraps the swapchain imageViews, so that it can be used in renderPass
+
+namespace LEApplication{
+    class IApplication;
+}
+
+namespace LERenderer{
 
 class CSwapchain final{
     VkSwapchainKHR handle{VK_NULL_HANDLE};
@@ -19,16 +22,9 @@ public:
     ~CSwapchain();
     void CleanUp();
 
-    void SetDevice(){
-        for(int i = 0; i < buffer_depthlight.size(); i++){
-            buffer_depthlight[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
-            buffer_depthlight[i].physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
-        }
-        buffer_depthcamera.logicalDevice = CContext::GetHandle().GetLogicalDevice();
-        buffer_depthcamera.physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
-        buffer_colorresolve.logicalDevice = CContext::GetHandle().GetLogicalDevice();
-        buffer_colorresolve.physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
-    }
+    LEApplication::IApplication* game;
+
+    void SetDevice();
 
     /**********************
     * Attachment IDs
@@ -87,7 +83,7 @@ public:
     ************************/
     VkFormat swapChainImageFormat;//08
 	VkExtent2D swapChainExtent;//08
-    CLogManager logManager;
+    //CLogManager logManager;
 
     VkSwapchainKHR getHandle() const{ return handle;}
     bool bComputeSwapChainImage = false; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage
@@ -101,4 +97,4 @@ public:
     //CDebugger * debugger;
 };
 
-#endif
+}

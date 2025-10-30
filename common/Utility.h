@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
-
+#include <vulkan/vulkan.h>
+#include <vector>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -23,4 +24,10 @@ struct QueueFamilyIndices {
 	bool isComplete() {
 		return graphicsAndComputeFamily.has_value() && graphicsFamily.has_value() && presentFamily.has_value() && computeFamily.has_value();
 	}
+};
+
+struct SwapChainSupportDetails {
+	VkSurfaceCapabilitiesKHR capabilities;
+	std::vector<VkSurfaceFormatKHR> formats;
+	std::vector<VkPresentModeKHR> presentModes;
 };

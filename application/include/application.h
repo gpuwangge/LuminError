@@ -12,7 +12,6 @@
 #include "timer.h"
 #include "controlNode.h"
 #include "shaderManager.h"
-#include "swapchain.h"
 
 #include "IApplication.h"
 #include "IGame.h"
@@ -58,7 +57,6 @@ namespace LEApplication{
         //bool framebufferResized = false;
         //bool needWindow = false;
 
-        CSwapchain swapchain;
         CShaderManager shaderManager;
         CModelManager modelManager;
         CTextureManager textureManager;
@@ -229,6 +227,10 @@ namespace LEApplication{
         VkQueue GetGraphicsQueue() override{ return CContext::GetHandle().GetGraphicsQueue(); }
         VkQueue GetPresentQueue() override{ return CContext::GetHandle().GetPresentQueue(); }
         VkQueue GetComputeQueue() override{ return CContext::GetHandle().GetComputeQueue(); }
+
+        QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) override { return CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, s); }
+        VkSampleCountFlagBits GetMaxUsableSampleCount() override { return CContext::GetHandle().physicalDevice->get()->getMaxUsableSampleCount(); }
+        SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) override { return CContext::GetHandle().physicalDevice->get()->querySwapChainSupport(surface); }
     };
 
 

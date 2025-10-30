@@ -88,9 +88,8 @@ void Application::CleanUp(){
     //std::cout<<"Application Begin Cleanup()..."<<std::endl;
 
     //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;
-    swapchain.CleanUp();
+    renderer->SwapchainCleanup();
     //std::cout<<"Application: renderProcess.CleanUp()"<<std::endl;
-    //renderProcess.Cleanup();
     renderer->RenderProcessCleanup();
 
     //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
@@ -279,8 +278,8 @@ double Application::GetElapseTime() { return elapseTime;}
 double Application::GetDeltaTime() { return deltaTime; }
 
 void Application::CmdNextSubpass() { vkCmdNextSubpass(renderer->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
-void Application::SetSwapchainImageSize(int size) { swapchain.swapchainImageSize = size; }
-void Application::EnableComputeSwapChainImage(bool enable) { swapchain.bComputeSwapChainImage = enable; }
+void Application::SetSwapchainImageSize(int size) { renderer->SetSwapchain_ImageSize(size); }
+void Application::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapchain_Compute_Image(enable); }
 void Application::DeviceWaitIdle() { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
 
 void Application::PushConstantToCommand(void* pcData, int pipelineId) {
@@ -292,7 +291,7 @@ void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBias
 
 void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
     std::vector<VkCommandBuffer> &commandBuffers = renderer->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
-    std::vector<VkImage> &swapChainImages = swapchain.swapchain_images;
+    std::vector<VkImage> &swapChainImages = renderer->GetSwapchain_Images();
 
     for (size_t i = 0; i < commandBuffers.size(); i++) {
         //renderer.currentFrame = i;
