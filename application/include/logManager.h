@@ -1,14 +1,7 @@
-#ifndef H_LOGMANAGER
-#define H_LOGMANAGER
+#pragma once
 
 #include "utility.h"
-
-#ifndef ANDROID
-    //#include "..\\..\\windowsFramework\\include\\windowsLogManager.h"
-    #include "desktopLogManager.h"
-#else
-    #include "..\\..\\androidFramework\\include\\androidLogManager.h"
-#endif
+#include "desktopLogManager.h"
 
 class CLogManager {
 public:
@@ -33,11 +26,6 @@ public:
     void print(std::string s, unsigned int n);
 
 private:
-#ifndef ANDROID
     CDesktopLogManager desktopLogManager;
-#else
-    CAndroidLogManager androidLogManager;
-#endif
-};
 
-#endif
+};

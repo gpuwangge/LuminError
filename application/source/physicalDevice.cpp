@@ -1,5 +1,4 @@
-#include "../include/physicalDevice.h"
-//#include "../include/instance.h"
+#include "physicalDevice.h"
 #include <set>
 
 CPhysicalDevice::CPhysicalDevice(VkPhysicalDevice physical_device) : handle(physical_device) {

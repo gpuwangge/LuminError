@@ -1,4 +1,4 @@
-#include "../include/logicalDevice.h"
+#include "logicalDevice.h"
 
 CLogicalDevice::CLogicalDevice(){
     //debugger = new CDebugger("../logs/logicalDevice.log");
