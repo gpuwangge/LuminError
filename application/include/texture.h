@@ -1,12 +1,13 @@
 #ifndef H_TEXTURE
 #define H_TEXTURE
 
-#include "context.h"
 #include "logManager.h"
 #include "timer.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeImageBuffer.h"
+#include <array>
+#include "Config.h"
 
 class CTextureImage final{
 public:
@@ -17,9 +18,12 @@ public:
     ~CTextureImage();
     void Destroy();
 
-    void SetDevice(){
-        m_textureImageBuffer.logicalDevice = CContext::GetHandle().GetLogicalDevice();
-	    m_textureImageBuffer.physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
+    VkQueue m_graphicsQueue;
+
+    void SetDevice(VkDevice logicalDevice, VkPhysicalDevice physicalDevice, VkQueue graphicsQueue){
+        m_textureImageBuffer.logicalDevice = logicalDevice;
+	    m_textureImageBuffer.physicalDevice = physicalDevice;
+        m_graphicsQueue = graphicsQueue;
     }
 
     /*******************
@@ -97,6 +101,11 @@ public:
     //unsigned int textureImageCount = 0;
     CTextureManager();
     ~CTextureManager();
+
+    VkDevice m_logicalDevice;
+    VkPhysicalDevice m_physicalDevice;
+    VkQueue m_graphicsQueue;
+
     void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
         int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false);
     void Destroy();
@@ -106,6 +115,7 @@ public:
 class CTextImageManager{
 public:
     std::vector<CTextureImage> textureImages;
+
     //CLogManager logManager;
     //unsigned int textureImageCount = 0;
     CTextImageManager();

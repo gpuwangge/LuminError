@@ -105,6 +105,10 @@ public:
     CTextImageManager *p_textImageManager = NULL;
     CModelManager *p_modelManager = NULL;
 
+    VkDevice m_logicalDevice;
+    VkPhysicalDevice m_physicalDevice;
+    VkQueue m_graphicsQueue;
+
     const std::string ascII = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     // Map to store glyph texture data for a font
     std::map<char, GlyphTexture> glyphMap;

@@ -11,6 +11,8 @@
 ********************/
 CTextureManager::CTextureManager(){
     logManager.setLogFile("textureManager.log");
+	//m_logicalDevice = logicalDevice;
+	//m_physicalDevice = physicalDevice;
 }
 CTextureManager::~CTextureManager(){}
 
@@ -21,7 +23,7 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 	TimePoint startTimePoint = now();
 
 	CTextureImage textureImage;
-	textureImage.SetDevice();
+	textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
 	textureImage.m_imageFormat = imageFormat;
 	//textureImage.bEnableMipMap = bEnableMipmap; 
 	//textureImage.bEnableCubemap = bCubemap;
@@ -121,7 +123,7 @@ void CTextureImage::GetTexels(const std::string texturePath) {
 	if (!m_pTexels) throw std::runtime_error("failed to load texture image!");
 	//std::cout<<"texWidth: "<<texWidth<<", texHeight: "<<texHeight<<", texChannels: "<<texChannels<<std::endl;
 
-	PRINT("CreateTextureImage: Load texels as %d bits per texel per channel", m_texBptpc);
+	//PRINT("CreateTextureImage: Load texels as %d bits per texel per channel", m_texBptpc);
 	//CreateTextureImage(texels, usage, textureImageBuffer, dstTexChannels, bitPerTexelPerChannel); 
 }
 
@@ -161,9 +163,9 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 // #else
 // 	LOGI("imageSize: %d bytes", imageSize);
 // #endif	
-	PRINT("CreateTextureImage: imageSize: %d bytes", (int)imageSize);
-	PRINT("CreateTextureImage: texWidth: %d texels", (int)m_texWidth);
-	PRINT("CreateTextureImage: texHeight: %d texels", (int)m_texHeight);
+	//RINT("CreateTextureImage: imageSize: %d bytes", (int)imageSize);
+	//PRINT("CreateTextureImage: texWidth: %d texels", (int)m_texWidth);
+	//PRINT("CreateTextureImage: texHeight: %d texels", (int)m_texHeight);
 
 	if(m_imageFormat == VK_FORMAT_R16G16B16A16_SFLOAT){
 // #ifndef ANDROID	
@@ -171,7 +173,7 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 // #else
 // 		LOGI("imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");
 // #endif	
-		PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
+		//PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
 		int texelNumber = m_texWidth * m_texHeight * m_texChannels;
 		for(int i = 0; i < texelNumber; i++) ((uint16_t*)m_pTexels)[i] = frac_float16(((uint16_t*)m_pTexels)[i]);
 	}
@@ -180,8 +182,8 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 	//std::cout<<"m_mipLevels: "<<m_mipLevels<<std::endl;
 
 	CWxjBuffer stagingBuffer;
-	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-	stagingBuffer.fill(m_pTexels, CContext::GetHandle().GetLogicalDevice());
+	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, m_textureImageBuffer.logicalDevice, m_textureImageBuffer.physicalDevice);
+	stagingBuffer.fill(m_pTexels, m_textureImageBuffer.logicalDevice);
 
 	if(useSTBI) stbi_image_free(m_pTexels);
 
@@ -204,7 +206,7 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 		copyBufferToImage(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
-	stagingBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+	stagingBuffer.DestroyAndFree(m_textureImageBuffer.logicalDevice);
 }
 
 void CTextureImage::CreateImageView(VkImageAspectFlags aspectFlags){
@@ -307,9 +309,9 @@ void CTextureImage::CreateTextureImage_cubemap() {
 // #else
 // 	LOGI("imageSize: %d bytes", imageSize);
 // #endif	
-	PRINT("CreateTextureImage: imageSize: %d bytes", (int)imageSize);
-	PRINT("CreateTextureImage: texWidth: %d texels", (int)m_texWidth);
-	PRINT("CreateTextureImage: texHeight: %d texels", (int)m_texHeight);
+	//PRINT("CreateTextureImage: imageSize: %d bytes", (int)imageSize);
+	//PRINT("CreateTextureImage: texWidth: %d texels", (int)m_texWidth);
+	//PRINT("CreateTextureImage: texHeight: %d texels", (int)m_texHeight);
 
 	if(m_imageFormat == VK_FORMAT_R16G16B16A16_SFLOAT){
 // #ifndef ANDROID	
@@ -317,7 +319,7 @@ void CTextureImage::CreateTextureImage_cubemap() {
 // #else
 // 		LOGI("imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");
 // #endif	
-		PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
+		//PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
 		int texelNumber = m_texWidth * m_texHeight * m_texChannels;
 		for(int i = 0; i < texelNumber; i++) ((uint16_t*)m_pTexels)[i] = frac_float16(((uint16_t*)m_pTexels)[i]);
 	}
@@ -325,8 +327,8 @@ void CTextureImage::CreateTextureImage_cubemap() {
 	//mipLevels = bEnableMipMap ? (static_cast<uint32_t>(std::floor(std::log2(std::max(m_texWidth, m_texHeight)))) + 1) : 1;
 
 	CWxjBuffer stagingBuffer;
-	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-	stagingBuffer.fill(m_pTexels, CContext::GetHandle().GetLogicalDevice());
+	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, m_textureImageBuffer.logicalDevice, m_textureImageBuffer.physicalDevice);
+	stagingBuffer.fill(m_pTexels, m_textureImageBuffer.logicalDevice);
 
 	stbi_image_free(m_pTexels);
 
@@ -348,7 +350,7 @@ void CTextureImage::CreateTextureImage_cubemap() {
 		copyBufferToImage_cubemap(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
-	stagingBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+	stagingBuffer.DestroyAndFree(m_textureImageBuffer.logicalDevice);
 }
 
 void CTextureImage::CreateImageView_cubemap(VkImageAspectFlags aspectFlags){
@@ -490,7 +492,7 @@ VkCommandBuffer CTextureImage::beginSingleTimeCommands() {
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(CContext::GetHandle().GetLogicalDevice(), &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(m_textureImageBuffer.logicalDevice, &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -509,10 +511,10 @@ void CTextureImage::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(CContext::GetHandle().GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(CContext::GetHandle().GetGraphicsQueue());
+    vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(m_graphicsQueue);
 
-    vkFreeCommandBuffers(CContext::GetHandle().GetLogicalDevice(), *m_pCommandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(m_textureImageBuffer.logicalDevice, *m_pCommandPool, 1, &commandBuffer);
 }
 
 
@@ -529,7 +531,7 @@ void CTextureImage::generateMipmapsCore(VkImage image, bool bCreateTempTexture, 
 	//textureImageBuffers_mipmaps: default is NULL
 	// Check if image format supports linear blitting
 	VkFormatProperties formatProperties;
-	vkGetPhysicalDeviceFormatProperties(CContext::GetHandle().GetPhysicalDevice(), m_imageFormat, &formatProperties);
+	vkGetPhysicalDeviceFormatProperties(m_textureImageBuffer.physicalDevice, m_imageFormat, &formatProperties);
 
 	if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
 		throw std::runtime_error("texture image format does not support linear blitting!");
@@ -628,7 +630,7 @@ void CTextureImage::CreateTextureImage_rainbow_mipmap(void* texels, VkImageUsage
 	VkDeviceSize imageSize = m_texWidth * m_texHeight * m_texChannels * m_texBptpc/8; 
 
 	if(m_imageFormat == VK_FORMAT_R16G16B16A16_SFLOAT){
-		PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
+		//PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
 		int texelNumber = m_texWidth * m_texHeight * m_texChannels;
 		for(int i = 0; i < texelNumber; i++) ((uint16_t*)texels)[i] = frac_float16(((uint16_t*)texels)[i]);
 	}
@@ -636,8 +638,8 @@ void CTextureImage::CreateTextureImage_rainbow_mipmap(void* texels, VkImageUsage
 	//mipLevels = bEnableMipMap ? (static_cast<uint32_t>(std::floor(std::log2(std::max(m_texWidth, m_texHeight)))) + 1) : 1;
 
 	CWxjBuffer stagingBuffer;
-	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-	stagingBuffer.fill(texels, CContext::GetHandle().GetLogicalDevice());
+	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, m_textureImageBuffer.logicalDevice, m_textureImageBuffer.physicalDevice);
+	stagingBuffer.fill(texels, m_textureImageBuffer.logicalDevice);
 
 	stbi_image_free(texels);
 
@@ -654,7 +656,7 @@ void CTextureImage::CreateTextureImage_rainbow_mipmap(void* texels, VkImageUsage
 		copyBufferToImage(stagingBuffer.buffer, imageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
-	stagingBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+	stagingBuffer.DestroyAndFree(m_textureImageBuffer.logicalDevice);
 }
 
 void CTextureImage::generateMipmaps(std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage){ //rainbow mipmaps case
@@ -662,8 +664,8 @@ void CTextureImage::generateMipmaps(std::string rainbowCheckerboardTexturePath, 
 
 	std::array<CWxjImageBuffer, MIPMAP_TEXTURE_COUNT> tmpTextureBufferForRainbowMipmaps;//create temp mipmaps
 	for (int i = 0; i < MIPMAP_TEXTURE_COUNT; i++) {//fill temp mipmaps
-		tmpTextureBufferForRainbowMipmaps[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
-		tmpTextureBufferForRainbowMipmaps[i].physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
+		tmpTextureBufferForRainbowMipmaps[i].logicalDevice = m_textureImageBuffer.logicalDevice;
+		tmpTextureBufferForRainbowMipmaps[i].physicalDevice = m_textureImageBuffer.physicalDevice; 
 		int texChannels;
 
 		std::string fullTexturePath = TEXTURE_PATH + rainbowCheckerboardTexturePath + std::to_string(i) + ".png";

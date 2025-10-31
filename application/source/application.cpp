@@ -85,6 +85,13 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
 
+    textureManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
+    textureManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
+    textureManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();
+    textManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
+    textManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
+    textManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();
+
     //query basic capabilities of surface
     //VkSurfaceCapabilitiesKHR*                   pSurfaceCapabilities;
     //std::cout<<vkGetPhysicalDeviceSurfaceCapabilitiesKHR(CContext::GetHandle().GetPhysicalDevice(), surface, pSurfaceCapabilities)<<std::endl;
