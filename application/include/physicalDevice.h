@@ -1,9 +1,7 @@
 #ifndef H_PHYSICALDEVICE
 #define H_PHYSICALDEVICE
 
-//#include "instance.h"
 #include "logicalDevice.h"
-//#include "context.h"
 #include "logManager.h"
 #include "Config.h"
 #include <vulkan/vulkan.h>

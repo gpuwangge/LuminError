@@ -59,7 +59,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     /**************** 
     * Step 4: create instance
     *****************/
-    instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions);
+    instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions, CContext::GetHandle().logManager);
 
     /**************** 
     * Step 5: create surface

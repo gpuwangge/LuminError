@@ -2,7 +2,6 @@
 #define H_INSTANCE
 
 #include "physicalDevice.h"
-#include "context.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <iostream>
@@ -10,14 +9,14 @@
 
 class CInstance{
 public:
-    CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions);
+    CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, CLogManager& logManager);
 
     ~CInstance();
 
     VkInstance handle{VK_NULL_HANDLE};
     VkInstance getHandle() const{ return handle;}
 
-    //CDebugger * debugger;
+    CLogManager *p_logManager;
 
     void DisplayLayers(std::vector<VkLayerProperties> &availableLayers);
     void DisplayExtensions(std::vector<VkExtensionProperties> &availableExtensions);
