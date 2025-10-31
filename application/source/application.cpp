@@ -33,6 +33,12 @@ void Application::Run(std::string exampleName){ //Entrance Function
     renderer = static_cast<LERenderer::IRendererCore*>(pVoid);
     renderer->SetApplication(this);
 
+    //Load Log Core Module
+    LoadModuleAndInstance(handle_module_logcore, pVoid, "logcore.dll");
+    //logger = std::shared_ptr<LELog::ILogCore>(static_cast<LELog::ILogCore*>(pVoid));
+    logger = static_cast<LELog::ILogCore*>(pVoid);
+    logger->Greet();
+
     CContext::Init();
     gamer->PreInitialize();
 

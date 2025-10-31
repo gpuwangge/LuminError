@@ -26,6 +26,7 @@
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
 #include "IRendererCore.h"
+#include "ILogCore.h"
 
 //added this to remove windows.h
 #ifdef _WIN32
@@ -118,6 +119,10 @@ namespace LEApplication{
         LuminError::IGame *gamer = NULL;
         HMODULE handle_module_renderercore;
         LERenderer::IRendererCore *renderer = NULL;
+        HMODULE handle_module_logcore;
+        LELog::ILogCore *logger = NULL;
+        //std::shared_ptr<LELog::ILogCore> logger;
+
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
         void DestroyInstance(HMODULE handle, void* instance);
 
