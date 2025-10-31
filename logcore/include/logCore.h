@@ -1,12 +1,11 @@
 #pragma once
 #include "ILogCore.h"
-//#include <vulkan/vulkan.h>
 #include <fstream>
+//#include <vulkan/vulkan.h>
 //#include <mutex>
 //#include <memory>
-#include <chrono>
-#include <ctime>
-#include <iomanip>
+//#include <ctime>
+//#include <iomanip>
 
 namespace LELog{
     class LogCore final : public ILogCore{
@@ -19,7 +18,9 @@ namespace LELog{
         bool SetLogFile(const std::string& filename) override;
         void CloseLogFile() override;
         bool IsFileLogging() const override;
+
         std::string GetLogFileName(std::string exampleName) override;
+        std::string CreateDateFolder(const std::string& basePath = "") override;
 
     private:
         std::ofstream file_;

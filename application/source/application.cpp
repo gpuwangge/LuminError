@@ -39,7 +39,8 @@ void Application::Run(std::string exampleName){ //Entrance Function
     logger = static_cast<LELog::ILogCore*>(pVoid);
 
     std::string logName = logger->GetLogFileName(exampleName);
-    std::string fullLogName = LOG_PATH + logName;
+    std::string folderPath = logger->CreateDateFolder(LOG_PATH);
+    std::string fullLogName = folderPath + logName;
     //mkdir(LOG_PATH);
     logger->SetLogFile(fullLogName);
     logger->Print("Application started");// 演示所有用例

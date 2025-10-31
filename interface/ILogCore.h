@@ -27,7 +27,10 @@ namespace LELog{
         virtual bool SetLogFile(const std::string& filename) = 0;
         virtual void CloseLogFile() = 0;
         virtual bool IsFileLogging() const = 0;
+        
         virtual std::string GetLogFileName(std::string exampleName) = 0;
+        virtual std::string CreateDateFolder(const std::string& basePath = "") = 0;
+
         virtual void Log(const std::string& message) = 0;
         template<typename... Args> // 可变参数模板 - 处理所有类型
         void Log(const std::string& format, Args... args) {

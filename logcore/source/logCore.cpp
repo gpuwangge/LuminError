@@ -1,4 +1,11 @@
 #include "logCore.h"
+#include <chrono>
+//#include <filesystem> //not work with mingw
+
+//to use _mkdir()
+#ifdef _WIN32
+    #include <direct.h>
+#endif
 
 namespace LELog{
 
@@ -53,6 +60,73 @@ std::string LogCore::GetLogFileName(std::string exampleName) {
     std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", &tm);
     
     return appName + "_" + std::string(buffer) + ".log";
+}
+
+//namespace fs = std::filesystem;
+
+std::string LogCore::CreateDateFolder(const std::string& basePath) {
+    // 获取当前时间
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    std::tm tm = *std::localtime(&time);
+
+    // 格式化日期字符串
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), "%Y%m%d", &tm);
+    std::string folderName = buffer;
+
+    // 构建完整路径
+    std::string fullPath = basePath.empty() ? "/" + folderName : basePath + folderName;
+
+    // 尝试创建文件夹
+    #ifdef _WIN32
+        if (_mkdir(fullPath.c_str()) == 0) {
+    #else
+        if (mkdir(fullPath.c_str(), 0755) == 0) {
+    #endif
+            std::cout << "Folder created successfully: " << fullPath << std::endl;
+        } else {
+            // 检查错误类型
+            if (errno == EEXIST) {
+                std::cout << "Folder already exists: " << fullPath << std::endl;
+            } else {
+                std::cout << "Folder creation failed (error code: " << errno << "): " << fullPath << std::endl;
+            }
+        }
+
+    return fullPath;
+
+    // // 获取当前时间
+    // auto now = std::chrono::system_clock::now();
+    // auto time = std::chrono::system_clock::to_time_t(now);
+    // std::tm tm = *std::localtime(&time);
+    
+    // // 格式化日期字符串
+    // char buffer[100];
+    // std::strftime(buffer, sizeof(buffer), "%Y%m%d", &tm);
+    // std::string folderName = buffer;
+    
+    // // 构建完整路径
+    // std::string fullPath;
+    // if (basePath.empty()) {
+    //     fullPath = folderName;
+    // } else {
+    //     //fullPath = basePath + "/" + folderName;
+    //     fullPath = basePath + folderName;
+    // }
+    
+    // // 检查文件夹是否存在，不存在则创建
+    // if (!fs::exists(fullPath)) {
+    //     if (fs::create_directory(fullPath)) {
+    //         std::cout << "文件夹创建成功: " << fullPath << std::endl;
+    //     } else {
+    //         std::cout << "文件夹创建失败: " << fullPath << std::endl;
+    //     }
+    // } else {
+    //     std::cout << "文件夹已存在: " << fullPath << std::endl;
+    // }
+    
+    // return fullPath;
 }
 
 }//namespace
