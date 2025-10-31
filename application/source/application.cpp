@@ -38,9 +38,11 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //logger = std::shared_ptr<LELog::ILogCore>(static_cast<LELog::ILogCore*>(pVoid));
     logger = static_cast<LELog::ILogCore*>(pVoid);
 
-    std::string logName = logger->GetLogFileName(exampleName);
+    m_sampleName = GetPureName(exampleName);
+    //std::cout<<"exampleName: "<<exampleName<<std::endl;
+    std::string logName = logger->GetLogFileName(m_sampleName);
     std::string folderPath = logger->CreateDateFolder(LOG_PATH);
-    std::string fullLogName = folderPath + logName;
+    std::string fullLogName = folderPath + "/" + logName;
     //mkdir(LOG_PATH);
     logger->SetLogFile(fullLogName);
     logger->Print("Application started");// 演示所有用例
@@ -69,7 +71,6 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
-    m_sampleName = GetPureName(exampleName);
     sdler->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
 	PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
 

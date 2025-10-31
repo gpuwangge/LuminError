@@ -1,6 +1,8 @@
 #include "rendererCore.h"
 #include <iostream>
 #include "IApplication.h" //context
+#include <windows.h>
+#include "Foundation.h"
 
 namespace LERenderer{
 
@@ -581,6 +583,97 @@ void RendererCore::Destroy(){
     }
 
     vkDestroyCommandPool(game->GetLogicalDevice(), commandPool, nullptr);
+
+
+    //Module Related
+    logger->CloseLogFile();
+    DestroyInstance(handle_module_logcore, logger);
+    if (handle_module_logcore) {
+        //std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
+        FreeLibrary(handle_module_logcore);
+        handle_module_logcore = nullptr;
+    }
 }
+
+void RendererCore::DestroyInstance(HMODULE handle, void* instance){
+    //std::cout<<"Application::DestroyInstance()"<<std::endl;
+    if (instance) {
+        using DestroyInstanceFunc = void(*)(void*);
+        auto DestroyInstance =  (DestroyInstanceFunc)GetProcAddress(handle, "DestroyInstance");
+        if(!DestroyInstance) { 
+            std::cerr << "GetProcAddress failed! (DestroyInstance)" << std::endl;
+            FreeLibrary(handle);
+            return;
+        }
+        DestroyInstance(instance);
+        instance = nullptr;
+    }
+}
+
+/**************************
+ * System Function
+ * ***********************/
+void RendererCore::SetApplication(LEApplication::IApplication* pApplication) {
+    game = pApplication;
+    renderProcess.game = game;
+    graphicsDescriptorManager.game = game;
+    computeDescriptorManager.game = game;
+    swapchain.game = game;
+
+    void* pVoid = nullptr;
+        //Load Log Core Module
+    LoadModuleAndInstance(handle_module_logcore, pVoid, "logcore.dll");
+    //logger = std::shared_ptr<LELog::ILogCore>(static_cast<LELog::ILogCore*>(pVoid));
+    logger = static_cast<LELog::ILogCore*>(pVoid);
+
+    std::string logName = logger->GetLogFileName("renderer");
+    std::string folderPath = logger->CreateDateFolder(LOG_PATH);
+    std::string fullLogName = folderPath + "/" + logName;
+    std::cout<<"fullLogName: "<<fullLogName<<std::endl;
+    //mkdir(LOG_PATH);
+    logger->SetLogFile(fullLogName);
+    logger->Print("Application started");// 演示所有用例
+    logger->Print("Integer: {}", 42); // 基本类型
+    logger->Print("Float: {}", 3.14f);
+    logger->Print("String: {}", "Hello");
+    logger->Print("Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
+    glm::vec3 vec(1.0f, 2.0f, 3.0f);// glm 向量
+    logger->Print("Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
+    int numbers[] = {10, 20, 30};// 数组
+    logger->Print("Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
+    logger->Log("Log Application started");// 演示所有用例
+    logger->Log("Log Integer: {}", 42); // 基本类型
+    logger->Log("Log Float: {}", 3.14f);
+    logger->Log("Log String: {}", "Hello");
+    logger->Log("Log Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
+    logger->Log("Log Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
+    logger->Log("Log Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
+}
+void RendererCore::LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName){
+    handle = LoadLibraryA(moduleName.c_str()); 
+    if(!handle) { 
+        std::cerr << "Module load failed! Module Name = " << moduleName << std::endl; 
+        return; 
+    }
+
+    using CreateInstanceFunc = void*(*)();
+    auto CreateInstance =  (CreateInstanceFunc)GetProcAddress(handle, "CreateInstance");
+    if(!CreateInstance) { 
+        std::cerr << "GetProcAddress failed! (CreateInstance_Module) Module Name = " << moduleName << std::endl;
+        FreeLibrary(handle);
+        instance = nullptr;
+        return;
+    }
+    
+    instance = CreateInstance();
+    if (!instance) {
+        std::cerr << "CreateInstance failed!" << std::endl;
+        FreeLibrary(handle);
+        handle = nullptr;
+        return;
+    }
+
+}
+
 
 }//end of namespace

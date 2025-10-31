@@ -9,11 +9,28 @@
 #include "computeDescriptor.h"
 #include "swapchain.h"
 
+#include "ILogCore.h"
+
+//added this to remove windows.h
+#ifdef _WIN32
+// 前向声明 HMODULE
+//typedef void* HMODULE;
+// 或者更精确的方式：
+struct HINSTANCE__;
+typedef HINSTANCE__* HMODULE;
+#endif
+
+
 namespace LERenderer{
     class RendererCore final : public IRendererCore{
     public:
         RendererCore(){}
         ~RendererCore(){}
+
+        //Module Related
+        HMODULE handle_module_logcore;
+        LELog::ILogCore *logger = NULL;
+        void DestroyInstance(HMODULE handle, void* instance);
 
         //Expose to application
         void SetRenderMode(int value) override { m_renderMode = (RenderModes)value; }
@@ -136,13 +153,8 @@ namespace LERenderer{
         std::vector<VkSemaphore> computeFinishedSemaphores;
         std::vector<VkFence> computeInFlightFences;
 
-        void SetApplication(LEApplication::IApplication* pApplication) override {
-            game = pApplication;
-            renderProcess.game = game;
-            graphicsDescriptorManager.game = game;
-            computeDescriptorManager.game = game;
-            swapchain.game = game;
-        }
+        void SetApplication(LEApplication::IApplication* pApplication) override;
+        void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
 
         /**************************
          * RenderProcess
