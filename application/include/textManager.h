@@ -1,7 +1,6 @@
 #ifndef H_TEXTMANAGER
 #define H_TEXTMANAGER
 
-#include "context.h"
 #include "camera.hpp"
 #include "utility.h"
 #include <vulkan/vulkan.h>
@@ -70,7 +69,7 @@ public:
 
     CTextbox(){}
     //~CTextbox(){}
-    void Destroy(){instanceDataBuffer.DestroyAndFree(CContext::GetHandle().GetLogicalDevice());}
+    void Destroy(){instanceDataBuffer.DestroyAndFree(logicalDevice);}
 
     //void SetText(std::string text_content){m_text_content = text_content;}
     void SetBoxColor(glm::vec4 color){m_boxColor = color;}
@@ -78,6 +77,8 @@ public:
     void SetTextContent(std::string text_content = "");
     //void SetHighlightedChar(int index){m_highlightedIndex = index;}
     void AdvanceHighlightedChar();
+    VkDevice logicalDevice;
+    VkPhysicalDevice physicalDevice;
     void Register(LEApplication::Application *p_app);
     void Update(float deltaTime, int currentFrame, Camera &mainCamera);
     void Draw();

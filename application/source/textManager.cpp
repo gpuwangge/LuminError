@@ -27,9 +27,9 @@ void CTextbox::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descri
     allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);///!!!
     allocInfo.pSetLayouts = layouts.data();
 
-    descriptorSets_graphics_texture_image_sampler.resize(MAX_FRAMES_IN_FLIGHT);///!!!
+    descriptorSets_graphics_texture_image_sampler.resize(MAX_FRAMES_IN_FLIGHT);///!!
     //Step 3
-    result = vkAllocateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), &allocInfo, descriptorSets_graphics_texture_image_sampler.data());
+    result = vkAllocateDescriptorSets(logicalDevice, &allocInfo, descriptorSets_graphics_texture_image_sampler.data());
     if (result != VK_SUCCESS) throw std::runtime_error("failed to allocate descriptor sets!");
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -80,7 +80,7 @@ void CTextbox::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descri
         //}
 
         //Step 4
-        vkUpdateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 
     //std::cout<<"Done set descriptor. "<<std::endl;
@@ -155,6 +155,9 @@ void CTextbox::Register(LEApplication::Application *p_app){
     //ch.descriptorSets_graphics_texture_image_sampler;
     p_textImageManager = &(p_app->textImageManager);
     //p_textManager = &(p_app->textManager); //set this outside register function
+
+    logicalDevice = p_app->GetLogicalDevice();
+    physicalDevice = p_app->GetPhysicalDevice();
 
     CreateDescriptorSets_TextureImageSampler(
         //CGraphicsDescriptorManager::graphicsDescriptorPool,
@@ -304,10 +307,10 @@ void CTextbox::SetTextContent(std::string text_content){
 
     if(!bInitialized) {
         VkDeviceSize bufferSize = sizeof(instanceData[0]) * instanceData.size();
-        VkResult result = instanceDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        VkResult result = instanceDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, logicalDevice, physicalDevice);
     }
 
-    instanceDataBuffer.fill((void *)(instanceData.data()), CContext::GetHandle().GetLogicalDevice());
+    instanceDataBuffer.fill((void *)(instanceData.data()), logicalDevice);
     
     bInitialized = true;
 }
