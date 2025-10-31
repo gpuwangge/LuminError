@@ -43,17 +43,18 @@ void Application::Run(std::string exampleName){ //Entrance Function
     std::string logName = logger->GetLogFileName(m_sampleName);
     std::string folderPath = logger->CreateDateFolder(LOG_PATH);
     std::string fullLogName = folderPath + "/" + logName;
+    //std::cout<<"fullLogName: "<<fullLogName<<std::endl;
     //mkdir(LOG_PATH);
     logger->SetLogFile(fullLogName);
-    logger->Print("Application started");// 演示所有用例
-    logger->Print("Integer: {}", 42); // 基本类型
-    logger->Print("Float: {}", 3.14f);
-    logger->Print("String: {}", "Hello");
-    logger->Print("Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
+    // logger->Print("Application started");// 演示所有用例
+    // logger->Print("Integer: {}", 42); // 基本类型
+    // logger->Print("Float: {}", 3.14f);
+    // logger->Print("String: {}", "Hello");
+    // logger->Print("Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
     glm::vec3 vec(1.0f, 2.0f, 3.0f);// glm 向量
-    logger->Print("Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
+    //logger->Print("Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
     int numbers[] = {10, 20, 30};// 数组
-    logger->Print("Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
+    //logger->Print("Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
     logger->Log("Log Application started");// 演示所有用例
     logger->Log("Log Integer: {}", 42); // 基本类型
     logger->Log("Log Float: {}", 3.14f);

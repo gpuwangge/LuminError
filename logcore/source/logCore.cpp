@@ -72,7 +72,8 @@ std::string LogCore::CreateDateFolder(const std::string& basePath) {
 
     // 格式化日期字符串
     char buffer[100];
-    std::strftime(buffer, sizeof(buffer), "%Y%m%d", &tm);
+    //std::strftime(buffer, sizeof(buffer), "%Y%m%d", &tm);
+    std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M", &tm);
     std::string folderName = buffer;
 
     // 构建完整路径
@@ -84,11 +85,11 @@ std::string LogCore::CreateDateFolder(const std::string& basePath) {
     #else
         if (mkdir(fullPath.c_str(), 0755) == 0) {
     #endif
-            std::cout << "Folder created successfully: " << fullPath << std::endl;
+            //std::cout << "Folder created successfully: " << fullPath << std::endl;
         } else {
             // 检查错误类型
             if (errno == EEXIST) {
-                std::cout << "Folder already exists: " << fullPath << std::endl;
+                //std::cout << "Folder already exists: " << fullPath << std::endl;
             } else {
                 std::cout << "Folder creation failed (error code: " << errno << "): " << fullPath << std::endl;
             }
