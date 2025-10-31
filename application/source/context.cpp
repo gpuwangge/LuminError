@@ -1,4 +1,4 @@
-#include "../include/context.h"
+#include "context.h"
 
 std::unique_ptr<CContext> CContext::handle = nullptr;
 

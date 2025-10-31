@@ -1,5 +1,6 @@
-#include "../include/shaderManager.h"
+#include "shaderManager.h"
 #include <fstream>
+#include "Config.h"
 
 CShaderManager::CShaderManager(){
     //debugger = new CDebugger("../logs/shaderManager.log");
@@ -37,19 +38,12 @@ void CShaderManager::CreateShader(const std::string shaderName, short shaderType
         break;
     }
     
-#ifndef ANDROID
     bool bopen = InitSpirVShader(SHADER_PATH + shaderName, pShaderModule);
     if(!bopen) bopen = InitSpirVShader("shaders/" + shaderName, pShaderModule);
     if(!bopen) throw std::runtime_error("failed to open shader: "+shaderName);
-#else
-    std::vector<uint8_t> fileBits;
-    std::string fullShaderName = ANDROID_SHADER_PATH + InsertString(shaderName, "shader.", '/');
-    CContext::GetHandle().androidFileManager.AssetReadFile(fullShaderName.c_str(), fileBits);
-    *pShaderModule = createShaderModule(fileBits);
-#endif   
+ 
 }
 
-#ifndef ANDROID
 bool CShaderManager::InitSpirVShader(const std::string shaderName, VkShaderModule *pShaderModule){
     std::vector<char> shaderCode;
     bool bOpen = readFile(shaderName.c_str(), shaderCode);
@@ -61,76 +55,13 @@ bool CShaderManager::InitSpirVShader(const std::string shaderName, VkShaderModul
     createInfo.codeSize = shaderCode.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
-    VkResult result = vkCreateShaderModule(CContext::GetHandle().GetLogicalDevice(), &createInfo, PALLOCATOR, pShaderModule);
+    VkResult result = vkCreateShaderModule(m_logicalDevice, &createInfo, PALLOCATOR, pShaderModule);
     //REPORT("vkCreateShaderModule");
     //debugger->writeMSG("Shader Module '%s' successfully loaded\n", shaderName.c_str());
 
     return true;
 }
-#else
-VkShaderModule CShaderManager::createShaderModule(const std::vector<uint8_t> &code) {
-    VkShaderModuleCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
 
-    // Satisifies alignment requirements since the allocator
-    // in vector ensures worst case requirements
-    createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
-    VkShaderModule shaderModule;
-    vkCreateShaderModule( CContext::GetHandle().GetLogicalDevice(), &createInfo, nullptr, &shaderModule);
-    //VkResult result = vkCreateShaderModule(CContext::GetHandle().GetLogicalDevice(), &createInfo, PALLOCATOR, pShaderModule);
-
-    return shaderModule;
-}
-
-std::string CShaderManager::InsertString(std::string originalString, std::string insertString, char separator){
-    std::string str1;
-    std::string str2;
-    for(int i = 0, j = 0; i < originalString.size(); i++){
-        if(originalString[i] == separator) {
-            str1.append(originalString, 0, i+1);
-            str2.append(originalString, i+1, originalString.size() - i - 1);
-        }
-    }
-    str1 = str1 + insertString + str2;
-    return str1;
-}
-#endif
-
-// void CShaderManager::CreateVertexShader(const std::string shaderName){
-// #ifndef ANDROID
-//     bool bopen = InitSpirVShader(SHADER_PATH + shaderName, &vertShaderModule);
-//     if(!bopen) bopen = InitSpirVShader("shaders/" + shaderName, &vertShaderModule);
-//     if(!bopen) throw std::runtime_error("failed to open vertex shader!");
-// #else
-//     std::vector<uint8_t> fileBits;
-//     std::string fullShaderName = ANDROID_SHADER_PATH + InsertString(shaderName, "shader.", '/');
-//     CContext::GetHandle().androidManager.AssetReadFile(fullShaderName.c_str(), fileBits);
-//     vertShaderModule = createShaderModule(fileBits);
-// #endif    
-// }
-// void CShaderManager::CreateFragmentShader(const std::string shaderName){
-// #ifndef ANDROID
-//     bool bopen = InitSpirVShader(SHADER_PATH + shaderName, &fragShaderModule);
-//     if(!bopen) bopen = InitSpirVShader("shaders/" + shaderName, &fragShaderModule);
-//     if(!bopen) throw std::runtime_error("failed to open fragment shader!");
-// #else
-//     std::vector<uint8_t> fileBits;
-//     std::string fullShaderName = ANDROID_SHADER_PATH + InsertString(shaderName, "shader.", '/');
-//     CContext::GetHandle().androidManager.AssetReadFile(fullShaderName.c_str(), fileBits);
-//     fragShaderModule = createShaderModule(fileBits);
-// #endif      
-// }
-// void CShaderManager::CreateComputeShader(const std::string shaderName){
-// #ifndef ANDROID
-//     InitSpirVShader(SHADER_PATH + shaderName, &computeShaderModule);
-// #else
-//     std::vector<uint8_t> fileBits;
-//     std::string fullShaderName = ANDROID_SHADER_PATH + InsertString(shaderName, "shader.", '/');
-//     CContext::GetHandle().androidManager.AssetReadFile(fullShaderName.c_str(), fileBits);
-//     computeShaderModule = createShaderModule(fileBits);    
-// #endif
-// }
 
  bool CShaderManager::readFile(const std::string& filename, std::vector<char> &buffer) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -153,13 +84,7 @@ std::string CShaderManager::InsertString(std::string originalString, std::string
 }
 
 void CShaderManager::Destroy(){
-    for(int i = 0; i < vertShaderModules.size(); i++) vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), vertShaderModules[i], nullptr);
-    for(int i = 0; i < fragShaderModules.size(); i++) vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), fragShaderModules[i], nullptr);
-    for(int i = 0; i < compShaderModules.size(); i++) vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), compShaderModules[i], nullptr);
-    // if(fragShaderModule)
-    //     vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), fragShaderModule, nullptr);
-    // if(vertShaderModule)
-    //     vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), vertShaderModule, nullptr);
-    // if(compShaderModule)
-    //     vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), compShaderModule, nullptr);
+    for(int i = 0; i < vertShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, vertShaderModules[i], nullptr);
+    for(int i = 0; i < fragShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, fragShaderModules[i], nullptr);
+    for(int i = 0; i < compShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, compShaderModules[i], nullptr);
 }

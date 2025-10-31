@@ -91,6 +91,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     textManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
     textManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
     textManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();
+    shaderManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
 
     //query basic capabilities of surface
     //VkSurfaceCapabilitiesKHR*                   pSurfaceCapabilities;
