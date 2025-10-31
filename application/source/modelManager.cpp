@@ -78,22 +78,13 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 
-#ifndef ANDROID
+
 	std::string fullModelPath = MODEL_PATH + modelName;
 	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())) {
 		fullModelPath = "models/" + modelName;
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())) 
 			throw std::runtime_error(warn + err);
 	}
-		
-#else
-	std::vector<uint8_t> fileBits;
-	std::string fullModelPath = ANDROID_MODEL_PATH + modelName;
-	CContext::GetHandle().androidFileManager.AssetReadFile(fullModelPath.c_str(), fileBits);
-	std::istringstream in_stream(std::string(fileBits.begin(), fileBits.end()));
-   	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &in_stream))
-		throw std::runtime_error(warn + err);
-#endif
 	
 	//if use unordered_map, need to implement size_t operator()(Vertex3D const& vertex) const. 
 	//for some reason(c++ 11 stl not recognized in GLM) android version doesn't support <glm/gtx/hash.hpp>

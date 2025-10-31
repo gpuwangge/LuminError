@@ -71,16 +71,8 @@ void CTextureManager::Destroy(){
 *	Text Manager: to manage a vector of CTextureImages
 ********************/
 
-CTextImageManager::CTextImageManager(){
-	//std::cout<<"CTextureManager::CTextureManager()"<<std::endl;
-	//textureImages.resize(1);
-// #ifndef ANDROID
-//     logManager.setLogFile("textureManager.log");
-// #endif	
-}
-CTextImageManager::~CTextImageManager(){
-	//std::cout<<"CTextureManager::~CTextureManager()"<<std::endl;
-}
+CTextImageManager::CTextImageManager(){}
+CTextImageManager::~CTextImageManager(){}
 void CTextImageManager::Destroy(){
 	//std::cout<<"CTextureManager::Destroy()"<<std::endl;
 	for(int i = 0; i < textureImages.size(); i++) textureImages[i].Destroy();
@@ -113,7 +105,6 @@ void CTextureImage::GetTexels(const std::string texturePath) {
 	int inputTexChannels; //not really useful
 	m_texChannels = m_dstTexChannels; //set channel to output channel number
 
-#ifndef ANDROID
 	std::string fullTexturePath = TEXTURE_PATH + texturePath;
 	for(short i = 0; i < 2; i++){ //look for texture in 2 locations
 		if(m_texBptpc == 16){
@@ -129,17 +120,7 @@ void CTextureImage::GetTexels(const std::string texturePath) {
 	}
 	if (!m_pTexels) throw std::runtime_error("failed to load texture image!");
 	//std::cout<<"texWidth: "<<texWidth<<", texHeight: "<<texHeight<<", texChannels: "<<texChannels<<std::endl;
-#else
-	//TODO: need support bitPerTexelPerChannel == 16
-	std::vector<uint8_t> fileBits;
-	std::string fullTexturePath = ANDROID_TEXTURE_PATH + texturePath;
-	CContext::GetHandle().androidFileManager.AssetReadFile(fullTexturePath.c_str(), fileBits);
-	if(bitPerTexelPerChannel == 16)
-		texels = stbi_load_16_from_memory(fileBits.data(), fileBits.size(), &texWidth, &texHeight, &texChannels, dstTexChannels);//stbi_uc
-	else
-		texels = stbi_load_from_memory(fileBits.data(), fileBits.size(), &texWidth, &texHeight, &texChannels, dstTexChannels);//stbi_uc
-	
-#endif
+
 	PRINT("CreateTextureImage: Load texels as %d bits per texel per channel", m_texBptpc);
 	//CreateTextureImage(texels, usage, textureImageBuffer, dstTexChannels, bitPerTexelPerChannel); 
 }
@@ -684,16 +665,10 @@ void CTextureImage::generateMipmaps(std::string rainbowCheckerboardTexturePath, 
 		tmpTextureBufferForRainbowMipmaps[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
 		tmpTextureBufferForRainbowMipmaps[i].physicalDevice =  CContext::GetHandle().GetPhysicalDevice();
 		int texChannels;
-#ifndef ANDROID
+
 		std::string fullTexturePath = TEXTURE_PATH + rainbowCheckerboardTexturePath + std::to_string(i) + ".png";
 		void *texels = stbi_load(fullTexturePath.c_str(), &m_texWidth, &m_texHeight, &texChannels, m_dstTexChannels);
-#else
-		//TODO: need support 16 bptpc
-		std::vector<uint8_t> fileBits;
-		std::string fullTexturePath = ANDROID_TEXTURE_PATH + rainbowCheckerboardTexturePath + std::to_string(i) + ".png";
-		CContext::GetHandle().androidFileManager.AssetReadFile(fullTexturePath.c_str(), fileBits);
-		uint8_t* texels = stbi_load_from_memory(fileBits.data(), fileBits.size(), &texWidth, &texHeight, &texChannels, 4);
-#endif
+
 		//CreateTextureImage_rainbow_mipmap(texels, usage, tmpTextureBufferForRainbowMipmaps[i], m_dstTexChannels, 8);
 		CreateTextureImage_rainbow_mipmap(texels, usage, tmpTextureBufferForRainbowMipmaps[i]);
         generateMipmapsCore(tmpTextureBufferForRainbowMipmaps[i].image, true);

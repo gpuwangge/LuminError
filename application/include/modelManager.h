@@ -7,10 +7,6 @@
 #include "TypeVertex.h"
 #include "TypeText.h"
 
- #ifdef ANDROID
-#include "context.h"
- #endif
-
 class CModelManager final{
 public:
     CModelManager();
