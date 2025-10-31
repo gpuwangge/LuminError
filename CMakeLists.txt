@@ -3,6 +3,7 @@ SET(CMAKE_C_COMPILER "C:/mingw64/bin/gcc.exe")
 SET(CMAKE_CXX_COMPILER "C:/mingw64/bin/g++.exe")
 project(VulkanPlatform)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Debug")
 
 #Set variables so all cmakelists.txt in sub dirs can access

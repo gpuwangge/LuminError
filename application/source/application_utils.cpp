@@ -85,6 +85,7 @@ void Application::DestroyInstance(HMODULE handle, void* instance){
 }
 
 void Application::CleanUp(){
+    logger->CloseLogFile();
     //std::cout<<"Application Begin Cleanup()..."<<std::endl;
 
     //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;

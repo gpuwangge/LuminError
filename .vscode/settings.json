@@ -118,7 +118,9 @@
     "valarray": "cpp",
     "thread": "cpp",
     "codecvt": "cpp",
-    "locale": "cpp"
+    "locale": "cpp",
+    "condition_variable": "cpp",
+    "mutex": "cpp"
   },
   "C_Cpp.default.compilerPath": "C:\\mingw64\\bin\\g++.exe",
   "cmake.configureOnOpen": false
