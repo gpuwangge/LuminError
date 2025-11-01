@@ -120,7 +120,9 @@
     "codecvt": "cpp",
     "locale": "cpp",
     "condition_variable": "cpp",
-    "mutex": "cpp"
+    "mutex": "cpp",
+    "bitset": "cpp",
+    "regex": "cpp"
   },
   "C_Cpp.default.compilerPath": "C:\\mingw64\\bin\\g++.exe",
   "cmake.configureOnOpen": false

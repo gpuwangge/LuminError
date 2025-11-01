@@ -1,10 +1,10 @@
 #pragma once
 
-//#include "logManager.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeImageBuffer.h"
 #include "Utility.h"
+#include "ILogCore.h"
 
 //Swapchain has all attachment resources(images, imageViews) for rendering
 //frambuffer wraps the swapchain imageViews, so that it can be used in renderPass
@@ -23,6 +23,7 @@ public:
     void CleanUp();
 
     LEApplication::IApplication* game;
+    LELog::ILogCore *logger = NULL;
 
     void SetDevice();
 
@@ -62,7 +63,7 @@ public:
     //for iMainSceneAttachmentColorPresent to use
     std::vector<VkImage> swapchain_images;
     std::vector<VkImageView> swapchain_views;
-    uint32_t swapchainImageSize = 0;
+    uint32_t swapchainImageSize = 0; //0 means the size is not set, will query for the value
     void createSwapchainImages(VkSurfaceKHR surface, int width, int height);
     void createSwapchainViews(VkImageAspectFlags aspectFlags);
 

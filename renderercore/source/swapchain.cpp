@@ -5,20 +5,12 @@
 namespace LERenderer{
 
 CSwapchain::CSwapchain(){
-    //debugger = new CDebugger("../logs/swapchain.log");
-
-    //swapchainImageSize = 0; //0 means the size is not set, will query for the value
     buffer_depthlight.resize(1);
     framebuffers_shadowmap.resize(1);
     msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-
-
     //logManager.setLogFile("swapChain.log");
-
 }
-CSwapchain::~CSwapchain(){
-    //if (!debugger) delete debugger;
-}   
+CSwapchain::~CSwapchain(){}   
 
 void CSwapchain::SetDevice(){
     for(int i = 0; i < buffer_depthlight.size(); i++){
@@ -109,7 +101,7 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
             break;
         }
     }
-    //logManager.print("Choose default swapchain format: format %4d, colorSpace %12d", surfaceFormat.format, surfaceFormat.colorSpace); 
+    //logger->Log("Choose default swapchain format: format %4d, colorSpace %12d", surfaceFormat.format, surfaceFormat.colorSpace); 
 
 	if(bComputeSwapChainImage){//added VK_IMAGE_USAGE_STORAGE_BIT for image storage
         //choose format (again) for requestedSupport
@@ -118,7 +110,8 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
         for (auto& swapchain_format : swapChainSupport.formats) {///!!!!
             vkGetPhysicalDeviceFormatProperties(game->GetPhysicalDevice(), swapchain_format.format, &vkFormatProperties);
             if ((vkFormatProperties.optimalTilingFeatures & requestedSupport) == requestedSupport){
-                //logManager.print("Choose swapchain format for storage image: format %4d, colorSpace %12d", swapchain_format.format, swapchain_format.colorSpace); 
+                //logger->Log("Choose swapchain format for storage image: format %4d, colorSpace %12d", swapchain_format.format, swapchain_format.colorSpace);
+                logger->Log("log test");
                 surfaceFormat.format = swapchain_format.format;///!!!!
                 break;///!!!!
             }
@@ -147,9 +140,12 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     if (swapChainSupport.capabilities.maxImageCount > 0 && swapchainImageSize > swapChainSupport.capabilities.maxImageCount) {
         swapchainImageSize = swapChainSupport.capabilities.maxImageCount;
     }
-    //logManager.print("swapChainSupport.capabilities.minImageCount = %d", (int)swapChainSupport.capabilities.minImageCount);
-    //logManager.print("swapChainSupport.capabilities.maxImageCount = %d", (int)swapChainSupport.capabilities.maxImageCount);
-    //logManager.print("swapchainImageSize = %d", (int)swapchainImageSize);
+    //logger->Log("swapChainSupport.capabilities.minImageCount = %d", (int)swapChainSupport.capabilities.minImageCount);
+    //logger->Log("swapChainSupport.capabilities.maxImageCount = %d", (int)swapChainSupport.capabilities.maxImageCount);
+    //logger->Log("swapchainImageSize = %d", (int)swapchainImageSize);
+    logger->Log("swapChainSupport.capabilities.minImageCount = {}", (int)swapChainSupport.capabilities.minImageCount);
+    logger->Log("swapChainSupport.capabilities.maxImageCount = {}", (int)swapChainSupport.capabilities.maxImageCount);
+    logger->Log("swapchainImageSize = {}", (int)swapchainImageSize);
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -315,49 +311,93 @@ VkExtent2D CSwapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
 }
 
 void CSwapchain::displaySwapchainInfo(SwapChainSupportDetails details){
-    /*
-    logManager.print("vkGetPhysicalDeviceSurfaceCapabilitiesKHR:");
-    logManager.print("\tminImageCount = %d; maxImageCount = %d", (int)details.capabilities.minImageCount, (int)details.capabilities.maxImageCount);
-    logManager.print("\tcurrentExtent = %d x %d", (int)details.capabilities.currentExtent.width, (int)details.capabilities.currentExtent.height);
-    logManager.print("\tminImageExtent = %d x %d", (int)details.capabilities.minImageExtent.width, (int)details.capabilities.minImageExtent.height);
-    logManager.print("\tmaxImageExtent = %d x %d", (int)details.capabilities.maxImageExtent.width, (int)details.capabilities.maxImageExtent.height);
-    logManager.print("\tmaxImageArrayLayers = %d", (int)details.capabilities.maxImageArrayLayers);
-    logManager.print("\tsupportedTransforms = 0x%04x", (int)details.capabilities.supportedTransforms);
-    logManager.print("\tcurrentTransform = 0x%04x", (int)details.capabilities.currentTransform);
-    logManager.print("\tsupportedCompositeAlpha = 0x%04x", (int)details.capabilities.supportedCompositeAlpha);
-    logManager.print("\tsupportedUsageFlags = 0x%04x", (int)details.capabilities.supportedUsageFlags);
+    logger->Log("Swapchain vkGetPhysicalDeviceSurfaceCapabilitiesKHR:");
+    logger->Log("\tminImageCount = {}; maxImageCount = {}", (int)details.capabilities.minImageCount, (int)details.capabilities.maxImageCount);
+    logger->Log("\tcurrentExtent = {} x {}", (int)details.capabilities.currentExtent.width, (int)details.capabilities.currentExtent.height);
+    logger->Log("\tminImageExtent = {} x {}", (int)details.capabilities.minImageExtent.width, (int)details.capabilities.minImageExtent.height);
+    logger->Log("\tmaxImageExtent = {} x {}", (int)details.capabilities.maxImageExtent.width, (int)details.capabilities.maxImageExtent.height);
+    logger->Log("\tmaxImageArrayLayers = {}", (int)details.capabilities.maxImageArrayLayers);
+    logger->Log("\tsupportedTransforms = {:#06x}", (int)details.capabilities.supportedTransforms);
+    logger->Log("\tcurrentTransform = {:#06x}", (int)details.capabilities.currentTransform);
+    logger->Log("\tsupportedCompositeAlpha = {:#06x}", (int)details.capabilities.supportedCompositeAlpha);
+    logger->Log("\tsupportedUsageFlags = {:#06x}", (int)details.capabilities.supportedUsageFlags);
    
    
-    logManager.print("\nFound %d Surface Formats:",  (int)details.formats.size());
+    logger->Log("\nSwapchain Found {} Surface Formats:",  (int)details.formats.size());
     for (uint32_t i = 0; i < details.formats.size(); i++) {
-        logManager.print("%3d: format %4d, colorSpace %12d", i, details.formats[i].format, details.formats[i].colorSpace); 
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)			    logManager.print("\tVK_COLOR_SPACE_SRGB_NONLINEAR_KHR");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT)		logManager.print("\tVK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)		logManager.print( "\tVK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DCI_P3_LINEAR_EXT)			    logManager.print("\tVK_COLOR_SPACE_DCI_P3_LINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT)		    logManager.print("\tVK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT709_LINEAR_EXT)			    logManager.print( "\tVK_COLOR_SPACE_BT709_LINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT709_NONLINEAR_EXT)			logManager.print( "\tVK_COLOR_SPACE_BT709_NONLINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT2020_LINEAR_EXT)			    logManager.print("\tVK_COLOR_SPACE_BT2020_LINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)			    logManager.print("\tVK_COLOR_SPACE_HDR10_ST2084_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DOLBYVISION_EXT)			    logManager.print( "\tVK_COLOR_SPACE_DOLBYVISION_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_HDR10_HLG_EXT)			        logManager.print("\tVK_COLOR_SPACE_HDR10_HLG_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT)			logManager.print("\tVK_COLOR_SPACE_ADOBERGB_LINEAR_EXT");
-        if (details.formats[i].colorSpace == VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT)		    logManager.print("\tVK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT");
+        logger->Log("{:3d}: format {:5d}, colorSpace {:12d}", i, details.formats[i].format, details.formats[i].colorSpace); 
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)			    logger->Log("\tVK_COLOR_SPACE_SRGB_NONLINEAR_KHR");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT)		logger->Log("\tVK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)		logger->Log( "\tVK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DCI_P3_LINEAR_EXT)			    logger->Log("\tVK_COLOR_SPACE_DCI_P3_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT)		    logger->Log("\tVK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT709_LINEAR_EXT)			    logger->Log( "\tVK_COLOR_SPACE_BT709_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT709_NONLINEAR_EXT)			logger->Log( "\tVK_COLOR_SPACE_BT709_NONLINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT2020_LINEAR_EXT)			    logger->Log("\tVK_COLOR_SPACE_BT2020_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)			    logger->Log("\tVK_COLOR_SPACE_HDR10_ST2084_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DOLBYVISION_EXT)			    logger->Log( "\tVK_COLOR_SPACE_DOLBYVISION_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_HDR10_HLG_EXT)			        logger->Log("\tVK_COLOR_SPACE_HDR10_HLG_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT)			logger->Log("\tVK_COLOR_SPACE_ADOBERGB_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT)		    logger->Log("\tVK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT");
     }
 
-    logManager.print("\nFound %d Present Modes:", (int)details.presentModes.size());
+    logger->Log("\nSwapchain Found {} Present Modes:", (int)details.presentModes.size());
     for (uint32_t i = 0; i < details.presentModes.size(); i++) {
-        logManager.print("%3d: presentModes %4d", i, details.presentModes[i]);
-        if (details.presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)			        logManager.print("\tVK_PRESENT_MODE_IMMEDIATE_KHR");
-        if (details.presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)			            logManager.print("\tVK_PRESENT_MODE_MAILBOX_KHR");
-        if (details.presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)			            logManager.print("\tVK_PRESENT_MODE_FIFO_KHR");
-        if (details.presentModes[i] == VK_PRESENT_MODE_FIFO_RELAXED_KHR)		        logManager.print("\tVK_PRESENT_MODE_FIFO_RELAXED_KHR");
-        if (details.presentModes[i] == VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR)	    logManager.print("\tVK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR");
-        if (details.presentModes[i] == VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR)	logManager.print("\tVK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR");
+        logger->Log("{:3d}: presentModes {:4d}", i, details.presentModes[i]);
+        if (details.presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)			        logger->Log("\tVK_PRESENT_MODE_IMMEDIATE_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)			            logger->Log("\tVK_PRESENT_MODE_MAILBOX_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)			            logger->Log("\tVK_PRESENT_MODE_FIFO_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_FIFO_RELAXED_KHR)		        logger->Log("\tVK_PRESENT_MODE_FIFO_RELAXED_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR)	    logger->Log("\tVK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR)	logger->Log("\tVK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR");
     }
 
-    logManager.print("");
+    logger->Log("");
+
+    ("swapchainImageSize = {}", (int)swapchainImageSize);
+    /*
+    logger->Log("vkGetPhysicalDeviceSurfaceCapabilitiesKHR:");
+    logger->Log("\tminImageCount = %d; maxImageCount = %d", (int)details.capabilities.minImageCount, (int)details.capabilities.maxImageCount);
+    logger->Log("\tcurrentExtent = %d x %d", (int)details.capabilities.currentExtent.width, (int)details.capabilities.currentExtent.height);
+    logger->Log("\tminImageExtent = %d x %d", (int)details.capabilities.minImageExtent.width, (int)details.capabilities.minImageExtent.height);
+    logger->Log("\tmaxImageExtent = %d x %d", (int)details.capabilities.maxImageExtent.width, (int)details.capabilities.maxImageExtent.height);
+    logger->Log("\tmaxImageArrayLayers = %d", (int)details.capabilities.maxImageArrayLayers);
+    logger->Log("\tsupportedTransforms = 0x%04x", (int)details.capabilities.supportedTransforms);
+    logger->Log("\tcurrentTransform = 0x%04x", (int)details.capabilities.currentTransform);
+    logger->Log("\tsupportedCompositeAlpha = 0x%04x", (int)details.capabilities.supportedCompositeAlpha);
+    logger->Log("\tsupportedUsageFlags = 0x%04x", (int)details.capabilities.supportedUsageFlags);
+   
+   
+    logger->Log("\nFound %d Surface Formats:",  (int)details.formats.size());
+    for (uint32_t i = 0; i < details.formats.size(); i++) {
+        logger->Log("%3d: format %4d, colorSpace %12d", i, details.formats[i].format, details.formats[i].colorSpace); 
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)			    logger->Log("\tVK_COLOR_SPACE_SRGB_NONLINEAR_KHR");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT)		logger->Log("\tVK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT)		logger->Log( "\tVK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DCI_P3_LINEAR_EXT)			    logger->Log("\tVK_COLOR_SPACE_DCI_P3_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT)		    logger->Log("\tVK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT709_LINEAR_EXT)			    logger->Log( "\tVK_COLOR_SPACE_BT709_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT709_NONLINEAR_EXT)			logger->Log( "\tVK_COLOR_SPACE_BT709_NONLINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_BT2020_LINEAR_EXT)			    logger->Log("\tVK_COLOR_SPACE_BT2020_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_HDR10_ST2084_EXT)			    logger->Log("\tVK_COLOR_SPACE_HDR10_ST2084_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_DOLBYVISION_EXT)			    logger->Log( "\tVK_COLOR_SPACE_DOLBYVISION_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_HDR10_HLG_EXT)			        logger->Log("\tVK_COLOR_SPACE_HDR10_HLG_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT)			logger->Log("\tVK_COLOR_SPACE_ADOBERGB_LINEAR_EXT");
+        if (details.formats[i].colorSpace == VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT)		    logger->Log("\tVK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT");
+    }
+
+    logger->Log("\nFound %d Present Modes:", (int)details.presentModes.size());
+    for (uint32_t i = 0; i < details.presentModes.size(); i++) {
+        logger->Log("%3d: presentModes %4d", i, details.presentModes[i]);
+        if (details.presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)			        logger->Log("\tVK_PRESENT_MODE_IMMEDIATE_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)			            logger->Log("\tVK_PRESENT_MODE_MAILBOX_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_FIFO_KHR)			            logger->Log("\tVK_PRESENT_MODE_FIFO_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_FIFO_RELAXED_KHR)		        logger->Log("\tVK_PRESENT_MODE_FIFO_RELAXED_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR)	    logger->Log("\tVK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR");
+        if (details.presentModes[i] == VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR)	logger->Log("\tVK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR");
+    }
+
+    logger->Log("");
     */
 }
 
