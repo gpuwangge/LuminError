@@ -22,10 +22,5 @@ VkQueue CContext::GetComputeQueue(){
     return physicalDevice->get()->getComputeQueue();
 }
 
-
-CContext::CContext(){
-#ifndef ANDROID
-    logManager.setLogFile("context.log");
-#endif
-}
+CContext::CContext(){}
 CContext::~CContext(){}

@@ -143,9 +143,9 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     //logger->Log("swapChainSupport.capabilities.minImageCount = %d", (int)swapChainSupport.capabilities.minImageCount);
     //logger->Log("swapChainSupport.capabilities.maxImageCount = %d", (int)swapChainSupport.capabilities.maxImageCount);
     //logger->Log("swapchainImageSize = %d", (int)swapchainImageSize);
-    logger->Log("swapChainSupport.capabilities.minImageCount = {}", (int)swapChainSupport.capabilities.minImageCount);
-    logger->Log("swapChainSupport.capabilities.maxImageCount = {}", (int)swapChainSupport.capabilities.maxImageCount);
-    logger->Log("swapchainImageSize = {}", (int)swapchainImageSize);
+    logger->Log("swapChainSupport.capabilities.minImageCount = {}\n", (int)swapChainSupport.capabilities.minImageCount);
+    logger->Log("swapChainSupport.capabilities.maxImageCount = {}\n", (int)swapChainSupport.capabilities.maxImageCount);
+    logger->Log("swapchainImageSize = {}\n", (int)swapchainImageSize);
 
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -354,7 +354,7 @@ void CSwapchain::displaySwapchainInfo(SwapChainSupportDetails details){
 
     logger->Log("");
 
-    ("swapchainImageSize = {}", (int)swapchainImageSize);
+    //("swapchainImageSize = {}\n", (int)swapchainImageSize);
     /*
     logger->Log("vkGetPhysicalDeviceSurfaceCapabilitiesKHR:");
     logger->Log("\tminImageCount = %d; maxImageCount = %d", (int)details.capabilities.minImageCount, (int)details.capabilities.maxImageCount);

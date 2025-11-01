@@ -6,17 +6,19 @@
 #include <vector>
 #include <iostream>
 #include <locale>
+#include "ILogCore.h"
 
 class CInstance{
 public:
-    CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, CLogManager& logManager);
+    CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger);
 
     ~CInstance();
 
     VkInstance handle{VK_NULL_HANDLE};
     VkInstance getHandle() const{ return handle;}
 
-    CLogManager *p_logManager;
+    //CLogManager *p_logManager;
+    LELog::ILogCore *logger = NULL;
 
     void DisplayLayers(std::vector<VkLayerProperties> &availableLayers);
     void DisplayExtensions(std::vector<VkExtensionProperties> &availableExtensions);

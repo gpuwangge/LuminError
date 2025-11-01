@@ -8,13 +8,10 @@
 // #endif
 
 #include "physicalDevice.h"
-#include "logManager.h"
 #include <vulkan/vulkan.h>
 #include <locale>
+//#include "ILogCore.h"
 
-#ifdef ANDROID
-#include "..\\..\\androidFramework\\include\\androidFileManager.h"
-#endif
 
 #define PRINT CContext::GetHandle().logManager.print
 
@@ -43,11 +40,8 @@ public:
     VkQueue GetPresentQueue();
     VkQueue GetComputeQueue();
 
-    CLogManager logManager;
-
-#ifdef ANDROID
-    CAndroidFileManager androidFileManager;
-#endif
+    //CLogManager logManager;
+    //LELog::ILogCore *logger = NULL;
     
 private:
     CContext();//set construct to private so no one can instanize this class.

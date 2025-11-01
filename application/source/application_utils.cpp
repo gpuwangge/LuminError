@@ -272,10 +272,10 @@ void Application::SetLightCameraPosition(int lightCameraId, glm::vec3 p) { light
 void Application::SetLightCameraFocusObjectId(int lightCameraId, int objectId) { lightCameras[lightCameraId].focusObjectId = objectId; }
 int Application::GetLightCameraFocusObjectId(int lightCameraId) { return lightCameras[lightCameraId].focusObjectId; }
 
-void Application::LogContext(std::string s, float *n, int size) { CContext::GetHandle().logManager.print(s, n, size);}
-void Application::LogContext(std::string s) { CContext::GetHandle().logManager.print(s); }
-void Application::LogContext(std::string s, float n) {CContext::GetHandle().logManager.print(s, n);}
-void Application::LogContext(std::string s, int n1, int n2) {CContext::GetHandle().logManager.print(s, n1, n2);}
+void Application::LogContext(std::string s, float *n, int size) {}//  CContext::GetHandle().logManager.print(s, n, size);}
+void Application::LogContext(std::string s) { logger->Print(s); }
+void Application::LogContext(std::string s, float n) { logger->Print(s, n);}
+void Application::LogContext(std::string s, int n1, int n2) {}//CContext::GetHandle().logManager.print(s, n1, n2);}
 
 void Application::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)mode; }
 void Application::SetPause(bool value) { NeedToPause = value; }

@@ -51,21 +51,22 @@ void Application::Run(std::string exampleName){ //Entrance Function
     // logger->Print("Float: {}", 3.14f);
     // logger->Print("String: {}", "Hello");
     // logger->Print("Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
-    glm::vec3 vec(1.0f, 2.0f, 3.0f);// glm 向量
+    //glm::vec3 vec(1.0f, 2.0f, 3.0f);// glm 向量
     //logger->Print("Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
-    int numbers[] = {10, 20, 30};// 数组
+    //int numbers[] = {10, 20, 30};// 数组
     //logger->Print("Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
-    logger->Log("Log Application started");// 演示所有用例
-    logger->Log("Log Integer: {}", 42); // 基本类型
-    logger->Log("Log Float: {}", 3.14f);
-    logger->Log("Log String: {}", "Hello");
-    logger->Log("Log Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
-    logger->Log("Log Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
-    logger->Log("Log Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
-    
-
+    // logger->Log("Log Application started");// 演示所有用例
+    // logger->Log("Log Integer: {}", 42); // 基本类型
+    // logger->Log("Log Float: {}", 3.14f);
+    // logger->Log("Log String: {}", "Hello");
+    // logger->Log("Log Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
+    // logger->Log("Log Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
+    // logger->Log("Log Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
 
     CContext::Init();
+
+    //CContext::GetHandle().logger = logger;
+
     gamer->PreInitialize();
 
     /**************** 
@@ -73,7 +74,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Step 1: Create Window
     *****************/
     sdler->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
-	PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
+	//PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
 
     /**************** 
     * Step 2: Select required layers
@@ -90,7 +91,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     /**************** 
     * Step 4: create instance
     *****************/
-    instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions, CContext::GetHandle().logManager);
+    instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions, logger);
 
     /**************** 
     * Step 5: create surface
@@ -115,6 +116,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //App dev will fill command buffer with commands later
     //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+    
 
     textureManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
     textureManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();

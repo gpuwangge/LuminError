@@ -5,8 +5,9 @@
 #include "..\\..\\androidFramework\\include\\androidFileManager.h"
 #endif
 
-CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, CLogManager& logManager){
-    p_logManager = &logManager;
+CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger_){
+    //p_logManager = &logManager;
+    logger = logger_;
 
     VkResult result = VK_SUCCESS;
 
@@ -26,12 +27,12 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
 
         std::vector<VkLayerProperties> availableLayers(layerCount);
         result = vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-        p_logManager->print("vkEnumerateInstanceLayerProperties");
+        logger->Log("Vulkan Instance vkEnumerateInstanceLayerProperties");
         DisplayLayers(availableLayers);
 
-        p_logManager->print("Required Layers:");
+        logger->Log("Vulkan Instance Required Layers:");
         for (const char* layerName : requiredValidationLayers) {// to find out validation layer in available layers
-            p_logManager->print("\t" + std::string(layerName));
+            logger->Log("\t" + std::string(layerName) + "\n");
             bool layerFound = false;
             for (const auto& layerProperties : availableLayers) {
                 if (strcmp(layerName, layerProperties.layerName) == 0) {
@@ -51,7 +52,7 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
     vkEnumerateInstanceExtensionProperties((char *)nullptr, &extensionCount, (VkExtensionProperties *)nullptr);
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     result = vkEnumerateInstanceExtensionProperties((char *)nullptr, &extensionCount, availableExtensions.data());
-    p_logManager->print("vkEnumerateInstanceExtensionProperties");
+    logger->Log("Vulkan Instance vkEnumerateInstanceExtensionProperties");
     DisplayExtensions(availableExtensions);
 
     VkInstanceCreateInfo createInfo{};
@@ -77,7 +78,7 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
     //auto extensions = getRequiredExtensions();
     createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
     createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-    p_logManager->print("Required Extensions");
+    logger->Log("Vulkan Instance Required Extensions");
     DisplayExtensions(requiredExtensions);
 
     //Third create instance
@@ -191,13 +192,13 @@ std::unique_ptr<CPhysicalDevice>* CInstance::pickSuitablePhysicalDevice(VkSurfac
         }
         if (indices.isComplete() && extensionsSupported && swapChainAdequate) {
             if(requiredQueueFamilies & VK_QUEUE_GRAPHICS_BIT) { //VK_QUEUE_GRAPHICS_BIT can do everything, including Compute
-                p_logManager->print("Require VK_QUEUE_GRAPHICS_BIT");
+                logger->Log("Vulkan Instance Require VK_QUEUE_GRAPHICS_BIT\n");
                 if(!indices.graphicsFamily.has_value()) return nullptr;
                 //debugger->writeMSG("Picked physical device index: %d\n", indices.graphicsFamily.value());debugger->flush();
                 //PRINT("Picked physical device index: %d", (int)indices.computeFamily.value());
             }
             if(requiredQueueFamilies & VK_QUEUE_COMPUTE_BIT) {
-                p_logManager->print("Require VK_QUEUE_COMPUTE_BIT");
+                logger->Log("Vulkan Instance Require VK_QUEUE_COMPUTE_BIT\n");
                 if(!indices.computeFamily.has_value()) return nullptr;
                 //PRINT("Picked physical device index: %d", (int)indices.computeFamily.value());
             }
@@ -210,7 +211,7 @@ std::unique_ptr<CPhysicalDevice>* CInstance::pickSuitablePhysicalDevice(VkSurfac
             //pickedPhysicalDevice = &phy_device;
             VkPhysicalDeviceProperties	PhysicalDeviceProperties;
             vkGetPhysicalDeviceProperties(IN phy_device.get()->getHandle(), OUT &PhysicalDeviceProperties);
-            p_logManager->print("Picked physical device: %s\n", PhysicalDeviceProperties.deviceName);
+            logger->Log("Vulkan Instance Picked physical device: {}\n\n", PhysicalDeviceProperties.deviceName);
 
             return &phy_device;  
         }
@@ -224,17 +225,20 @@ std::unique_ptr<CPhysicalDevice>* CInstance::pickSuitablePhysicalDevice(VkSurfac
 
 void CInstance::DisplayLayers(std::vector<VkLayerProperties> &availableLayers){
     for (const auto& layerProperties : availableLayers) 
-        p_logManager->print("\t" + std::string(layerProperties.layerName) + " (" + std::string(layerProperties.description) + "): 0x%08x, %5d", (int)layerProperties.specVersion, layerProperties.implementationVersion);
+        logger->Log("\t" + std::string(layerProperties.layerName) + " (" + std::string(layerProperties.description) + "): {:#10x}, {:5d}", (int)layerProperties.specVersion, layerProperties.implementationVersion);
+    logger->Log("");
 }
 
 void CInstance::DisplayExtensions(std::vector<VkExtensionProperties> &availableExtensions){
     for (const auto& extensionsProperties : availableExtensions) 
-        p_logManager->print("\t" + std::string(extensionsProperties.extensionName) + ": 0x%08x", (int)extensionsProperties.specVersion);
+        logger->Log("\t" + std::string(extensionsProperties.extensionName) + ": {:#10x}", (int)extensionsProperties.specVersion);
+    logger->Log("");
 }
 
 void CInstance::DisplayExtensions(std::vector<const char*> &availableExtensions){
     for (const auto& extensionsProperties : availableExtensions) 
-        p_logManager->print("\t" + std::string(extensionsProperties));
+        logger->Log("\t" + std::string(extensionsProperties));
+    logger->Log("");
 }
 
 
