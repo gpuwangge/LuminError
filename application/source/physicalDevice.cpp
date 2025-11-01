@@ -1,12 +1,12 @@
 #include "physicalDevice.h"
 #include <set>
 
-CPhysicalDevice::CPhysicalDevice(VkPhysicalDevice physical_device) : handle(physical_device) {
+CPhysicalDevice::CPhysicalDevice(VkPhysicalDevice physical_device, LELog::ILogCore *logger_) : handle(physical_device), logger(logger_) {
     //CPhysicalDevice(CInstance *instance, VkPhysicalDevice physical_device){
     //debugger = new CDebugger("../logs/physicalDevice.log");
-#ifndef ANDROID
-    logManager.setLogFile("physicalDevice.log");
-#endif
+// #ifndef ANDROID
+//     logManager.setLogFile("physicalDevice.log");
+// #endif
 }
 
  //void CPhysicalDevice::setInstance(CInstance *instance){
@@ -194,97 +194,97 @@ VkSampleCountFlagBits CPhysicalDevice::getMaxUsableSampleCount() {
 }
 
 void CPhysicalDevice::displayPhysicalDevices(){
-    logManager.print("displayPhysicalDevices: ");
+    logger->Log("Physical Device DisplayPhysicalDevices: ");
 
     VkPhysicalDeviceProperties	PhysicalDeviceProperties;
     vkGetPhysicalDeviceProperties(IN handle, OUT &PhysicalDeviceProperties);
 
-    logManager.print("\tlimits.timestampPeriod(ns): %f", (float)PhysicalDeviceProperties.limits.timestampPeriod);
+    logger->Log("\tlimits.timestampPeriod(ns): {}", (float)PhysicalDeviceProperties.limits.timestampPeriod);
 
-    logManager.print("\tAPI version: %d", (int)PhysicalDeviceProperties.apiVersion);
-    logManager.print("\tDriver version: %d", (int)PhysicalDeviceProperties.apiVersion);
-    logManager.print("\tVendor ID: 0x%04x", (int)PhysicalDeviceProperties.vendorID);
-    logManager.print("\tDevice ID: 0x%04x", (int)PhysicalDeviceProperties.deviceID);
-    logManager.print("\tPhysical Device Type: %d =", (int)PhysicalDeviceProperties.deviceType);
-    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)	logManager.print("\t\t(Discrete GPU)");
-    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)	logManager.print("\t\t(Integrated GPU)");
-    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)	logManager.print("\t\t(Virtual GPU)");
-    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)		logManager.print("\t\t(CPU)");
-    logManager.print("\tDevice Name: %s", PhysicalDeviceProperties.deviceName);
-    logManager.print("\tPipeline Cache Size: %d", PhysicalDeviceProperties.pipelineCacheUUID[0]);
+    logger->Log("\tAPI version: {}", (int)PhysicalDeviceProperties.apiVersion);
+    logger->Log("\tDriver version: {}", (int)PhysicalDeviceProperties.apiVersion);
+    logger->Log("\tVendor ID: {:#06x}", (int)PhysicalDeviceProperties.vendorID);
+    logger->Log("\tDevice ID: {:#06x}", (int)PhysicalDeviceProperties.deviceID);
+    logger->Log("\tPhysical Device Type: {} =", (int)PhysicalDeviceProperties.deviceType);
+    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)	logger->Log("\t\t(Discrete GPU)");
+    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)	logger->Log("\t\t(Integrated GPU)");
+    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)	logger->Log("\t\t(Virtual GPU)");
+    if (PhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)		logger->Log("\t\t(CPU)");
+    logger->Log("\tDevice Name: {}", PhysicalDeviceProperties.deviceName);
+    logger->Log("\tPipeline Cache Size: {}", (int)PhysicalDeviceProperties.pipelineCacheUUID[0]);
 
 
     //Display PhysicalDevice Features
     VkPhysicalDeviceFeatures	PhysicalDeviceFeatures;
     vkGetPhysicalDeviceFeatures(IN handle, OUT &PhysicalDeviceFeatures);
 
-    logManager.print("\n\tPhysical Device Features:");
-    logManager.print("\t\tgeometryShader = %2d", (int)PhysicalDeviceFeatures.geometryShader);
-    logManager.print("\t\ttessellationShader = %2d", (int)PhysicalDeviceFeatures.tessellationShader);
-    logManager.print("\t\tmultiDrawIndirect = %2d", (int)PhysicalDeviceFeatures.multiDrawIndirect);
-    logManager.print("\t\twideLines = %2d", (int)PhysicalDeviceFeatures.wideLines);
-    logManager.print("\t\tlargePoints = %2d", (int)PhysicalDeviceFeatures.largePoints);
-    logManager.print("\t\tmultiViewport = %2d", (int)PhysicalDeviceFeatures.multiViewport);
-    logManager.print("\t\tocclusionQueryPrecise = %2d", (int)PhysicalDeviceFeatures.occlusionQueryPrecise);
-    logManager.print("\t\tpipelineStatisticsQuery = %2d", (int)PhysicalDeviceFeatures.pipelineStatisticsQuery);
-    logManager.print("\t\tshaderFloat64 = %2d", (int)PhysicalDeviceFeatures.shaderFloat64);
-    logManager.print("\t\tshaderInt64 = %2d", (int)PhysicalDeviceFeatures.shaderInt64);
-    logManager.print("\t\tshaderInt16 = %2d", (int)PhysicalDeviceFeatures.shaderInt16);
-    logManager.print("\t\tsamplerAnisotropy = %2d", (int)PhysicalDeviceFeatures.samplerAnisotropy);
+    logger->Log("\n\tPhysical Device Features:");
+    logger->Log("\t\tgeometryShader = {:2d}", (int)PhysicalDeviceFeatures.geometryShader);
+    logger->Log("\t\ttessellationShader = {:2d}", (int)PhysicalDeviceFeatures.tessellationShader);
+    logger->Log("\t\tmultiDrawIndirect = {:2d}", (int)PhysicalDeviceFeatures.multiDrawIndirect);
+    logger->Log("\t\twideLines = {:2d}", (int)PhysicalDeviceFeatures.wideLines);
+    logger->Log("\t\tlargePoints = {:2d}", (int)PhysicalDeviceFeatures.largePoints);
+    logger->Log("\t\tmultiViewport = {:2d}", (int)PhysicalDeviceFeatures.multiViewport);
+    logger->Log("\t\tocclusionQueryPrecise = {:2d}", (int)PhysicalDeviceFeatures.occlusionQueryPrecise);
+    logger->Log("\t\tpipelineStatisticsQuery = {:2d}", (int)PhysicalDeviceFeatures.pipelineStatisticsQuery);
+    logger->Log("\t\tshaderFloat64 = {:2d}", (int)PhysicalDeviceFeatures.shaderFloat64);
+    logger->Log("\t\tshaderInt64 = {:2d}", (int)PhysicalDeviceFeatures.shaderInt64);
+    logger->Log("\t\tshaderInt16 = {:2d}", (int)PhysicalDeviceFeatures.shaderInt16);
+    logger->Log("\t\tsamplerAnisotropy = {:2d}", (int)PhysicalDeviceFeatures.samplerAnisotropy);
     
 
     VkFormatProperties					vfp;
-    logManager.print("\n\tImage Formats Checked:");
+    logger->Log("\n\tImage Formats Checked:");
     vkGetPhysicalDeviceFormatProperties(handle, IN VK_FORMAT_R32G32B32A32_SFLOAT, &vfp);
-    logManager.print("\t\tFormat VK_FORMAT_R32G32B32A32_SFLOAT: 0x%08x, 0x%08x, 0x%08x", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
+    logger->Log("\t\tFormat VK_FORMAT_R32G32B32A32_SFLOAT: {:#10x}, {:#10x}, {:#10x}", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
 
     vkGetPhysicalDeviceFormatProperties(handle, IN VK_FORMAT_R8G8B8A8_UNORM, &vfp);
-    logManager.print("\t\tFormat VK_FORMAT_R8G8B8A8_UNORM: 0x%08x, 0x%08x, 0x%08x", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
+    logger->Log("\t\tFormat VK_FORMAT_R8G8B8A8_UNORM: {:#10x}, {:#10x}, {:#10x}", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
         
     vkGetPhysicalDeviceFormatProperties(handle, IN VK_FORMAT_B8G8R8A8_UNORM, &vfp);
-    logManager.print("\t\tFormat VK_FORMAT_B8G8R8A8_UNORM: 0x%08x, 0x%08x, 0x%08x", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
+    logger->Log("\t\tFormat VK_FORMAT_B8G8R8A8_UNORM: {:#10x}, {:#10x}, {:#10x}", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
 
     vkGetPhysicalDeviceFormatProperties(handle, IN VK_FORMAT_B8G8R8A8_SRGB, &vfp);
-    logManager.print("\t\tFormat VK_FORMAT_B8G8R8A8_SRGB: 0x%08x, 0x%08x, 0x%08x", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
+    logger->Log("\t\tFormat VK_FORMAT_B8G8R8A8_SRGB: {:#10x}, {:#10x}, {:#10x}", (int)vfp.linearTilingFeatures, (int)vfp.optimalTilingFeatures, (int)vfp.bufferFeatures);
 
     VkPhysicalDeviceMemoryProperties			vpdmp;
     vkGetPhysicalDeviceMemoryProperties(handle, OUT &vpdmp);
-    logManager.print("\n\t%d Memory Types:", (int)vpdmp.memoryTypeCount);
+    logger->Log("\n\t{} Memory Types:", (int)vpdmp.memoryTypeCount);
     for (unsigned int i = 0; i < vpdmp.memoryTypeCount; i++) {
         VkMemoryType vmt = vpdmp.memoryTypes[i];
         VkMemoryPropertyFlags vmpf = vmt.propertyFlags;
-        logManager.print("\t\tMemory %2d: ", (int)i);
-        if ((vmpf & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0)	logManager.print("\t\t\tDeviceLocal");
-        if ((vmpf & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0)	logManager.print("\t\t\tHostVisible");
-        if ((vmpf & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0)	logManager.print("\t\t\tHostCoherent");
-        if ((vmpf & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0)	logManager.print("\t\t\tHostCached");
-        if ((vmpf & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) != 0)	logManager.print(" LazilyAllocated");
-        //logManager.print("");
+        logger->Log("\t\tMemory {:2d}: ", (int)i);
+        if ((vmpf & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0)	logger->Log("\t\t\tDeviceLocal");
+        if ((vmpf & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0)	logger->Log("\t\t\tHostVisible");
+        if ((vmpf & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0)	logger->Log("\t\t\tHostCoherent");
+        if ((vmpf & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0)	logger->Log("\t\t\tHostCached");
+        if ((vmpf & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) != 0)	logger->Log(" LazilyAllocated");
+        //logger->Log("");
     }
 
-    logManager.print("\n\t%d Memory Heaps:", (int)vpdmp.memoryHeapCount);
+    logger->Log("\n\t{} Memory Heaps:", (int)vpdmp.memoryHeapCount);
     for (unsigned int i = 0; i < vpdmp.memoryHeapCount; i++) {
-        logManager.print("\t\tHeap %d: ", (int)i);
+        logger->Log("\t\tHeap {}: ", (int)i);
         VkMemoryHeap vmh = vpdmp.memoryHeaps[i];
-        logManager.print("\t\t\tsize = 0x%08lx", (unsigned long int)vmh.size);
-        if ((vmh.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0)	logManager.print("\t\t\tDeviceLocal");
-        if ((vmh.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT) != 0)	logManager.print("\t\t\tMultiInstance");
-        //logManager.print("");
+        logger->Log("\t\t\tsize = {:#10x}", (unsigned long int)vmh.size);
+        if ((vmh.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0)	logger->Log("\t\t\tDeviceLocal");
+        if ((vmh.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT) != 0)	logger->Log("\t\t\tMultiInstance");
+        //logger->Log("");
     }
-    logManager.print("");
+    logger->Log("");
 
     // see what device layers are available:
     uint32_t layerCount;
     vkEnumerateDeviceLayerProperties(handle, &layerCount, (VkLayerProperties *)nullptr);
     VkLayerProperties * deviceLayers = new VkLayerProperties[layerCount];
     VkResult result = vkEnumerateDeviceLayerProperties(handle, &layerCount, deviceLayers);
-    logManager.print("\n\tvkEnumerateDeviceLayerProperties");
-    logManager.print("\t%d physical device layers enumerated:", (int)layerCount);
+    logger->Log("\n\tvkEnumerateDeviceLayerProperties");
+    logger->Log("\t{} physical device layers enumerated:", (int)layerCount);
     for (unsigned int i = 0; i < layerCount; i++) {
-        logManager.print("\t\t%s", deviceLayers[i].layerName);
-        logManager.print("\t\t%s", deviceLayers[i].description);
-        logManager.print("\t\t0x%08x", (int)deviceLayers[i].specVersion);
-        logManager.print("\t\t%2d", (int)deviceLayers[i].implementationVersion);
+        logger->Log("\t\t{}", deviceLayers[i].layerName);
+        logger->Log("\t\t{}", deviceLayers[i].description);
+        logger->Log("\t\t{:#10x}", (int)deviceLayers[i].specVersion);
+        logger->Log("\t\t{:2d}", (int)deviceLayers[i].implementationVersion);
         
 
         // see what device extensions are available:
@@ -293,24 +293,26 @@ void CPhysicalDevice::displayPhysicalDevices(){
         vkEnumerateDeviceExtensionProperties(handle, deviceLayers[i].layerName, &extensionCount, (VkExtensionProperties *)nullptr);
         VkExtensionProperties * deviceExtensions = new VkExtensionProperties[extensionCount];
         result = vkEnumerateDeviceExtensionProperties(handle, deviceLayers[i].layerName, &extensionCount, deviceExtensions);
-        logManager.print("\t\tvkEnumerateDeviceExtensionProperties");
+        logger->Log("\t\tvkEnumerateDeviceExtensionProperties");
 
-        logManager.print("\t\t%d device extensions enumerated", (int)extensionCount);
-        //logManager.print("\t\tfor '%s':", deviceLayers[i].layerName);
+        logger->Log("\t\t{} device extensions enumerated", (int)extensionCount);
+        //logger->Log("\t\tfor '%s':", deviceLayers[i].layerName);
         for (unsigned int ii = 0; ii < extensionCount; ii++) {
-            logManager.print("\t\t\t0x%08x", (int)deviceExtensions[ii].specVersion);
-            logManager.print("\t\t\t%s", deviceExtensions[ii].extensionName);
+            logger->Log("\t\t\t{:#10x}", (int)deviceExtensions[ii].specVersion);
+            logger->Log("\t\t\t{}", deviceExtensions[ii].extensionName);
         }
-        logManager.print("");
+        logger->Log("");
     }
     delete[] deviceLayers;
     //debugger->flush();
 
-    logManager.print("\n\tMax Uniform Buffer Range: %u bytes", (unsigned int)PhysicalDeviceProperties.limits.maxUniformBufferRange);
-    logManager.print("  \tMax Storage Buffer Range: %u bytes", (unsigned int)PhysicalDeviceProperties.limits.maxStorageBufferRange);
-    logManager.print("  \tMax Descriptor Set Uniform Buffers: %u", (unsigned int)PhysicalDeviceProperties.limits.maxDescriptorSetUniformBuffers);
-    logManager.print("  \tMax Descriptor Set Uniform Buffers Dynamic: %u", (unsigned int)PhysicalDeviceProperties.limits.maxDescriptorSetUniformBuffersDynamic);
-    logManager.print("  \tMax Per Stage Descriptor Uniform Buffers: %u", (unsigned int)PhysicalDeviceProperties.limits.maxPerStageDescriptorUniformBuffers);
-    logManager.print("  \tMin Uniform Buffer Offset Alignment: %u", (unsigned int)PhysicalDeviceProperties.limits.minUniformBufferOffsetAlignment);
+    logger->Log("\n\tMax Uniform Buffer Range: {} bytes", (unsigned int)PhysicalDeviceProperties.limits.maxUniformBufferRange);
+    logger->Log("  \tMax Storage Buffer Range: {} bytes", (unsigned int)PhysicalDeviceProperties.limits.maxStorageBufferRange);
+    logger->Log("  \tMax Descriptor Set Uniform Buffers: {}", (unsigned int)PhysicalDeviceProperties.limits.maxDescriptorSetUniformBuffers);
+    logger->Log("  \tMax Descriptor Set Uniform Buffers Dynamic: {}", (unsigned int)PhysicalDeviceProperties.limits.maxDescriptorSetUniformBuffersDynamic);
+    logger->Log("  \tMax Per Stage Descriptor Uniform Buffers: {}", (unsigned int)PhysicalDeviceProperties.limits.maxPerStageDescriptorUniformBuffers);
+    logger->Log("  \tMin Uniform Buffer Offset Alignment: {}", (unsigned int)PhysicalDeviceProperties.limits.minUniformBufferOffsetAlignment);
+
+    logger->Log("");
 }
     

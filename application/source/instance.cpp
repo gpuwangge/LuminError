@@ -1,5 +1,6 @@
 #include "instance.h"
 #include <string.h>
+#include "Utility.h"
 
 #ifdef ANDROID
 #include "..\\..\\androidFramework\\include\\androidFileManager.h"
@@ -162,7 +163,7 @@ void CInstance::findAllPhysicalDevices(){
 
     for (auto &physical_device : devices){
         //gpus.push_back(std::make_unique<CPhysicalDevice>(*this, physical_device));
-        physicalDevices.push_back(std::make_unique<CPhysicalDevice>(physical_device));
+        physicalDevices.push_back(std::make_unique<CPhysicalDevice>(physical_device, logger));
         physicalDevices.back().get()->displayPhysicalDevices();
     }
 

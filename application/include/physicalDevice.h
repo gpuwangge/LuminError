@@ -2,12 +2,13 @@
 #define H_PHYSICALDEVICE
 
 #include "logicalDevice.h"
-#include "logManager.h"
 #include "Config.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <optional>
 #include <locale>
+#include "ILogCore.h"
+#include "Utility.h"
 
 //#define PRINT logManager.print
 
@@ -16,7 +17,7 @@
 class CPhysicalDevice{
 public:
     //CInstance *m_instance;
-    CPhysicalDevice(VkPhysicalDevice physical_device);
+    CPhysicalDevice(VkPhysicalDevice physical_device, LELog::ILogCore *logger_);
     //CPhysicalDevice(CInstance *instance, VkPhysicalDevice physical_device);
 
     ~CPhysicalDevice();
@@ -24,7 +25,8 @@ public:
     VkPhysicalDevice getHandle() const{ return handle;}
 
     //CDebugger * debugger;
-    CLogManager logManager;
+    //CLogManager logManager;
+    LELog::ILogCore *logger = NULL;
 
     //void setInstance(CInstance *instance);
 
