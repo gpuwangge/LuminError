@@ -9,7 +9,7 @@ Application::Application(){
     //lightCameras.resize(2); //work
     lightCameras.resize(LIGHT_MAX); //TODO: for test purpose, create more cameras than needed
 
-    logManager.setLogFile("application.log");
+    //logManager.setLogFile("application.log");
 }
 
 std::string Application::GetPureName(const std::string& path) {

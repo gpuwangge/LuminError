@@ -212,7 +212,7 @@ std::unique_ptr<CPhysicalDevice>* CInstance::pickSuitablePhysicalDevice(VkSurfac
             //pickedPhysicalDevice = &phy_device;
             VkPhysicalDeviceProperties	PhysicalDeviceProperties;
             vkGetPhysicalDeviceProperties(IN phy_device.get()->getHandle(), OUT &PhysicalDeviceProperties);
-            logger->Log("Vulkan Instance Picked physical device: {}\n\n", PhysicalDeviceProperties.deviceName);
+            logger->Log("Vulkan Instance Picked physical device: {}\n", PhysicalDeviceProperties.deviceName);
 
             return &phy_device;  
         }

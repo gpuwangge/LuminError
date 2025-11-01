@@ -46,7 +46,7 @@ namespace LEApplication{
         Application();
         ~Application();
 
-        CLogManager logManager;
+        //CLogManager logManager;
 
         //VkInstance instance;//01
         std::unique_ptr<CInstance> instance{nullptr};

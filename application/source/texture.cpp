@@ -10,7 +10,7 @@
 *	Texture Manager: to manage a vector of CTextureImages
 ********************/
 CTextureManager::CTextureManager(){
-    logManager.setLogFile("textureManager.log");
+    //logManager.setLogFile("textureManager.log");
 	//m_logicalDevice = logicalDevice;
 	//m_physicalDevice = physicalDevice;
 }
@@ -54,12 +54,13 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 	TimePoint endTimePoint = now();
 	double durationTime = millisecondsBetween(startTimePoint, endTimePoint);
 
-	logManager.print("Load Texture Image %s", texturePath);
-	//logManager.print("\tenable mipmap: %d", textureImage.bEnableMipMap);
-	logManager.print("\tenable miplevels: %d", (int)textureImage.m_mipLevels);
-	logManager.print("\tuse sampler: %d", (int)textureImage.m_sampler_id);
-	logManager.print("\tenable cubemap: %d", bCubemap);
-	logManager.print("\tcost %f milliseconds", (float)durationTime);
+	logger->Log("Texture Manager Load Texture Image {}", texturePath);
+	//logger.Log("\tenable mipmap: %d", textureImage.bEnableMipMap);
+	logger->Log("\tenable miplevels: {}", (int)textureImage.m_mipLevels);
+	logger->Log("\tuse sampler: {}", (int)textureImage.m_sampler_id);
+	logger->Log("\tenable cubemap: {}", bCubemap);
+	logger->Log("\tcost {} milliseconds", (float)durationTime);
+	logger->Log("");
     //std::cout<<"Load Texture '"<< (*textureNames)[i].first <<"' cost: "<<durationTime<<" milliseconds"<<std::endl;
 }
 

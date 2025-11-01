@@ -121,6 +121,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     textureManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
     textureManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
     textureManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();
+    textureManager.SetLogger(logger);
     textManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
     textManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
     textManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();

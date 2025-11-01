@@ -509,14 +509,14 @@ void Application::Initialize(){
 
     for(int i = 0; i < objects.size(); i++){
         if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
-        logManager.print("Object ID: %d", i);
-        logManager.print("\tName: %s", objects[i].Name.c_str());
-        logManager.print("\tPosition: %f, %f, %f", objects[i].Position);
-        logManager.print("\tLength_original: %f, %f, %f", objects[i].Length_original);
-        logManager.print("\tLengthMin_original: %f, %f, %f", objects[i].LengthMin_original);
-        logManager.print("\tLengthMax_original: %f, %f, %f", objects[i].LengthMax_original);
-        logManager.print("\tScale: %f, %f, %f", objects[i].Scale);
-        logManager.print("\tLength: %f, %f, %f", objects[i].Length);
+        // logger->Log("Object ID: %d", i);
+        // logger->Log("\tName: %s", objects[i].Name.c_str());
+        // logger->Log("\tPosition: %f, %f, %f", objects[i].Position);
+        // logger->Log("\tLength_original: %f, %f, %f", objects[i].Length_original);
+        // logger->Log("\tLengthMin_original: %f, %f, %f", objects[i].LengthMin_original);
+        // logger->Log("\tLengthMax_original: %f, %f, %f", objects[i].LengthMax_original);
+        // logger->Log("\tScale: %f, %f, %f", objects[i].Scale);
+        // logger->Log("\tLength: %f, %f, %f", objects[i].Length);
     }
 
     TimePoint T9 = now();
@@ -556,14 +556,14 @@ void Application::Initialize(){
 
     for(int i = 0; i < textManager.m_textBoxes.size(); i++){
         if(!textManager.m_textBoxes[i].bRegistered) std::cout<<"WARNING: Textbox id("<<i<<") is not registered!"<<std::endl;
-        logManager.print("Textbox ID: %d", i);
-        logManager.print("\tName: %s", textManager.m_textBoxes[i].Name.c_str());
-        logManager.print("\tPosition: %f, %f, %f", textManager.m_textBoxes[i].Position);
-        logManager.print("\tLength_original: %f, %f, %f", textManager.m_textBoxes[i].Length_original);
-        logManager.print("\tLengthMin_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMin_original);
-        logManager.print("\tLengthMax_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMax_original);
-        logManager.print("\tScale: %f, %f, %f", textManager.m_textBoxes[i].Scale);
-        logManager.print("\tLength: %f, %f, %f", textManager.m_textBoxes[i].Length);
+        // logger->Log("Textbox ID: %d", i);
+        // logger->Log("\tName: %s", textManager.m_textBoxes[i].Name.c_str());
+        // logger->Log("\tPosition: %f, %f, %f", textManager.m_textBoxes[i].Position);
+        // logger->Log("\tLength_original: %f, %f, %f", textManager.m_textBoxes[i].Length_original);
+        // logger->Log("\tLengthMin_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMin_original);
+        // logger->Log("\tLengthMax_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMax_original);
+        // logger->Log("\tScale: %f, %f, %f", textManager.m_textBoxes[i].Scale);
+        // logger->Log("\tLength: %f, %f, %f", textManager.m_textBoxes[i].Length);
     }
 
     TimePoint T10 = now();

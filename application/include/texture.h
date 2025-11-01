@@ -1,13 +1,13 @@
 #ifndef H_TEXTURE
 #define H_TEXTURE
 
-#include "logManager.h"
 #include "timer.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeImageBuffer.h"
 #include <array>
 #include "Config.h"
+#include "ILogCore.h"
 
 class CTextureImage final{
 public:
@@ -97,10 +97,15 @@ public:
 class CTextureManager{
 public:
     std::vector<CTextureImage> textureImages;
-    CLogManager logManager;
+    //CLogManager logManager;
+    LELog::ILogCore *logger = NULL;
     //unsigned int textureImageCount = 0;
     CTextureManager();
     ~CTextureManager();
+
+    void SetLogger(LELog::ILogCore *logger_){
+        logger = logger_;
+    }
 
     VkDevice m_logicalDevice;
     VkPhysicalDevice m_physicalDevice;
