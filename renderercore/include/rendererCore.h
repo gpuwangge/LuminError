@@ -9,6 +9,9 @@
 #include "computeDescriptor.h"
 #include "swapchain.h"
 
+#include "instance.h"
+#include "context.h"
+
 #include "ILogCore.h"
 
 //added this to remove windows.h
@@ -24,7 +27,9 @@ typedef HINSTANCE__* HMODULE;
 namespace LERenderer{
     class RendererCore final : public IRendererCore{
     public:
-        RendererCore(){}
+        RendererCore(){
+            CContext::Init();
+        }
         ~RendererCore(){}
 
         //Module Related
@@ -342,6 +347,49 @@ namespace LERenderer{
 
         void SetSwapchainDevice() override { swapchain.SetDevice(); }
         void SwapchainCleanup() override { swapchain.CleanUp(); }
+
+        /**************************
+         * Context
+         * ***********************/
+        std::unique_ptr<CInstance> instance{nullptr};
+
+        VkSurfaceKHR surface;//03
+        VkSurfaceKHR& GetSurface() override { return surface; }
+
+        void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger) override {
+            instance = std::make_unique<CInstance>(requiredValidationLayers, requiredExtensions, logger);
+        }
+        VkInstance GetInstance() override { return instance.get()->getHandle(); }
+
+        void CreatePhysicalDevice(const std::vector<const char*> requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers) override {
+            instance->findAllPhysicalDevices();
+
+            CContext::GetHandle().physicalDevice = instance->pickSuitablePhysicalDevice(surface, requireDeviceExtensions, requiredQueueFamilies);
+            //App dev can only query properties from physical device, but can not directly operate it
+            //App dev operates logical device, can logical device communicate with physical device by command queues
+            //App dev will fill command buffer with commands later
+            //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+            CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+        }
+
+        VkDebugUtilsMessengerEXT GetDebugMessenger() override {
+            return instance->debugMessenger;
+        }
+        void ContextQuit() override {
+            CContext::Quit();
+        }
+
+        QueueFamilyIndices GetQueueFamilyIndices() override { return CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating command pool"); }
+        VkDevice GetLogicalDevice() override { return CContext::GetHandle().GetLogicalDevice(); }
+        VkPhysicalDevice GetPhysicalDevice() override { return CContext::GetHandle().GetPhysicalDevice(); }
+
+        VkQueue GetGraphicsQueue() override{ return CContext::GetHandle().GetGraphicsQueue(); }
+        VkQueue GetPresentQueue() override{ return CContext::GetHandle().GetPresentQueue(); }
+        VkQueue GetComputeQueue() override{ return CContext::GetHandle().GetComputeQueue(); }
+
+        QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) override { return CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, s); }
+        VkSampleCountFlagBits GetMaxUsableSampleCount() override { return CContext::GetHandle().physicalDevice->get()->getMaxUsableSampleCount(); }
+        SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) override { return CContext::GetHandle().physicalDevice->get()->querySwapChainSupport(surface); }
 
     };
     EXPORT_FACTORY_FOR(RendererCore);

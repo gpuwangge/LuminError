@@ -99,7 +99,7 @@ void CObject::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descrip
 
     descriptorSets_graphics_texture_image_sampler.resize(MAX_FRAMES_IN_FLIGHT);///!!!
     //Step 3
-    result = vkAllocateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), &allocInfo, descriptorSets_graphics_texture_image_sampler.data());
+    result = vkAllocateDescriptorSets(renderer->GetLogicalDevice(), &allocInfo, descriptorSets_graphics_texture_image_sampler.data());
     if (result != VK_SUCCESS) throw std::runtime_error("failed to allocate descriptor sets!");
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -149,7 +149,7 @@ void CObject::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descrip
         //}
 
         //Step 4
-        vkUpdateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(renderer->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 
     //std::cout<<"Done set descriptor. "<<std::endl;

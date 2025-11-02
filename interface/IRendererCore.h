@@ -4,6 +4,8 @@
 #include <vector>
 #include <array>
 #include "TypeDataBuffer.h"
+#include "ILogCore.h"
+#include "Utility.h"
 
 namespace LEApplication{
     class IApplication;
@@ -258,6 +260,31 @@ namespace LERenderer{
 
         virtual void SetSwapchainDevice() = 0;
         virtual void SwapchainCleanup() = 0;
+
+        /**************************
+         * Context
+         * ***********************/
+        virtual VkSurfaceKHR& GetSurface() = 0;
+
+        virtual void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger) = 0;
+        virtual VkInstance GetInstance() = 0;
+
+        virtual void CreatePhysicalDevice(const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers) = 0;
+        
+        virtual VkDebugUtilsMessengerEXT GetDebugMessenger() = 0;
+        virtual void ContextQuit() = 0;
+
+        virtual QueueFamilyIndices GetQueueFamilyIndices() = 0;
+        virtual VkDevice GetLogicalDevice() = 0;
+        virtual VkPhysicalDevice GetPhysicalDevice() = 0;
+
+        virtual VkQueue GetGraphicsQueue() = 0;
+        virtual VkQueue GetPresentQueue() = 0;
+        virtual VkQueue GetComputeQueue() = 0;
+
+        virtual QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) = 0;
+        virtual VkSampleCountFlagBits GetMaxUsableSampleCount() = 0;
+        virtual SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) = 0;
 
     protected:
         //AppInfo appInfo;

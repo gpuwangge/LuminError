@@ -2,8 +2,6 @@
 #define H_APPLICATION
 
 #include "camera.hpp"
-#include "instance.h"
-#include "context.h"
 #include "texture.h" //this includes imageManager.h
 #include "modelManager.h"
 #include "object.h"
@@ -49,11 +47,11 @@ namespace LEApplication{
         //CLogManager logManager;
 
         //VkInstance instance;//01
-        std::unique_ptr<CInstance> instance{nullptr};
+        //std::unique_ptr<CInstance> instance{nullptr};
 
         int windowWidth = 0;
         int windowHeight = 0;
-        VkSurfaceKHR surface;//03
+        //VkSurfaceKHR surface;//03
 
         //bool framebufferResized = false;
         //bool needWindow = false;
@@ -225,17 +223,17 @@ namespace LEApplication{
         void CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
         //VkPhysicalDevice GetPhysicalDevice() override { return CContext::GetHandle().physicalDevice->get()->getHandle();}
-        QueueFamilyIndices GetQueueFamilyIndices() override { return CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating command pool"); }
-        VkDevice GetLogicalDevice() override { return CContext::GetHandle().GetLogicalDevice(); }
-        VkPhysicalDevice GetPhysicalDevice() override { return CContext::GetHandle().GetPhysicalDevice(); }
+        QueueFamilyIndices GetQueueFamilyIndices() override { return renderer->GetQueueFamilyIndices(); }
+        VkDevice GetLogicalDevice() override { return renderer->GetLogicalDevice(); }
+        VkPhysicalDevice GetPhysicalDevice() override { return renderer->GetPhysicalDevice(); }
 
-        VkQueue GetGraphicsQueue() override{ return CContext::GetHandle().GetGraphicsQueue(); }
-        VkQueue GetPresentQueue() override{ return CContext::GetHandle().GetPresentQueue(); }
-        VkQueue GetComputeQueue() override{ return CContext::GetHandle().GetComputeQueue(); }
+        VkQueue GetGraphicsQueue() override{ return renderer->GetGraphicsQueue(); }
+        VkQueue GetPresentQueue() override{ return renderer->GetPresentQueue(); }
+        VkQueue GetComputeQueue() override{ return renderer->GetComputeQueue(); }
 
-        QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) override { return CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, s); }
-        VkSampleCountFlagBits GetMaxUsableSampleCount() override { return CContext::GetHandle().physicalDevice->get()->getMaxUsableSampleCount(); }
-        SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) override { return CContext::GetHandle().physicalDevice->get()->querySwapChainSupport(surface); }
+        QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) override { return renderer->FindQueueFamilies(surface, s); }
+        VkSampleCountFlagBits GetMaxUsableSampleCount() override { return renderer->GetMaxUsableSampleCount(); }
+        SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) override { return renderer->QuerySwapChainSupport(surface); }
     };
 
 

@@ -63,7 +63,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     // logger->Log("Log Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
     // logger->Log("Log Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
 
-    CContext::Init();
+    //CContext::Init();
 
     //CContext::GetHandle().logger = logger;
 
@@ -91,14 +91,15 @@ void Application::Run(std::string exampleName){ //Entrance Function
     /**************** 
     * Step 4: create instance
     *****************/
-    instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions, logger);
+    //instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions, logger);
+    renderer->CreateInstance(requiredValidationLayers, requiredInstanceExtensions, logger);
 
     /**************** 
     * Step 5: create surface
     * Surface is to store view format information for creating swapchain. 
     * Only third party(glfw or sdl) knows what kind of surface can be attached to its window.
     *****************/
-    sdler->createSurface(IN instance, OUT surface);
+    sdler->createSurface(IN renderer->GetInstance(), OUT renderer->GetSurface());
 
     /**************** 
     * General initialization begins
@@ -108,34 +109,35 @@ void Application::Run(std::string exampleName){ //Entrance Function
     VkQueueFlagBits requiredQueueFamilies = VK_QUEUE_GRAPHICS_BIT; //& VK_QUEUE_COMPUTE_BIT
     const std::vector<const char*>  requireDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-    instance->findAllPhysicalDevices();
+    // instance->findAllPhysicalDevices();
 
-    CContext::GetHandle().physicalDevice = instance->pickSuitablePhysicalDevice(surface, requireDeviceExtensions, requiredQueueFamilies);
-    //App dev can only query properties from physical device, but can not directly operate it
-    //App dev operates logical device, can logical device communicate with physical device by command queues
-    //App dev will fill command buffer with commands later
-    //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
-    CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+    // CContext::GetHandle().physicalDevice = instance->pickSuitablePhysicalDevice(renderer->GetSurface(), requireDeviceExtensions, requiredQueueFamilies);
+    // //App dev can only query properties from physical device, but can not directly operate it
+    // //App dev operates logical device, can logical device communicate with physical device by command queues
+    // //App dev will fill command buffer with commands later
+    // //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+    // CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers);
     
 
-    textureManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
-    textureManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
-    textureManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();
+    textureManager.m_logicalDevice = renderer->GetLogicalDevice();
+    textureManager.m_physicalDevice = renderer->GetPhysicalDevice();
+    textureManager.m_graphicsQueue = renderer->GetGraphicsQueue();
     textureManager.SetLogger(logger);
-    textManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
-    textManager.m_physicalDevice = CContext::GetHandle().GetPhysicalDevice();
-    textManager.m_graphicsQueue = CContext::GetHandle().GetGraphicsQueue();
-    shaderManager.m_logicalDevice = CContext::GetHandle().GetLogicalDevice();
+    textManager.m_logicalDevice = renderer->GetLogicalDevice();
+    textManager.m_physicalDevice = renderer->GetPhysicalDevice();
+    textManager.m_graphicsQueue = renderer->GetGraphicsQueue();
+    shaderManager.m_logicalDevice = renderer->GetLogicalDevice();
 
     //query basic capabilities of surface
     //VkSurfaceCapabilitiesKHR*                   pSurfaceCapabilities;
     //std::cout<<vkGetPhysicalDeviceSurfaceCapabilitiesKHR(CContext::GetHandle().GetPhysicalDevice(), surface, pSurfaceCapabilities)<<std::endl;
     //std::cout<<"Surface min extent: width="<<pSurfaceCapabilities->minImageExtent.width<<", Surface min extent: height="<<pSurfaceCapabilities->minImageExtent.height<<std::endl;
     //std::cout<<"Surface max extent: width="<<pSurfaceCapabilities->maxImageExtent.width<<", Surface max extent: height="<<pSurfaceCapabilities->maxImageExtent.height<<std::endl;
-    renderer->CreateSwapchainImages(surface, windowWidth, windowHeight);
+    renderer->CreateSwapchainImages(renderer->GetSurface(), windowWidth, windowHeight);
     renderer->CreateSwapchainViews(VK_IMAGE_ASPECT_COLOR_BIT);
 
-    renderer->CreateCommandPool(surface);
+    renderer->CreateCommandPool(renderer->GetSurface());
 
     std::cout<<"======================================="<<std::endl;
     std::cout<<"======Welcome to Vulkan Platform======="<<std::endl;
@@ -162,7 +164,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
         if(NeedToExit) break;
     }
 
-	vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
+	vkDeviceWaitIdle(renderer->GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
 }
 
 void Application::Update(){

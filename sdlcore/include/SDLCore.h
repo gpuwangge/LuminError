@@ -19,9 +19,6 @@
 #include <vector>
 #include <iostream>
 
-//class CApplication;
-class CInstance;
-
 namespace LESDL{
     class SDLCore final : public ISDLCore{
     public:
@@ -48,7 +45,7 @@ namespace LESDL{
         bool IsRunning() override {return bStillRunning;}
         void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle) override;
         void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) override;
-        void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) override;
+        void createSurface(VkInstance instance, VkSurfaceKHR &surface) override;
         void eventHandle() override;
 
         void SetMouseSensibility(float value) override { mouse_sensitive = value; }

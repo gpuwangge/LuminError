@@ -109,14 +109,14 @@ void Application::CleanUp(){
     //std::cout<<"Application: renderer end Destroy()"<<std::endl;
 
     //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
-    vkDestroyDevice(CContext::GetHandle().GetLogicalDevice(), nullptr);
+    vkDestroyDevice(renderer->GetLogicalDevice(), nullptr);
 
-    if (enableValidationLayers) DestroyDebugUtilsMessengerEXT(instance->getHandle(), instance->debugMessenger, nullptr);
+    if (enableValidationLayers) DestroyDebugUtilsMessengerEXT(renderer->GetInstance(), renderer->GetDebugMessenger(), nullptr);
 
-    vkDestroySurfaceKHR(instance->getHandle(), surface, nullptr);
-    vkDestroyInstance(instance->getHandle(), nullptr);
+    vkDestroySurfaceKHR(renderer->GetInstance(), renderer->GetSurface(), nullptr);
+    vkDestroyInstance(renderer->GetInstance(), nullptr);
     
-    CContext::Quit();
+    renderer->ContextQuit();
 
     //std::cout<<"Application End Cleanup()."<<std::endl;
 }
@@ -186,7 +186,7 @@ void Application::Set_feature_graphics_show_performance_control(bool value) {app
 
 int Application::GetControlNodeSize() { return controlNodes.size();}
 void Application::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}
-void* Application::GetInstanceHandle() {return instance->getHandle();}
+void* Application::GetInstanceHandle() {return renderer->GetInstance();}// instance->getHandle();}
 
 int Application::GetObjectSize() { return objects.size(); }
 int Application::GetCustomObjectSize() { return appInfo->Objects.size(); }
@@ -288,7 +288,7 @@ double Application::GetDeltaTime() { return deltaTime; }
 void Application::CmdNextSubpass() { vkCmdNextSubpass(renderer->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
 void Application::SetSwapchainImageSize(int size) { renderer->SetSwapchain_ImageSize(size); }
 void Application::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapchain_Compute_Image(enable); }
-void Application::DeviceWaitIdle() { vkDeviceWaitIdle(CContext::GetHandle().GetLogicalDevice()); }
+void Application::DeviceWaitIdle() { vkDeviceWaitIdle(renderer->GetLogicalDevice()); }
 
 void Application::PushConstantToCommand(void* pcData, int pipelineId) {
     renderer->PushConstantToCommand(pcData, renderer->GetGraphicsPipelineLayout(pipelineId), shaderManager.pushConstantRange);

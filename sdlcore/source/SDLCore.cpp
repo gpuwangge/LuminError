@@ -44,9 +44,10 @@ namespace LESDL{
         for(int i = 0; i < count_instance_extensions; i++) requiredInstanceExtensions[i] = instance_extensions[i];
     }
 
-    void SDLCore::createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface){
+    void SDLCore::createSurface(VkInstance instance, VkSurfaceKHR &surface){
         //if(!SDL_Vulkan_CreateSurface(window, instance->getHandle(), NULL, &surface)) {
-        if(!SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(game->GetInstanceHandle()), NULL, &surface)) {
+        //if(!SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(game->GetInstanceHandle()), NULL, &surface)) {
+        if(!SDL_Vulkan_CreateSurface(window, instance, NULL, &surface)) {
             std::cout << "Could not create a Vulkan surface." << std::endl;
             //return 1;
         }

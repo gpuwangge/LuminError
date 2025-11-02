@@ -7,8 +7,6 @@ namespace LEApplication{
     class IApplication;
 }
 
-class CInstance;
-
 namespace LESDL{
     class ISDLCore {
     public:
@@ -18,7 +16,7 @@ namespace LESDL{
         virtual bool IsRunning() = 0;
         virtual void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle) = 0;
         virtual void queryRequiredInstanceExtensions(std::vector<const char*> &requiredInstanceExtensions) = 0;
-        virtual void createSurface(std::unique_ptr<CInstance> &instance, VkSurfaceKHR &surface) = 0;
+        virtual void createSurface(VkInstance instance, VkSurfaceKHR &surface) = 0;
         virtual void eventHandle() = 0;
 
         virtual void SetMouseSensibility(float value) = 0;
