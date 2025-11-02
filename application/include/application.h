@@ -9,7 +9,7 @@
 #include "light.h"
 #include "timer.h"
 #include "controlNode.h"
-#include "shaderManager.h"
+//#include "shaderManager.h"
 
 #include "IApplication.h"
 #include "IGame.h"
@@ -57,7 +57,7 @@ namespace LEApplication{
         //bool framebufferResized = false;
         //bool needWindow = false;
 
-        CShaderManager shaderManager;
+        //CShaderManager shaderManager;
         CModelManager modelManager;
         CTextureManager textureManager;
         CTextImageManager textImageManager;

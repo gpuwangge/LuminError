@@ -1,17 +1,15 @@
-#ifndef H_SHADERMANAGER
-#define H_SHADERMANAGER
-
+#pragma once
 #include "Foundation.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <string>
 
+namespace LEResource{
+
 class CShaderManager final{
 public:
-    CShaderManager();
-    ~CShaderManager();
-
-    enum ShaderTypes{VERT, FRAG, COMP};
+    CShaderManager(){};
+    ~CShaderManager(){};
 
     VkDevice m_logicalDevice;
 
@@ -23,13 +21,14 @@ public:
 
     bool bEnablePushConstant = false;
     VkPushConstantRange pushConstantRange;
-    template<typename T>
-    void CreatePushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset){
-        bEnablePushConstant = true;
-        pushConstantRange.stageFlags = shaderStageFlagBits;
-        pushConstantRange.offset = offset;
-        pushConstantRange.size = sizeof(T);
-    }
+    // template<typename T>
+    // void CreatePushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset){
+    //     bEnablePushConstant = true;
+    //     pushConstantRange.stageFlags = shaderStageFlagBits;
+    //     pushConstantRange.offset = offset;
+    //     pushConstantRange.size = sizeof(T);
+    // }
+    void CreatePushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset, uint32_t size);
 
     void Destroy();
 
@@ -39,4 +38,4 @@ private:
     bool readFile(const std::string& filename, std::vector<char> &buffer);
 };
 
-#endif
+}//namespace

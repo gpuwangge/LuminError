@@ -11,7 +11,8 @@ void Application::Initialize(){
     //renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
     renderer->SetRenderMode(appInfo->RenderMode);
     if(appInfo->Feature.b_feature_graphics_push_constant)
-        shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
+        resourcer->CreateShaderPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelPushConstants));
+        //shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);
     if(appInfo->Feature.b_feature_graphics_global_blend)
         renderer->AddColorBlendAttachment(
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
@@ -362,13 +363,13 @@ void Application::Initialize(){
     if(appInfo->GraphicsPipelines.size() > 0){
         for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
             //std::cout<<appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name<<std::endl;
-            shaderManager.CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_vertexshader_name, shaderManager.VERT);
-            shaderManager.CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_fragmentshader_name, shaderManager.FRAG);
+            resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_vertexshader_name, VERT);
+            resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_fragmentshader_name, FRAG);
         }
     }
     if(appInfo->ComputePipelines.size() > 0)
         for(int i = 0; i < appInfo->ComputePipelines.size(); i++)
-            shaderManager.CreateShader(appInfo->ComputePipelines[i].compute_pipeline_computeshader_name, shaderManager.COMP);
+            resourcer->CreateShader(appInfo->ComputePipelines[i].compute_pipeline_computeshader_name, COMP);
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
 
     /****************************
@@ -404,9 +405,9 @@ void Application::Initialize(){
         for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
             //std::cout<<"test create pipeline"<<std::endl;
             //! All graphics pipelines use the same dsLayouts
-            if(shaderManager.bEnablePushConstant){
+            if(resourcer->GetShaderEnablePushConstant()){
                 if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create Push Constant Layout"<<std::endl;
-                renderer->CreateGraphicsPipelineLayout(dsLayouts,  shaderManager.pushConstantRange, true, i);
+                renderer->CreateGraphicsPipelineLayout(dsLayouts, resourcer->GetShaderPushConstantRange(), true, i);
                 if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Push Constant Layout"<<std::endl;
             }
             else renderer->CreateGraphicsPipelineLayout(dsLayouts, i);
@@ -419,7 +420,7 @@ void Application::Initialize(){
             switch(vertexDatatype){
                 case VertexStructureTypes::NoType:
                     renderer->CreateGraphicsPipeline(NULL, NULL,
-                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], false, false, 
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), false, false, 
                         renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::ThreeDimension:
@@ -427,28 +428,28 @@ void Application::Initialize(){
                     //if((*appInfo->RenderPassShadowmap)[i]) {
                     if(appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap) {
                         renderer->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
-                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
+                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
                             renderer->GetRenderpass_shadowmap(), i, appInfo); 
                     }else{
                         renderer->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
-                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
+                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
                             renderer->GetRenderpass_mainscene(), i, appInfo);
                     }   
                 break;
                 case VertexStructureTypes::TwoDimension:
                     //std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
                     renderer->CreateGraphicsPipeline(Vertex2D::getBindingDescription, Vertex2D::getAttributeDescriptions, 
-                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
                         renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::ParticleType:
                     renderer->CreateGraphicsPipeline(Particle::getBindingDescription, Particle::getAttributeDescriptions, 
-                        VK_PRIMITIVE_TOPOLOGY_POINT_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, false, 
+                        VK_PRIMITIVE_TOPOLOGY_POINT_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
                         renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 case VertexStructureTypes::TextQuad:
                     renderer->CreateGraphicsPipeline(NULL, NULL, //TextQuadVertex::getBindingDescription, TextQuadVertex::getAttributeDescriptions, 
-                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, shaderManager.vertShaderModules[i], shaderManager.fragShaderModules[i], true, true, 
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, true, 
                         renderer->GetRenderpass_mainscene(), i, appInfo);
                 break;
                 default:
@@ -461,7 +462,7 @@ void Application::Initialize(){
     if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
         renderer->CreateComputePipelineLayout(renderer->GetComputeDescriptorSetLayout());
-        renderer->CreateComputePipeline(shaderManager.compShaderModules[0]);
+        renderer->CreateComputePipeline(resourcer->GetComputeShaderModule(0));
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 
@@ -659,7 +660,7 @@ void Application::Initialize(){
     * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
     renderer->CreateSyncObjects(renderer->GetSwapchain_ImageSize());
-    shaderManager.Destroy();
+    resourcer->DestroyShaderManager();
 
     TimePoint T13 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for creating sync objects and destroy shaders", T12, T13);

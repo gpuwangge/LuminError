@@ -298,7 +298,7 @@ void Application::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapch
 void Application::DeviceWaitIdle() { vkDeviceWaitIdle(renderer->GetLogicalDevice()); }
 
 void Application::PushConstantToCommand(void* pcData, int pipelineId) {
-    renderer->PushConstantToCommand(pcData, renderer->GetGraphicsPipelineLayout(pipelineId), shaderManager.pushConstantRange);
+    renderer->PushConstantToCommand(pcData, renderer->GetGraphicsPipelineLayout(pipelineId), resourcer->GetShaderPushConstantRange());
 }
 void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
     vkCmdSetDepthBias(renderer->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);

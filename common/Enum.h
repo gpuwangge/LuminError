@@ -9,4 +9,6 @@ enum RenderModes {
     GRAPHICS_SHADOWMAP
 };
 
+enum ShaderTypes{VERT, FRAG, COMP};
+
 

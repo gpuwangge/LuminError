@@ -1,16 +1,9 @@
 #include "shaderManager.h"
 #include <fstream>
 #include "Config.h"
+#include "Enum.h"
 
-CShaderManager::CShaderManager(){
-    //debugger = new CDebugger("../logs/shaderManager.log");
-    //bEnablePushConstant = false;
-}
-CShaderManager::~CShaderManager(){
-    //if (!debugger) delete debugger;
-}
-
-
+namespace LEResource{
 void CShaderManager::CreateShader(const std::string shaderName, short shaderType){
     VkShaderModule *pShaderModule;
     switch(shaderType){
@@ -62,8 +55,7 @@ bool CShaderManager::InitSpirVShader(const std::string shaderName, VkShaderModul
     return true;
 }
 
-
- bool CShaderManager::readFile(const std::string& filename, std::vector<char> &buffer) {
+bool CShaderManager::readFile(const std::string& filename, std::vector<char> &buffer) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
     if (!file.is_open()) {
@@ -83,8 +75,17 @@ bool CShaderManager::InitSpirVShader(const std::string shaderName, VkShaderModul
     return true;
 }
 
+void CShaderManager::CreatePushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset, uint32_t size) {
+    bEnablePushConstant = true;
+    pushConstantRange.stageFlags = shaderStageFlagBits;
+    pushConstantRange.offset = offset;
+    pushConstantRange.size = size;
+}
+
 void CShaderManager::Destroy(){
     for(int i = 0; i < vertShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, vertShaderModules[i], nullptr);
     for(int i = 0; i < fragShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, fragShaderModules[i], nullptr);
     for(int i = 0; i < compShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, compShaderModules[i], nullptr);
 }
+
+}//namespace
