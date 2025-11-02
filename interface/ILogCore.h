@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include "Utility.h"
 
 namespace LELog{
     class ILogCore {
@@ -18,9 +19,10 @@ namespace LELog{
             Print(formatted);
         }
 
-        //Log to File(Array)
-        virtual void LogArray(std::string s, float *n, int size) = 0;
-        
+        //Log to File(Array, glm::vec3)
+        virtual void LogArray(const std::string& message, float *n, int size) = 0;
+        virtual void LogVec3(const std::string& message, glm::vec3 v) = 0;
+
         //Log to File
         virtual bool SetLogFile(const std::string& filename) = 0;
         virtual void CloseLogFile() = 0;

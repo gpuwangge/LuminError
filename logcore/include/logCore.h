@@ -1,11 +1,7 @@
 #pragma once
 #include "ILogCore.h"
 #include <fstream>
-//#include <vulkan/vulkan.h>
-//#include <mutex>
-//#include <memory>
-//#include <ctime>
-//#include <iomanip>
+#include "Utility.h"
 
 namespace LELog{
     class LogCore final : public ILogCore{
@@ -13,7 +9,8 @@ namespace LELog{
         LogCore(){}
         ~LogCore(){}
         void Print(const std::string& message) override;
-        void LogArray(std::string s, float *n, int size) override;
+        void LogArray(const std::string& message, float *n, int size) override;
+        void LogVec3(const std::string& message, glm::vec3 v) override;
         void Log(const std::string& message) override;
 
         bool SetLogFile(const std::string& filename) override;

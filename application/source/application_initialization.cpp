@@ -511,12 +511,12 @@ void Application::Initialize(){
         if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
         logger->Log("Object ID: {}", i);
         logger->Log("\tName: {}", objects[i].Name.c_str());
-        //logger->Log("\tPosition: {}", objects[i].Position.x);
-        // logger->Log("\tLength_original: %f, %f, %f", objects[i].Length_original);
-        // logger->Log("\tLengthMin_original: %f, %f, %f", objects[i].LengthMin_original);
-        // logger->Log("\tLengthMax_original: %f, %f, %f", objects[i].LengthMax_original);
-        // logger->Log("\tScale: %f, %f, %f", objects[i].Scale);
-        // logger->Log("\tLength: %f, %f, %f", objects[i].Length);
+        logger->LogVec3("\tPosition", objects[i].Position);
+        logger->LogVec3("\tLength_original", objects[i].Length_original);
+        logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
+        logger->LogVec3("\tLengthMax_original", objects[i].LengthMax_original);
+        logger->LogVec3("\tScale", objects[i].Scale);
+        logger->LogVec3("\tLength", objects[i].Length);
         logger->Log("");
     }
 
@@ -559,12 +559,12 @@ void Application::Initialize(){
         if(!textManager.m_textBoxes[i].bRegistered) std::cout<<"WARNING: Textbox id("<<i<<") is not registered!"<<std::endl;
         logger->Log("Textbox ID: {}", i);
         logger->Log("\tName: {}", textManager.m_textBoxes[i].Name.c_str());
-        // logger->Log("\tPosition: %f, %f, %f", textManager.m_textBoxes[i].Position);
-        // logger->Log("\tLength_original: %f, %f, %f", textManager.m_textBoxes[i].Length_original);
-        // logger->Log("\tLengthMin_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMin_original);
-        // logger->Log("\tLengthMax_original: %f, %f, %f", textManager.m_textBoxes[i].LengthMax_original);
-        // logger->Log("\tScale: %f, %f, %f", textManager.m_textBoxes[i].Scale);
-        // logger->Log("\tLength: %f, %f, %f", textManager.m_textBoxes[i].Length);
+        logger->LogVec3("\tPosition", textManager.m_textBoxes[i].Position);
+        logger->LogVec3("\tLength_original", textManager.m_textBoxes[i].Length_original);
+        logger->LogVec3("\tLengthMin_original", textManager.m_textBoxes[i].LengthMin_original);
+        logger->LogVec3("\tLengthMax_original", textManager.m_textBoxes[i].LengthMax_original);
+        logger->LogVec3("\tScale", textManager.m_textBoxes[i].Scale);
+        logger->LogVec3("\tLength", textManager.m_textBoxes[i].Length);
         logger->Log("");
     }
 

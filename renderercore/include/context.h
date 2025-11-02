@@ -1,6 +1,4 @@
-#ifndef H_CONTEXT
-#define H_CONTEXT
-
+#pragma once
 // #ifdef PROJECTA_EXPORTS
 //     #define PROJECTA_API __declspec(dllexport)
 // #else
@@ -11,9 +9,6 @@
 #include <vulkan/vulkan.h>
 #include <locale>
 //#include "ILogCore.h"
-
-
-#define PRINT CContext::GetHandle().logManager.print
 
 //CContext is to store some commonly used static variables(physical device, logical device in the current context)
 
@@ -49,4 +44,3 @@ private:
     static std::unique_ptr<CContext> handle;
 };
 
-#endif

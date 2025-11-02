@@ -1,6 +1,4 @@
-#ifndef H_LOGICALDEVICE
-#define H_LOGICALDEVICE
-
+#pragma once
 #include <vulkan/vulkan.h>
 
 class CLogicalDevice final{
@@ -20,4 +18,4 @@ public:
     //CDebugger * debugger;
 };
 
-#endif
+

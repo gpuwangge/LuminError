@@ -13,13 +13,19 @@ void LogCore::Print(const std::string& message) {
     std::cout<<message<<std::endl;
 }
 
-void LogCore::LogArray(std::string s, float *n, int size){
+void LogCore::LogArray(const std::string& message, float *n, int size){
     if(fileEnabled_) {
-        file_<<s<<std::endl;
+        file_<<message<<std::endl;
         for(int i = 0; i < size; i++){
             file_<<n[i]<<", ";
         }
         file_<<std::endl;
+    }
+}
+
+void LogCore::LogVec3(const std::string& message, glm::vec3 v) {
+    if(fileEnabled_) {
+        file_<<message<<": "<<v[0]<<", "<<v[1]<<", "<<v[2]<<std::endl;
     }
 }
 

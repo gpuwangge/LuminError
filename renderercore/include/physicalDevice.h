@@ -1,5 +1,4 @@
-#ifndef H_PHYSICALDEVICE
-#define H_PHYSICALDEVICE
+#pragma once
 
 #include "logicalDevice.h"
 #include "Config.h"
@@ -9,10 +8,6 @@
 #include <locale>
 #include "ILogCore.h"
 #include "Utility.h"
-
-//#define PRINT logManager.print
-
-//class CInstance;//forward declaration
 
 class CPhysicalDevice{
 public:
@@ -51,4 +46,3 @@ private:
     VkPhysicalDevice handle{VK_NULL_HANDLE};
 };
 
-#endif

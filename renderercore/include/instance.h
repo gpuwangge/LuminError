@@ -1,6 +1,4 @@
-#ifndef H_INSTANCE
-#define H_INSTANCE
-
+#pragma once
 #include "physicalDevice.h"
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -44,5 +42,3 @@ public:
     std::unique_ptr<CPhysicalDevice>* pickSuitablePhysicalDevice(VkSurfaceKHR surface, const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies);
 };
 
-
-#endif
