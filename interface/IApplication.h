@@ -138,6 +138,7 @@ namespace LEApplication{
         // virtual VkSampleCountFlagBits GetMaxUsableSampleCount() = 0;
         // virtual SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) = 0;
 
+
     };
 
 }

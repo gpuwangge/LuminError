@@ -1,9 +1,6 @@
 #pragma once
-//#include <string>
-//#include <sstream>
 #include <iostream>
-// #include <iomanip>
-// #include "Utility.h"
+#include "ILogCore.h"
 
 namespace LEApplication{
     class IApplication;
@@ -13,8 +10,7 @@ namespace LEResource{
     class IResourceCore {
     public:
         virtual ~IResourceCore() = default;
-        void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
-        void Greet(){std::cout<<"resourcecore::greet!"<<std::endl;}
+        virtual void SetApplication(LEApplication::IApplication* pApplication, LELog::ILogCore *logger_) = 0;
 
     protected:
         LEApplication::IApplication* game;

@@ -41,8 +41,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //Load Resource Core Module
     LoadModuleAndInstance(handle_module_resourcecore, pVoid, "resourcecore.dll");
     resourcer = static_cast<LEResource::IResourceCore*>(pVoid);
-    resourcer->SetApplication(this);
-    resourcer->Greet();
+    resourcer->SetApplication(this, logger);
 
     m_sampleName = GetPureName(exampleName);
     //std::cout<<"exampleName: "<<exampleName<<std::endl;
