@@ -1,5 +1,4 @@
-#ifndef H_APPLICATION
-#define H_APPLICATION
+#pragma once
 
 #include "camera.hpp"
 #include "texture.h" //this includes imageManager.h
@@ -241,5 +240,3 @@ namespace LEApplication{
 }
 
 
-
-#endif

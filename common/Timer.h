@@ -1,5 +1,4 @@
-#ifndef H_TIMER
-#define H_TIMER
+#pragma once
 
 #include <chrono>
 #include <iostream>
@@ -69,4 +68,3 @@ inline void printElapsedSince(const char* message, TimePoint start) {
     printElapsed(message, start, now());
 }
 
-#endif

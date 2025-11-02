@@ -1,5 +1,4 @@
-#ifndef H_TEXTURE
-#define H_TEXTURE
+#pragma once
 
 #include "timer.h"
 #include <vulkan/vulkan.h>
@@ -130,5 +129,3 @@ public:
     void Destroy();
 };
 
-
-#endif

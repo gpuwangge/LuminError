@@ -1,6 +1,4 @@
-#ifndef H_CAMERA
-#define H_CAMERA
-
+#pragma once
 #include "entity.h"
 #include "Foundation.h"
 #include <iostream>
@@ -165,5 +163,3 @@ public:
 	}
 	*/
 };
-
-#endif
