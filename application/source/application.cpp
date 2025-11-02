@@ -38,6 +38,12 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //logger = std::shared_ptr<LELog::ILogCore>(static_cast<LELog::ILogCore*>(pVoid));
     logger = static_cast<LELog::ILogCore*>(pVoid);
 
+    //Load Resource Core Module
+    LoadModuleAndInstance(handle_module_resourcecore, pVoid, "resourcecore.dll");
+    resourcer = static_cast<LEResource::IResourceCore*>(pVoid);
+    resourcer->SetApplication(this);
+    resourcer->Greet();
+
     m_sampleName = GetPureName(exampleName);
     //std::cout<<"exampleName: "<<exampleName<<std::endl;
     std::string logName = logger->GetLogFileName(m_sampleName);

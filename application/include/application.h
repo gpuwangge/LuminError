@@ -25,6 +25,7 @@
 #include "IYAMLCore.h"
 #include "IRendererCore.h"
 #include "ILogCore.h"
+#include "IResourceCore.h"
 
 //added this to remove windows.h
 #ifdef _WIN32
@@ -120,6 +121,8 @@ namespace LEApplication{
         HMODULE handle_module_logcore;
         LELog::ILogCore *logger = NULL;
         //std::shared_ptr<LELog::ILogCore> logger;
+        HMODULE handle_module_resourcecore;
+        LEResource::IResourceCore *resourcer = NULL;
 
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
         void DestroyInstance(HMODULE handle, void* instance);
