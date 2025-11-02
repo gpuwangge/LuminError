@@ -13,6 +13,7 @@ namespace LELog{
         LogCore(){}
         ~LogCore(){}
         void Print(const std::string& message) override;
+        void LogArray(std::string s, float *n, int size) override;
         void Log(const std::string& message) override;
 
         bool SetLogFile(const std::string& filename) override;

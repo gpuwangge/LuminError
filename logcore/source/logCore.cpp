@@ -13,6 +13,16 @@ void LogCore::Print(const std::string& message) {
     std::cout<<message<<std::endl;
 }
 
+void LogCore::LogArray(std::string s, float *n, int size){
+    if(fileEnabled_) {
+        file_<<s<<std::endl;
+        for(int i = 0; i < size; i++){
+            file_<<n[i]<<", ";
+        }
+        file_<<std::endl;
+    }
+}
+
 void LogCore::Log(const std::string& message) {
     if(fileEnabled_) file_<<message<<std::endl;
 }

@@ -356,7 +356,7 @@ namespace LERenderer{
         VkSurfaceKHR surface;//03
         VkSurfaceKHR& GetSurface() override { return surface; }
 
-        void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger) override {
+        void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions) override {
             instance = std::make_unique<CInstance>(requiredValidationLayers, requiredExtensions, logger);
         }
         VkInstance GetInstance() override { return instance.get()->getHandle(); }

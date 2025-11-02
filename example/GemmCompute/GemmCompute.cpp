@@ -19,7 +19,7 @@ namespace LuminError{
             float MatB[DIM_K * DIM_N];
             float MatC[DIM_M * DIM_N];
         };
-        StructStorageBuffer storageBufferObject; //input and output use the same storage. Issue?
+        StructStorageBuffer storageBufferObject; //input and output use the same storage
 
         bool bVerbose = true;
 	    bool bVerify = true;

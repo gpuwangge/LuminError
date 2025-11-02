@@ -266,7 +266,7 @@ namespace LERenderer{
          * ***********************/
         virtual VkSurfaceKHR& GetSurface() = 0;
 
-        virtual void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger) = 0;
+        virtual void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions) = 0;
         virtual VkInstance GetInstance() = 0;
 
         virtual void CreatePhysicalDevice(const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers) = 0;

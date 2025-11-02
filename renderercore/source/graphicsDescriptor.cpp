@@ -346,13 +346,6 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             depthImageInfo.imageView = depthImageView; //depth image from swapchain
             depthImageInfo.sampler = depthImageSampler; 
 
-            // if(j < m_texture_ids.size()){
-            //     imageInfo[j].imageView = p_textureManager->textureImages[m_texture_ids[j]].m_textureImageBuffer.view;
-            //     imageInfo[j].sampler = samplers[p_textureManager->textureImages[m_texture_ids[j]].m_sampler_id]; 
-            // }else{ //There are more samplers than textures for this object, so use the first texture to fill other samplers
-            //     imageInfo[j].imageView = p_textureManager->textureImages[m_texture_ids[0]].m_textureImageBuffer.view;
-            //     imageInfo[j].sampler = samplers[p_textureManager->textureImages[m_texture_ids[0]].m_sampler_id]; 
-            // }
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;

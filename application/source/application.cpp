@@ -31,7 +31,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //Load Renderer Core Module
     LoadModuleAndInstance(handle_module_renderercore, pVoid, "renderercore.dll");
     renderer = static_cast<LERenderer::IRendererCore*>(pVoid);
-    renderer->SetApplication(this);
+    renderer->SetApplication(this); //also load log dll and create logger here
 
     //Load Log Core Module
     LoadModuleAndInstance(handle_module_logcore, pVoid, "logcore.dll");
@@ -55,7 +55,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     //logger->Print("Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
     //int numbers[] = {10, 20, 30};// 数组
     //logger->Print("Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
-    // logger->Log("Log Application started");// 演示所有用例
+    // logger->Log("Log Application started");
     // logger->Log("Log Integer: {}", 42); // 基本类型
     // logger->Log("Log Float: {}", 3.14f);
     // logger->Log("Log String: {}", "Hello");
@@ -92,7 +92,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
     * Step 4: create instance
     *****************/
     //instance = std::make_unique<CInstance>(requiredValidationLayers, requiredInstanceExtensions, logger);
-    renderer->CreateInstance(requiredValidationLayers, requiredInstanceExtensions, logger);
+    renderer->CreateInstance(requiredValidationLayers, requiredInstanceExtensions);
 
     /**************** 
     * Step 5: create surface

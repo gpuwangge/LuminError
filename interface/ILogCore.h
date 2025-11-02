@@ -17,6 +17,9 @@ namespace LELog{
             std::string formatted = formatString(format, args...);
             Print(formatted);
         }
+
+        //Log to File(Array)
+        virtual void LogArray(std::string s, float *n, int size) = 0;
         
         //Log to File
         virtual bool SetLogFile(const std::string& filename) = 0;
