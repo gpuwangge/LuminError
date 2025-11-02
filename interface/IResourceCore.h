@@ -11,6 +11,7 @@ namespace LEResource{
     public:
         virtual ~IResourceCore() = default;
         virtual void SetApplication(LEApplication::IApplication* pApplication, LELog::ILogCore *logger_) = 0;
+        virtual void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_) = 0;
 
     protected:
         LEApplication::IApplication* game;

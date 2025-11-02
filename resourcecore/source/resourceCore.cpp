@@ -9,4 +9,9 @@ void ResourceCore::SetApplication(LEApplication::IApplication* pApplication, LEL
     //logger->Log("ResourceCore::SetApplication() Test");
 }
 
+void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_){
+    logicalDevice = logicalDevice_;
+    physicalDevice = physicalDevice_;
+}
+
 }//namespace
