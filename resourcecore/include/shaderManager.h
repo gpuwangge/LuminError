@@ -8,8 +8,8 @@ namespace LEResource{
 
 class CShaderManager final{
 public:
-    CShaderManager(){};
-    ~CShaderManager(){};
+    CShaderManager() {}
+    ~CShaderManager() {}
 
     VkDevice m_logicalDevice;
 

@@ -1,13 +1,11 @@
-#include "../include/modelManager.h"
+#include "modelManager.h"
 #include "Foundation.h"
 #include <unordered_map>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../external/tiny_obj_loader.h"
 
-CModelManager::CModelManager(){}
-CModelManager::~CModelManager(){}
-
+namespace LEResource{
 void CModelManager::CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage){
 	CCustomModel3D model;
 	model.vertices = vertices3D;
@@ -139,6 +137,6 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	modelLengthsMax.push_back(glm::vec3(max_x, max_y, max_z));
 }
 
-
+}//namespace
 
 

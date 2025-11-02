@@ -1,16 +1,16 @@
-#ifndef H_MODELMANAGER
-#define H_MODELMANAGER
-
+#pragma once
 #include "utility.h"
 #include "Config.h"
 #include <vector>
 #include "TypeVertex.h"
 #include "TypeText.h"
 
+namespace LEResource{
+
 class CModelManager final{
 public:
-    CModelManager();
-    ~CModelManager();
+    CModelManager() {}
+    ~CModelManager() {}
 
     /****Custom Model 3D*****/
     class CCustomModel3D{
@@ -62,4 +62,4 @@ public:
     void LoadObjModel(IN const std::string modelName, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D);
 };
 
-#endif
+}//namespace

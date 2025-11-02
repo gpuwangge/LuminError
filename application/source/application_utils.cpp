@@ -1,4 +1,4 @@
-#include "../include/application.h"
+#include "application.h"
 #include <windows.h>
 
 namespace LEApplication{
@@ -210,9 +210,9 @@ glm::vec3 Application::GetLightPosition(int lightId) { return lights[lightId].Ge
 void Application::SetLightPosition(int lightId, float px, float py, float pz) { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }
 void Application::SetLightPosition(int lightId, glm::vec3 p) { lights[lightId].SetLightPosition(p); }
 
-void Application::CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) {modelManager.CreateCustomModel2D(vertices2D);}
+void Application::CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) { resourcer->CreateModelCustomModel2D(vertices2D);}
 void Application::CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) {
-    modelManager.CreateCustomModel3D(vertices3D, indices3D, isTextboxImage);
+    resourcer->CreateModelCustomModel3D(vertices3D, indices3D, isTextboxImage);
 }
 
 void Application::DrawObject(int objectId) { objects[objectId].Draw(); }

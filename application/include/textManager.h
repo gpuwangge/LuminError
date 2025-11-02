@@ -10,6 +10,7 @@
 #include "TypeText.h"
 #include <map>
 #include "IRendererCore.h"
+#include "IResourceCore.h"
 #include "TypeUniform.h"
 
 //forward declaration. 
@@ -101,9 +102,10 @@ public:
 
     //CRenderer *p_renderer = NULL;
     LERenderer::IRendererCore *renderer = NULL;
+    LEResource::IResourceCore *resourcer = NULL;
 
     CTextImageManager *p_textImageManager = NULL;
-    CModelManager *p_modelManager = NULL;
+    //CModelManager *p_modelManager = NULL;
 
     VkDevice m_logicalDevice;
     VkPhysicalDevice m_physicalDevice;

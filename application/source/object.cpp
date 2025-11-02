@@ -157,9 +157,19 @@ void CObject::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descrip
 
 void CObject::Register(LEApplication::Application *p_app){
     //if(p_app->appInfo.VertexBufferType == VertexStructureTypes::TwoDimension || p_app->appInfo.VertexBufferType == VertexStructureTypes::ThreeDimension){
-    Length_original = p_app->modelManager.modelLengths.size() > m_model_id ? p_app->modelManager.modelLengths[m_model_id] : glm::vec3();
-    LengthMin_original = p_app->modelManager.modelLengthsMin.size() > m_model_id ? p_app->modelManager.modelLengthsMin[m_model_id] : glm::vec3();
-    LengthMax_original = p_app->modelManager.modelLengthsMax.size() > m_model_id ? p_app->modelManager.modelLengthsMax[m_model_id] : glm::vec3();
+    // Length_original = p_app->modelManager.modelLengths.size() > m_model_id ? p_app->modelManager.modelLengths[m_model_id] : glm::vec3();
+    // LengthMin_original = p_app->modelManager.modelLengthsMin.size() > m_model_id ? p_app->modelManager.modelLengthsMin[m_model_id] : glm::vec3();
+    // LengthMax_original = p_app->modelManager.modelLengthsMax.size() > m_model_id ? p_app->modelManager.modelLengthsMax[m_model_id] : glm::vec3();
+    
+    //Prepare pointers for drawcall
+    //p_renderer = &(p_app->renderer);
+    renderer = p_app->renderer;
+    resourcer = p_app->resourcer;
+
+    Length_original = resourcer->GetModelLengths().size() > m_model_id ? resourcer->GetModelLength(m_model_id) : glm::vec3();
+    LengthMin_original = resourcer->GetModelLengthsMin().size() > m_model_id ? resourcer->GetModelLengthMin(m_model_id) : glm::vec3();
+    LengthMax_original = resourcer->GetModelLengthsMax().size() > m_model_id ? resourcer->GetModelLengthMax(m_model_id) : glm::vec3();
+
     // }else{ 
     //     Length_original = glm::vec3(); //put to initialization
     //     LengthMin_original = glm::vec3();
@@ -170,10 +180,6 @@ void CObject::Register(LEApplication::Application *p_app){
     //std::cout<<"LengthMin = "<<LengthMin.x<<", "<<LengthMin.y<<", "<<LengthMin.z<<std::endl;
     //std::cout<<"LengthMax = "<<LengthMax.x<<", "<<LengthMax.y<<", "<<LengthMax.z<<std::endl;
     
-    //Prepare pointers for drawcall
-    //p_renderer = &(p_app->renderer);
-    renderer = p_app->renderer;
-
     //p_renderProcess = &(p_app->renderProcess);
     //p_graphicsPipelineLayout = &(p_app->renderProcess.graphicsPipelineLayouts[m_graphics_pipeline_id]);
     p_descriptorSets_graphics_general = &(renderer->GetDescriptorSets_General());

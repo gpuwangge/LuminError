@@ -1,4 +1,5 @@
-#include "../include/application.h"
+#include "application.h"
+#include "TypeVertex.h"
 
 namespace LEApplication{
 
@@ -198,7 +199,8 @@ void Application::Initialize(){
         //textManager.p_renderer = &renderer;
         textManager.renderer = renderer;
         textManager.p_textImageManager = &textImageManager;
-        textManager.p_modelManager = &modelManager;
+        //textManager.p_modelManager = &modelManager;
+        textManager.resourcer = resourcer;
 
         textManager.CreateTextImage(); //create text atlas image and push to textImageManager
         textManager.CreateGlyphMap(); //create glyph map
@@ -210,12 +212,13 @@ void Application::Initialize(){
             std::string modelName = appInfo->Models[i].model_names;
             //std::cout<<"test:"<<i<<", modelName="<<modelName<<std::endl;
             if(modelName == "CUSTOM3D0"){
-                renderer->CreateVertexBuffer(modelManager.customModels3D[0].vertices.data(), sizeof(Vertex3D), modelManager.customModels3D[0].vertices.size());
-                renderer->CreateIndexBuffer(modelManager.customModels3D[0].indices);
+                renderer->CreateVertexBuffer(resourcer->GetModelCustomModel3DData(0), sizeof(Vertex3D), resourcer->GetModelCustomModel3DSize(0));
+                renderer->CreateIndexBuffer(resourcer->GetModelCustomModel3DIndices(0));
                 
-                modelManager.modelLengths.push_back(modelManager.customModels3D[0].length);
-                modelManager.modelLengthsMin.push_back(modelManager.customModels3D[0].lengthMin);
-                modelManager.modelLengthsMax.push_back(modelManager.customModels3D[0].lengthMax);
+                resourcer->GetModelLengths().push_back(resourcer->GetModelCustomModel3DLength(0)[0]);
+                resourcer->GetModelLengthsMin().push_back(resourcer->GetModelCustomModel3DLength(0)[1]);
+                resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel3DLength(0)[2]);
+
             // }else if(name == "CUSTOM3D1"){
             //     renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[1].vertices);
             //     renderer.CreateIndexBuffer(modelManager.customModels3D[1].indices);
@@ -224,39 +227,49 @@ void Application::Initialize(){
             //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
             //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
             }else if(modelName == "TEXTBOXIMAGE"){
-                renderer->CreateVertexBuffer(modelManager.textboxImageModels[0].vertices.data(), sizeof(Vertex3D), modelManager.textboxImageModels[0].vertices.size());
-                renderer->CreateIndexBuffer(modelManager.textboxImageModels[0].indices);
+                renderer->CreateVertexBuffer(resourcer->GetModelTextboxImageModelData(0), sizeof(Vertex3D), resourcer->GetModelTextboxImageModelSize(0));
+                renderer->CreateIndexBuffer(resourcer->GetModelTextboxImageModelIndices(0));
                 
-                modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
-                modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
-                modelManager.modelLengthsMax.push_back(modelManager.textboxImageModels[0].lengthMax);
+                //modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
+                //modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
+                //modelManager.modelLengthsMax.push_back(modelManager.textboxImageModels[0].lengthMax);
+                resourcer->GetModelLengths().push_back(resourcer->GetModelTextboxImageModelLength(0)[0]);
+                resourcer->GetModelLengthsMin().push_back(resourcer->GetModelTextboxImageModelLength(0)[1]);
+                resourcer->GetModelLengthsMax().push_back(resourcer->GetModelTextboxImageModelLength(0)[2]);
+
             }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
                 //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
                 //std::cout<<"Application: Load "<<std::endl;
-                renderer->CreateVertexBuffer(modelManager.textQuadModels[0].vertices.data(), sizeof(TextQuadVertex), modelManager.textQuadModels[0].vertices.size());
+                renderer->CreateVertexBuffer(resourcer->GetModelTextQuadModelData(0), sizeof(TextQuadVertex), resourcer->GetModelTextQuadModelSize(0));
                 //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
-                renderer->CreateIndexBuffer(modelManager.textQuadModels[0].indices);
+                renderer->CreateIndexBuffer(resourcer->GetModelTextQuadModelIndices(0));
 
                 //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
                 //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
                 //std::cout<<"Application: Created IndexBuffer, size = "<<renderer.indexDataBuffers.size()<<std::endl;
 
                 glm::vec3 v(1,1,1); //text quad length is not important, only placeholder
-                modelManager.modelLengths.push_back(v);
-                modelManager.modelLengthsMin.push_back(v);
-                modelManager.modelLengthsMax.push_back(v);
+                //modelManager.modelLengths.push_back(v);
+                //modelManager.modelLengthsMin.push_back(v);
+                //modelManager.modelLengthsMax.push_back(v);
+                resourcer->GetModelLengths().push_back(v);
+                resourcer->GetModelLengthsMin().push_back(v);
+                resourcer->GetModelLengthsMax().push_back(v);
             }else if(modelName == "CUSTOM2D0"){
                 //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
-                renderer->CreateVertexBuffer(modelManager.customModels2D[0].vertices.data(), sizeof(Vertex2D), modelManager.customModels2D[0].vertices.size()); 
+                renderer->CreateVertexBuffer(resourcer->GetModelCustomModel2DData(0), sizeof(Vertex2D), resourcer->GetModelCustomModel2DSize(0)); 
 
-                modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
-                modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
-                modelManager.modelLengthsMax.push_back(modelManager.customModels2D[0].lengthMax);
+                //modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
+                //modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
+                //modelManager.modelLengthsMax.push_back(modelManager.customModels2D[0].lengthMax);
+                resourcer->GetModelLengths().push_back(resourcer->GetModelCustomModel2DLength(0)[0]);
+                resourcer->GetModelLengthsMin().push_back(resourcer->GetModelCustomModel2DLength(0)[1]);
+                resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel2DLength(0)[2]);
             }else{
                 //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
                 std::vector<Vertex3D> modelVertices3D;
                 std::vector<uint32_t> modelIndices3D;
-                modelManager.LoadObjModel(modelName, modelVertices3D, modelIndices3D);
+                resourcer->LoadModelObj(modelName, modelVertices3D, modelIndices3D);
                 renderer->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
                 renderer->CreateIndexBuffer(modelIndices3D);
             }

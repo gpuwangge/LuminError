@@ -3,7 +3,7 @@
 #include "Config.h"
 #include "texture.h"
 #include "controlNode.h"
-#include "modelManager.h"
+//#include "modelManager.h"
 #include "application.h"
 
 /*************
@@ -538,7 +538,8 @@ void CTextManager::CreateTextResource(){
     textQuadVertices.push_back({ {x_max, y_max}, {1.0f, 1.0f} }); // right up
     textQuadVertices.push_back({ {x_min, y_max}, {0.0f, 1.0f} }); // left up
 
-    p_modelManager->CreateTextQuadModel(textQuadVertices, indices3D);
+    //p_modelManager->CreateTextQuadModel(textQuadVertices, indices3D);
+    resourcer->CreateModelTextQuadModel(textQuadVertices, indices3D);
 
 
     std::vector<Vertex3D> vertices3D = {
@@ -548,7 +549,8 @@ void CTextManager::CreateTextResource(){
 		{ { -0.5f, 0.5f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 1.0f, 1.0f } ,{ 0.0f, 0.0f, 1.0f }}
 	};
 
-    p_modelManager->CreateCustomModel3D(vertices3D, indices3D, true);
+    //p_modelManager->CreateCustomModel3D(vertices3D, indices3D, true);
+    resourcer->CreateModelCustomModel3D(vertices3D, indices3D, true);
 
 }
 

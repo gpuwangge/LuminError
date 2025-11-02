@@ -3,13 +3,11 @@
 
 #include "camera.hpp"
 #include "texture.h" //this includes imageManager.h
-#include "modelManager.h"
 #include "object.h"
 #include "textManager.h"
 #include "light.h"
 #include "timer.h"
 #include "controlNode.h"
-//#include "shaderManager.h"
 
 #include "IApplication.h"
 #include "IGame.h"
@@ -57,8 +55,6 @@ namespace LEApplication{
         //bool framebufferResized = false;
         //bool needWindow = false;
 
-        //CShaderManager shaderManager;
-        CModelManager modelManager;
         CTextureManager textureManager;
         CTextImageManager textImageManager;
         CTextManager textManager;

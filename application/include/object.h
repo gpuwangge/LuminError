@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "IRendererCore.h"
+#include "IResourceCore.h"
 #include "texture.h"
 #include "TypeUniform.h"
 
@@ -28,6 +29,7 @@ class CObject : public CEntity {
     //These will be used when recording draw cmd
     //CRenderer *p_renderer;
     LERenderer::IRendererCore *renderer = NULL;
+    LEResource::IResourceCore *resourcer = NULL;
 
     //CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
