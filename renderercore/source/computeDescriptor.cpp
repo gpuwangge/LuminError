@@ -1,6 +1,7 @@
 #include "computeDescriptor.h"
 #include <iostream>
 #include "IApplication.h"
+#include "context.h"
 
 namespace LERenderer{
 
@@ -57,7 +58,7 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	poolInfo.pPoolSizes = computeDescriptorPoolSizes.data();
 	poolInfo.maxSets = ((counter==0)?1:counter)*10*static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);///!!!TODO: currently support 10 sets?
 
-	VkResult result = vkCreateDescriptorPool(game->GetLogicalDevice(), &poolInfo, nullptr, &computeDescriptorPool);
+	VkResult result = vkCreateDescriptorPool(CContext::GetHandle().GetLogicalDevice(), &poolInfo, nullptr, &computeDescriptorPool);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create descriptor pool!");
 	//REPORT("vkCreateDescriptorPool");
 }
@@ -122,7 +123,7 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
 	layoutInfo.bindingCount = static_cast<uint32_t>(computeBindings.size());
 	layoutInfo.pBindings = computeBindings.data();
 
-	VkResult result = vkCreateDescriptorSetLayout(game->GetLogicalDevice(), &layoutInfo, nullptr, OUT &descriptorSetLayout);
+	VkResult result = vkCreateDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), &layoutInfo, nullptr, OUT &descriptorSetLayout);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create descriptor set layout!");
 	//REPORT("vkCreateDescriptorSetLayout");
 }
@@ -149,7 +150,7 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);///!!!
     //Step 3
     //std::cout<<"before vkAllocateDescriptorSets(). "<<std::endl;
-    result = vkAllocateDescriptorSets(game->GetLogicalDevice(), &allocInfo, descriptorSets.data());
+    result = vkAllocateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), &allocInfo, descriptorSets.data());
     //std::cout<<"after vkAllocateDescriptorSets(). "<<std::endl;
     if (result != VK_SUCCESS) throw std::runtime_error("failed to allocate descriptor sets!");
     //REPORT("vkAllocateDescriptorSets");
@@ -246,7 +247,7 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
         
         //Step 4
         //std::cout<<"before vkUpdateDescriptorSets(). "<<std::endl;
-        vkUpdateDescriptorSets(game->GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(CContext::GetHandle().GetLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         //std::cout<<"after vkUpdateDescriptorSets(). "<<std::endl;
     }
 
@@ -270,8 +271,8 @@ void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUnifor
 	m_customUniformBufferSize = customUniformBufferSize;
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
-		vkMapMemory(game->GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
+		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
 	}    
 }
 void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
@@ -302,8 +303,8 @@ void CComputeDescriptorManager::addStorageBuffer(VkDeviceSize storageBufferSize,
         //VkResult result = InitDataBufferHelper(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, &shaderStorageBuffers_compute[i]);// Create a staging buffer used to upload data to the gpu
         //FillDataBufferHelper(shaderStorageBuffers_compute[i], (void *)(particles.data()));// Copy initial particle data to all storage buffers
         //shaderStorageBuffers_compute[i].init(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-        storageBuffers[i].init(storageBufferSize, usage, game->GetLogicalDevice(), game->GetPhysicalDevice());
-        vkMapMemory(game->GetLogicalDevice(), storageBuffers[i].deviceMemory, 0, storageBufferSize, 0, &storageBuffersMapped[i]);
+        storageBuffers[i].init(storageBufferSize, usage, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers[i].deviceMemory, 0, storageBufferSize, 0, &storageBuffersMapped[i]);
     }
 }
 void CComputeDescriptorManager::uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) {
@@ -349,14 +350,14 @@ int CComputeDescriptorManager::getSetSize(){
 
 void CComputeDescriptorManager::DestroyAndFree(){
     for (size_t i = 0; i < customUniformBuffers.size(); i++) {
-        customUniformBuffers[i].DestroyAndFree(game->GetLogicalDevice());
+        customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
     for (size_t i = 0; i < storageBuffers.size(); i++) {
-        storageBuffers[i].DestroyAndFree(game->GetLogicalDevice());
+        storageBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
 
-    vkDestroyDescriptorPool(game->GetLogicalDevice(), computeDescriptorPool, nullptr);
-    vkDestroyDescriptorSetLayout(game->GetLogicalDevice(), descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), computeDescriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), descriptorSetLayout, nullptr);
 }
 
 } //namespace

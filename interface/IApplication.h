@@ -126,17 +126,17 @@ namespace LEApplication{
         virtual void CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) = 0;
 
         //Expose for renderer core to get context
-        virtual QueueFamilyIndices GetQueueFamilyIndices() = 0;
-        virtual VkDevice GetLogicalDevice() = 0;
-        virtual VkPhysicalDevice GetPhysicalDevice() = 0;
+        // virtual QueueFamilyIndices GetQueueFamilyIndices() = 0;
+        // virtual VkDevice GetLogicalDevice() = 0;
+        // virtual VkPhysicalDevice GetPhysicalDevice() = 0;
 
-        virtual VkQueue GetGraphicsQueue() = 0;
-        virtual VkQueue GetPresentQueue() = 0;
-        virtual VkQueue GetComputeQueue() = 0;
+        // virtual VkQueue GetGraphicsQueue() = 0;
+        // virtual VkQueue GetPresentQueue() = 0;
+        // virtual VkQueue GetComputeQueue() = 0;
 
-        virtual QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) = 0;
-        virtual VkSampleCountFlagBits GetMaxUsableSampleCount() = 0;
-        virtual SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) = 0;
+        // virtual QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) = 0;
+        // virtual VkSampleCountFlagBits GetMaxUsableSampleCount() = 0;
+        // virtual SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) = 0;
 
     };
 

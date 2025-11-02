@@ -2,10 +2,6 @@
 #include <string.h>
 #include "Utility.h"
 
-#ifdef ANDROID
-#include "..\\..\\androidFramework\\include\\androidFileManager.h"
-#endif
-
 CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger_){
     //p_logManager = &logManager;
     logger = logger_;

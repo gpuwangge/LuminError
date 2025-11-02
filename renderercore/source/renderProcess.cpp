@@ -1,6 +1,7 @@
 #include "renderProcess.h"
 #include "TypeAppInfo.h"
 #include "IApplication.h"
+#include "context.h"
 
 namespace LERenderer{
 
@@ -322,7 +323,7 @@ void CRenderProcess::createRenderPass_shadowmap(){ //pAttachments order must mat
 	renderPassInfo.pDependencies = nullptr; //&dependency;//3
 	//std::cout<<"Done prepare renderpass info: "<< subpasses.size()<<", "<<attachmentDescriptions.size()<<std::endl;
 
-	result = vkCreateRenderPass(game->GetLogicalDevice(), &renderPassInfo, nullptr, &renderPass_shadowmap);
+	result = vkCreateRenderPass(CContext::GetHandle().GetLogicalDevice(), &renderPassInfo, nullptr, &renderPass_shadowmap);
 	//std::cout<<"Done create renderpass"<<std::endl;
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create render pass!");	 
 
@@ -353,7 +354,7 @@ void CRenderProcess::createRenderPass_mainscene(){ //pAttachments order must mat
 	renderPassInfo.pDependencies = dependencies_mainscene.data(); //&dependency;//3
 	//std::cout<<"Done prepare renderpass info: subpasses_mainscene.size()="<< subpasses_mainscene.size()<<", attachmentDescriptions.size()="<<attachmentDescriptions.size()<<std::endl;
 
-	result = vkCreateRenderPass(game->GetLogicalDevice(), &renderPassInfo, nullptr, &renderPass_mainscene);
+	result = vkCreateRenderPass(CContext::GetHandle().GetLogicalDevice(), &renderPassInfo, nullptr, &renderPass_mainscene);
 	//std::cout<<"Done create renderpass"<<std::endl;
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create render pass!");	 
 
@@ -398,7 +399,7 @@ void CRenderProcess::createComputePipelineLayout(VkDescriptorSetLayout &descript
 	pipelineLayoutInfo.setLayoutCount = 1;
 	pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
-	if (vkCreatePipelineLayout(game->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS) 
+	if (vkCreatePipelineLayout(CContext::GetHandle().GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &computePipelineLayout) != VK_SUCCESS) 
 		throw std::runtime_error("failed to create compute pipeline layout!");
 }
 void CRenderProcess::createComputePipeline(VkShaderModule &computeShaderModule){
@@ -415,7 +416,7 @@ void CRenderProcess::createComputePipeline(VkShaderModule &computeShaderModule){
 	pipelineInfo.layout = computePipelineLayout;
 	pipelineInfo.stage = computeShaderStageInfo;
 
-	if (vkCreateComputePipelines(game->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &computePipeline) != VK_SUCCESS) {
+	if (vkCreateComputePipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &computePipeline) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create compute pipeline!");
 	}
 }
@@ -447,7 +448,7 @@ void CRenderProcess::createGraphicsPipelineLayout(std::vector<VkDescriptorSetLay
 	VkPipelineLayout newlayout;
 	graphicsPipelineLayouts.push_back(newlayout);
 	//std::cout<<"before vkCreatePipelineLayout()"<<std::endl;
-	result = vkCreatePipelineLayout(game->GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &graphicsPipelineLayouts[graphicsPipelineLayout_id]);
+	result = vkCreatePipelineLayout(CContext::GetHandle().GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &graphicsPipelineLayouts[graphicsPipelineLayout_id]);
 	//std::cout<<"after vkCreatePipelineLayout()"<<std::endl;
 	//result = vkCreatePipelineLayout(CContext::GetHandle().GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &graphicsPipelineLayout);
 	
@@ -641,7 +642,7 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 	VkPipeline newpipeline;
 	graphicsPipelines.push_back(newpipeline);
 	if(bVerbose) std::cout<<"begin create graphics pipeline... "<<std::endl;
-	result = vkCreateGraphicsPipelines(game->GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipelines[graphcisPipeline_id]);
+	result = vkCreateGraphicsPipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipelines[graphcisPipeline_id]);
 	if(bVerbose) std::cout<<"done create graphcis pipeline "<<std::endl;
 	//result = vkCreateGraphicsPipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
 	if (result != VK_SUCCESS) throw std::runtime_error("failed to create graphics pipeline!");
@@ -657,20 +658,20 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 
 void CRenderProcess::Cleanup(){
 	if(renderPass_shadowmap != VK_NULL_HANDLE)
-		vkDestroyRenderPass(game->GetLogicalDevice(), renderPass_shadowmap, nullptr);
+		vkDestroyRenderPass(CContext::GetHandle().GetLogicalDevice(), renderPass_shadowmap, nullptr);
 	if(renderPass_mainscene != VK_NULL_HANDLE)
-		vkDestroyRenderPass(game->GetLogicalDevice(), renderPass_mainscene, nullptr);
+		vkDestroyRenderPass(CContext::GetHandle().GetLogicalDevice(), renderPass_mainscene, nullptr);
 
 	if(bCreateGraphicsPipeline){
 		for(int i = 0; i < graphicsPipelines.size(); i++){
-			vkDestroyPipeline(game->GetLogicalDevice(), graphicsPipelines[i], nullptr);
-			vkDestroyPipelineLayout(game->GetLogicalDevice(), graphicsPipelineLayouts[i], nullptr);
+			vkDestroyPipeline(CContext::GetHandle().GetLogicalDevice(), graphicsPipelines[i], nullptr);
+			vkDestroyPipelineLayout(CContext::GetHandle().GetLogicalDevice(), graphicsPipelineLayouts[i], nullptr);
 		}
 	}
 
 	if(bCreateComputePipeline){
-		vkDestroyPipeline(game->GetLogicalDevice(), computePipeline, nullptr);
-    	vkDestroyPipelineLayout(game->GetLogicalDevice(), computePipelineLayout, nullptr);
+		vkDestroyPipeline(CContext::GetHandle().GetLogicalDevice(), computePipeline, nullptr);
+    	vkDestroyPipelineLayout(CContext::GetHandle().GetLogicalDevice(), computePipelineLayout, nullptr);
 	}
 	
 }

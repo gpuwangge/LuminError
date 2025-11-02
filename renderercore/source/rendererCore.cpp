@@ -1,8 +1,9 @@
 #include "rendererCore.h"
 #include <iostream>
-#include "IApplication.h" //context
+#include "IApplication.h"
 #include <windows.h>
 #include "Foundation.h"
+#include "context.h"
 
 namespace LERenderer{
 
@@ -14,9 +15,9 @@ void RendererCore::CreateVertexBuffer(void* data, size_t elementSize, size_t ele
     CWxjBuffer vertexDataBuffer;
     VkDeviceSize bufferSize = elementSize * elementCount;
 
-    VkResult result = vertexDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+    VkResult result = vertexDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
 
-    vertexDataBuffer.fill(data, game->GetLogicalDevice());
+    vertexDataBuffer.fill(data, CContext::GetHandle().GetLogicalDevice());
     vertexDataBuffers.push_back(vertexDataBuffer);
 }
 
@@ -29,11 +30,11 @@ void RendererCore::CreateIndexBuffer(std::vector<uint32_t> &indices3D){
 
     //VK_BUFFER_USAGE_TRANSFER_SRC_BIT
     //VkResult result = InitDataBufferHelper(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, &indexDataBuffer);
-    VkResult result = indexDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, game->GetLogicalDevice(), game->GetPhysicalDevice());
+    VkResult result = indexDataBuffer.init(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
 
 	//REPORT("InitIndexDataBuffer");
     //FillDataBufferHelper(indexDataBuffer, (void *)(indices3D.data()));
-	indexDataBuffer.fill((void *)(indices3D.data()), game->GetLogicalDevice());
+	indexDataBuffer.fill((void *)(indices3D.data()), CContext::GetHandle().GetLogicalDevice());
 
     indexDataBuffers.push_back(indexDataBuffer);
     indices3Ds.push_back(indices3D);
@@ -50,7 +51,7 @@ void RendererCore::CreateCommandPool(VkSurfaceKHR &surface) {
 
     //QueueFamilyIndices queueFamilyIndices = instance->pickedPhysicalDevice->get()->findQueueFamilies(surface);
     //QueueFamilyIndices queueFamilyIndices = CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating command pool");
-    QueueFamilyIndices queueFamilyIndices = game->GetQueueFamilyIndices();
+    QueueFamilyIndices queueFamilyIndices = CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating command pool");
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -58,7 +59,7 @@ void RendererCore::CreateCommandPool(VkSurfaceKHR &surface) {
     //poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();//find a queue family that does graphics
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();
 
-    result = vkCreateCommandPool(game->GetLogicalDevice(), &poolInfo, nullptr, &commandPool);
+    result = vkCreateCommandPool(CContext::GetHandle().GetLogicalDevice(), &poolInfo, nullptr, &commandPool);
     if (result != VK_SUCCESS) throw std::runtime_error("failed to create graphics command pool!");
     //REPORT("vkCreateCommandPool -- Graphics");
 }
@@ -88,7 +89,7 @@ void RendererCore::CreateCommandBuffers() {
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t)commandBuffer.size();
 
-    result = vkAllocateCommandBuffers(game->GetLogicalDevice(), &allocInfo, commandBuffer.data());
+    result = vkAllocateCommandBuffers(CContext::GetHandle().GetLogicalDevice(), &allocInfo, commandBuffer.data());
 
     if (result != VK_SUCCESS) throw std::runtime_error("failed to allocate command buffers!");
     //REPORT("vkAllocateCommandBuffers");
@@ -102,11 +103,11 @@ void RendererCore::CreateCommandBuffers() {
  * ***********************/
 //void RendererCore::AquireSwapchainImage(CSwapchain &swapchain){
 void RendererCore::AquireSwapchainImage(VkSwapchainKHR swapchainHandle){
-    VkResult result = vkAcquireNextImageKHR(game->GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 }
 
 void RendererCore::WaitForComputeFence(){
-    vkWaitForFences(game->GetLogicalDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 }
 
 void RendererCore::SubmitCompute(){
@@ -161,15 +162,15 @@ void RendererCore::SubmitCompute(){
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffers[computeCmdId][currentFrame];///!!!
 
-    vkResetFences(game->GetLogicalDevice(), 1, &computeInFlightFences[currentFrame]);
+    vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[currentFrame]);
 
-    if (vkQueueSubmit(game->GetComputeQueue(), 1, &submitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
+    if (vkQueueSubmit(CContext::GetHandle().GetComputeQueue(), 1, &submitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 }
 
 void RendererCore::WaitForGraphicsFence(){
-    VkResult result = vkWaitForFences(game->GetLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);//must call vkWaitForFences before record command buffer
+    VkResult result = vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);//must call vkWaitForFences before record command buffer
     //Validation Error: vkBeginCommandBuffer() on active VkCommandBuffer 0x8c99500[] before it has completed. 
     //You must check command buffer fence before this call. 
     //The Vulkan spec states: commandBuffer must not be in the recording or pending state
@@ -229,11 +230,11 @@ void RendererCore::SubmitGraphics(){
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    vkResetFences(game->GetLogicalDevice(), 1, &inFlightFences[currentFrame]);
+    vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &inFlightFences[currentFrame]);
 
     //std::cout<<"before graphics submit. "<<std::endl;
     //GPU read recorded command buffer and execute
-    if (vkQueueSubmit(game->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
+    if (vkQueueSubmit(CContext::GetHandle().GetGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
         //debugger->writeMSG("Failed to submit draw command buffer! CurrentFrame: %d\n", currentFrame);
         throw std::runtime_error("failed to submit draw command buffer!");
     }
@@ -282,7 +283,7 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle){
 
     presentInfo.pImageIndices = &imageIndex;
 
-    VkResult result = vkQueuePresentKHR(game->GetPresentQueue(), &presentInfo);
+    VkResult result = vkQueuePresentKHR(CContext::GetHandle().GetPresentQueue(), &presentInfo);
 }
 
 /**************************
@@ -312,11 +313,11 @@ void RendererCore::CreateSyncObjects(int swapchainSize) {
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (vkCreateSemaphore(game->GetLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(game->GetLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(game->GetLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS ||
-            vkCreateFence(game->GetLogicalDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(game->GetLogicalDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS) {
+        if (vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS ||
+            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
         //if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS ||
@@ -568,21 +569,21 @@ void RendererCore::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
 
 void RendererCore::Destroy(){
     //std::cout<<"Begin Destroy RenderCore(): vertexDataBuffers/indexDataBuffers"<<std::endl;
-    for(size_t i = 0; i < vertexDataBuffers.size(); i++)  vertexDataBuffers[i].DestroyAndFree(game->GetLogicalDevice());
-    for(size_t i = 0; i < indexDataBuffers.size(); i++) indexDataBuffers[i].DestroyAndFree(game->GetLogicalDevice());
+    for(size_t i = 0; i < vertexDataBuffers.size(); i++)  vertexDataBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    for(size_t i = 0; i < indexDataBuffers.size(); i++) indexDataBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     //for(size_t i = 0; i < instanceDataBuffers.size(); i++) instanceDataBuffers[i].DestroyAndFree();
 
     //std::cout<<"Begin Destroy RenderCore(): sync objects"<<std::endl;
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(game->GetLogicalDevice(), renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(game->GetLogicalDevice(), imageAvailableSemaphores[i], nullptr);
-        vkDestroyFence(game->GetLogicalDevice(), inFlightFences[i], nullptr);
+        vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), renderFinishedSemaphores[i], nullptr);
+        vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), imageAvailableSemaphores[i], nullptr);
+        vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), inFlightFences[i], nullptr);
 
-        vkDestroyFence(game->GetLogicalDevice(), computeInFlightFences[i], nullptr);
-        vkDestroySemaphore(game->GetLogicalDevice(), computeFinishedSemaphores[i], nullptr);
+        vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), computeInFlightFences[i], nullptr);
+        vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), computeFinishedSemaphores[i], nullptr);
     }
 
-    vkDestroyCommandPool(game->GetLogicalDevice(), commandPool, nullptr);
+    vkDestroyCommandPool(CContext::GetHandle().GetLogicalDevice(), commandPool, nullptr);
 
 
     //Module Related

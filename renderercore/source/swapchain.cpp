@@ -1,6 +1,7 @@
 #include "swapchain.h"
 #include <algorithm>
 #include "IApplication.h"
+#include "context.h"
 
 namespace LERenderer{
 
@@ -14,13 +15,13 @@ CSwapchain::~CSwapchain(){}
 
 void CSwapchain::SetDevice(){
     for(int i = 0; i < buffer_depthlight.size(); i++){
-        buffer_depthlight[i].logicalDevice = game->GetLogicalDevice();
-        buffer_depthlight[i].physicalDevice = game->GetPhysicalDevice();
+        buffer_depthlight[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
+        buffer_depthlight[i].physicalDevice = CContext::GetHandle().GetPhysicalDevice();
     }
-    buffer_depthcamera.logicalDevice = game->GetLogicalDevice();
-    buffer_depthcamera.physicalDevice = game->GetPhysicalDevice();
-    buffer_colorresolve.logicalDevice = game->GetLogicalDevice();
-    buffer_colorresolve.physicalDevice = game->GetPhysicalDevice();
+    buffer_depthcamera.logicalDevice = CContext::GetHandle().GetLogicalDevice();
+    buffer_depthcamera.physicalDevice = CContext::GetHandle().GetPhysicalDevice();
+    buffer_colorresolve.logicalDevice = CContext::GetHandle().GetLogicalDevice();
+    buffer_colorresolve.physicalDevice = CContext::GetHandle().GetPhysicalDevice();
 }
 
 /**********************
@@ -48,7 +49,7 @@ void CSwapchain::create_attachment_resource_depthcamera(){
 VkFormat CSwapchain::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
     for (VkFormat format : candidates) {
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(game->GetPhysicalDevice(), format, &props);
+        vkGetPhysicalDeviceFormatProperties(CContext::GetHandle().GetPhysicalDevice(), format, &props);
 
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
             return format;
@@ -90,7 +91,7 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     VkResult result = VK_SUCCESS;
 
     //try to find all available swapChainSupport(format, colorSpace and presentMode)
-    SwapChainSupportDetails swapChainSupport = game->QuerySwapChainSupport(surface);
+    SwapChainSupportDetails swapChainSupport = CContext::GetHandle().physicalDevice->get()->querySwapChainSupport(surface);
     displaySwapchainInfo(swapChainSupport);
 
     //choose format and color space
@@ -108,7 +109,7 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
         VkFormatFeatureFlags requestedSupport = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT | VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
         VkFormatProperties vkFormatProperties;
         for (auto& swapchain_format : swapChainSupport.formats) {///!!!!
-            vkGetPhysicalDeviceFormatProperties(game->GetPhysicalDevice(), swapchain_format.format, &vkFormatProperties);
+            vkGetPhysicalDeviceFormatProperties(CContext::GetHandle().GetPhysicalDevice(), swapchain_format.format, &vkFormatProperties);
             if ((vkFormatProperties.optimalTilingFeatures & requestedSupport) == requestedSupport){
                 //logger->Log("Choose swapchain format for storage image: format %4d, colorSpace %12d", swapchain_format.format, swapchain_format.colorSpace);
                 logger->Log("log test");
@@ -160,7 +161,7 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     if(bComputeSwapChainImage)
         createInfo.imageUsage |= VK_IMAGE_USAGE_STORAGE_BIT; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage
 
-    QueueFamilyIndices indices = game->FindQueueFamilies(surface, "Find Queue Families when creating swapchain images");
+    QueueFamilyIndices indices = CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating swapchain images");
     uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -180,12 +181,12 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     //generate swapChain images (swapChainImages)
     //result = vkCreateSwapchainKHR(LOGICAL_DEVICE, &createInfo, nullptr, &swapChain);
 
-    result = vkCreateSwapchainKHR(game->GetLogicalDevice(), &createInfo, nullptr, &handle);
+    result = vkCreateSwapchainKHR(CContext::GetHandle().GetLogicalDevice(), &createInfo, nullptr, &handle);
     if (result != VK_SUCCESS) throw std::runtime_error("failed to create swap chain!");
 
-    result = vkGetSwapchainImagesKHR(game->GetLogicalDevice(), handle, &swapchainImageSize, nullptr);
+    result = vkGetSwapchainImagesKHR(CContext::GetHandle().GetLogicalDevice(), handle, &swapchainImageSize, nullptr);
     swapchain_images.resize(swapchainImageSize);
-    result = vkGetSwapchainImagesKHR(game->GetLogicalDevice(), handle, &swapchainImageSize, swapchain_images.data());
+    result = vkGetSwapchainImagesKHR(CContext::GetHandle().GetLogicalDevice(), handle, &swapchainImageSize, swapchain_images.data());
     //these swapchain images cant not set properties, they always have VK_SAMPLE_COUNT_1_BIT, so it can't be used to present MSAA images
     //because of physical device(display) doesn't support multi sampling(each pixel only display one color), so the final image must be single-sample
     //solution is to create another image(resolve) with msaa number > 1 , use msaa to render high-quality image, then display single-sample image at the end
@@ -198,7 +199,7 @@ void CSwapchain::createSwapchainViews(VkImageAspectFlags aspectFlags){
     // present views for the double-buffering:
     swapchain_views.resize(swapchainImageSize);
     for (size_t i = 0; i < swapchainImageSize; i++) {
-        CWxjImageBuffer dummyImageBuffer(game->GetLogicalDevice(), game->GetPhysicalDevice()); //dummyImageBuffer doesn't really matter here, just use it's create function
+        CWxjImageBuffer dummyImageBuffer(CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice()); //dummyImageBuffer doesn't really matter here, just use it's create function
 		swapchain_views[i] = dummyImageBuffer.createImageView_swapchain(swapchain_images[i], swapChainImageFormat, aspectFlags, 1);
     }
 }
@@ -227,7 +228,7 @@ void CSwapchain::CreateFramebuffer_shadowmap(VkRenderPass &renderPass, int shado
 		framebufferInfo.height = swapChainExtent.height;
 		framebufferInfo.layers = 1;
 
-		result = vkCreateFramebuffer(game->GetLogicalDevice(), &framebufferInfo, nullptr, &framebuffers_shadowmap[shadowmapIndex][i]);
+		result = vkCreateFramebuffer(CContext::GetHandle().GetLogicalDevice(), &framebufferInfo, nullptr, &framebuffers_shadowmap[shadowmapIndex][i]);
 		if (result != VK_SUCCESS) throw std::runtime_error("failed to create framebuffer!");
 	}	
 
@@ -263,7 +264,7 @@ void CSwapchain::CreateFramebuffer_mainscene(VkRenderPass &renderPass){ //pAttac
 		framebufferInfo.height = swapChainExtent.height;
 		framebufferInfo.layers = 1;
 
-		result = vkCreateFramebuffer(game->GetLogicalDevice(), &framebufferInfo, nullptr, &framebuffers_mainscene[i]);
+		result = vkCreateFramebuffer(CContext::GetHandle().GetLogicalDevice(), &framebufferInfo, nullptr, &framebuffers_mainscene[i]);
 		if (result != VK_SUCCESS) throw std::runtime_error("failed to create framebuffer!");
 	}	
 
@@ -275,7 +276,7 @@ void CSwapchain::CreateFramebuffer_mainscene(VkRenderPass &renderPass){ //pAttac
 * Helper Variable and Functions
 ************************/
 void CSwapchain::GetMaxUsableSampleCount(){
-	msaaSamples = game->GetMaxUsableSampleCount();
+	msaaSamples = CContext::GetHandle().physicalDevice->get()->getMaxUsableSampleCount();
     //std::cout<<"msaaSamples = "<<msaaSamples<<std::endl;
 	//msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 }
@@ -403,16 +404,16 @@ void CSwapchain::displaySwapchainInfo(SwapChainSupportDetails details){
 
 void CSwapchain::CleanUp(){
     for (auto framebuffer : framebuffers_mainscene) 
-        vkDestroyFramebuffer(game->GetLogicalDevice(), framebuffer, nullptr);
+        vkDestroyFramebuffer(CContext::GetHandle().GetLogicalDevice(), framebuffer, nullptr);
     for (int i = 0; i < framebuffers_shadowmap.size(); i++) {
         for (auto framebuffer : framebuffers_shadowmap[i]) 
-        vkDestroyFramebuffer(game->GetLogicalDevice(), framebuffer, nullptr);
+        vkDestroyFramebuffer(CContext::GetHandle().GetLogicalDevice(), framebuffer, nullptr);
     }
 
     for (auto imageView : swapchain_views) 
-        vkDestroyImageView(game->GetLogicalDevice(), imageView, nullptr);
+        vkDestroyImageView(CContext::GetHandle().GetLogicalDevice(), imageView, nullptr);
     
-    vkDestroySwapchainKHR(game->GetLogicalDevice(), handle, nullptr);
+    vkDestroySwapchainKHR(CContext::GetHandle().GetLogicalDevice(), handle, nullptr);
 
     for(int i = 0; i < buffer_depthlight.size(); i++)
         buffer_depthlight[i].destroy();

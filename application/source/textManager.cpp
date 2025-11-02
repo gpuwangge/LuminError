@@ -156,8 +156,8 @@ void CTextbox::Register(LEApplication::Application *p_app){
     p_textImageManager = &(p_app->textImageManager);
     //p_textManager = &(p_app->textManager); //set this outside register function
 
-    logicalDevice = p_app->GetLogicalDevice();
-    physicalDevice = p_app->GetPhysicalDevice();
+    logicalDevice = renderer->GetLogicalDevice();
+    physicalDevice = renderer->GetPhysicalDevice();
 
     CreateDescriptorSets_TextureImageSampler(
         //CGraphicsDescriptorManager::graphicsDescriptorPool,

@@ -223,17 +223,17 @@ namespace LEApplication{
         void CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
         //VkPhysicalDevice GetPhysicalDevice() override { return CContext::GetHandle().physicalDevice->get()->getHandle();}
-        QueueFamilyIndices GetQueueFamilyIndices() override { return renderer->GetQueueFamilyIndices(); }
-        VkDevice GetLogicalDevice() override { return renderer->GetLogicalDevice(); }
-        VkPhysicalDevice GetPhysicalDevice() override { return renderer->GetPhysicalDevice(); }
+        // QueueFamilyIndices GetQueueFamilyIndices() override { return renderer->GetQueueFamilyIndices(); }
+        // VkDevice GetLogicalDevice() override { return renderer->GetLogicalDevice(); }
+        // VkPhysicalDevice GetPhysicalDevice() override { return renderer->GetPhysicalDevice(); }
 
-        VkQueue GetGraphicsQueue() override{ return renderer->GetGraphicsQueue(); }
-        VkQueue GetPresentQueue() override{ return renderer->GetPresentQueue(); }
-        VkQueue GetComputeQueue() override{ return renderer->GetComputeQueue(); }
+        // VkQueue GetGraphicsQueue() override{ return renderer->GetGraphicsQueue(); }
+        // VkQueue GetPresentQueue() override{ return renderer->GetPresentQueue(); }
+        // VkQueue GetComputeQueue() override{ return renderer->GetComputeQueue(); }
 
-        QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) override { return renderer->FindQueueFamilies(surface, s); }
-        VkSampleCountFlagBits GetMaxUsableSampleCount() override { return renderer->GetMaxUsableSampleCount(); }
-        SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) override { return renderer->QuerySwapChainSupport(surface); }
+        // QueueFamilyIndices FindQueueFamilies(VkSurfaceKHR surface, std::string s) override { return renderer->FindQueueFamilies(surface, s); }
+        // VkSampleCountFlagBits GetMaxUsableSampleCount() override { return renderer->GetMaxUsableSampleCount(); }
+        // SwapChainSupportDetails QuerySwapChainSupport(VkSurfaceKHR surface) override { return renderer->QuerySwapChainSupport(surface); }
     };
 
 
