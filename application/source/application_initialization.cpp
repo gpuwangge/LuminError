@@ -198,10 +198,10 @@ void Application::Initialize(){
         textManager.SetTextColor(glm::vec4(appInfo->Font.font_textColor[0], appInfo->Font.font_textColor[1], appInfo->Font.font_textColor[2], appInfo->Font.font_textColor[3]));
         //textManager.p_renderer = &renderer;
         textManager.renderer = renderer;
-        textManager.p_textImageManager = &textImageManager;
-        //textManager.p_modelManager = &modelManager;
         textManager.resourcer = resourcer;
-
+        //textManager.p_textImageManager = &textImageManager;
+        //textManager.p_modelManager = &modelManager;
+        
         textManager.CreateTextImage(); //create text atlas image and push to textImageManager
         textManager.CreateGlyphMap(); //create glyph map
         textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
@@ -285,26 +285,28 @@ void Application::Initialize(){
             int textureMipLevel = appInfo->Textures[i].texture_miplevel;
             bool textureEnableCubemap = appInfo->Textures[i].texture_enableCubemap;
             int textureSamplerId = appInfo->Textures[i].texture_samplerid;
-            
             VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                if(textureMipLevel > 1) //mipmap
-                    usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                else 
-                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-                    else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                
-                if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, renderer->GetSwapchainImageFormat());
-                    else textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
-                }else{ //48bpt
-                    //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                    textureManager.CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
-                }
-                
-                if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
-                    VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                    if(textureMipLevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps("checkerboard", usage_mipmap);
-                }else if(textureMipLevel > 1) textureManager.textureImages[textureManager.textureImages.size()-1].generateMipmaps();
+            if(textureMipLevel > 1) //mipmap
+                usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+            else 
+                if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+                else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+            //std::cout<<"appInfo->Feature.b_feature_graphics_48pbt="<<appInfo->Feature.b_feature_graphics_48pbt<<std::endl;
+            if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
+                //std::cout<<"textureSamplerId = "<<textureSamplerId<<std::endl;
+                if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, renderer->GetSwapchainImageFormat());
+                else resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
+            }else{ //48bpt
+                //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
+                resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+            }
+            if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
+                VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                //if(textureMipLevel > 1) resourcer->GetTextureImage(resourcer->GetTextureImageSize()-1).generateMipmaps("checkerboard", usage_mipmap);
+                if(textureMipLevel > 1) resourcer->GenerateMipmaps(resourcer->GetTextureImageSize()-1, "checkerboard", usage_mipmap);
+            }else 
+                //if(textureMipLevel > 1) resourcer->GetTextureImage(resourcer->GetTextureImageSize()-1).generateMipmaps();
+                if(textureMipLevel > 1) resourcer->GenerateMipmaps(resourcer->GetTextureImageSize()-1);
 
         }
     }
@@ -347,7 +349,7 @@ void Application::Initialize(){
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage)
-                renderer->createComputeDescriptorSets(textureManager.textureImages[0].m_textureImageBuffer.view, &(renderer->GetSwapchain_Views()));//this must be called after texture resource is loaded
+                renderer->createComputeDescriptorSets(resourcer->GetTextureImageView(0), &(renderer->GetSwapchain_Views()));//this must be called after texture resource is loaded
             else renderer->createComputeDescriptorSets(NULL, &(renderer->GetSwapchain_Views()));
         }else renderer->createComputeDescriptorSets();
     }
@@ -503,7 +505,6 @@ void Application::Initialize(){
             continue;
         }
         objects[i].Register((Application*)this);
-        
         if(appInfo->Objects[i].object_scale != 1.0f){
             objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
         }else{

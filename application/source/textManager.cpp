@@ -1,9 +1,7 @@
 #include "textManager.h"
 #include "Foundation.h"
 #include "Config.h"
-#include "texture.h"
 #include "controlNode.h"
-//#include "modelManager.h"
 #include "application.h"
 
 /*************
@@ -51,8 +49,14 @@ void CTextbox::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descri
 
             //if(b_isText){
                 //if(j < m_text_ids.size()){
-                    imageInfo[j].imageView = p_textImageManager->textureImages[0].m_textureImageBuffer.view; //TODO: now we have only one text image(ascII), maybe add more later
-                    imageInfo[j].sampler = samplers[p_textImageManager->textureImages[0].m_sampler_id]; 
+
+            //imageInfo[j].imageView = p_textImageManager->textureImages[0].m_textureImageBuffer.view; //TODO: now we have only one text image(ascII), maybe add more later
+            //imageInfo[j].sampler = samplers[p_textImageManager->textureImages[0].m_sampler_id];
+            imageInfo[j].imageView = resourcer->GetTextImageView(0);
+            imageInfo[j].sampler = samplers[resourcer->GetTextImageSamplerId(0)];
+
+
+
                 //}else{ //There are more samplers than textures for this object, so use the first texture to fill other samplers
                 //    imageInfo[j].imageView = p_textImageManager->textureImages[m_text_ids[0]].m_textureImageBuffer.view;
                 //    imageInfo[j].sampler = samplers[p_textImageManager->textureImages[m_text_ids[0]].m_sampler_id]; 
@@ -150,10 +154,11 @@ void CTextbox::Register(LEApplication::Application *p_app){
     //ch.SetInstanceCount(m_instanceCount);
     //p_renderer = &(p_app->renderer);
     renderer = p_app->renderer;
+    resourcer = p_app->resourcer;
     //p_renderProcess = &(p_app->renderProcess);
     p_descriptorSets_graphics_general = &(renderer->GetDescriptorSets_General());
     //ch.descriptorSets_graphics_texture_image_sampler;
-    p_textImageManager = &(p_app->textImageManager);
+    //p_textImageManager = &(p_app->textImageManager);
     //p_textManager = &(p_app->textManager); //set this outside register function
 
     logicalDevice = renderer->GetLogicalDevice();
@@ -415,31 +420,36 @@ void CTextManager::CreateTextImage(){
 
     //std::cout << "Text Surface '" << 123 << "' Width: " << width << ", Height: " << height << ", Pitch: " << pitch << std::endl;
 
-    CTextureImage textureImage;
-    textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
-    textureImage.m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R8G8B8A8_SRGB;
-    textureImage.m_mipLevels = 1;
-    textureImage.m_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    //textureImage.m_pCommandPool = &(p_renderer->commandPool);
-    textureImage.m_pCommandPool = &renderer->GetCommandPool();
+    // CTextureImage textureImage;
+    // textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
+    // textureImage.m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R8G8B8A8_SRGB;
+    // textureImage.m_mipLevels = 1;
+    // textureImage.m_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    // //textureImage.m_pCommandPool = &(p_renderer->commandPool);
+    // textureImage.m_pCommandPool = &renderer->GetCommandPool();
 
-    //textureImage.GetTexels(texturePath);
-    textureImage.m_pTexels = pixels;
-    textureImage.m_texWidth = width;
-    textureImage.m_texHeight = height;
-    textureImage.m_texChannels = 4;// STBI_rgb_alpha, RGBA
-    textureImage.m_texBptpc = 8;
+    // //textureImage.GetTexels(texturePath);
+    // textureImage.m_pTexels = pixels;
+    // textureImage.m_texWidth = width;
+    // textureImage.m_texHeight = height;
+    // textureImage.m_texChannels = 4;// STBI_rgb_alpha, RGBA
+    // textureImage.m_texBptpc = 8;
 
-    textureImage.CreateTextureImage(false); //false: not use STBI to free pixels
+    // textureImage.CreateTextureImage(false); //false: not use STBI to free pixels
+    // SDL_DestroySurface(conv);
+    // SDL_DestroySurface(textSurface);
+    // textureImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+
+    // textureImage.m_sampler_id = m_samplerID;
+
+    // //std::cout<<"Text Image Created: "<<std::endl;
+
+    // p_textImageManager->textureImages.push_back(textureImage);
+
+    resourcer->CreateTextImage(pixels, width, height, renderer->GetCommandPool(), m_samplerID);
+
     SDL_DestroySurface(conv);
     SDL_DestroySurface(textSurface);
-    textureImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-
-    textureImage.m_sampler_id = m_samplerID;
-
-    //std::cout<<"Text Image Created: "<<std::endl;
-
-    p_textImageManager->textureImages.push_back(textureImage);
 }
 
 

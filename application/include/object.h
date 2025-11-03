@@ -1,13 +1,10 @@
-#ifndef H_OBJECT
-#define H_OBJECT
-
+#pragma once
 #include "entity.h"
 #include "camera.hpp"
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "IRendererCore.h"
 #include "IResourceCore.h"
-#include "texture.h"
 #include "TypeUniform.h"
 
 //forward declaration. 
@@ -34,8 +31,8 @@ class CObject : public CEntity {
     //CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
     //VkPipelineLayout *p_graphicsPipelineLayout;
-    CTextureManager *p_textureManager;
-    CTextImageManager *p_textImageManager;
+    //CTextureManager *p_textureManager;
+    //CTextImageManager *p_textImageManager;
 
     //bool bUseTextureSampler;
     std::vector<VkDescriptorSet> descriptorSets_graphics_texture_image_sampler; //This descritpor is for texture sampler. one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
@@ -92,5 +89,3 @@ public:
     inline static VPUniformBufferObject vpUBO;
 	inline static std::vector<void*> vpUniformBuffersMapped;
 };
-
-#endif

@@ -15,6 +15,16 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
     graphicsQueue = graphicsQueue_;
 
     shaderManager.m_logicalDevice = logicalDevice_;
+
+    textImageManager.m_logicalDevice = logicalDevice_;
+    textImageManager.m_physicalDevice = physicalDevice_;
+    textImageManager.m_graphicsQueue = graphicsQueue_;
+
+    textureManager.m_logicalDevice = logicalDevice_;
+    textureManager.m_physicalDevice = physicalDevice_;
+    textureManager.m_graphicsQueue = graphicsQueue_;
+
+    textureManager.logger = logger;
 }
 
 /**************************
@@ -96,5 +106,41 @@ glm::vec3& ResourceCore::GetModelLength(int index) { return modelManager.modelLe
 glm::vec3& ResourceCore::GetModelLengthMax(int index) { return modelManager.modelLengthsMax[index]; }
 glm::vec3& ResourceCore::GetModelLengthMin(int index)  { return modelManager.modelLengthsMin[index]; }
 
+/**************************
+ * Texture Resource
+ * ***********************/
+void ResourceCore::CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+    int miplevel, int sampler_id, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, bool bCubemap){
+    textureManager.CreateTextureImage(texturePath, usage, commandPool, miplevel, sampler_id, imageFormat, bitPerTexelPerChannel, bCubemap);
+}
+void ResourceCore::DestroyTextureManager(){
+    textureManager.Destroy();
+}
+// CTextureImage& ResourceCore::GetTextureImage(int index){
+//     return textureManager.textureImages[index];
+// }
+int ResourceCore::GetTextureImageSize() { return textureManager.textureImages.size(); }
+VkImageView ResourceCore::GetTextureImageView(int index) { return textureManager.textureImages[index].m_textureImageBuffer.view; }
+int ResourceCore::GetTextureImageSamplerId(int index) { return textureManager.textureImages[index].m_sampler_id; }
+void ResourceCore::GenerateMipmaps(int index) { textureManager.textureImages[index].generateMipmaps(); }
+void ResourceCore::GenerateMipmaps(int index, std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage) {
+    textureManager.textureImages[index].generateMipmaps(rainbowCheckerboardTexturePath, usage);
+}
+
+/**************************
+ * Textimage Resource
+ * ***********************/
+void ResourceCore::CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
+    textImageManager.CreateTextImage(texels, width, height, commandPool, samplerId);
+}
+// CTextureImage& ResourceCore::GetTextImage(int index){
+//     return textImageManager.textureImages[index];
+// }
+void ResourceCore::DestroyTextImageManager(){
+    textImageManager.Destroy();
+}
+int ResourceCore::GetTextImageSize() { return textImageManager.textureImages.size(); }
+VkImageView ResourceCore::GetTextImageView(int index) { return textImageManager.textureImages[index].m_textureImageBuffer.view; }
+int ResourceCore::GetTextImageSamplerId(int index) { return textImageManager.textureImages[index].m_sampler_id; }
 
 }//namespace

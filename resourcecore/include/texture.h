@@ -1,5 +1,4 @@
 #pragma once
-
 #include "timer.h"
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -7,6 +6,8 @@
 #include <array>
 #include "Config.h"
 #include "ILogCore.h"
+
+namespace LEResource{
 
 class CTextureImage final{
 public:
@@ -99,8 +100,8 @@ public:
     //CLogManager logManager;
     LELog::ILogCore *logger = NULL;
     //unsigned int textureImageCount = 0;
-    CTextureManager();
-    ~CTextureManager();
+    CTextureManager() {}
+    ~CTextureManager() {}
 
     void SetLogger(LELog::ILogCore *logger_){
         logger = logger_;
@@ -109,9 +110,9 @@ public:
     VkDevice m_logicalDevice;
     VkPhysicalDevice m_physicalDevice;
     VkQueue m_graphicsQueue;
-
     void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
         int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false);
+
     void Destroy();
 };
 
@@ -122,10 +123,17 @@ public:
 
     //CLogManager logManager;
     //unsigned int textureImageCount = 0;
-    CTextImageManager();
-    ~CTextImageManager();
+    CTextImageManager() {}
+    ~CTextImageManager() {}
     // void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
     //     int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false);
+
+    VkDevice m_logicalDevice;
+    VkPhysicalDevice m_physicalDevice;
+    VkQueue m_graphicsQueue;
+    void CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId);
+
     void Destroy();
 };
 
+}//namespace

@@ -125,7 +125,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
         bindingCounter++;
     }//std::cout<<"!";
 	if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM){
-        std::cout<<"?";
+        //std::cout<<"?";
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = customBinding->descriptorCount;
 		graphicsBindings[bindingCounter].descriptorType = customBinding->descriptorType;

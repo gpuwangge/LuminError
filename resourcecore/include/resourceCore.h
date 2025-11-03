@@ -2,6 +2,7 @@
 #include "IResourceCore.h"
 #include "shaderManager.h"
 #include "modelManager.h"
+#include "texture.h"
 
 namespace LEResource{
     class ResourceCore final : public IResourceCore{
@@ -63,6 +64,28 @@ namespace LEResource{
         glm::vec3& GetModelLengthMax(int index) override;
         glm::vec3& GetModelLengthMin(int index) override;
 
+        /**************************
+         * Texture Resource
+         * ***********************/
+        void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+            int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false) override;
+        void DestroyTextureManager() override;
+        //CTextureImage& GetTextureImage(int index) override;
+        int GetTextureImageSize() override;
+        VkImageView GetTextureImageView(int index) override;
+        int GetTextureImageSamplerId(int index) override;
+        void GenerateMipmaps(int index) override;
+        void GenerateMipmaps(int index, std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage) override;
+
+         /**************************
+         * Textimage Resource
+         * ***********************/
+        void CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId) override;
+        //CTextureImage& GetTextImage(int index) override;
+        void DestroyTextImageManager() override;
+        int GetTextImageSize() override;
+        VkImageView GetTextImageView(int index) override;
+        int GetTextImageSamplerId(int index) override;
 
     private:
         LELog::ILogCore *logger = NULL;
@@ -72,6 +95,10 @@ namespace LEResource{
 
         CShaderManager shaderManager;
         CModelManager modelManager;
+
+        CTextureManager textureManager; //in texture.h
+        CTextImageManager textImageManager; //in texture.h
+
     };
 
     EXPORT_FACTORY_FOR(ResourceCore);

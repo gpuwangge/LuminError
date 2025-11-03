@@ -1,21 +1,15 @@
-#include "../include/texture.h"
-
+#include "texture.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../external/stb_image.h"
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Foundation.h"
 #include "TypeDataBuffer.h"
 
+namespace LEResource{
+
 /*******************
 *	Texture Manager: to manage a vector of CTextureImages
 ********************/
-CTextureManager::CTextureManager(){
-    //logManager.setLogFile("textureManager.log");
-	//m_logicalDevice = logicalDevice;
-	//m_physicalDevice = physicalDevice;
-}
-CTextureManager::~CTextureManager(){}
-
 //The main entrance to create texture image
 void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
 		int miplevel, int sampler_id, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, bool bCubemap){
@@ -54,6 +48,7 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 	TimePoint endTimePoint = now();
 	double durationTime = millisecondsBetween(startTimePoint, endTimePoint);
 
+	//std::cout<<"texturePath = "<<texturePath<<std::endl;
 	logger->Log("Texture Manager Load Texture Image {}", texturePath);
 	//logger.Log("\tenable mipmap: %d", textureImage.bEnableMipMap);
 	logger->Log("\tenable miplevels: {}", (int)textureImage.m_mipLevels);
@@ -61,6 +56,7 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 	logger->Log("\tenable cubemap: {}", bCubemap);
 	logger->Log("\tcost {} milliseconds", (float)durationTime);
 	logger->Log("");
+
     //std::cout<<"Load Texture '"<< (*textureNames)[i].first <<"' cost: "<<durationTime<<" milliseconds"<<std::endl;
 }
 
@@ -73,13 +69,38 @@ void CTextureManager::Destroy(){
 /*******************
 *	Text Manager: to manage a vector of CTextureImages
 ********************/
+void CTextImageManager::CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
+	CTextureImage textureImage;
+    textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
+    textureImage.m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R8G8B8A8_SRGB;
+    textureImage.m_mipLevels = 1;
+    textureImage.m_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    //textureImage.m_pCommandPool = &(p_renderer->commandPool);
+    textureImage.m_pCommandPool = &commandPool;
 
-CTextImageManager::CTextImageManager(){}
-CTextImageManager::~CTextImageManager(){}
+    //textureImage.GetTexels(texturePath);
+    textureImage.m_pTexels = texels;
+    textureImage.m_texWidth = width;
+    textureImage.m_texHeight = height;
+    textureImage.m_texChannels = 4;// STBI_rgb_alpha, RGBA
+    textureImage.m_texBptpc = 8;
+
+    textureImage.CreateTextureImage(false); //false: not use STBI to free pixels
+
+    textureImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+
+    textureImage.m_sampler_id = samplerId;
+
+    //std::cout<<"Text Image Created: "<<std::endl;
+
+    textureImages.push_back(textureImage);
+}
 void CTextImageManager::Destroy(){
 	//std::cout<<"CTextureManager::Destroy()"<<std::endl;
 	for(int i = 0; i < textureImages.size(); i++) textureImages[i].Destroy();
 }
+
+
 
 /*******************
 *	Texture Image: Basic
@@ -684,3 +705,4 @@ void CTextureImage::generateMipmaps(std::string rainbowCheckerboardTexturePath, 
 	}
 }
 
+}//namespace

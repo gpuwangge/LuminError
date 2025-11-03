@@ -125,10 +125,10 @@ void Application::Run(std::string exampleName){ //Entrance Function
     renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers);
     
 
-    textureManager.m_logicalDevice = renderer->GetLogicalDevice();
-    textureManager.m_physicalDevice = renderer->GetPhysicalDevice();
-    textureManager.m_graphicsQueue = renderer->GetGraphicsQueue();
-    textureManager.SetLogger(logger);
+    // textureManager.m_logicalDevice = renderer->GetLogicalDevice();
+    // textureManager.m_physicalDevice = renderer->GetPhysicalDevice();
+    // textureManager.m_graphicsQueue = renderer->GetGraphicsQueue();
+    //textureManager.SetLogger(logger);
     textManager.m_logicalDevice = renderer->GetLogicalDevice();
     textManager.m_physicalDevice = renderer->GetPhysicalDevice();
     textManager.m_graphicsQueue = renderer->GetGraphicsQueue();

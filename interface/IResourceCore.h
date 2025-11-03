@@ -69,6 +69,29 @@ namespace LEResource{
         virtual glm::vec3& GetModelLengthMax(int index) = 0;
         virtual glm::vec3& GetModelLengthMin(int index) = 0;
 
+        /**************************
+         * Texture Resource
+         * ***********************/
+        virtual void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+            int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false) = 0;
+        virtual void DestroyTextureManager() = 0;
+        //virtual CTextureImage& GetTextureImage(int index) = 0;
+        virtual int GetTextureImageSize() = 0;
+        virtual VkImageView GetTextureImageView(int index) = 0;
+        virtual int GetTextureImageSamplerId(int index) = 0;
+        virtual void GenerateMipmaps(int index) = 0; //create normal mipmap
+        virtual void GenerateMipmaps(int index, std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage) = 0; //create mix mipmaps
+
+         /**************************
+         * Textimage Resource
+         * ***********************/
+        virtual void CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId) = 0;
+        //virtual CTextureImage& GetTextImage(int index) = 0;
+        virtual void DestroyTextImageManager() = 0;
+        virtual int GetTextImageSize() = 0;
+        virtual VkImageView GetTextImageView(int index) = 0;
+        virtual int GetTextImageSamplerId(int index) = 0;
+
     protected:
         LEApplication::IApplication* game;
 

@@ -100,8 +100,8 @@ void Application::CleanUp(){
     renderer->ComputeDescriptorManagerDestroyAndFree();
 
     //std::cout<<"Application: textureManager.Destroy()"<<std::endl;
-    textureManager.Destroy();
-    textImageManager.Destroy();
+    resourcer->DestroyTextureManager();
+    resourcer->DestroyTextImageManager();
     textManager.Destroy();
 
     //std::cout<<"Application: renderer begin Destroy()"<<std::endl;

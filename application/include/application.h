@@ -1,7 +1,6 @@
 #pragma once
 
 #include "camera.hpp"
-#include "texture.h" //this includes imageManager.h
 #include "object.h"
 #include "textManager.h"
 #include "light.h"
@@ -53,9 +52,6 @@ namespace LEApplication{
 
         //bool framebufferResized = false;
         //bool needWindow = false;
-
-        CTextureManager textureManager;
-        CTextImageManager textImageManager;
         CTextManager textManager;
 
         int objectCountControl = 0;

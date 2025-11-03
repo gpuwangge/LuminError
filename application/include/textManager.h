@@ -1,5 +1,4 @@
-#ifndef H_TEXTMANAGER
-#define H_TEXTMANAGER
+#pragma once
 
 #include "camera.hpp"
 #include "utility.h"
@@ -32,11 +31,12 @@ class CTextManager;
 class CTextbox : public CEntity {
     //CRenderer *p_renderer;
     LERenderer::IRendererCore *renderer = NULL;
+    LEResource::IResourceCore *resourcer = NULL;
 
     //CRenderProcess *p_renderProcess;
     std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general;
     std::vector<VkDescriptorSet> descriptorSets_graphics_texture_image_sampler;
-    CTextImageManager *p_textImageManager;
+    //CTextImageManager *p_textImageManager;
 
     std::vector<int> m_highlightedIndex = std::vector<int>(10, -1);
     //int m_highlightedIndex = -1;
@@ -104,7 +104,7 @@ public:
     LERenderer::IRendererCore *renderer = NULL;
     LEResource::IResourceCore *resourcer = NULL;
 
-    CTextImageManager *p_textImageManager = NULL;
+    //CTextImageManager *p_textImageManager = NULL;
     //CModelManager *p_modelManager = NULL;
 
     VkDevice m_logicalDevice;
@@ -145,4 +145,3 @@ public:
 
 };
 
-#endif
