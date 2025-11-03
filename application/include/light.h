@@ -1,6 +1,4 @@
-#ifndef H_LIGHT
-#define H_LIGHT
-
+#pragma once
 #include <string>
 #include <vector>
 #include "camera.hpp"
@@ -42,4 +40,3 @@ public:
     inline static std::vector<void*> m_lightingUniformBuffersMapped;
 };
 
-#endif

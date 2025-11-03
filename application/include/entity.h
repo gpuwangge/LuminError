@@ -1,6 +1,4 @@
-#ifndef H_ENTITY
-#define H_ENTITY
-
+#pragma once
 #include <string>
 #include "utility.h"
 #include <locale>
@@ -102,4 +100,3 @@ public:
     void Update(float deltaTime);
 };
 
-#endif

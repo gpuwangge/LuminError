@@ -1,6 +1,4 @@
-#ifndef H_CONTROLNODE
-#define H_CONTROLNODE
-
+#pragma once
 #include "entity.h"
 #include "object.h"
 #include "textManager.h"
@@ -155,6 +153,3 @@ public:
 };
 
 
-
-
-#endif

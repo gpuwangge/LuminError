@@ -1,5 +1,4 @@
 #pragma once
-
 #include "camera.hpp"
 #include "utility.h"
 #include <vulkan/vulkan.h>
