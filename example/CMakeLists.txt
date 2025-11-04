@@ -26,7 +26,7 @@ endfunction()
 
 add_example("SimpleTriangle")
 add_example("BasicTriangles")
-#add_example("Bptpc16Texture")
+add_example("Bptpc16Texture")
 
 #file(GLOB EXAMPLE_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*/")
 

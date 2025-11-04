@@ -5,7 +5,6 @@
 #include <windows.h>
 #include <iostream>
 #include <memory>
-//#include <iostream>
 
 int main(int argc, char* argv[]) {
     HMODULE handle_application = LoadLibraryA("application.dll"); //Windows.h
@@ -33,12 +32,11 @@ int main(int argc, char* argv[]) {
 
     LEApplication::IApplication* instance_application = (LEApplication::IApplication*)CreateInstance();
     try {
-        //LuminError::IGame *game = new LuminError::Game(); //will not call Game's destructor
-        auto game = std::make_unique<LuminError::Game>();
+        auto game = std::make_unique<LuminError::Game>(); //will call Game's destructor at the end of main()
         game->SetApplication(instance_application);
         instance_application->SetGamer(game.get());
         //if(argc > 1) instance_application->Run(argv[1]); else 
-        instance_application->Run(std::string(EXAMPLE_NAME));//todo: 这里需要example名字，因为要去找yaml和建立log
+        instance_application->Run(std::string(EXAMPLE_NAME));//need examplename to find yaml files and create log file
     } catch (const std::exception& e) {
         std::cerr << "Exception in Application::Run(): " << e.what() << std::endl;
     } catch (...) {

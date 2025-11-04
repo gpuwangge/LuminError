@@ -30,17 +30,17 @@ namespace LuminError{
         StructCustomUniformBuffer customUniformBufferObject{};
 
         void Initialize() override {
-            engine->CreateCustomModel3D(vertices3D, indices3D);
-            engine->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
+            GameEngine->CreateCustomModel3D(vertices3D, indices3D);
+            GameEngine->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
-            engine->SetGraphicsCustomBinding(static_cast<void*>(&binding));
+            GameEngine->SetGraphicsCustomBinding(static_cast<void*>(&binding));
         }
 
         void Update() override {
-            double et = engine->GetElapseTime();
+            double et = GameEngine->GetElapseTime();
             customUniformBufferObject.color = {(sin(et) + 1.0f) / 2.0f, 0.0f, (cos(et) + 1.0f) / 2.0f};
-            engine->UploadGraphicsCustomUniformBuffer(engine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
-            engine->SetObjectVelocity(0, 
+            GameEngine->UploadGraphicsCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+            GameEngine->SetObjectVelocity(0, 
                 0.5 * sin(et * 2), 
                 0.5 * sin(et * 2), 
                 0.5 * sin(et * 2)
@@ -48,8 +48,8 @@ namespace LuminError{
         }
 
         void Record() override{
-            engine->DrawObjects();
-            engine->DrawTexts();
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();
         }
     };
 }
