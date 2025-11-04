@@ -12,7 +12,7 @@ cd build/bin
 ```
 Run SimpleTriangle:  
 ```
-.\launcher.exe .\SimpleTriangle.dll
+.\SimpleTriangle.exe
 ```
 Run all tests:
 ```

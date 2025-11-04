@@ -1,10 +1,10 @@
 #include "IGame.h"
 namespace LuminError{
-    struct SimpleSkybox : public IGame {
+    class Game : public IGame {
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();
         }
     };
-    EXPORT_FACTORY_FOR(SimpleSkybox)
 }
+#include "launcher.hpp"

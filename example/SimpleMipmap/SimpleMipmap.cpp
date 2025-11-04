@@ -1,10 +1,10 @@
 #include "IGame.h"
 namespace LuminError{
-    struct SimpleMipmap : public IGame {
+    class Game : public IGame {
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();
         }
     };
-    EXPORT_FACTORY_FOR(SimpleMipmap)
 }
+#include "launcher.hpp"

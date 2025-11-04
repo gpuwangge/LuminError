@@ -2,9 +2,8 @@
 #include <iostream>
 #include "utility.h"
 #include <vulkan/vulkan.h>
-
 namespace LuminError{
-    struct SimpleUniformBuffer : public IGame {
+    class Game : public IGame {
         struct StructCustomUniformBuffer {
             glm::vec3 color;
 
@@ -21,22 +20,21 @@ namespace LuminError{
         StructCustomUniformBuffer customUniformBufferObject{};
 
         void Initialize() override {
-            game->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
+            GameEngine->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
-            game->SetGraphicsCustomBinding(static_cast<void*>(&binding));
+            GameEngine->SetGraphicsCustomBinding(static_cast<void*>(&binding));
         }
 
         void Update() override {
-            double et = game->GetElapseTime();
+            double et = GameEngine->GetElapseTime();
             customUniformBufferObject.color = glm::vec4((sin(et*3) + 1.0f) / 2.0f, (cos(et*3) + 1.0f) / 2.0f, 0.0f, 1.0f);
-            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+            GameEngine->UploadGraphicsCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
         }
 
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();
         }
     };
-
-    EXPORT_FACTORY_FOR(SimpleUniformBuffer)
 }
+#include "launcher.hpp"

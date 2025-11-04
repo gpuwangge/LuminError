@@ -6,7 +6,7 @@
 #include "TypeVertex.h"
 
 namespace LuminError{
-    struct FurMark : public IGame {
+    class Game : public IGame {
         std::vector<Vertex3D> vertices3D = {
             { { -1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
             { { 1.0f, -1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
@@ -32,24 +32,24 @@ namespace LuminError{
         CustomUniformBufferObject customUBO{};
 
         void Initialize() override {
-            game->CreateCustomModel3D(vertices3D, indices3D);
-            game->SetGraphicsCustomSize(sizeof(CustomUniformBufferObject));
+            GameEngine->CreateCustomModel3D(vertices3D, indices3D);
+            GameEngine->SetGraphicsCustomSize(sizeof(CustomUniformBufferObject));
             VkDescriptorSetLayoutBinding binding = CustomUniformBufferObject::GetBinding();
-            game->SetGraphicsCustomBinding(static_cast<void*>(&binding));
+            GameEngine->SetGraphicsCustomBinding(static_cast<void*>(&binding));
         }
 
         void Update() override {
-            double et = game->GetElapseTime();
+            double et = GameEngine->GetElapseTime();
             customUBO.u_time = et;
-            customUBO.u_resolution = glm::vec2(game->GetWindowWidth(), game->GetWindowHeight());
-            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
+            customUBO.u_resolution = glm::vec2(GameEngine->GetWindowWidth(), GameEngine->GetWindowHeight());
+            GameEngine->UploadGraphicsCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUBO, sizeof(CustomUniformBufferObject));
         }
 
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();
         }
     };
-
-    EXPORT_FACTORY_FOR(FurMark)
 }
+
+#include "launcher.hpp"

@@ -8,23 +8,21 @@
 #include "IGame.h"
 #include "Enum.h"
 #include "Config.h"
-
 namespace LuminError{
-    struct SimpleComputeStorageImage : public IGame {
+    class Game : public IGame {
         void PreInitialize() override {
-            game->SetSwapchainImageSize(MAX_FRAMES_IN_FLIGHT);
-            game->EnableComputeSwapChainImage(true);
+            GameEngine->SetSwapchainImageSize(MAX_FRAMES_IN_FLIGHT);
+            GameEngine->EnableComputeSwapChainImage(true);
 	    }
 
         void Initialize() override {
-            game->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
+            GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
         }
 
         void PostInitialize() override{
             //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
-            game->CreateComputeCommandBuffers_DispatchForSwapchainImage(200, 300, 1);
+            GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage(200, 300, 1);
         }
     };
-
-    EXPORT_FACTORY_FOR(SimpleComputeStorageImage)
 }
+#include "launcher.hpp"

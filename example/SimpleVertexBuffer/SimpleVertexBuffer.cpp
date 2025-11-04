@@ -1,9 +1,8 @@
 #include "IGame.h"
 #include <iostream>
 #include "TypeVertex.h"
-
 namespace LuminError{
-    struct SimpleVertexBuffer : public IGame {
+    class Game : public IGame {
         std::vector<Vertex2D> vertices = {
             { { 0.0f, -0.5f},{ 1.0f, 0.0f, 0.0f }},
             { { 0.5f, 0.5f},{ 0.0f, 1.0f, 0.0f }},
@@ -11,16 +10,15 @@ namespace LuminError{
         };
 
         void Initialize() override {
-            game->CreateCustomModel2D(vertices);
+            GameEngine->CreateCustomModel2D(vertices);
         }
 
 
         void Record() override{
-            game->DrawObject(0, -1, 3); //objectId=0, use default pipeline, draw 3 veritices
-            game->DrawObjects(1, game->GetObjectSize()-1);
-            game->DrawTexts();
+            GameEngine->DrawObject(0, -1, 3); //objectId=0, use default pipeline, draw 3 veritices
+            GameEngine->DrawObjects(1, GameEngine->GetObjectSize()-1);
+            GameEngine->DrawTexts();
         }
     };
-
-    EXPORT_FACTORY_FOR(SimpleVertexBuffer)
 }
+#include "launcher.hpp"

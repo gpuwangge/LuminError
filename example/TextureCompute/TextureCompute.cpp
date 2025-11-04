@@ -13,27 +13,25 @@
 #include "IGame.h"
 #include "Enum.h"
 #include "Config.h"
-
 namespace LuminError{
-    struct TextureCompute : public IGame {
+    class Game : public IGame {
         void PreInitialize() override {
-            game->SetSwapchainImageSize(MAX_FRAMES_IN_FLIGHT);
-            game->EnableComputeSwapChainImage(true);
+            GameEngine->SetSwapchainImageSize(MAX_FRAMES_IN_FLIGHT);
+            GameEngine->EnableComputeSwapChainImage(true);
 	    }
 
         void Initialize() override {
-            game->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
+            GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
         }
 
         void PostInitialize() override{
             //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
-            game->CreateComputeCommandBuffers_DispatchForSwapchainImage(300, 600, 1);
+            GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage(300, 600, 1);
         }
 
         void PostUpdate() override {
-            game->DeviceWaitIdle();
+            GameEngine->DeviceWaitIdle();
         }
     };
-
-    EXPORT_FACTORY_FOR(TextureCompute)
 }
+#include "launcher.hpp"

@@ -7,10 +7,8 @@
 #include "IGame.h"
 #include "Utility.h"
 #include "TypeVertex.h"
-
-
 namespace LuminError{
-    struct SimpleShadowMapShaderDepthbias : public IGame {
+    class Game : public IGame {
         std::vector<Vertex3D> vertices3D = {
             { { -0.5f, 0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } ,{ 0.0f, 0.0f, 1.0f }},
             { { -0.5f, -0.5f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
@@ -20,26 +18,26 @@ namespace LuminError{
         std::vector<uint32_t> indices3D = { 0, 1, 2, 2, 1, 3};
 
         void Initialize() override{
-            game->CreateCustomModel3D(vertices3D, indices3D);
+            GameEngine->CreateCustomModel3D(vertices3D, indices3D);
         }
 
         void PostInitialize() override{
-            game->SetObjectScaleRectangleXY(3, 0.5, 0.5, 1, 1);
+            GameEngine->SetObjectScaleRectangleXY(3, 0.5, 0.5, 1, 1);
         }
 
         void Update() override{
-            double et = game->GetElapseTime();
-            for(int i = 0; i < game->GetLightSize(); i++) {
-                game->SetLightPosition(i,
+            double et = GameEngine->GetElapseTime();
+            for(int i = 0; i < GameEngine->GetLightSize(); i++) {
+                GameEngine->SetLightPosition(i,
                     glm::vec3(0, 3.5 + sin(et * (i+1)),0)
                 );
-                game->SetObjectPosition(2+i, game->GetLightPosition(i));
-                game->SetLightCameraPosition(i, game->GetLightPosition(i));
+                GameEngine->SetObjectPosition(2+i, GameEngine->GetLightPosition(i));
+                GameEngine->SetLightCameraPosition(i, GameEngine->GetLightPosition(i));
 		    }
         }
 
         void Record() override{
-            int objectCustomSize = game->GetCustomObjectSize();
+            int objectCustomSize = GameEngine->GetCustomObjectSize();
 
             int lightDepthPipeline = 4;
 
@@ -51,23 +49,21 @@ namespace LuminError{
             //3 - depth image rectangle
             for(int i = 0; i < objectCustomSize-1; i++) {
                 if(i == 2) continue; //dont draw the light ball in shadowmap. the 5th object is the 3rd lightball. the 2rd object is the 0th lightball
-                game->DrawObject(i, lightDepthPipeline);
+                GameEngine->DrawObject(i, lightDepthPipeline);
             }
 
-            game->CmdNextSubpass();
+            GameEngine->CmdNextSubpass();
              //second subpass: render main scene from camera's perspective
-            game->DrawObjects(0, objectCustomSize-2);
+            GameEngine->DrawObjects(0, objectCustomSize-2);
             
-            game->CmdNextSubpass();
+            GameEngine->CmdNextSubpass();
             //third subpass: render depth image rectangle
-            game->DrawObject(objectCustomSize-1);
+            GameEngine->DrawObject(objectCustomSize-1);
 
             //render info panels (panesl must be drawn at the last; dont forget to set subpasses_subpass_id = 2 in yaml)
-            game->DrawObjects(objectCustomSize, game->GetObjectSize()-1);
-            game->DrawTexts(); 
+            GameEngine->DrawObjects(objectCustomSize, GameEngine->GetObjectSize()-1);
+            GameEngine->DrawTexts(); 
         }
     };
-
-
-    EXPORT_FACTORY_FOR(SimpleShadowMapShaderDepthbias)
 }
+#include "launcher.hpp"

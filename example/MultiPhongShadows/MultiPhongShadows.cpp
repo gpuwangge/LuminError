@@ -9,24 +9,23 @@
 #include "Utility.h"
 #include "Enum.h"
 #include "TypeUniform.h"
-
 namespace LuminError{
-    struct MultiPhongShadows : public IGame {
+    class Game : public IGame {
         void Initialize() override{
-            game->SetRenderMode(RenderModes::GRAPHICS_SHADOWMAP);
+            GameEngine->SetRenderMode(RenderModes::GRAPHICS_SHADOWMAP);
         }
 
         void Update() override{
-            double et = game->GetElapseTime();
-            for(int i = 0; i < game->GetLightSize(); i++) {
-                game->SetLightPosition(i,
+            double et = GameEngine->GetElapseTime();
+            for(int i = 0; i < GameEngine->GetLightSize(); i++) {
+                GameEngine->SetLightPosition(i,
                     //glm::vec3(lights[i].GetLightPosition().x, lights[i].GetLightPosition().y,lights[i].GetLightPosition().z)
                     //glm::vec3(lights[i].GetLightPosition().x, 1+1.5*sin(elapseTime*1.5), lights[i].GetLightPosition().z)
-                    glm::vec3(2.5 *cos(et * (i+1) * 0.5), game->GetLightPosition(i).y, 2.5 *sin(et * (i+1) * 0.5))
+                    glm::vec3(2.5 *cos(et * (i+1) * 0.5), GameEngine->GetLightPosition(i).y, 2.5 *sin(et * (i+1) * 0.5))
                     //glm::vec3(0, 3+0.6*sin(elapseTime * (i+1)/2), 0)
                 );
-                game->SetObjectPosition(2+i, game->GetLightPosition(i)); //object2<-light0's position; object3<-light1's position;
-                game->SetLightCameraPosition(i, game->GetLightPosition(i));
+                GameEngine->SetObjectPosition(2+i, GameEngine->GetLightPosition(i)); //object2<-light0's position; object3<-light1's position;
+                GameEngine->SetLightCameraPosition(i, GameEngine->GetLightPosition(i));
 		    }
         }
 
@@ -35,9 +34,9 @@ namespace LuminError{
 
             IntPushConstants pushConstants;
             pushConstants.value = renderpassIndex; //pass shadowmap renderpass index to device
-            game->PushConstantToCommand(&pushConstants, shadowmapPipelineIndex);
+            GameEngine->PushConstantToCommand(&pushConstants, shadowmapPipelineIndex);
 
-            game->CmdSetDepthBias(1.25f, 0.0f, 6.0f);
+            GameEngine->CmdSetDepthBias(1.25f, 0.0f, 6.0f);
 
             //object0: middle big sphere
             //object1: table
@@ -45,16 +44,14 @@ namespace LuminError{
             //object3(removed): small light sphere1 (light1)
             //...
             for(int i = 0; i < 2; i++) { //only draw table and middle big sphere in shadowmap
-                game->DrawObject(i, shadowmapPipelineIndex);
+                GameEngine->DrawObject(i, shadowmapPipelineIndex);
             }
         }
 
         void RecordGraphicsCommandBuffer_RenderpassMainscene() override{
-            game->DrawObjects();
-            game->DrawTexts();    
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();    
         }
     };
-
-
-    EXPORT_FACTORY_FOR(MultiPhongShadows)
 }
+#include "launcher.hpp"

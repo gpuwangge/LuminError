@@ -7,9 +7,8 @@
 #include "Enum.h"
 #include <vulkan/vulkan.h>
 #include <iostream>
-
 namespace LuminError{
-    struct SimpleComputeStorageBuffer : public IGame {
+    class Game : public IGame {
         const int KernelRunNumber = 5;
         struct StructStorageBuffer {
             glm::vec4 data;
@@ -17,23 +16,23 @@ namespace LuminError{
         StructStorageBuffer storageBufferObject;
 
         void Initialize() override{
-            game->SetRenderMode(RenderModes::COMPUTE);
-            game->SetComputeStorageBufferSize(1); //this can be any non-zero number, in order to enable storage buffer
-            game->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            GameEngine->SetRenderMode(RenderModes::COMPUTE);
+            GameEngine->SetComputeStorageBufferSize(1); //this can be any non-zero number, in order to enable storage buffer
+            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         }
 
         void Update() override {
             static int counter = 1;
             //Initial Host data
-            game->LogContext("update(): write counter = %d to the device, frame = %d", counter, game->GetCurrentFrame());
+            GameEngine->LogContext("update(): write counter = %d to the device, frame = %d", counter, GameEngine->GetCurrentFrame());
             storageBufferObject.data = {counter+0.0f, counter+0.1f, counter+0.2f, counter+0.3f};
 
             //Host >> Device
             //computeDescriptorManager.updateStorageBuffer<StructStorageBuffer>(renderer.currentFrame, storageBufferObject);
-            game->UploadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
+            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
             //std::cout<<"update(): Delta Time: "<<deltaTime<<", Duration Time: "<<durationTime<<std::endl;
 
-            if(counter==KernelRunNumber) game->SetPause(true);
+            if(counter==KernelRunNumber) GameEngine->SetPause(true);
             counter++;
         }
 
@@ -43,20 +42,19 @@ namespace LuminError{
         }
 
         void PostUpdate() override {
-            game->DeviceWaitIdle();
+            GameEngine->DeviceWaitIdle();
 
             //Device >> Host
             float data[4] = {0};
             //std::cout<<"compute(): Current Frame = "<<renderer.currentFrame<<": "<<std::endl;
             //memcpy(data, computeDescriptorManager.storageBuffersMapped[renderer.currentFrame], sizeof(data));
             ///game->DownloadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
-            game->DownloadComputeStorageBuffer(game->GetCurrentFrame(), &data, sizeof(data));
-            game->LogContext("compute() read data: ", data, 4);
+            GameEngine->DownloadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &data, sizeof(data));
+            GameEngine->LogContext("compute() read data: ", data, 4);
             std::cout<<"compute() read data: "<<data[0]<<", "<<data[1]<<", "<<data[2]<<", "<<data[3]<<", "<<std::endl;
 
         }
 
     };
-
-    EXPORT_FACTORY_FOR(SimpleComputeStorageBuffer)
 }
+#include "launcher.hpp"

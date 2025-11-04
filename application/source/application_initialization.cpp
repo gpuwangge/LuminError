@@ -1,6 +1,5 @@
 #include "application.h"
 #include "TypeVertex.h"
-
 namespace LEApplication{
 
 void Application::Initialize(){

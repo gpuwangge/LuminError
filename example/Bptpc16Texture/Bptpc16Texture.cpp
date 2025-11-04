@@ -1,7 +1,7 @@
 #include "IGame.h"
 #include "TypeVertex.h"
 namespace LuminError{
-    struct Game : public IGame {
+    class Game : public IGame {
         std::vector<Vertex3D> vertices3D = {
             { { -1.0f, -1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
             { { 1.0f, -1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},

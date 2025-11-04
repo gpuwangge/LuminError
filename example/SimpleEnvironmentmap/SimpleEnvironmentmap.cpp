@@ -4,9 +4,8 @@
 #include "IGame.h"
 #include "Utility.h"
 #include <vulkan/vulkan.h>
-
 namespace LuminError{
-    struct SimpleEnvironmentmap : public IGame {
+    class Game : public IGame {
         struct StructCustomUniformBuffer {
             glm::vec3 cameraPos;
 
@@ -23,29 +22,27 @@ namespace LuminError{
         StructCustomUniformBuffer customUniformBufferObject{};
 
         void Initialize() override {
-            game->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
+            GameEngine->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
-            game->SetGraphicsCustomBinding(&binding);
+            GameEngine->SetGraphicsCustomBinding(&binding);
         }
 
         void Update() override{
-            customUniformBufferObject.cameraPos = game->GetMainCameraPosition();
-            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+            customUniformBufferObject.cameraPos = GameEngine->GetMainCameraPosition();
+            GameEngine->UploadGraphicsCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
 
-            game->SetObjectVelocity(7, glm::cross(game->GetObjectPosition(7) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
-            game->SetObjectVelocity(1, glm::cross(game->GetObjectPosition(1) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
-            game->SetObjectVelocity(2, glm::cross(game->GetObjectPosition(2) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
-            game->SetObjectVelocity(3, glm::cross(game->GetObjectPosition(3) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
-            game->SetObjectVelocity(4, glm::cross(game->GetObjectPosition(4) - glm::vec3(0,0,0), glm::vec3(0.5,0.5,0)));
-            game->SetObjectVelocity(5, glm::cross(game->GetObjectPosition(5) - glm::vec3(0,0,0), glm::vec3(0.5,0.5,0)));
+            GameEngine->SetObjectVelocity(7, glm::cross(GameEngine->GetObjectPosition(7) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
+            GameEngine->SetObjectVelocity(1, glm::cross(GameEngine->GetObjectPosition(1) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
+            GameEngine->SetObjectVelocity(2, glm::cross(GameEngine->GetObjectPosition(2) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
+            GameEngine->SetObjectVelocity(3, glm::cross(GameEngine->GetObjectPosition(3) - glm::vec3(0,0,0), glm::vec3(0,0,1)));
+            GameEngine->SetObjectVelocity(4, glm::cross(GameEngine->GetObjectPosition(4) - glm::vec3(0,0,0), glm::vec3(0.5,0.5,0)));
+            GameEngine->SetObjectVelocity(5, glm::cross(GameEngine->GetObjectPosition(5) - glm::vec3(0,0,0), glm::vec3(0.5,0.5,0)));
         }
 
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();
         }
     };
-
-
-    EXPORT_FACTORY_FOR(SimpleEnvironmentmap)
 }
+#include "launcher.hpp"

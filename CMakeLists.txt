@@ -48,7 +48,7 @@ foreach(example_dir IN LISTS EXAMPLE_DIRECTORIES)
         get_filename_component(sample_name ${sample_file} NAME_WE)
         # 添加到批处理文件（Windows 需要 .exe 扩展名）
         file(APPEND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat 
-            "start /wait launcher.exe ${sample_name}.dll\r\n"
+            "start /wait ${sample_name}.exe\r\n"
         )
     endforeach()
 endforeach()

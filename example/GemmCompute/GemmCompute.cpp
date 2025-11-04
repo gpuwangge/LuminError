@@ -2,9 +2,8 @@
 #include "Enum.h"
 #include <vulkan/vulkan.h>
 #include <iostream>
-
 namespace LuminError{
-    struct GemmCompute : public IGame {
+    class Game : public IGame {
         static const int DIM = 16;
         static const int DIM_M = DIM;
         static const int DIM_K = DIM;
@@ -25,9 +24,9 @@ namespace LuminError{
 	    bool bVerify = true;
 
         void Initialize() override{
-            game->SetRenderMode(RenderModes::COMPUTE);
-            game->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
-            game->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            GameEngine->SetRenderMode(RenderModes::COMPUTE);
+            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
+            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         }
 
         void PostInitialize() override{
@@ -37,8 +36,8 @@ namespace LuminError{
             storageBufferObject.K = DIM_K;
             for(int i = 0; i < DIM_M*DIM_K; i++) storageBufferObject.MatA[i] = (float)rand() / (float)RAND_MAX;
             for(int i = 0; i < DIM_K*DIM_N; i++) storageBufferObject.MatB[i] = (float)rand() / (float)RAND_MAX;
-            if(bVerbose) game->LogContext("A: ", storageBufferObject.MatA, DIM_M*DIM_K);
-            if(bVerbose) game->LogContext("B: ", storageBufferObject.MatB, DIM_K*DIM_N);
+            if(bVerbose) GameEngine->LogContext("A: ", storageBufferObject.MatA, DIM_M*DIM_K);
+            if(bVerbose) GameEngine->LogContext("B: ", storageBufferObject.MatB, DIM_K*DIM_N);
             //std::cout<<"Initialized A and B."<<std::endl;
 
             //Host >> Device
@@ -51,35 +50,35 @@ namespace LuminError{
             //- computation starts with flight0, so initialize buffer1 only
             //- the result will be downloaded back to SBO(only MatC has value)
             //game->UploadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer0. because buffer0 will be output for frame0, no need to initialize.
-            game->UploadComputeStorageBuffer(game->GetCurrentFrame()+1, &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer1: this is the input for the first flight
+            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame()+1, &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer1: this is the input for the first flight
         }
 
         void Update() override {
             static int counter = 1;
-            if(counter==KernelRunNumber) game->SetPause(true);
+            if(counter==KernelRunNumber) GameEngine->SetPause(true);
             counter++;
         }
 
         void RecordComputeCommandBuffer() override{
-            game->ComputeDispatch(1, 1, 1);
+            GameEngine->ComputeDispatch(1, 1, 1);
         }
 
         void PostUpdate() override {
-            game->DeviceWaitIdle();
+            GameEngine->DeviceWaitIdle();
 
             float cpu_result0 = 0.0f;
             if(bVerify){
                 //std::cout<<"Begin verification..."<<std::endl;
-                game->LogContext("Begin verification... ");
+                GameEngine->LogContext("Begin verification... ");
                 float cpu_result[DIM_M*DIM_N];
                 CPUSingleThreadMatMul(DIM_M, DIM_N, DIM_K, storageBufferObject.MatA, storageBufferObject.MatB, cpu_result, DIM_M*DIM_N);
                 //printMatrix(cpu_result, DIM_M, DIM_N, "cpu_C");
-                game->LogContext("cpu_C: ", cpu_result, DIM_M*DIM_N);
+                GameEngine->LogContext("cpu_C: ", cpu_result, DIM_M*DIM_N);
                 cpu_result0 = cpu_result[0];
             }
 
-            if(bVerbose) game->DownloadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //for the first flight, download result from buffer0 back to SBO. SBO.MatC has result, and SBO.MatA/B will be reset to zero.
-            if(bVerbose) game->LogContext("C: ", storageBufferObject.MatC, DIM_M*DIM_N);
+            if(bVerbose) GameEngine->DownloadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //for the first flight, download result from buffer0 back to SBO. SBO.MatC has result, and SBO.MatA/B will be reset to zero.
+            if(bVerbose) GameEngine->LogContext("C: ", storageBufferObject.MatC, DIM_M*DIM_N);
 
             if(bVerify){
                 std::cout<<"gpu_result[0] = "<<storageBufferObject.MatC[0]<<std::endl;
@@ -104,7 +103,7 @@ namespace LuminError{
                     count++;
                     if(count % printDelta == 0){
                         float completeRate = (count * 100.0)/sampleNum ;
-                        game->LogContext("Completed: %f%%", completeRate);
+                        GameEngine->LogContext("Completed: %f%%", completeRate);
                         std::cout<<"Completed: "<<completeRate<<"%"<<" (sampleNum="<<sampleNum<<", count="<<count<<")"<<std::endl;
                     }
                     
@@ -113,6 +112,5 @@ namespace LuminError{
             }
         }
     };
-
-    EXPORT_FACTORY_FOR(GemmCompute)
 }
+#include "launcher.hpp"

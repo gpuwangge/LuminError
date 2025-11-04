@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 
     LEApplication::IApplication* instance_application = (LEApplication::IApplication*)CreateInstance();
     try {
-        auto game = std::make_unique<LuminError::Game>(); //will call Game's destructor at the end of main()
+        auto game = std::make_unique<LuminError::Game>(); //will call Game's destructor at the end of main(). Need complete declaration of Game.
         game->SetApplication(instance_application);
         instance_application->SetGamer(game.get());
         //if(argc > 1) instance_application->Run(argv[1]); else 

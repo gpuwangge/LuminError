@@ -3,7 +3,6 @@
 #include "TypeDataBuffer.h"
 #include "IApplication.h"
 #include "context.h"
-
 namespace LERenderer{
 //Declare static variables here:
 /************

@@ -3,26 +3,23 @@
  * *********** */
 #include "IGame.h"
 #include "Utility.h"
-
 namespace LuminError{
-    struct MultiPhongLightings : public IGame {
+    class Game : public IGame {
         void Update() override{
-            double et = game->GetElapseTime();
-            for(int i = 0; i < game->GetLightSize(); i++) {
-                game->SetLightPosition(i,
-				    glm::vec3(0, game->GetLightPosition(i).y, 0) +
+            double et = GameEngine->GetElapseTime();
+            for(int i = 0; i < GameEngine->GetLightSize(); i++) {
+                GameEngine->SetLightPosition(i,
+				    glm::vec3(0, GameEngine->GetLightPosition(i).y, 0) +
 				    glm::vec3(2.5 *cos(et * (i+1)), 0, 2.5 *sin(et * (i+1)))
 			    );
-                game->SetObjectPosition(2+i, game->GetLightPosition(i));
+                GameEngine->SetObjectPosition(2+i, GameEngine->GetLightPosition(i));
 		    }
         }
 
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();    
+            GameEngine->DrawObjects();
+            GameEngine->DrawTexts();    
         }
     };
-
-
-    EXPORT_FACTORY_FOR(MultiPhongLightings)
 }
+#include "launcher.hpp"
