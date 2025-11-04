@@ -10,11 +10,17 @@ class CTextManager;
 class Vertex3D;
 class Vertex2D;
 
+namespace LuminError{
+    class IGame;
+}
+
 namespace LEApplication{
     class IApplication {
     public:
         virtual ~IApplication() = default;
         virtual void Run(std::string exampleName = "SimpleTriangle") = 0;
+
+        virtual void SetGamer(LuminError::IGame* game) = 0;
 
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;

@@ -1,10 +1,11 @@
-#include "IApplication.h"
-
+#pragma once
 //If migrate to Linux, #include<dlfcn.h>
 //dlopen(), dlerror(), dlsym(), and suffix .so instead of .dll, void* indead of HMODULE
 //Or olternative: Boost.DLL
 #include <windows.h>
 #include <iostream>
+#include <memory>
+//#include <iostream>
 
 int main(int argc, char* argv[]) {
     HMODULE handle_application = LoadLibraryA("application.dll"); //Windows.h
@@ -32,17 +33,21 @@ int main(int argc, char* argv[]) {
 
     LEApplication::IApplication* instance_application = (LEApplication::IApplication*)CreateInstance();
     try {
-        if(argc > 1) instance_application->Run(argv[1]);
-        else instance_application->Run();
+        //LuminError::IGame *game = new LuminError::Game(); //will not call Game's destructor
+        auto game = std::make_unique<LuminError::Game>();
+        game->SetApplication(instance_application);
+        instance_application->SetGamer(game.get());
+        //if(argc > 1) instance_application->Run(argv[1]); else 
+        instance_application->Run(std::string(EXAMPLE_NAME));//todo: 这里需要example名字，因为要去找yaml和建立log
     } catch (const std::exception& e) {
         std::cerr << "Exception in Application::Run(): " << e.what() << std::endl;
     } catch (...) {
         std::cerr << "Unknown exception in Application::Run()" << std::endl;
     }
     
-    DestroyInstance(instance_application);
+    DestroyInstance(instance_application); //engine will be destroyed in main()
     FreeLibrary(handle_application);
     //std::cout<<"- FreeLibrary: Application."<<std::endl;
 
-    return 0;
+    return 0; //game(by smart pointer) will be destoyed in when main() ends
 }

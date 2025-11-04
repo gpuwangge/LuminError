@@ -8,7 +8,6 @@
 #include "controlNode.h"
 
 #include "IApplication.h"
-#include "IGame.h"
 #include "Utility.h"
 #include <vector>
 #include "Enum.h"
@@ -22,6 +21,7 @@
 #include "IRendererCore.h"
 #include "ILogCore.h"
 #include "IResourceCore.h"
+#include "IGame.h"
 
 //added this to remove windows.h
 #ifdef _WIN32
@@ -41,6 +41,10 @@ namespace LEApplication{
         Application();
         ~Application();
 
+        LuminError::IGame *gamer = NULL;
+        void SetGamer(LuminError::IGame* game) override{
+            gamer = game;
+        }
         //CLogManager logManager;
 
         //VkInstance instance;//01
@@ -98,15 +102,15 @@ namespace LEApplication{
 
         void Initialize(); //use this to call sample initialization
         void Update(); //base: update time, frame id, camera and ubo
-        void RecordGraphicsCommandBuffer_RenderpassMainscene(){ gamer->Record(); gamer->RecordGraphicsCommandBuffer_RenderpassMainscene(); }
+        void RecordGraphicsCommandBuffer_RenderpassMainscene(){ gamer->RecordGraphicsCommandBuffer_RenderpassMainscene(); } //todo: Optimize here
 
         //Module Related
         HMODULE handle_module_yamlcore;
         LEYAML::IYAMLCore *yamler = NULL;
         HMODULE handle_module_sdlcore;
         LESDL::ISDLCore *sdler = NULL;
-        HMODULE handle_module_game;
-        LuminError::IGame *gamer = NULL;
+        //HMODULE handle_module_game;
+        //LuminError::IGame *gamer = NULL;
         HMODULE handle_module_renderercore;
         LERenderer::IRendererCore *renderer = NULL;
         HMODULE handle_module_logcore;

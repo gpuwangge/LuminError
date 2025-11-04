@@ -17,7 +17,8 @@
                 ""
             ],
             "defines": [
-            "SDL"
+            "SDL",
+            "EXAMPLE_NAME"
             ]
         }
     ],

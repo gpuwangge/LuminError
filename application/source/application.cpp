@@ -8,6 +8,7 @@
 namespace LEApplication{
 
 void Application::Run(std::string exampleName){ //Entrance Function
+    std::cout<<"Run "<<exampleName<<std::endl;
     /**************** 
     * Module Related
     *****************/
@@ -24,9 +25,10 @@ void Application::Run(std::string exampleName){ //Entrance Function
     sdler->SetApplication(this);
 
     //Load Game(Example) Module
-    LoadModuleAndInstance(handle_module_game, pVoid, exampleName);
-    gamer = static_cast<LuminError::IGame*>(pVoid);
-    gamer->SetApplication(this);
+    //LoadModuleAndInstance(handle_module_game, pVoid, exampleName);
+    //LoadModuleAndInstance(handle_module_game, pVoid, "SimpleTriangle.exe");
+    //gamer = static_cast<LuminError::IGame*>(pVoid);
+    //gamer->SetApplication(this);
 
     //Load Renderer Core Module
     LoadModuleAndInstance(handle_module_renderercore, pVoid, "renderercore.dll");

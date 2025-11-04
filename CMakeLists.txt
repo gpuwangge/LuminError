@@ -20,7 +20,6 @@ add_subdirectory(resourcecore)
 add_subdirectory(renderercore)
 add_subdirectory(application)
 add_subdirectory(example)
-add_subdirectory(launcher)
 
 file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)

@@ -4,9 +4,8 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "TypeVertex.h"
-
 namespace LuminError{
-    struct BasicTriangles : public IGame {
+    struct Game : public IGame {
         std::vector<Vertex3D> vertices3D = {
             { { -0.5f, 0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
             { { -0.5f, -0.5f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 1.0f } ,{ 0.0f, 0.0f, 1.0f }},
@@ -31,17 +30,17 @@ namespace LuminError{
         StructCustomUniformBuffer customUniformBufferObject{};
 
         void Initialize() override {
-            game->CreateCustomModel3D(vertices3D, indices3D);
-            game->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
+            engine->CreateCustomModel3D(vertices3D, indices3D);
+            engine->SetGraphicsCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
-            game->SetGraphicsCustomBinding(static_cast<void*>(&binding));
+            engine->SetGraphicsCustomBinding(static_cast<void*>(&binding));
         }
 
         void Update() override {
-            double et = game->GetElapseTime();
+            double et = engine->GetElapseTime();
             customUniformBufferObject.color = {(sin(et) + 1.0f) / 2.0f, 0.0f, (cos(et) + 1.0f) / 2.0f};
-            game->UploadGraphicsCustomUniformBuffer(game->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
-            game->SetObjectVelocity(0, 
+            engine->UploadGraphicsCustomUniformBuffer(engine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+            engine->SetObjectVelocity(0, 
                 0.5 * sin(et * 2), 
                 0.5 * sin(et * 2), 
                 0.5 * sin(et * 2)
@@ -49,10 +48,9 @@ namespace LuminError{
         }
 
         void Record() override{
-            game->DrawObjects();
-            game->DrawTexts();
+            engine->DrawObjects();
+            engine->DrawTexts();
         }
     };
-
-    EXPORT_FACTORY_FOR(BasicTriangles)
 }
+#include "launcher.hpp"

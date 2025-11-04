@@ -142,11 +142,11 @@ Application::~Application(){
         handle_module_sdlcore = nullptr;
     }
 
-    if (handle_module_game) {
+    //if (handle_module_game) {
         //std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
-        FreeLibrary(handle_module_game);
-        handle_module_game = nullptr;
-    }
+    //    FreeLibrary(handle_module_game);
+    //    handle_module_game = nullptr;
+    //}
 
     if (handle_module_renderercore) {
         //std::cout<<"- FreeLibrary: handle_module_example. (~Application())"<<std::endl;
@@ -173,7 +173,7 @@ extern "C" void DestroyInstance(void *p){
         static_cast<Application*>(p)->CleanUp();
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->yamler);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->sdler);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->gamer);
+        //static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->gamer);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_renderercore,static_cast<Application*>(p)->renderer);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_logcore, static_cast<Application*>(p)->logger);
         static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_resourcecore, static_cast<Application*>(p)->resourcer);
