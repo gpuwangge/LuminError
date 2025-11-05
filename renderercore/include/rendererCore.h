@@ -158,7 +158,7 @@ namespace LERenderer{
         std::vector<VkSemaphore> computeFinishedSemaphores;
         std::vector<VkFence> computeInFlightFences;
 
-        void SetApplication(LEApplication::IApplication* pApplication) override;
+        void SetApplication(LEGameEngine::IGameEngine* pApplication) override;
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
 
         /**************************

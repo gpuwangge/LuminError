@@ -4,10 +4,10 @@ namespace LuminError{
     class IGame{
     public:
         virtual ~IGame() = default; //define virtual destructor, so when game is deleted, will call ~Game(), then ~IGame()
-        LEApplication::IApplication* GameEngine = NULL;
-        void SetApplication(LEApplication::IApplication* pApplication) { GameEngine = pApplication; }
-        //std::weak_ptr<LEApplication::IApplication> engine; //weak_ptr: IGame only use engine, not responsible for engine's destruction
-        //void SetApplication(std::weak_ptr<LEApplication::IApplication> pApplication) { engine = pApplication;}
+        LEGameEngine::IGameEngine* GameEngine = NULL;
+        void SetApplication(LEGameEngine::IGameEngine* pApplication) { GameEngine = pApplication; }
+        //std::weak_ptr<LEGameEngine::IGameEngine> engine; //weak_ptr: IGame only use engine, not responsible for engine's destruction
+        //void SetApplication(std::weak_ptr<LEGameEngine::IGameEngine> pApplication) { engine = pApplication;}
 
         virtual void PreInitialize() {}
         virtual void Initialize() {}

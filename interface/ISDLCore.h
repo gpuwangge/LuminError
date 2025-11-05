@@ -3,15 +3,15 @@
 #include <vector>
 #include <memory>
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 namespace LESDL{
     class ISDLCore {
     public:
         virtual ~ISDLCore() = default;
-        void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
+        void SetApplication(LEGameEngine::IGameEngine* pApplication) {game = pApplication;}
 
         virtual bool IsRunning() = 0;
         virtual void createWindow(int &windowWidth, int &windowHeight, std::string windowTitle) = 0;
@@ -22,7 +22,7 @@ namespace LESDL{
         virtual void SetMouseSensibility(float value) = 0;
         virtual void SetKeyboardSensibility(float value) = 0;
     protected:
-        LEApplication::IApplication* game;
+        LEGameEngine::IGameEngine* game;
     };
 
     #define EXPORT_FACTORY_FOR(ClassName) \

@@ -1,26 +1,26 @@
 #pragma once
-#include "camera.hpp"
-#include "object.h"
-#include "textManager.h"
-#include "light.h"
-#include "timer.h"
-#include "controlNode.h"
-
 #include "IGameEngine.h"
-#include "Utility.h"
-#include <vector>
-#include "Enum.h"
-
-//Macro to convert the macro value to a string
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
+#include "IGame.h"
 #include "ISDLCore.h"
 #include "IYAMLCore.h"
 #include "IRendererCore.h"
 #include "ILogCore.h"
 #include "IResourceCore.h"
-#include "IGame.h"
+
+#include "camera.hpp"
+#include "object.h"
+#include "textManager.h"
+#include "light.h"
+#include "controlNode.h"
+
+#include "Utility.h"
+#include <vector>
+#include "Enum.h"
+#include "timer.h"
+
+//Macro to convert the macro value to a string
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
 
 //added this to remove windows.h
 #ifdef _WIN32
@@ -33,11 +33,11 @@ typedef HINSTANCE__* HMODULE;
 
 class CSwapchain;
 
-namespace LEApplication{
-    class Application : public LEApplication::IApplication{
+namespace LEGameEngine{
+    class GameEngine : public LEGameEngine::IGameEngine{
     public:
-        Application();
-        ~Application();
+        GameEngine();
+        ~GameEngine();
 
         LuminError::IGame *gamer = NULL;
         void SetGamer(LuminError::IGame* game) override{

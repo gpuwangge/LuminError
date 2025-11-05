@@ -5,8 +5,8 @@
 #include "utility.h"
 #include <vector>
 
-namespace LEApplication{
-    class Application;
+namespace LEGameEngine{
+    class GameEngine;
 }
 
 /******************
@@ -30,7 +30,7 @@ public:
     }
     ~CControlNode(){}
 
-    LEApplication::Application *m_pApp;
+    LEGameEngine::GameEngine *m_pApp;
     bool bVisible = true;
     int m_object_count = 0;
     int m_textbox_count = 0;
@@ -41,7 +41,7 @@ public:
     std::vector<CObject*> m_pObjects;
     std::vector<CTextbox*> m_pTextboxes;
 
-    void Register(LEApplication::Application *p_app);
+    void Register(LEGameEngine::GameEngine *p_app);
     virtual void RegisterObject(int startIndex);
     virtual void RegisterTextbox(int startIndex);
     virtual void Update();

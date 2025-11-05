@@ -9,7 +9,7 @@ namespace LELog{
     class ILogCore {
     public:
         virtual ~ILogCore() = default;
-        //void SetApplication(LEApplication::IApplication* pApplication) {game = pApplication;}
+        //void SetApplication(LEGameEngine::IGameEngine* pApplication) {game = pApplication;}
 
         //Print to screen
         virtual void Print(const std::string& message) = 0;

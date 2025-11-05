@@ -9,7 +9,7 @@ namespace LEResource{
     public:
         ResourceCore(){}
         ~ResourceCore(){}
-        void SetApplication(LEApplication::IApplication* pApplication, LELog::ILogCore *logger_) override;
+        void SetApplication(LEGameEngine::IGameEngine* pApplication, LELog::ILogCore *logger_) override;
         void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_) override;
 
         /**************************

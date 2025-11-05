@@ -14,10 +14,10 @@ namespace LuminError{
     class IGame;
 }
 
-namespace LEApplication{
-    class IApplication {
+namespace LEGameEngine{
+    class IGameEngine {
     public:
-        virtual ~IApplication() = default;
+        virtual ~IGameEngine() = default;
         virtual void Run(std::string exampleName = "SimpleTriangle") = 0;
 
         virtual void SetGamer(LuminError::IGame* game) = 0;

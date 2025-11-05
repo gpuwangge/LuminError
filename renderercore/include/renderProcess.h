@@ -7,8 +7,8 @@
 //renderProcess constains all attachment descriptions
 //when creating renderPass, it will use these attachment descriptions (as well as subpasses and dependencies) 
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 class AppInfo;
@@ -23,7 +23,7 @@ public:
 
     void Cleanup();
 
-    LEApplication::IApplication* game;
+    LEGameEngine::IGameEngine* game;
 
     /**************************
     * Attachments(Description) 

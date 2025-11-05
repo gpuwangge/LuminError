@@ -1,18 +1,18 @@
 #include "gameEngine.h"
 #include <windows.h>
 
-namespace LEApplication{
+namespace LEGameEngine{
 /**************
  * Helper Functions
  ************/
-Application::Application(){
+GameEngine::GameEngine(){
     //lightCameras.resize(2); //work
     lightCameras.resize(LIGHT_MAX); //TODO: for test purpose, create more cameras than needed
 
     //logManager.setLogFile("application.log");
 }
 
-std::string Application::GetPureName(const std::string& path) {
+std::string GameEngine::GetPureName(const std::string& path) {
     std::string result = path;
     
     // 移除前导的 .\ 或 ./
@@ -36,14 +36,14 @@ std::string Application::GetPureName(const std::string& path) {
     return result;
 }
 
-void Application::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
+void GameEngine::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr) {
         func(instance, debugMessenger, pAllocator);
     }
 }
 
-void Application::LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName){
+void GameEngine::LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName){
     handle = LoadLibraryA(moduleName.c_str()); 
     if(!handle) { 
         std::cerr << "Module load failed! Module Name = " << moduleName << std::endl; 
@@ -69,7 +69,7 @@ void Application::LoadModuleAndInstance(HMODULE &handle, void* &instance, const 
 
 }
 
-void Application::DestroyInstance(HMODULE handle, void* instance){
+void GameEngine::DestroyInstance(HMODULE handle, void* instance){
     //std::cout<<"Application::DestroyInstance()"<<std::endl;
     if (instance) {
         using DestroyInstanceFunc = void(*)(void*);
@@ -84,7 +84,7 @@ void Application::DestroyInstance(HMODULE handle, void* instance){
     }
 }
 
-void Application::CleanUp(){
+void GameEngine::CleanUp(){
     logger->CloseLogFile();
     //std::cout<<"Application Begin Cleanup()..."<<std::endl;
 
@@ -121,7 +121,7 @@ void Application::CleanUp(){
     //std::cout<<"Application End Cleanup()."<<std::endl;
 }
 
-Application::~Application(){
+GameEngine::~GameEngine(){
     //std::cout<<"Application::~Application()"<<std::endl;
 
     if (handle_module_yamlcore) {
@@ -167,144 +167,144 @@ Application::~Application(){
     }
 }
 
-extern "C" void* CreateInstance(){ return new Application();}
+extern "C" void* CreateInstance(){ return new GameEngine();}
 extern "C" void DestroyInstance(void *p){ 
     if(p) {
-        static_cast<Application*>(p)->CleanUp();
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_yamlcore,static_cast<Application*>(p)->yamler);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_sdlcore,static_cast<Application*>(p)->sdler);
+        static_cast<GameEngine*>(p)->CleanUp();
+        static_cast<GameEngine*>(p)->DestroyInstance(static_cast<GameEngine*>(p)->handle_module_yamlcore,static_cast<GameEngine*>(p)->yamler);
+        static_cast<GameEngine*>(p)->DestroyInstance(static_cast<GameEngine*>(p)->handle_module_sdlcore,static_cast<GameEngine*>(p)->sdler);
         //static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_game,static_cast<Application*>(p)->gamer);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_renderercore,static_cast<Application*>(p)->renderer);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_logcore, static_cast<Application*>(p)->logger);
-        static_cast<Application*>(p)->DestroyInstance(static_cast<Application*>(p)->handle_module_resourcecore, static_cast<Application*>(p)->resourcer);
-        delete static_cast<Application*>(p);
+        static_cast<GameEngine*>(p)->DestroyInstance(static_cast<GameEngine*>(p)->handle_module_renderercore,static_cast<GameEngine*>(p)->renderer);
+        static_cast<GameEngine*>(p)->DestroyInstance(static_cast<GameEngine*>(p)->handle_module_logcore, static_cast<GameEngine*>(p)->logger);
+        static_cast<GameEngine*>(p)->DestroyInstance(static_cast<GameEngine*>(p)->handle_module_resourcecore, static_cast<GameEngine*>(p)->resourcer);
+        delete static_cast<GameEngine*>(p);
         //std::cout<<"- Destroy Instance Application."<<std::endl;
     } 
 }
 
 
 
-bool Application::Get_feature_graphics_enable_controls()  {return yamler->GetAppInfo().Feature.feature_graphics_enable_controls;}
-bool Application::Get_feature_graphics_show_all_metric_controls()  {return appInfo->Feature.feature_graphics_show_all_metric_controls;}
-bool Application::Get_feature_graphics_show_performance_control()  {return appInfo->Feature.feature_graphics_show_performance_control;}
-void Application::Set_feature_graphics_enable_controls(bool value)  {appInfo->Feature.feature_graphics_enable_controls = value;}
-void Application::Set_feature_graphics_show_all_metric_controls(bool value) {appInfo->Feature.feature_graphics_show_all_metric_controls = value;}
-void Application::Set_feature_graphics_show_performance_control(bool value) {appInfo->Feature.feature_graphics_show_performance_control = value;}
+bool GameEngine::Get_feature_graphics_enable_controls()  {return yamler->GetAppInfo().Feature.feature_graphics_enable_controls;}
+bool GameEngine::Get_feature_graphics_show_all_metric_controls()  {return appInfo->Feature.feature_graphics_show_all_metric_controls;}
+bool GameEngine::Get_feature_graphics_show_performance_control()  {return appInfo->Feature.feature_graphics_show_performance_control;}
+void GameEngine::Set_feature_graphics_enable_controls(bool value)  {appInfo->Feature.feature_graphics_enable_controls = value;}
+void GameEngine::Set_feature_graphics_show_all_metric_controls(bool value) {appInfo->Feature.feature_graphics_show_all_metric_controls = value;}
+void GameEngine::Set_feature_graphics_show_performance_control(bool value) {appInfo->Feature.feature_graphics_show_performance_control = value;}
 
-int Application::GetControlNodeSize() { return controlNodes.size();}
-void Application::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}
-void* Application::GetInstanceHandle() {return renderer->GetInstance();}// instance->getHandle();}
+int GameEngine::GetControlNodeSize() { return controlNodes.size();}
+void GameEngine::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}
+void* GameEngine::GetInstanceHandle() {return renderer->GetInstance();}// instance->getHandle();}
 
-int Application::GetObjectSize() { return objects.size(); }
-int Application::GetCustomObjectSize() { return appInfo->Objects.size(); }
-void Application::SetObjectVelocity(int objectId, float vx, float vy, float vz) {objects[objectId].SetVelocity(vx, vy, vz);}
-void Application::SetObjectVelocity(int objectId, glm::vec3 v) {objects[objectId].SetVelocity(v);}
-void Application::SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) {objects[objectId].SetAngularVelocity(vx, vy, vz); }
-void Application::SetObjectPosition(int objectId, float px, float py, float pz) { objects[objectId].SetPosition(px, py, pz); }
-void Application::SetObjectPosition(int objectId, glm::vec3 p) { objects[objectId].SetPosition(p); }
-void Application::SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
-glm::vec3 Application::GetObjectPosition(int objectId) { return objects[objectId].Position; }
+int GameEngine::GetObjectSize() { return objects.size(); }
+int GameEngine::GetCustomObjectSize() { return appInfo->Objects.size(); }
+void GameEngine::SetObjectVelocity(int objectId, float vx, float vy, float vz) {objects[objectId].SetVelocity(vx, vy, vz);}
+void GameEngine::SetObjectVelocity(int objectId, glm::vec3 v) {objects[objectId].SetVelocity(v);}
+void GameEngine::SetObjectAngularVelocity(int objectId, float vx, float vy, float vz) {objects[objectId].SetAngularVelocity(vx, vy, vz); }
+void GameEngine::SetObjectPosition(int objectId, float px, float py, float pz) { objects[objectId].SetPosition(px, py, pz); }
+void GameEngine::SetObjectPosition(int objectId, glm::vec3 p) { objects[objectId].SetPosition(p); }
+void GameEngine::SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
+glm::vec3 GameEngine::GetObjectPosition(int objectId) { return objects[objectId].Position; }
 
-int Application::GetLightSize() { return lights.size(); }
-glm::vec3 Application::GetLightPosition(int lightId) { return lights[lightId].GetLightPosition(); }
-void Application::SetLightPosition(int lightId, float px, float py, float pz) { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }
-void Application::SetLightPosition(int lightId, glm::vec3 p) { lights[lightId].SetLightPosition(p); }
+int GameEngine::GetLightSize() { return lights.size(); }
+glm::vec3 GameEngine::GetLightPosition(int lightId) { return lights[lightId].GetLightPosition(); }
+void GameEngine::SetLightPosition(int lightId, float px, float py, float pz) { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }
+void GameEngine::SetLightPosition(int lightId, glm::vec3 p) { lights[lightId].SetLightPosition(p); }
 
-void Application::CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) { resourcer->CreateModelCustomModel2D(vertices2D);}
-void Application::CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) {
+void GameEngine::CreateCustomModel2D(std::vector<Vertex2D> &vertices2D) { resourcer->CreateModelCustomModel2D(vertices2D);}
+void GameEngine::CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) {
     resourcer->CreateModelCustomModel3D(vertices3D, indices3D, isTextboxImage);
 }
 
-void Application::DrawObject(int objectId) { objects[objectId].Draw(); }
-void Application::DrawTexts() { textManager.Draw(); }
-void Application::DrawObjects() { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
-void Application::DrawObjects(int startObjectId, int endObjectId) { 
+void GameEngine::DrawObject(int objectId) { objects[objectId].Draw(); }
+void GameEngine::DrawTexts() { textManager.Draw(); }
+void GameEngine::DrawObjects() { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
+void GameEngine::DrawObjects(int startObjectId, int endObjectId) { 
     for(int i = startObjectId; i <= endObjectId && i < objects.size(); i++)  objects[i].Draw(); 
 }
-void Application::DrawObject(int objectId, int pipelineId) { objects[objectId].Draw(pipelineId); }
-void Application::DrawObject(int objectId, int pipelineId, int numVertex) { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
-void Application::DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) {
+void GameEngine::DrawObject(int objectId, int pipelineId) { objects[objectId].Draw(pipelineId); }
+void GameEngine::DrawObject(int objectId, int pipelineId, int numVertex) { objects[objectId].Draw_NoIndexNoSet(pipelineId, numVertex); }
+void GameEngine::DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) {
     objects[objectId].Draw(renderer->GetStorageBuffers(), -1, particleCount);
 }
 
-void Application::ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
+void GameEngine::ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
     Dispatch(numWorkGroupsX,numWorkGroupsY,numWorkGroupsZ);
 }
 
-void Application::SetComputeCustomSize(int size) { appInfo->Uniform.ComputeCustom.Size = size; }
-void Application::SetComputeCustomBinding(void* binding) {
+void GameEngine::SetComputeCustomSize(int size) { appInfo->Uniform.ComputeCustom.Size = size; }
+void GameEngine::SetComputeCustomBinding(void* binding) {
     VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
     if (bindingPtr) appInfo->Uniform.ComputeCustom.Binding = *bindingPtr;
 }
-void Application::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
+void GameEngine::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
     renderer->uploadComputeCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
-void Application::SetComputeStorageBufferSize(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
-void Application::SetComputeStorageBufferUsage(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
-void Application::UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
+void GameEngine::SetComputeStorageBufferSize(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
+void GameEngine::SetComputeStorageBufferUsage(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
+void GameEngine::UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
     renderer->uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
 }
-void Application::DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
+void GameEngine::DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
     renderer->downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
 }
 
-void Application::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }
-void Application::SetGraphicsCustomBinding(void* binding) {
+void GameEngine::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }
+void GameEngine::SetGraphicsCustomBinding(void* binding) {
     VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
     if (bindingPtr) appInfo->Uniform.GraphicsCustom.Binding = *bindingPtr;
 }
-void Application::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
+void GameEngine::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
     //graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
     renderer->uploadGraphicsCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 
-void Application::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }
-void Application::SetMainCameraVelocityY(float value) { mainCamera.Velocity.y = value; }
-void Application::SetMainCameraVelocityZ(float value) { mainCamera.Velocity.z = value; }
-void Application::SetMainCameraAngularVelocityX(float value) { mainCamera.AngularVelocity.x = value; }
-void Application::SetMainCameraAngularVelocityY(float value) { mainCamera.AngularVelocity.y = value; }
-void Application::SetMainCameraAngularVelocityZ(float value) { mainCamera.AngularVelocity.z = value; }
-void Application::SetMainCameraType(int type) { mainCamera.cameraType = (CameraType)type; }
-int Application::GetMainCameraType() { return mainCamera.cameraType; }
-void Application::SetMainCameraFocusObjectId(int objectId) { mainCamera.focusObjectId = objectId; }
-int Application::GetMainCameraFocusObjectId() { return mainCamera.focusObjectId; }
-void Application::MoveMainCameraLeft(float distance, float speed) { mainCamera.MoveLeft(distance, speed); }
-void Application::MoveMainCameraRight(float distance, float speed) { mainCamera.MoveRight(distance, speed); }
-void Application::MoveMainCameraForward(float distance, float speed) { mainCamera.MoveForward(distance, speed); }
-void Application::MoveMainCameraBackward(float distance, float speed) { mainCamera.MoveBackward(distance, speed); }
-glm::vec3 Application::GetMainCameraPosition() { return mainCamera.Position; }
-void Application::SetMainCameraSensitivity(float sensitivity) { mainCamera.SetRotationSensitivity(sensitivity); }
+void GameEngine::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }
+void GameEngine::SetMainCameraVelocityY(float value) { mainCamera.Velocity.y = value; }
+void GameEngine::SetMainCameraVelocityZ(float value) { mainCamera.Velocity.z = value; }
+void GameEngine::SetMainCameraAngularVelocityX(float value) { mainCamera.AngularVelocity.x = value; }
+void GameEngine::SetMainCameraAngularVelocityY(float value) { mainCamera.AngularVelocity.y = value; }
+void GameEngine::SetMainCameraAngularVelocityZ(float value) { mainCamera.AngularVelocity.z = value; }
+void GameEngine::SetMainCameraType(int type) { mainCamera.cameraType = (CameraType)type; }
+int GameEngine::GetMainCameraType() { return mainCamera.cameraType; }
+void GameEngine::SetMainCameraFocusObjectId(int objectId) { mainCamera.focusObjectId = objectId; }
+int GameEngine::GetMainCameraFocusObjectId() { return mainCamera.focusObjectId; }
+void GameEngine::MoveMainCameraLeft(float distance, float speed) { mainCamera.MoveLeft(distance, speed); }
+void GameEngine::MoveMainCameraRight(float distance, float speed) { mainCamera.MoveRight(distance, speed); }
+void GameEngine::MoveMainCameraForward(float distance, float speed) { mainCamera.MoveForward(distance, speed); }
+void GameEngine::MoveMainCameraBackward(float distance, float speed) { mainCamera.MoveBackward(distance, speed); }
+glm::vec3 GameEngine::GetMainCameraPosition() { return mainCamera.Position; }
+void GameEngine::SetMainCameraSensitivity(float sensitivity) { mainCamera.SetRotationSensitivity(sensitivity); }
 
-void Application::SetLightCameraPosition(int lightCameraId, glm::vec3 p) { lightCameras[lightCameraId].SetPosition(p); }
-void Application::SetLightCameraFocusObjectId(int lightCameraId, int objectId) { lightCameras[lightCameraId].focusObjectId = objectId; }
-int Application::GetLightCameraFocusObjectId(int lightCameraId) { return lightCameras[lightCameraId].focusObjectId; }
+void GameEngine::SetLightCameraPosition(int lightCameraId, glm::vec3 p) { lightCameras[lightCameraId].SetPosition(p); }
+void GameEngine::SetLightCameraFocusObjectId(int lightCameraId, int objectId) { lightCameras[lightCameraId].focusObjectId = objectId; }
+int GameEngine::GetLightCameraFocusObjectId(int lightCameraId) { return lightCameras[lightCameraId].focusObjectId; }
 
-void Application::LogContext(std::string s, float *n, int size) { logger->LogArray(s, n, size); }
-void Application::LogContext(std::string s) { logger->Print(s); }
-void Application::LogContext(std::string s, float n) { logger->Print(s, n); }
-void Application::LogContext(std::string s, int n1, int n2) { logger->Log(s, n1, n2); }
+void GameEngine::LogContext(std::string s, float *n, int size) { logger->LogArray(s, n, size); }
+void GameEngine::LogContext(std::string s) { logger->Print(s); }
+void GameEngine::LogContext(std::string s, float n) { logger->Print(s, n); }
+void GameEngine::LogContext(std::string s, int n1, int n2) { logger->Log(s, n1, n2); }
 
-void Application::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)mode; }
-void Application::SetPause(bool value) { NeedToPause = value; }
-int Application::GetWindowWidth() { return windowWidth; }
-int Application::GetWindowHeight() { return windowHeight; }
-int Application::GetCurrentFrame() { return renderer->GetCurrentFrame();}
-double Application::GetElapseTime() { return elapseTime;}
-double Application::GetDeltaTime() { return deltaTime; }
+void GameEngine::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)mode; }
+void GameEngine::SetPause(bool value) { NeedToPause = value; }
+int GameEngine::GetWindowWidth() { return windowWidth; }
+int GameEngine::GetWindowHeight() { return windowHeight; }
+int GameEngine::GetCurrentFrame() { return renderer->GetCurrentFrame();}
+double GameEngine::GetElapseTime() { return elapseTime;}
+double GameEngine::GetDeltaTime() { return deltaTime; }
 
-void Application::CmdNextSubpass() { vkCmdNextSubpass(renderer->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
-void Application::SetSwapchainImageSize(int size) { renderer->SetSwapchain_ImageSize(size); }
-void Application::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapchain_Compute_Image(enable); }
-void Application::DeviceWaitIdle() { vkDeviceWaitIdle(renderer->GetLogicalDevice()); }
+void GameEngine::CmdNextSubpass() { vkCmdNextSubpass(renderer->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
+void GameEngine::SetSwapchainImageSize(int size) { renderer->SetSwapchain_ImageSize(size); }
+void GameEngine::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapchain_Compute_Image(enable); }
+void GameEngine::DeviceWaitIdle() { vkDeviceWaitIdle(renderer->GetLogicalDevice()); }
 
-void Application::PushConstantToCommand(void* pcData, int pipelineId) {
+void GameEngine::PushConstantToCommand(void* pcData, int pipelineId) {
     renderer->PushConstantToCommand(pcData, renderer->GetGraphicsPipelineLayout(pipelineId), resourcer->GetShaderPushConstantRange());
 }
-void Application::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
+void GameEngine::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) {
     vkCmdSetDepthBias(renderer->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 }
 
-void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
+void GameEngine::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
     std::vector<VkCommandBuffer> &commandBuffers = renderer->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
     std::vector<VkImage> &swapChainImages = renderer->GetSwapchain_Images();
 
@@ -342,5 +342,5 @@ void Application::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numW
     renderer->SetCurrentFrame(0);
 }
 
-}
+}//namespace
 

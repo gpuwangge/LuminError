@@ -1,8 +1,8 @@
 #include "gameEngine.h"
 #include "TypeVertex.h"
-namespace LEApplication{
+namespace LEGameEngine{
 
-void Application::Initialize(){
+void GameEngine::Initialize(){
     bool bVerboseInitialization = false;
     TimePoint T0 = now();
     /****************************
@@ -503,7 +503,7 @@ void Application::Initialize(){
             std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
             continue;
         }
-        objects[i].Register((Application*)this);
+        objects[i].Register((GameEngine*)this);
         if(appInfo->Objects[i].object_scale != 1.0f){
             objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
         }else{
@@ -557,7 +557,7 @@ void Application::Initialize(){
             std::cout<<"WARNING: Trying to register a registered Textbox id("<<i<<")!"<<std::endl;
             continue;
         }
-        textManager.m_textBoxes[i].Register((Application*)this);
+        textManager.m_textBoxes[i].Register((GameEngine*)this);
     }
 
     //register textbox for controls

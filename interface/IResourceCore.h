@@ -6,15 +6,15 @@
 #include "TypeVertex.h"
 #include "TypeText.h"
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 namespace LEResource{
     class IResourceCore {
     public:
         virtual ~IResourceCore() = default;
-        virtual void SetApplication(LEApplication::IApplication* pApplication, LELog::ILogCore *logger_) = 0;
+        virtual void SetApplication(LEGameEngine::IGameEngine* pApplication, LELog::ILogCore *logger_) = 0;
         virtual void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_) = 0;
 
         /**************************
@@ -93,7 +93,7 @@ namespace LEResource{
         virtual int GetTextImageSamplerId(int index) = 0;
 
     protected:
-        LEApplication::IApplication* game;
+        LEGameEngine::IGameEngine* game;
 
     }; //class
 

@@ -12,7 +12,7 @@ inline std::string to_string_prec(double value, int prec = 1) {
 /******************
 * ControlNode
 *******************/
-void CControlNode::Register(LEApplication::Application *p_app){
+void CControlNode::Register(LEGameEngine::GameEngine *p_app){
     m_pApp = p_app;
     p_app->objectCountControl += m_object_count;
     p_app->textboxCountControl += m_textbox_count;

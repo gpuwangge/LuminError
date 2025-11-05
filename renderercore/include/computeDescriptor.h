@@ -4,8 +4,8 @@
 #include "TypeUniform.h"
 #include "TypeDataBuffer.h"
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 namespace LERenderer{
@@ -15,7 +15,7 @@ public:
     CComputeDescriptorManager(){}
     ~CComputeDescriptorManager(){}
 
-    LEApplication::IApplication* game;
+    LEGameEngine::IGameEngine* game;
 
     /************
      * Pool

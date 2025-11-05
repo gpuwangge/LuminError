@@ -7,8 +7,8 @@
 
 class CWxjBuffer;
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 namespace LERenderer{
@@ -18,7 +18,7 @@ public:
     CGraphicsDescriptorManager(){};
     ~CGraphicsDescriptorManager(){};
 
-    LEApplication::IApplication* game;
+    LEGameEngine::IGameEngine* game;
 
     /************
      * Pool

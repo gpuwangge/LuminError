@@ -614,7 +614,7 @@ void RendererCore::DestroyInstance(HMODULE handle, void* instance){
 /**************************
  * System Function
  * ***********************/
-void RendererCore::SetApplication(LEApplication::IApplication* pApplication) {
+void RendererCore::SetApplication(LEGameEngine::IGameEngine* pApplication) {
     game = pApplication;
     renderProcess.game = game;
     graphicsDescriptorManager.game = game;

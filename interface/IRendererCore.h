@@ -7,8 +7,8 @@
 #include "ILogCore.h"
 #include "Utility.h"
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 class AppInfo;
@@ -17,8 +17,8 @@ namespace LERenderer{
     class IRendererCore {
     public:
         virtual ~IRendererCore() = default;
-        LEApplication::IApplication* game;
-        virtual void SetApplication(LEApplication::IApplication* pApplication) = 0;
+        LEGameEngine::IGameEngine* game;
+        virtual void SetApplication(LEGameEngine::IGameEngine* pApplication) = 0;
 
         virtual void SetRenderMode(int value) = 0;
         virtual int GetRenderMode() = 0;

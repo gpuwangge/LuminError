@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
         return -1; 
     }
 
-    using CreateAppFunc = LEApplication::IApplication*(*)();
+    using CreateAppFunc = LEGameEngine::IGameEngine*(*)();
     auto CreateInstance =  (CreateAppFunc)GetProcAddress(handle_application, "CreateInstance");
     if(!CreateInstance) { 
         std::cerr << "GetProcAddress failed! (CreateInstance)" << std::endl;
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    LEApplication::IApplication* instance_application = (LEApplication::IApplication*)CreateInstance();
+    LEGameEngine::IGameEngine* instance_application = (LEGameEngine::IGameEngine*)CreateInstance();
     try {
         auto game = std::make_unique<LuminError::Game>(); //will call Game's destructor at the end of main(). Need complete declaration of Game.
         game->SetApplication(instance_application);

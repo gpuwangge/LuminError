@@ -5,9 +5,9 @@
 #include <iostream>
 //#include "shaderManager.h"
 
-namespace LEApplication{
+namespace LEGameEngine{
 
-void Application::Run(std::string exampleName){ //Entrance Function
+void GameEngine::Run(std::string exampleName){ //Entrance Function
     //std::cout<<"Run "<<exampleName<<std::endl;
     /**************** 
     * Module Related
@@ -175,7 +175,7 @@ void Application::Run(std::string exampleName){ //Entrance Function
 	vkDeviceWaitIdle(renderer->GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
 }
 
-void Application::Update(){
+void GameEngine::Update(){
     static TimePoint startTimePoint = now();
     static TimePoint lastTimePoint = now();
     TimePoint currentTimePoint = now();
@@ -202,7 +202,7 @@ void Application::Update(){
     frameCount++;
 }
 
-void Application::Record_Present(){
+void GameEngine::Record_Present(){
     /**************************
      * Universial Render Functions
      *************************/
@@ -338,7 +338,7 @@ void Application::Record_Present(){
     }
 }
 
-void Application::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
+void GameEngine::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     dsSets.push_back(renderer->GetDescriptorSets());
     renderer->BindComputeDescriptorSets(renderer->GetComputePipelineLayout(), dsSets);

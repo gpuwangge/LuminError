@@ -8,8 +8,8 @@
 //Swapchain has all attachment resources(images, imageViews) for rendering
 //frambuffer wraps the swapchain imageViews, so that it can be used in renderPass
 
-namespace LEApplication{
-    class IApplication;
+namespace LEGameEngine{
+    class IGameEngine;
 }
 
 namespace LERenderer{
@@ -21,7 +21,7 @@ public:
     ~CSwapchain();
     void CleanUp();
 
-    LEApplication::IApplication* game;
+    LEGameEngine::IGameEngine* game;
     LELog::ILogCore *logger = NULL;
 
     void SetDevice();

@@ -139,7 +139,7 @@ void CTextbox::Draw(){
 * TextBox
 *******************/
 //CTextBox::CTextBox(){}
-void CTextbox::Register(LEApplication::Application *p_app){
+void CTextbox::Register(LEGameEngine::GameEngine *p_app){
     bRegistered = true;
     //m_textBoxID = textbox_id;
     //m_text_content = text_content;

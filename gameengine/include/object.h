@@ -10,8 +10,8 @@
 //forward declaration. 
 //Because we dont want to include application.h here, but we want to use CApplciation.
 //We want application to include object.h instead
-namespace LEApplication{
-    class Application;
+namespace LEGameEngine{
+    class GameEngine;
 }
 class CControlNode;
 class CRenderer;
@@ -70,7 +70,7 @@ public:
     void Update(float deltaTime, int currentFrame, Camera &mainCamera);
 
     bool bRegistered = false;
-    void Register(LEApplication::Application *p_app);
+    void Register(LEGameEngine::GameEngine *p_app);
 
     bool bVisible = true;
 
