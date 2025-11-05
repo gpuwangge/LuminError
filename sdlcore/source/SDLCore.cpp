@@ -2,7 +2,7 @@
 #include "Foundation.h"
 #include <windows.h>
 #include "Enum.h"
-#include "IApplication.h"
+#include "IGameEngine.h"
 
 namespace LESDL{
 

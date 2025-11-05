@@ -2,7 +2,7 @@
 #include "Foundation.h"
 #include "Config.h"
 #include "controlNode.h"
-#include "application.h"
+#include "gameEngine.h"
 
 /*************
 * Change from CCharacter(no use) to CTextBox

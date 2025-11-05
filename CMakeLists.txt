@@ -18,7 +18,7 @@ add_subdirectory(yamlcore)
 add_subdirectory(sdlcore)
 add_subdirectory(resourcecore)
 add_subdirectory(renderercore)
-add_subdirectory(application)
+add_subdirectory(gameengine)
 add_subdirectory(example)
 
 file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)

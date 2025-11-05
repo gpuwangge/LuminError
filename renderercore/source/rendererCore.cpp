@@ -1,6 +1,6 @@
 #include "rendererCore.h"
 #include <iostream>
-#include "IApplication.h"
+#include "IGameEngine.h"
 #include <windows.h>
 #include "Foundation.h"
 #include "context.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "IApplication.h"
+#include "IGameEngine.h"
 namespace LuminError{
     class IGame{
     public:

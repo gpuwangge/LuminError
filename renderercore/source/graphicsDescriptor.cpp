@@ -1,7 +1,7 @@
 #include "graphicsDescriptor.h"
 #include <iostream>
 #include "TypeDataBuffer.h"
-#include "IApplication.h"
+#include "IGameEngine.h"
 #include "context.h"
 namespace LERenderer{
 //Declare static variables here:

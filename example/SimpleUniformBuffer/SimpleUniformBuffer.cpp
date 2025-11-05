@@ -37,4 +37,4 @@ namespace LuminError{
         }
     };
 }
-#include "launcher.hpp"
+#include "Launcher.hpp"

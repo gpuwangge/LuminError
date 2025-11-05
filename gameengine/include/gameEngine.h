@@ -1,5 +1,4 @@
 #pragma once
-
 #include "camera.hpp"
 #include "object.h"
 #include "textManager.h"
@@ -7,7 +6,7 @@
 #include "timer.h"
 #include "controlNode.h"
 
-#include "IApplication.h"
+#include "IGameEngine.h"
 #include "Utility.h"
 #include <vector>
 #include "Enum.h"
@@ -25,15 +24,14 @@
 
 //added this to remove windows.h
 #ifdef _WIN32
-// 前向声明 HMODULE
+// forward declaration HMODULE
 //typedef void* HMODULE;
-// 或者更精确的方式：
+// or better：
 struct HINSTANCE__;
 typedef HINSTANCE__* HMODULE;
 #endif
 
 class CSwapchain;
-//class CShaderManager;
 
 namespace LEApplication{
     class Application : public LEApplication::IApplication{

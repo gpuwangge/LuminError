@@ -1,6 +1,6 @@
 #include "swapchain.h"
 #include <algorithm>
-#include "IApplication.h"
+#include "IGameEngine.h"
 #include "context.h"
 
 namespace LERenderer{

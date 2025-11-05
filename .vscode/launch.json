@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "${workspaceFolder}/build/bin",
-      "program": "${workspaceFolder}/build/bin/launcher.exe",
+      "program": "${workspaceFolder}/build/bin/Launcher.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

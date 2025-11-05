@@ -1,4 +1,4 @@
-#include "application.h"
+#include "gameEngine.h"
 #include "Foundation.h"
 #include <locale>
 #include <iomanip>
@@ -8,7 +8,7 @@
 namespace LEApplication{
 
 void Application::Run(std::string exampleName){ //Entrance Function
-    std::cout<<"Run "<<exampleName<<std::endl;
+    //std::cout<<"Run "<<exampleName<<std::endl;
     /**************** 
     * Module Related
     *****************/

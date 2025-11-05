@@ -1,5 +1,4 @@
 #include "../include/entity.h"
-//#include "../include/application.h"
 #include <iostream>
 
 /******************

@@ -1,6 +1,6 @@
 #include "computeDescriptor.h"
 #include <iostream>
-#include "IApplication.h"
+#include "IGameEngine.h"
 #include "context.h"
 
 namespace LERenderer{
