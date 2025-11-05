@@ -5,11 +5,11 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": ["SimpleParticles.dll"],
+      "args": [""],
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "${workspaceFolder}/build/bin",
-      "program": "${workspaceFolder}/build/bin/Launcher.exe",
+      "program": "${workspaceFolder}/build/bin/SimpleTriangle.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -67,8 +67,8 @@ namespace LEGameEngine{
         //Camera lightCameras[2]; //works
         std::vector<Camera> lightCameras; 
 
-        bool NeedToExit;
-        bool NeedToPause;
+        bool NeedToExit = false;
+        bool NeedToPause = false;
 
         /*Clean up Functions*/
         void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);

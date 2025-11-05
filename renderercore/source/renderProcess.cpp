@@ -492,14 +492,23 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 	std::vector<VkVertexInputAttributeDescription> attributeDescriptions; //must declare these outside of blocks
 
 	if(bVerbose) std::cout<<"createGraphicsPipeline(): bUseInstanceBuffer = "<<bUseInstanceBuffer<<", bUseVertexBuffer = "<<bUseVertexBuffer<<std::endl;
+	std::array<VkVertexInputBindingDescription, 2> bindingDescriptions;
+	std::vector<VkVertexInputAttributeDescription> vertexAttributes;
+	std::array<VkVertexInputAttributeDescription, 4> instanceAttributes;
 	if(bUseInstanceBuffer){ //use two bindings together
-		auto bindingDescriptions = std::array{
+		bindingDescriptions = std::array{
 			TextQuadVertex::getBindingDescription(),
 			TextInstanceData::getBindingDescription()
 		};
-		auto vertexAttributes = TextQuadVertex::getAttributeDescriptions();
-		auto instanceAttributes = TextInstanceData::getAttributeDescriptions();
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+		// auto bindingDescriptions = std::array{
+		// 	TextQuadVertex::getBindingDescription(),
+		// 	TextInstanceData::getBindingDescription()
+		// };
+		vertexAttributes = TextQuadVertex::getAttributeDescriptions();
+		instanceAttributes = TextInstanceData::getAttributeDescriptions();
+		//auto vertexAttributes = TextQuadVertex::getAttributeDescriptions();
+		//auto instanceAttributes = TextInstanceData::getAttributeDescriptions();
+		
 		attributeDescriptions.insert(attributeDescriptions.end(), vertexAttributes.begin(), vertexAttributes.end());
 		attributeDescriptions.insert(attributeDescriptions.end(), instanceAttributes.begin(), instanceAttributes.end());
 
