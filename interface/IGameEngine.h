@@ -20,7 +20,7 @@ namespace LEGameEngine{
         virtual ~IGameEngine() = default;
         virtual void Run(std::string exampleName = "SimpleTriangle") = 0;
 
-        virtual void SetGamer(LuminError::IGame* game) = 0;
+        virtual void SetGameContent(LuminError::IGame* gameContent) = 0;
 
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;

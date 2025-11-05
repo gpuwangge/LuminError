@@ -7,44 +7,44 @@
 #include <memory>
 
 int main(int argc, char* argv[]) {
-    HMODULE handle_application = LoadLibraryA("application.dll"); //Windows.h
-    if(!handle_application) { 
-        std::cerr << "Module load failed! Module Name = application.dll" << std::endl; //Windows.h
+    HMODULE handle_gameEngine= LoadLibraryA("gameengine.dll"); //Windows.h
+    if(!handle_gameEngine) { 
+        std::cerr << "Module load failed! Module Name = gameengine.dll" << std::endl; //Windows.h
         return -1; 
     }
 
-    using CreateAppFunc = LEGameEngine::IGameEngine*(*)();
-    auto CreateInstance =  (CreateAppFunc)GetProcAddress(handle_application, "CreateInstance");
+    using CreateGameEngineFunc = LEGameEngine::IGameEngine*(*)();
+    auto CreateInstance =  (CreateGameEngineFunc)GetProcAddress(handle_gameEngine, "CreateInstance");
     if(!CreateInstance) { 
         std::cerr << "GetProcAddress failed! (CreateInstance)" << std::endl;
-        FreeLibrary(handle_application);
-        std::cout<<"FreeLibrary: Application"<<std::endl;
+        FreeLibrary(handle_gameEngine);
+        std::cout<<"FreeLibrary: handle_gameEngine"<<std::endl;
         return -1;
     }
     using DestroyAppFunc = void(*)(void*);
-    auto DestroyInstance =  (DestroyAppFunc)GetProcAddress(handle_application, "DestroyInstance");
+    auto DestroyInstance =  (DestroyAppFunc)GetProcAddress(handle_gameEngine, "DestroyInstance");
     if(!DestroyInstance) { 
         std::cerr << "GetProcAddress failed! (DestroyInstance)" << std::endl;
-        FreeLibrary(handle_application);
+        FreeLibrary(handle_gameEngine);
         std::cout<<"FreeLibrary: Application"<<std::endl;
         return -1;
     }
 
-    LEGameEngine::IGameEngine* instance_application = (LEGameEngine::IGameEngine*)CreateInstance();
+    LEGameEngine::IGameEngine* gameEngine = (LEGameEngine::IGameEngine*)CreateInstance();
     try {
-        auto game = std::make_unique<LuminError::Game>(); //will call Game's destructor at the end of main(). Need complete declaration of Game.
-        game->SetApplication(instance_application);
-        instance_application->SetGamer(game.get());
+        auto gameContent = std::make_unique<LuminError::Game>(); //will call Game's destructor at the end of main(). Need complete declaration of Game.
+        gameContent->SetGameEngine(gameEngine);
+        gameEngine->SetGameContent(gameContent.get());
         //if(argc > 1) instance_application->Run(argv[1]); else 
-        instance_application->Run(std::string(EXAMPLE_NAME));//need examplename to find yaml files and create log file
+        gameEngine->Run(std::string(EXAMPLE_NAME));//need examplename to find yaml files and create log file
     } catch (const std::exception& e) {
         std::cerr << "Exception in Application::Run(): " << e.what() << std::endl;
     } catch (...) {
         std::cerr << "Unknown exception in Application::Run()" << std::endl;
     }
     
-    DestroyInstance(instance_application); //engine will be destroyed in main()
-    FreeLibrary(handle_application);
+    DestroyInstance(gameEngine); //engine will be destroyed in main()
+    FreeLibrary(handle_gameEngine);
     //std::cout<<"- FreeLibrary: Application."<<std::endl;
 
     return 0; //game(by smart pointer) will be destoyed in when main() ends

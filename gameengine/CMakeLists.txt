@@ -1,4 +1,4 @@
-project(application)
+project(gameengine)
 
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")

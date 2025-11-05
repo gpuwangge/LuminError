@@ -9,6 +9,10 @@ namespace LEGameEngine{
 
 void GameEngine::Run(std::string exampleName){ //Entrance Function
     //std::cout<<"Run "<<exampleName<<std::endl;
+    std::cout<<"======================================="<<std::endl;
+    std::cout<<"======Welcome to Vulkan Platform======="<<std::endl;
+    std::cout<<"======================================="<<std::endl;
+
     /**************** 
     * Module Related
     *****************/
@@ -23,12 +27,6 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
     sdler = static_cast<LESDL::ISDLCore*>(pVoid);
     sdler->SetApplication(this);
-
-    //Load Game(Example) Module
-    //LoadModuleAndInstance(handle_module_game, pVoid, exampleName);
-    //LoadModuleAndInstance(handle_module_game, pVoid, "SimpleTriangle.exe");
-    //gamer = static_cast<LuminError::IGame*>(pVoid);
-    //gamer->SetApplication(this);
 
     //Load Renderer Core Module
     LoadModuleAndInstance(handle_module_renderercore, pVoid, "renderercore.dll");
@@ -69,10 +67,6 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     // logger->Log("Log Multiple: {}, {}, {}", 1, "test", 2.5f);// 多个参数
     // logger->Log("Log Vector: ({}, {}, {})", vec.x, vec.y, vec.z);
     // logger->Log("Log Array: {}, {}, {}", numbers[0], numbers[1], numbers[2]);
-
-    //CContext::Init();
-
-    //CContext::GetHandle().logger = logger;
 
     gamer->PreInitialize();
 
@@ -147,9 +141,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     renderer->CreateCommandPool(renderer->GetSurface());
 
-    std::cout<<"======================================="<<std::endl;
-    std::cout<<"======Welcome to Vulkan Platform======="<<std::endl;
-    std::cout<<"======================================="<<std::endl;
+    std::cout<<"======Begin Initialization======="<<std::endl;
 
     TimePoint T0 = now();
     gamer->Initialize();

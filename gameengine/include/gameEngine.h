@@ -40,9 +40,7 @@ namespace LEGameEngine{
         ~GameEngine();
 
         LuminError::IGame *gamer = NULL;
-        void SetGamer(LuminError::IGame* game) override{
-            gamer = game;
-        }
+        void SetGameContent(LuminError::IGame* gameContent) override{ gamer = gameContent; }
         //CLogManager logManager;
 
         //VkInstance instance;//01
