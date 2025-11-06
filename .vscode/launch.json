@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "${workspaceFolder}/build/bin",
-      "program": "${workspaceFolder}/build/bin/SimpleTriangle.exe",
+      "program": "${workspaceFolder}/build/bin/SimpleShadowMap2Shadows.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

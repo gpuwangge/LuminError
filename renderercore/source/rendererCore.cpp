@@ -569,9 +569,11 @@ void RendererCore::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
 
 void RendererCore::Destroy(){
     //std::cout<<"Begin Destroy RenderCore(): vertexDataBuffers/indexDataBuffers"<<std::endl;
-    for(size_t i = 0; i < vertexDataBuffers.size(); i++)  vertexDataBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    for(size_t i = 0; i < vertexDataBuffers.size(); i++) vertexDataBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    vertexDataBuffers.clear();
     for(size_t i = 0; i < indexDataBuffers.size(); i++) indexDataBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     //for(size_t i = 0; i < instanceDataBuffers.size(); i++) instanceDataBuffers[i].DestroyAndFree();
+    indexDataBuffers.clear();
 
     //std::cout<<"Begin Destroy RenderCore(): sync objects"<<std::endl;
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -582,9 +584,14 @@ void RendererCore::Destroy(){
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), computeInFlightFences[i], nullptr);
         vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), computeFinishedSemaphores[i], nullptr);
     }
+    renderFinishedSemaphores.clear();
+    imageAvailableSemaphores.clear();
+    inFlightFences.clear();
+    computeInFlightFences.clear();
+    computeFinishedSemaphores.clear();
 
     vkDestroyCommandPool(CContext::GetHandle().GetLogicalDevice(), commandPool, nullptr);
-
+    commandPool = VK_NULL_HANDLE;
 
     //Module Related
     logger->CloseLogFile();

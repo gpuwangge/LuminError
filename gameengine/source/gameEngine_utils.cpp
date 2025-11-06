@@ -88,35 +88,108 @@ void GameEngine::CleanUp(){
     logger->CloseLogFile();
     //std::cout<<"Application Begin Cleanup()..."<<std::endl;
 
+    /*********************
+    *1 VkDevice Resources
+    ********************/
+    vkDeviceWaitIdle(renderer->GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
+
+    /*********************
+    *1.1 Swapchain
+    * For Framebuffer(shadowmap, mainscene)
+    *   vkDestroyFramebuffer
+    * For swapchain imageviews
+    *   vkDestroyImageView
+    * 
+    *   vkDestroySwapchainKHR
+    *
+    * For buffer(buffer_depthlight, buffer_depthcamera, buffer_colorresolve, textureimages, textimage textureimages):
+    *   vkDestroyImage
+    *   vkFreeMemory
+    *   vkDestroyImageView
+    * 
+    * For buffer(instanceDataBuffer)
+    *   vkDestroyBuffer
+    *   vkFreeMemory
+    ********************/
     //std::cout<<"Application: swapchain.CleanUp()"<<std::endl;
     renderer->SwapchainCleanup();
     //std::cout<<"Application: renderProcess.CleanUp()"<<std::endl;
-    renderer->RenderProcessCleanup();
-
-    //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
-    //graphicsDescriptorManager.DestroyAndFree();
-    renderer->GraphicsDescriptorManagerDestroyAndFree();
-    //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
-    renderer->ComputeDescriptorManagerDestroyAndFree();
 
     //std::cout<<"Application: textureManager.Destroy()"<<std::endl;
     resourcer->DestroyTextureManager();
     resourcer->DestroyTextImageManager();
     textManager.Destroy();
 
+    /*********************
+    *1.2 Pipeline
+    * For Renderpass(Shadowmap, mainScene)
+    *   vkDestroyRenderPass
+    * For Pipelines (Graphics, Compute)
+    *   vkDestroyPipeline
+    *   vkDestroyPipelineLayout
+    ********************/
+    renderer->RenderProcessCleanup();
+
+    /*********************
+    *1.3 Descriptor
+    *   vkDestroySampler
+    *   vkDestroyDescriptorPool
+    *   vkDestroyDescriptorSetLayout
+    * 
+    * For buffers(mvpUniformBuffers, textMVPUniformBuffers, customUniformBuffers, vpUniformBuffers, m_lightingUniformBuffers)
+    *   vkDestroyBuffer
+    *   vkFreeMemory 
+    ********************/
+    //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
+    //graphicsDescriptorManager.DestroyAndFree();
+    renderer->GraphicsDescriptorManagerDestroyAndFree();
+    //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
+    renderer->ComputeDescriptorManagerDestroyAndFree();
+
+    /*********************
+    *1.4 Command Pool
+    * For buffers(vertexDataBuffer, indexDataBuffer)
+    *   vkDestroyBuffer
+    *   vkFreeMemory
+    * 
+    *   vkDestroySemaphore
+    *   vkDestroyFence
+    *   vkDestroyCommandPool
+    ********************/
     //std::cout<<"Application: renderer begin Destroy()"<<std::endl;
     renderer->Destroy();
     //std::cout<<"Application: renderer end Destroy()"<<std::endl;
 
-    //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
-    vkDestroyDevice(renderer->GetLogicalDevice(), nullptr);
+    /*********************
+    *2 VkDevice
+    ********************/
+    vkDeviceWaitIdle(renderer->GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
 
+    //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
+    vkDestroyDevice(renderer->GetLogicalDevice(), nullptr); //把这行注释之后可以正常关闭
+
+    /*********************
+    *3 Surface
+    ********************/
+    vkDestroySurfaceKHR(renderer->GetInstance(), renderer->GetSurface(), nullptr);
+
+    /*********************
+    *4 Debug Messenger
+    ********************/
     if (enableValidationLayers) DestroyDebugUtilsMessengerEXT(renderer->GetInstance(), renderer->GetDebugMessenger(), nullptr);
 
-    vkDestroySurfaceKHR(renderer->GetInstance(), renderer->GetSurface(), nullptr);
-    vkDestroyInstance(renderer->GetInstance(), nullptr);
+    /*********************
+    *5 VkInstance
+    ********************/
+    vkDestroyInstance(renderer->GetInstance(), nullptr); //!怀疑这句有问题，这行保留的时候，在debug的时候下一行可能会出错（可能还有未销毁的Device相关资源）, 把这行注释之后可以正常关闭
     
-    renderer->ContextQuit();
+    /*********************
+    *6 Context
+    ********************/
+    renderer->ContextQuit(); //在这里按F5可以通过，按F10会出错
+
+    //DS: 根本原因推断
+    //最可能的问题：双重释放或使用已销毁的资源
 
     //std::cout<<"Application End Cleanup()."<<std::endl;
 }

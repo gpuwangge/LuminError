@@ -405,18 +405,23 @@ void CSwapchain::displaySwapchainInfo(SwapChainSupportDetails details){
 void CSwapchain::CleanUp(){
     for (auto framebuffer : framebuffers_mainscene) 
         vkDestroyFramebuffer(CContext::GetHandle().GetLogicalDevice(), framebuffer, nullptr);
+    framebuffers_mainscene.clear();
     for (int i = 0; i < framebuffers_shadowmap.size(); i++) {
         for (auto framebuffer : framebuffers_shadowmap[i]) 
         vkDestroyFramebuffer(CContext::GetHandle().GetLogicalDevice(), framebuffer, nullptr);
     }
+    framebuffers_shadowmap.clear();
 
     for (auto imageView : swapchain_views) 
         vkDestroyImageView(CContext::GetHandle().GetLogicalDevice(), imageView, nullptr);
+    swapchain_views.clear();
     
     vkDestroySwapchainKHR(CContext::GetHandle().GetLogicalDevice(), handle, nullptr);
+    handle = VK_NULL_HANDLE;
 
     for(int i = 0; i < buffer_depthlight.size(); i++)
         buffer_depthlight[i].destroy();
+    buffer_depthlight.clear();
     buffer_depthcamera.destroy();
     buffer_colorresolve.destroy();
 }
