@@ -86,12 +86,10 @@ void GameEngine::DestroyInstance(HMODULE handle, void* instance){
 
 void GameEngine::CleanUp(){
     logger->CloseLogFile();
-    //std::cout<<"Application Begin Cleanup()..."<<std::endl;
 
     /*********************
     *1 VkDevice Resources
     ********************/
-    vkDeviceWaitIdle(renderer->GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
 
     /*********************
     *1.1 Swapchain
@@ -140,10 +138,7 @@ void GameEngine::CleanUp(){
     *   vkDestroyBuffer
     *   vkFreeMemory 
     ********************/
-    //std::cout<<"Application: graphicsDescriptorManager.Destroy()"<<std::endl;
-    //graphicsDescriptorManager.DestroyAndFree();
     renderer->GraphicsDescriptorManagerDestroyAndFree();
-    //std::cout<<"Application: computeDescriptorManager.DestroyAndFree()"<<std::endl;
     renderer->ComputeDescriptorManagerDestroyAndFree();
 
     /*********************
@@ -156,17 +151,12 @@ void GameEngine::CleanUp(){
     *   vkDestroyFence
     *   vkDestroyCommandPool
     ********************/
-    //std::cout<<"Application: renderer begin Destroy()"<<std::endl;
     renderer->Destroy();
-    //std::cout<<"Application: renderer end Destroy()"<<std::endl;
 
     /*********************
     *2 VkDevice
     ********************/
-    vkDeviceWaitIdle(renderer->GetLogicalDevice());//Wait GPU to complete all jobs before CPU destroy resources
-
-    //std::cout<<"Application: vkDestroyDevice()"<<std::endl;
-    vkDestroyDevice(renderer->GetLogicalDevice(), nullptr); //把这行注释之后可以正常关闭
+    vkDestroyDevice(renderer->GetLogicalDevice(), nullptr); 
 
     /*********************
     *3 Surface
@@ -181,17 +171,12 @@ void GameEngine::CleanUp(){
     /*********************
     *5 VkInstance
     ********************/
-    vkDestroyInstance(renderer->GetInstance(), nullptr); //!怀疑这句有问题，这行保留的时候，在debug的时候下一行可能会出错（可能还有未销毁的Device相关资源）, 把这行注释之后可以正常关闭
+    vkDestroyInstance(renderer->GetInstance(), nullptr);
     
     /*********************
     *6 Context
     ********************/
-    renderer->ContextQuit(); //在这里按F5可以通过，按F10会出错
-
-    //DS: 根本原因推断
-    //最可能的问题：双重释放或使用已销毁的资源
-
-    //std::cout<<"Application End Cleanup()."<<std::endl;
+    renderer->ContextQuit();
 }
 
 GameEngine::~GameEngine(){

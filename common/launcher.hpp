@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Unknown exception in Application::Run()" << std::endl;
     }
     
-    DestroyInstance(gameEngine); //engine will be destroyed in main()
+    DestroyInstance(gameEngine); //gameEngine will be destroyed in main()
     FreeLibrary(handle_gameEngine);
     //std::cout<<"- FreeLibrary: Application."<<std::endl;
 
