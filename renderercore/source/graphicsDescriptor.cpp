@@ -25,13 +25,13 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
-    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP){
+    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){
         //std::cout<<": MVP";
         graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
-    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
+    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
         //std::cout<<": Text MVP";
         graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -119,8 +119,8 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
 		bindingCounter++;
     }
-    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP){
-        VkDescriptorSetLayoutBinding binding = MVPUniformBufferObject::GetBinding();
+    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){
+        VkDescriptorSetLayoutBinding binding = StructObjectUniformBuffer::GetBinding();
         //std::cout<<"DEBUG: MVP Layout binding="<<counter<<std::endl;
         graphicsBindings[bindingCounter].binding = bindingCounter;
         graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
@@ -129,8 +129,8 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
         graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
         bindingCounter++;
     }//std::cout<<"!";
-    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
-        VkDescriptorSetLayoutBinding binding = MVPUniformBufferObject::GetBinding();
+    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
+        VkDescriptorSetLayoutBinding binding = TextMVPUniformBufferObject::GetBinding();
         //std::cout<<"DEBUG: MVP Layout binding="<<counter<<std::endl;
         graphicsBindings[bindingCounter].binding = bindingCounter;
         graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
@@ -169,7 +169,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     // }
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
+        //VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = 1;
 		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -179,7 +179,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
+        //VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = 1;
 		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -189,7 +189,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
+        //VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = LIGHT_MAX;
 		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -293,7 +293,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             counter++;
         }
         VkDescriptorBufferInfo mvpBufferInfo{}; //for mvp
-        if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP){ //TODO: Getbinding
+        if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){ //TODO: Getbinding
             mvpBufferInfo.buffer = mvpUniformBuffers[i].buffer;
             mvpBufferInfo.offset = 0;
             //sizeof(MVPUniformBufferObject) is MVPSIZE, including 2 mvp matrices. We only use one at a time.
@@ -309,7 +309,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             counter++;
         }
         VkDescriptorBufferInfo textMVPBufferInfo{}; //for text mvp
-        if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){ //TODO: Getbinding
+        if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){ //TODO: Getbinding
             textMVPBufferInfo.buffer = textMVPUniformBuffers[i].buffer;
             textMVPBufferInfo.offset = 0;
             //sizeof(MVPUniformBufferObject) is MVPSIZE, including 2 mvp matrices. We only use one at a time.
@@ -471,32 +471,32 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
 
 
 /************
-* 1 GRAPHCIS_UNIFORMBUFFER_MVP
+* 1 GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC
 ************/
 std::vector<CWxjBuffer> CGraphicsDescriptorManager::mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 //std::vector<void*> CGraphicsDescriptorManager::mvpUniformBuffersMapped;
 //MVPUniformBufferObject CGraphicsDescriptorManager::mvpUBO;
 void CGraphicsDescriptorManager::addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped){
-    graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_MVP;
+    graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC;
     //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
     mvpUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     mvpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = mvpUniformBuffers[i].init(sizeof(MVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), mvpUniformBuffers[i].deviceMemory, 0, sizeof(MVPUniformBufferObject), 0, &mvpUniformBuffersMapped[i]);
+        VkResult result = mvpUniformBuffers[i].init(sizeof(StructObjectUniformBuffer), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), mvpUniformBuffers[i].deviceMemory, 0, sizeof(StructObjectUniformBuffer), 0, &mvpUniformBuffersMapped[i]);
     }
 }
 
 /************
-* 2 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP
+* 2 GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC
 ************/
 std::vector<CWxjBuffer> CGraphicsDescriptorManager::textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 //std::vector<void*> CGraphicsDescriptorManager::textMVPUniformBuffersMapped;
 //TextMVPUniformBufferObject CGraphicsDescriptorManager::textMVPUBO;
 void CGraphicsDescriptorManager::addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped){
-    graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_TEXT_MVP;
+    graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC;
     //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
     textMVPUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -603,8 +603,8 @@ void CGraphicsDescriptorManager::uploadGlobalUniformBuffer(uint32_t currentFrame
 //     }
 // }
 // bool CGraphicsDescriptorManager::CheckMVP(){ //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
-//     return ((graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) 
-//         || (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP)
+//     return ((graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC) 
+//         || (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC)
 //         || (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP));
 // }
 
@@ -787,8 +787,8 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
 ************/
 int CGraphicsDescriptorManager::getPoolSize(){ //to calculate descriptor pool size
 	int descriptorPoolSize = 0;
-    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) ? 1:0;
-    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP) ? 1:0;
+    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC) ? 1:0;
+    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_GLOBAL) ? 1:0;
@@ -802,8 +802,8 @@ int CGraphicsDescriptorManager::getPoolSize(){ //to calculate descriptor pool si
 }
 int CGraphicsDescriptorManager::getLayoutSize_General(){ //to get descriptor layout/set size (general: exclude texture)
 	int descriptorPoolSize = 0;
-    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) ? 1:0;
-    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP) ? 1:0;
+    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC) ? 1:0;
+    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_GLOBAL) ? 1:0;

@@ -400,8 +400,8 @@ void GameEngine::Initialize(){
 
         if((type & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
             (type & GRAPHCIS_UNIFORMBUFFER_LIGHTING) || 
-            (type & GRAPHCIS_UNIFORMBUFFER_MVP) ||
-            (type & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP) ||
+            (type & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC) ||
+            (type & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC) ||
             (type & GRAPHCIS_UNIFORMBUFFER_GLOBAL)
             ){
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set0: graphics general layout"<<std::endl;

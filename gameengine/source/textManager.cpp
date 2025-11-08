@@ -328,7 +328,7 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     /********************************
     * Calculate model matrix based on Translation, Rotation and Scale
     ********************************/
-   if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP){
+   if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
         if(p_controlNode == NULL)  CTextManager::textMVPUBO.mvpData[m_textBoxID].model = ModelMatrix;
         else CTextManager::textMVPUBO.mvpData[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
 

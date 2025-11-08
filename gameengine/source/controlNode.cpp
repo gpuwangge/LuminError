@@ -322,25 +322,25 @@ void CControlGraphicsUniform::Update(){
     if(firstTime){
         glm::vec4 greyColor = glm::vec4(0.25, 0.25, 0.25, 1);
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_mvp) m_pTextboxes[1]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_global) m_pTextboxes[1]->bFlash = true;
         else m_pTextboxes[1]->SetTextColor(greyColor);
-        m_pTextboxes[1]->SetTextContent("Object MVP");
+        m_pTextboxes[1]->SetTextContent("Global");
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_text_mvp) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_mvp) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
-        m_pTextboxes[2]->SetTextContent("Text MVP");
+        m_pTextboxes[2]->SetTextContent("Object Dynamic");
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_custom) m_pTextboxes[3]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_text_mvp) m_pTextboxes[3]->bFlash = true;
         else m_pTextboxes[3]->SetTextColor(greyColor);
-        m_pTextboxes[3]->SetTextContent("Custom");
+        m_pTextboxes[3]->SetTextContent("Text Dynamic");
 
         if(m_pApp->appInfo->Uniform.b_uniform_graphics_lighting) m_pTextboxes[4]->bFlash = true;
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Lighting");
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_global) m_pTextboxes[5]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_custom) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
-        m_pTextboxes[5]->SetTextContent("Global");
+        m_pTextboxes[5]->SetTextContent("Custom");
 
         if(m_pApp->appInfo->Uniform.b_uniform_graphics_depth_image_sampler) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);

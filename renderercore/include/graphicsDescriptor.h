@@ -54,7 +54,7 @@ public:
     void uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
-     * 2 GRAPHCIS_UNIFORMBUFFER_MVP (for object)
+     * 2 GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC (for object)
      ************/
     static std::vector<CWxjBuffer> mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 	//static std::vector<void*> mvpUniformBuffersMapped;
@@ -62,7 +62,7 @@ public:
     //static MVPUniformBufferObject mvpUBO;
 
     /************
-     * 3 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP (for textbox)
+     * 3 GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC (for textbox)
      ************/
     static std::vector<CWxjBuffer> textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
     void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped);

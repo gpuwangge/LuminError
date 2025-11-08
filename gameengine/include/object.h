@@ -83,7 +83,7 @@ public:
 
 class CObjectManager{
 public:
-    inline static MVPUniformBufferObject mvpUBO;
+    inline static StructObjectUniformBuffer mvpUBO;
 	inline static std::vector<void*> mvpUniformBuffersMapped;
 
     //inline static VPUniformBufferObject vpUBO;

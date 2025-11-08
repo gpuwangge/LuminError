@@ -5,8 +5,8 @@
 //Uniform Naming Rule: PipelineType_DescriptorType_Purpose
 enum UniformTypes {
     GRAPHCIS_UNIFORMBUFFER_GLOBAL =                 0x00000001,
-    GRAPHCIS_UNIFORMBUFFER_MVP =                    0x00000002, //assume app uses one: MVP or VP
-    GRAPHCIS_UNIFORMBUFFER_TEXT_MVP =               0x00000004,
+    GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC =         0x00000002, //assume app uses one: MVP or VP
+    GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC =           0x00000004,
     GRAPHCIS_UNIFORMBUFFER_LIGHTING =               0x00000008,
     GRAPHCIS_UNIFORMBUFFER_CUSTOM =                 0x00000010,
     //GRAPHCIS_UNIFORMBUFFER_VP =                     0x00000020,
@@ -42,7 +42,7 @@ struct GlobalUniformBufferObject {
 };
 
 //!In graphicsDescriptor.cpp and rendererCore.cpp, assume MVPData is 256 bytes. If change size here, need adjust those sourcefiles
-struct MVPData{
+struct ObjectTextData{
     alignas(16) glm::mat4 model; //16*4=64 bytes
     alignas(4) bool identityCameraProj; // 4 byte
     alignas(4) bool identityCameraView; // 4 byte
@@ -51,16 +51,15 @@ struct MVPData{
     // sum: 64 + 16 + 176 = 256 bytes 
 };
 
-#define MVP_NUM 256
-struct MVPUniformBufferObject {
+#define OBJECT_TEXT_NUM 256
+struct StructObjectUniformBuffer {
 	//MVPData *mvpData; //dynamic doesn't work
 
     //for now, support two groups of mvpData. Each draw only use one mvpData matrices. Use offset to access.
     //Each mvpData is to be aligned to be 256 bytes
     //Support up to 256 (MVP) objects. buffer size is 256*256(TODO: update to 320) = 65536 bytes; Buffer range is 256 bytes(for each object)
     //65536 bytes = 64 kilo bytes
-    MVPData mvpData[MVP_NUM];
-
+    ObjectTextData mvpData[OBJECT_TEXT_NUM];
     static VkDescriptorSetLayoutBinding GetBinding(){
         VkDescriptorSetLayoutBinding binding;
         binding.binding = 0;
@@ -72,20 +71,13 @@ struct MVPUniformBufferObject {
     }
 
 public:
-    MVPUniformBufferObject(){}
-
-    void init(int mvpCount){
-       // mvpData = new MVPData[mvpCount];
-        //std::cout<<"Created mvpData, mvpCount = "<<mvpCount<<std::endl;
-    }
-
-    ~MVPUniformBufferObject(){
-        //if(mvpData) delete mvpData;
-    }
+    StructObjectUniformBuffer(){}
+    //void init(int mvpCount){}
+    ~StructObjectUniformBuffer(){}
 };
 
 struct TextMVPUniformBufferObject {
-    MVPData mvpData[MVP_NUM];
+    ObjectTextData mvpData[OBJECT_TEXT_NUM];
     static VkDescriptorSetLayoutBinding GetBinding(){
         VkDescriptorSetLayoutBinding binding;
         binding.binding = 0;
@@ -100,21 +92,21 @@ public:
     ~TextMVPUniformBufferObject(){}
 };
 
-struct VPUniformBufferObject {
-	//alignas(16) glm::mat4 model;
-	alignas(16) glm::mat4 view;
-	alignas(16) glm::mat4 proj;
+// struct VPUniformBufferObject {
+// 	//alignas(16) glm::mat4 model;
+// 	alignas(16) glm::mat4 view;
+// 	alignas(16) glm::mat4 proj;
 
-    static VkDescriptorSetLayoutBinding GetBinding(){
-        VkDescriptorSetLayoutBinding binding;
-        binding.binding = 0;
-		binding.descriptorCount = 1;
-		binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		binding.pImmutableSamplers = nullptr;
-		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        return binding;
-    }
-};
+//     static VkDescriptorSetLayoutBinding GetBinding(){
+//         VkDescriptorSetLayoutBinding binding;
+//         binding.binding = 0;
+// 		binding.descriptorCount = 1;
+// 		binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+// 		binding.pImmutableSamplers = nullptr;
+// 		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+//         return binding;
+//     }
+// };
 
 struct ModelPushConstants{
     glm::mat4 model;

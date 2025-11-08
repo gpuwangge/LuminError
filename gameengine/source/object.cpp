@@ -11,7 +11,7 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     /********************************
     * Calculate model matrix based on Translation, Rotation and Scale
     ********************************/
-    if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_MVP){
+    if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){
         //update model matrix to ubo
         if(p_controlNode == NULL) {
             CObjectManager::mvpUBO.mvpData[m_object_id].model = ModelMatrix;
