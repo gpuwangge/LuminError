@@ -271,7 +271,7 @@ namespace LERenderer{
         void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) override { graphicsDescriptorManager.addLightingUniformBuffer(lightingUniformBuffersMapped); }
         void addGlobalUniformBuffer() override { graphicsDescriptorManager.addGlobalUniformBuffer(); }
         void uploadGraphicsGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { graphicsDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
-        void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) override { graphicsDescriptorManager.addVPUniformBuffer(vpUniformBuffersMapped); }
+        //void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) override { graphicsDescriptorManager.addVPUniformBuffer(vpUniformBuffersMapped); }
         void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) override { graphicsDescriptorManager.addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats); }
         void addDepthImageSamplerUniformBuffer() override {graphicsDescriptorManager.addDepthImageSamplerUniformBuffer(); }
         void addLightDepthImageSamplerUniformBuffer() override { graphicsDescriptorManager.addLightDepthImageSamplerUniformBuffer(); }

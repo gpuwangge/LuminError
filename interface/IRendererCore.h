@@ -187,7 +187,7 @@ namespace LERenderer{
         virtual void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) = 0;
         virtual void addGlobalUniformBuffer() = 0;
         virtual void uploadGraphicsGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
-        virtual void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) = 0;
+        //virtual void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped) = 0;
         virtual void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) = 0;
         virtual void addDepthImageSamplerUniformBuffer() = 0;
         virtual void addLightDepthImageSamplerUniformBuffer() = 0;

@@ -62,11 +62,11 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
         memcpy(CObjectManager::mvpUniformBuffersMapped[currentFrame], &CObjectManager::mvpUBO, sizeof(CObjectManager::mvpUBO));
     }
 
-    if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_VP){
-        CObjectManager::vpUBO.view = mainCamera.matrices.view;
-        CObjectManager::vpUBO.proj = mainCamera.matrices.projection;
-        memcpy(CObjectManager::vpUniformBuffersMapped[currentFrame], &CObjectManager::vpUBO, sizeof(CObjectManager::vpUBO));
-    }
+    // if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_VP){
+    //     CObjectManager::vpUBO.view = mainCamera.matrices.view;
+    //     CObjectManager::vpUBO.proj = mainCamera.matrices.projection;
+    //     memcpy(CObjectManager::vpUniformBuffersMapped[currentFrame], &CObjectManager::vpUBO, sizeof(CObjectManager::vpUBO));
+    // }
 }
 
 // float CObject::ComputeDifference(glm::vec3 v1, glm::vec3 v2){

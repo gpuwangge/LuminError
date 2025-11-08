@@ -1,10 +1,9 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform UniformBufferObject {
-    //mat4 model;
-    mat4 view;
-    mat4 proj;
-} vpUBO;
+//layout(set = 0, binding = 0) uniform UniformBufferObject {
+//    mat4 view;
+//    mat4 proj;
+//} vpUBO;
 
 //The maximum push constant per shader is 128b~256b. One 4x4 matrix takes 4x4x4=64 bytes
 layout(push_constant) uniform PushConstant{
@@ -20,7 +19,7 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = vpUBO.proj * vpUBO.view * pc.model * vec4(inPosition, 1.0); //vpUBO.model
+    gl_Position = mat4(1.0f) * mat4(1.0f) * pc.model * vec4(inPosition, 1.0);
     fragColor = inColor;
 	fragTexCoord = inTexCoord;
 }

@@ -88,9 +88,9 @@ public:
     /************
      * 5.5 GRAPHCIS_UNIFORMBUFFER_VP (temp)
      ************/
-    static std::vector<CWxjBuffer> vpUniformBuffers; 
+    //static std::vector<CWxjBuffer> vpUniformBuffers; 
 	//static std::vector<void*> vpUniformBuffersMapped;
-    void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped);
+    //void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped);
     //static VPUniformBufferObject vpUBO;
     //static bool CheckMVP(); //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
 

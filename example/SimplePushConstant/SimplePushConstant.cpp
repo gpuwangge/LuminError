@@ -20,7 +20,7 @@ namespace LuminError{
             double et = GameEngine->GetElapseTime();
 
             ModelPushConstants pushConstants;
-            pushConstants.model = glm::rotate(glm::mat4(1.0f), (float)et * glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            pushConstants.model = glm::rotate(glm::mat4(1.0f), (float)et * glm::radians(100.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
             GameEngine->PushConstantToCommand(&pushConstants, 0);//pipeline0
 

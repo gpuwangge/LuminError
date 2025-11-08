@@ -86,6 +86,6 @@ public:
     inline static MVPUniformBufferObject mvpUBO;
 	inline static std::vector<void*> mvpUniformBuffersMapped;
 
-    inline static VPUniformBufferObject vpUBO;
-	inline static std::vector<void*> vpUniformBuffersMapped;
+    //inline static VPUniformBufferObject vpUBO;
+	//inline static std::vector<void*> vpUniformBuffersMapped;
 };

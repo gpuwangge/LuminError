@@ -25,7 +25,7 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
-    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP || graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
+    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP){
         //std::cout<<": MVP";
         graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -158,15 +158,15 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		bindingCounter++;
 	}//std::cout<<"!";
     
-    if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
-        VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
-        graphicsBindings[bindingCounter].binding = bindingCounter;
-		graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
-		graphicsBindings[bindingCounter].descriptorType = binding.descriptorType;
-		graphicsBindings[bindingCounter].pImmutableSamplers = binding.pImmutableSamplers;
-		graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
-		bindingCounter++;
-    }//std::cout<<"!";
+    // if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
+    //     VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
+    //     graphicsBindings[bindingCounter].binding = bindingCounter;
+	// 	graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
+	// 	graphicsBindings[bindingCounter].descriptorType = binding.descriptorType;
+	// 	graphicsBindings[bindingCounter].pImmutableSamplers = binding.pImmutableSamplers;
+	// 	graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
+	// 	bindingCounter++;
+    // }
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
         VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
@@ -353,20 +353,20 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             counter++;
         }
         
-        VkDescriptorBufferInfo vpBufferInfo{}; //for vp
-        if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
-            vpBufferInfo.buffer = vpUniformBuffers[i].buffer;
-            vpBufferInfo.offset = 0;
-            vpBufferInfo.range = sizeof(VPUniformBufferObject);
-            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[counter].dstSet = descriptorSets_general[i];
-            descriptorWrites[counter].dstBinding = counter;
-            descriptorWrites[counter].dstArrayElement = 0;
-            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-            descriptorWrites[counter].descriptorCount = 1;
-            descriptorWrites[counter].pBufferInfo = &vpBufferInfo;
-            counter++;
-        }
+        // VkDescriptorBufferInfo vpBufferInfo{}; //for vp
+        // if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
+        //     vpBufferInfo.buffer = vpUniformBuffers[i].buffer;
+        //     vpBufferInfo.offset = 0;
+        //     vpBufferInfo.range = sizeof(VPUniformBufferObject);
+        //     descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        //     descriptorWrites[counter].dstSet = descriptorSets_general[i];
+        //     descriptorWrites[counter].dstBinding = counter;
+        //     descriptorWrites[counter].dstArrayElement = 0;
+        //     descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        //     descriptorWrites[counter].descriptorCount = 1;
+        //     descriptorWrites[counter].pBufferInfo = &vpBufferInfo;
+        //     counter++;
+        // }
         VkDescriptorImageInfo depthImageInfo{}; //for depth sampler
         if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE){
             //std::cout<<"createDescriptorSets_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
@@ -588,22 +588,20 @@ void CGraphicsDescriptorManager::uploadGlobalUniformBuffer(uint32_t currentFrame
 }
 
 /************
-* 5 GRAPHCIS_UNIFORMBUFFER_VP
+* X5 GRAPHCIS_UNIFORMBUFFER_VP
 ************/
-std::vector<CWxjBuffer> CGraphicsDescriptorManager::vpUniformBuffers; 
-//std::vector<void*> CGraphicsDescriptorManager::vpUniformBuffersMapped;
-//VPUniformBufferObject CGraphicsDescriptorManager::vpUBO;
-void CGraphicsDescriptorManager::addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped){
-    graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_VP;
+// std::vector<CWxjBuffer> CGraphicsDescriptorManager::vpUniformBuffers; 
+// void CGraphicsDescriptorManager::addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped){
+//     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_VP;
 
-    vpUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    vpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+//     vpUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+//     vpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), vpUniformBuffers[i].deviceMemory, 0, sizeof(VPUniformBufferObject), 0, &vpUniformBuffersMapped[i]);
-    }
-}
+//     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+//         VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+//         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), vpUniformBuffers[i].deviceMemory, 0, sizeof(VPUniformBufferObject), 0, &vpUniformBuffersMapped[i]);
+//     }
+// }
 // bool CGraphicsDescriptorManager::CheckMVP(){ //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
 //     return ((graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) 
 //         || (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP)
@@ -789,7 +787,7 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
 ************/
 int CGraphicsDescriptorManager::getPoolSize(){ //to calculate descriptor pool size
 	int descriptorPoolSize = 0;
-    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP || graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP) ? 1:0;
+    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING) ? 1:0;
@@ -804,7 +802,7 @@ int CGraphicsDescriptorManager::getPoolSize(){ //to calculate descriptor pool si
 }
 int CGraphicsDescriptorManager::getLayoutSize_General(){ //to get descriptor layout/set size (general: exclude texture)
 	int descriptorPoolSize = 0;
-    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP || graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP) ? 1:0;
+    descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_MVP) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_CUSTOM) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_LIGHTING) ? 1:0;
@@ -835,8 +833,8 @@ void CGraphicsDescriptorManager::DestroyAndFree(){
     for (size_t i = 0; i < customUniformBuffers.size(); i++) 
         customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 
-    for (size_t i = 0; i < vpUniformBuffers.size(); i++) 
-        vpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    // for (size_t i = 0; i < vpUniformBuffers.size(); i++) 
+    //     vpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     
     for (size_t i = 0; i < m_lightingUniformBuffers.size(); i++) 
         m_lightingUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());

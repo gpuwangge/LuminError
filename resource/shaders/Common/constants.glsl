@@ -11,7 +11,6 @@ const int UNIFORM_OBJECT_BINDING = 1;
 const int UNIFORM_TEXT_BINDING = 2;
 const int UNIFROM_LIGHT_BINDING = 3;
 //uniform_graphics_custom
-//uniform_graphics_object_vp
 //uniform_graphics_depth_image_sampler
 //uniform_graphics_lightdepth_image_sampler
 //uniform_graphics_lightdepth_image_sampler_hardware

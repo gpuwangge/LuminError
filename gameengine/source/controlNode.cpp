@@ -338,9 +338,9 @@ void CControlGraphicsUniform::Update(){
         else m_pTextboxes[4]->SetTextColor(greyColor);
         m_pTextboxes[4]->SetTextContent("Lighting");
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_vp) m_pTextboxes[5]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_global) m_pTextboxes[5]->bFlash = true;
         else m_pTextboxes[5]->SetTextColor(greyColor);
-        m_pTextboxes[5]->SetTextContent("Object VP");
+        m_pTextboxes[5]->SetTextContent("Global");
 
         if(m_pApp->appInfo->Uniform.b_uniform_graphics_depth_image_sampler) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
