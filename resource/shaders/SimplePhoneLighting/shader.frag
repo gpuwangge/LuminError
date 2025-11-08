@@ -1,27 +1,13 @@
 #version 450
-#define LIGHT_MAX 64
+#include "../Common/constants.glsl"
 
-struct LightAttribute{
-	mat4 lightCameraProj;
-    mat4 lightCameraView;
-	vec4 lightPos;
-	vec4 lightDir;
-    vec4 lightColor; //RGBA
-	float ambientIntensity;
-	float diffuseIntensity;
-	float specularIntensity;
-	float dimmerSwitch;
-	float spotInnerAngle;
-    float spotOuterAngle;
-};
-
-layout(set = 0, binding = 3) uniform lightsBufferObject { 
+layout(set = 0, binding = UNIFROM_LIGHT_BINDING) uniform lightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
 	vec4 mainCameraPos; 
 	int lightNum; //number of lights, max is LIGHT_MAX
 } lightsUBO;
 
-layout (set = 1, binding = 0) uniform sampler2D texSampler;
+layout (set = 1, binding = UNIFORM_TEXTURE_SAMPLER_BINDING) uniform sampler2D texSampler;
 
 layout (location = 0) in vec3 inNormal;
 layout (location = 1) in vec3 inColor;//inColor is not used here	

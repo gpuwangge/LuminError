@@ -1,25 +1,11 @@
 #version 450
-#define LIGHT_MAX 64 
+#include "../Common/constants.glsl"
 
 layout(push_constant) uniform PushConstant{
     int value; //the index of shadowmap renderpass
 } pc;
 
-struct LightAttribute{
-	mat4 lightCameraProj;
-    mat4 lightCameraView;
-	vec4 lightPos;
-	vec4 lightDir;
-    vec4 lightColor; //RGBA
-	float ambientIntensity;
-	float diffuseIntensity;
-	float specularIntensity;
-	float dimmerSwitch;
-	float spotInnerAngle;
-    float spotOuterAngle;
-};
-
-layout(set = 0, binding = 1) uniform MVPBufferObject {
+layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform MVPBufferObject {
 	mat4 model;
     bool identityCameraProj;
     bool identityCameraView;
@@ -27,7 +13,7 @@ layout(set = 0, binding = 1) uniform MVPBufferObject {
     vec4 padding[11];
 } mvpUBO;
 
-layout(set = 0, binding = 3) uniform UniformLightsBufferObject { 
+layout(set = 0, binding = UNIFROM_LIGHT_BINDING) uniform UniformLightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
 	vec4 mainCameraPos; 
 	int lightNum; //number of lights, max is LIGHT_MAX

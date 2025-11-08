@@ -1,6 +1,7 @@
 #version 450
+#include "constants.glsl"
 
-layout(set = 0, binding = 0) uniform GlobalBufferObject {
+layout(set = 0, binding = UNIFORM_GLOBAL_BINDING) uniform GlobalBufferObject {
 	mat4 mainCameraProj;
     mat4 mainCameraView;
     float tanHalfFovY;
@@ -8,7 +9,7 @@ layout(set = 0, binding = 0) uniform GlobalBufferObject {
     float padding[30];
 } globalUBO;
 
-layout(set = 0, binding = 2) uniform TextUniformBufferObject {
+layout(set = 0, binding = UNIFORM_TEXT_BINDING) uniform TextUniformBufferObject {
     mat4 model;
     bool identityCameraProj;
     bool identityCameraView;
