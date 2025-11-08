@@ -179,6 +179,12 @@ void GameEngine::Update(){
         mainCamera.SetTargetPosition(objects[mainCamera.focusObjectId].Position);
     mainCamera.update(deltaTime);
 
+    //global ubo must be uploaded after camera, and before object
+    GlobalUniformBufferObject globalUniformBufferObject{};
+    globalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
+    globalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
+    renderer->uploadGraphicsGlobalUniformBuffer(renderer->GetCurrentFrame(), &globalUniformBufferObject, sizeof(GlobalUniformBufferObject));
+
     for(int i = 0; i < lights.size(); i++){//lightCameras.size()
         if(lights.size() > 0 && lightCameras[i].focusObjectId < objects.size())
             lightCameras[i].SetTargetPosition(objects[lightCameras[i].focusObjectId].Position);

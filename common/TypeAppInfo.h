@@ -49,6 +49,7 @@ struct UniformConfig {
     bool b_uniform_graphics_text_mvp = false;
     bool b_uniform_graphics_object_vp = false;
     bool b_uniform_graphics_lighting = false;
+    bool b_uniform_graphics_global = false;
     bool b_uniform_graphics_depth_image_sampler = false;
     bool b_uniform_graphics_lightdepth_image_sampler = false;
     bool b_uniform_graphics_lightdepth_image_sampler_hardware = false;
@@ -76,6 +77,7 @@ struct UniformConfig {
         b_uniform_graphics_text_mvp                   = getOrDefault(node, "uniform_graphics_text_mvp", false);
         b_uniform_graphics_object_vp                         = getOrDefault(node, "uniform_graphics_object_vp", false);
         b_uniform_graphics_lighting                   = getOrDefault(node, "uniform_graphics_lighting", false);
+        b_uniform_graphics_global                   = getOrDefault(node, "uniform_graphics_global", false);
         b_uniform_graphics_depth_image_sampler        = getOrDefault(node, "uniform_graphics_depth_image_sampler", false);
         b_uniform_graphics_lightdepth_image_sampler   = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler", false);
         b_uniform_graphics_lightdepth_image_sampler_hardware = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler_hardware", false);

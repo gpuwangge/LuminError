@@ -15,7 +15,7 @@ struct LightAttribute{
     float spotOuterAngle;
 };
 
-layout(set = 0, binding = 2) uniform UniformLightsBufferObject { 
+layout(set = 0, binding = 3) uniform UniformLightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
 	vec4 mainCameraPos; 
 	int lightNum; //number of lights, max is LIGHT_MAX
@@ -24,7 +24,7 @@ layout(set = 0, binding = 2) uniform UniformLightsBufferObject {
 //layout (set = 0, binding = 3) uniform sampler2D depthSampler;//single sampled
 //layout (set = 0, binding = 3) uniform sampler2DMS depthSampler; //msaa, there is no use to this uniform in this shader
 //layout (set = 0, binding = 4) uniform sampler2DMS lightDepthSampler; //msaa
-layout (set = 0, binding = 3) uniform sampler2DShadow lightDepthSampler[LIGHT_MAX];
+layout (set = 0, binding = 4) uniform sampler2DShadow lightDepthSampler[LIGHT_MAX];
 
 layout (set = 1, binding = 0) uniform sampler2D texSampler;
 

@@ -343,12 +343,19 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
         // std::cout<< "TextBox ID: " << m_textBoxID << " TempMoveAngularVelocity: " << glm::to_string(TempMoveAngularVelocity) << std::endl;
         //std::cout<< "Delta Time: " << deltaTime << std::endl;
 
-        if(!bSticker){
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = mainCamera.matrices.projection;
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = mainCamera.matrices.view;
+        // if(!bSticker){
+        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = mainCamera.matrices.projection;
+        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = mainCamera.matrices.view;
+        // }else{
+        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = glm::mat4(1.0f);
+        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = glm::mat4(1.0f);
+        // }
+        if(bSticker){
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraProj = true;
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraView = true;
         }else{
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = glm::mat4(1.0f);
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = glm::mat4(1.0f);
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraProj = false;
+            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraView = false;
         }
 
         memcpy(CTextManager::textMVPUniformBuffersMapped[currentFrame], &CTextManager::textMVPUBO, sizeof(CTextManager::textMVPUBO));

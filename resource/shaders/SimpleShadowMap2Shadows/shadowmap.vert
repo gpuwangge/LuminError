@@ -19,22 +19,21 @@ struct LightAttribute{
     float spotOuterAngle;
 };
 
-layout(set = 0, binding = 2) uniform UniformLightsBufferObject { 
+layout(set = 0, binding = 1) uniform MVPBufferObject {
+    mat4 model;
+    bool identityCameraProj;
+    bool identityCameraView;
+    bool padding_bool[2];
+    vec4 padding[11];
+} mvpUBO;
+
+layout(set = 0, binding = 3) uniform UniformLightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
 	vec4 mainCameraPos; 
 	int lightNum; //number of lights, max is LIGHT_MAX
 } lightsUBO;
 
-layout(set = 0, binding = 0) uniform MVPBufferObject {
-	mat4 model;
-	mat4 mainCameraProj;
-	mat4 mainCameraView;
-	mat4 padding0;
-	mat4 padding1;
-	mat4 padding2;
-	mat4 padding3;
-	mat4 padding4;
-} mvpUBO;
+
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor; //not used

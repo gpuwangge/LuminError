@@ -7,6 +7,8 @@
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const int MIPMAP_TEXTURE_COUNT = 7;
 
+#define MVPSIZE 256
+
 //#define NDEBUG
 #ifdef NDEBUG
 const bool enableValidationLayers = false;

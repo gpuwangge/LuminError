@@ -446,21 +446,21 @@ void RendererCore::BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vec
     }
 
     if(bUseObjectMVP && bUseTextboxMVP && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[2] ={512 * dynamicObjectMVPOffset, 512 * dynamicTextboxMVPOffset};
+        uint32_t offsets[2] ={MVPSIZE * dynamicObjectMVPOffset, MVPSIZE * dynamicTextboxMVPOffset};
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             2, //dynamicOffsetCount. # means there is (exact)# uniforms in the descriptor sets that are set to be dynamic 
             offsets 
         );
     }else if (bUseObjectMVP && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[1] ={512 * dynamicObjectMVPOffset}; 
+        uint32_t offsets[1] ={MVPSIZE * dynamicObjectMVPOffset}; 
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             1,
             offsets 
         );
     }else if (bUseTextboxMVP && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[1] ={512 * dynamicTextboxMVPOffset}; 
+        uint32_t offsets[1] ={MVPSIZE * dynamicTextboxMVPOffset}; 
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             1,

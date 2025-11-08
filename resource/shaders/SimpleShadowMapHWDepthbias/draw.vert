@@ -1,16 +1,19 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform MVPBufferObject {
-	mat4 model;
+layout(set = 0, binding = 0) uniform GlobalBufferObject {
 	mat4 mainCameraProj;
-	//mat4 lightCameraProj;
-	mat4 mainCameraView;
-	//mat4 lightCameraView;
-	mat4 padding0;
-	mat4 padding1;
-	mat4 padding2;
-	mat4 padding3;
-	mat4 padding4;
+    mat4 mainCameraView;
+    float tanHalfFovY;
+    float aspect;
+    float padding[30];
+} globalUBO;
+
+layout(set = 0, binding = 1) uniform MVPBufferObject {
+    mat4 model;
+    bool identityCameraProj;
+    bool identityCameraView;
+    bool padding_bool[2];
+    vec4 padding[11];
 } mvpUBO;
 
 layout(location = 0) in vec3 inPosition;
@@ -33,7 +36,7 @@ layout (location = 3) out vec4 outPosWorld;
 // 	0.5, 0.5, 0.0, 1.0 );
 
 void main() {
-	gl_Position = mvpUBO.mainCameraProj * mvpUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
+	gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
 
 	outNormal = mat3(mvpUBO.model) * inNormal;
 	outColor = inColor;

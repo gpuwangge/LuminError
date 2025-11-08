@@ -1,25 +1,19 @@
 #version 450
 
-// layout(set = 0, binding = 0) uniform UniformBufferObject {
-// 	mat4 model;
-// 	mat4 mainCameraProj;
-// 	mat4 mainCameraView;
-// 	mat4 padding0;
-// 	mat4 padding1;
-// 	mat4 padding2;
-// 	mat4 padding3;
-// 	mat4 padding4; 
-// } mvpUBO;
-
-layout(set = 0, binding = 1) uniform TextUniformBufferObject {
-	mat4 model;
+layout(set = 0, binding = 0) uniform GlobalBufferObject {
 	mat4 mainCameraProj;
-	mat4 mainCameraView;
-	mat4 padding0;
-	mat4 padding1;
-	mat4 padding2;
-	mat4 padding3;
-	mat4 padding4; 
+    mat4 mainCameraView;
+    float tanHalfFovY;
+    float aspect;
+    float padding[30];
+} globalUBO;
+
+layout(set = 0, binding = 2) uniform TextUniformBufferObject {
+    mat4 model;
+    bool identityCameraProj;
+    bool identityCameraView;
+    bool padding_bool[2];
+    vec4 padding[11];
 } textMvpUBO;
 
 //legacy code: (vertex buffer layout without instance data)
@@ -42,7 +36,9 @@ layout(location = 1) out vec2 fragTexCoord;
 void main() {
    // gl_Position = mvpUBO.mainCameraProj * mvpUBO.mainCameraView * mvpUBO.model * vec4(inPosition+inOffset, 0.0, 1.0);
 
-	gl_Position = textMvpUBO.mainCameraProj * textMvpUBO.mainCameraView * textMvpUBO.model * vec4(inPosition * inScale + inOffset, 0.0, 1.0);
+	mat4 p = textMvpUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
+	mat4 v = textMvpUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
+	gl_Position = p * v * textMvpUBO.model * vec4(inPosition * inScale + inOffset, 0.0, 1.0);
 
     fragColor = inColor;
 

@@ -14,7 +14,8 @@ struct LightAttribute{
     float specularIntensity;
     float dimmerSwitch;
     float spotInnerAngle;
-    float spotOuterAngle;
+    float spotOuterAngle; //64×2 + 16×3 + 4×6 = 128 + 48 + 24 = 200 bytes
+    //alignas(4) float padding[14];            // TODO: need this padding 4×14 = 56 bytes
 };
 
 #define LIGHT_MAX 64

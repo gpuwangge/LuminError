@@ -31,14 +31,12 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
         //     std::cout<<ModelMatrix[3][0]<<","<<ModelMatrix[3][1]<<","<<ModelMatrix[3][2]<<","<<ModelMatrix[3][3]<<std::endl;
         }
 
-        //update view and perspective matrices to ubo
-        if(!bSticker){
-            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraProj = mainCamera.matrices.projection;
-            //if(bSkybox) CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(glm::mat3(mainCamera.matrices.view)); //update: remove translate in shader instead
-            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraView = mainCamera.matrices.view;
+        if(bSticker){
+            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraProj = true;
+            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraView = true;
         }else{
-            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraProj = glm::mat4(1.0f);
-            CObjectManager::mvpUBO.mvpData[m_object_id].mainCameraView = glm::mat4(1.0f);
+            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraProj = false;
+            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraView = false;
         }
 
         // std::cout<<"myUBO.mvpDATA["<<m_object_id<<"] lightCameraProj:"<<std::endl;
@@ -58,7 +56,7 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
         // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][3]<<std::endl;
         // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][3]<<std::endl;
         // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][3]<<std::endl;
-
+        
 
         //memcpy to GPU memory
         memcpy(CObjectManager::mvpUniformBuffersMapped[currentFrame], &CObjectManager::mvpUBO, sizeof(CObjectManager::mvpUBO));

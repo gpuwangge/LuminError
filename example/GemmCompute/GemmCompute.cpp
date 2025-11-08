@@ -103,7 +103,7 @@ namespace LuminError{
                     count++;
                     if(count % printDelta == 0){
                         float completeRate = (count * 100.0)/sampleNum ;
-                        GameEngine->LogContext("Completed: %f%%", completeRate);
+                        GameEngine->LogContext("Completed: {}%", completeRate);
                         std::cout<<"Completed: "<<completeRate<<"%"<<" (sampleNum="<<sampleNum<<", count="<<count<<")"<<std::endl;
                     }
                     

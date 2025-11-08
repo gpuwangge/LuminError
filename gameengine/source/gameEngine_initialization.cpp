@@ -89,6 +89,10 @@ void GameEngine::Initialize(){
         //renderer.bUseObjectMVP = true; //reuse MVP bool
         renderer->SetEnableObjectMVP(true);
     }
+    if(appInfo->Uniform.b_uniform_graphics_global){
+        renderer->addGlobalUniformBuffer();
+        //renderer->SetEnableObjectMVP(true);
+    }
     if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) renderer->addDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) renderer->addLightDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) renderer->addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
@@ -397,6 +401,8 @@ void GameEngine::Initialize(){
         if((type & GRAPHCIS_UNIFORMBUFFER_CUSTOM) || 
             (type & GRAPHCIS_UNIFORMBUFFER_LIGHTING) || 
             (type & GRAPHCIS_UNIFORMBUFFER_MVP) ||
+            (type & GRAPHCIS_UNIFORMBUFFER_TEXT_MVP) ||
+            (type & GRAPHCIS_UNIFORMBUFFER_GLOBAL) ||
             (type & GRAPHCIS_UNIFORMBUFFER_VP)){
             if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set0: graphics general layout"<<std::endl;
             dsLayouts.push_back(renderer->GetDescriptorSetLayout_General()); //set = 0

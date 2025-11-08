@@ -45,7 +45,16 @@ public:
     void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews);
 
     /************
-     * 1 GRAPHCIS_UNIFORMBUFFER_MVP
+     * 1 GRAPHCIS_UNIFORMBUFFER_GLOBAL
+     ************/
+    static std::vector<CWxjBuffer> m_globalUniformBuffers; 
+	static std::vector<void*> m_globalUniformBuffersMapped;
+    static VkDeviceSize m_globalUniformBufferSize;
+    void addGlobalUniformBuffer();
+    void uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
+
+    /************
+     * 2 GRAPHCIS_UNIFORMBUFFER_MVP (for object)
      ************/
     static std::vector<CWxjBuffer> mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 	//static std::vector<void*> mvpUniformBuffersMapped;
@@ -53,22 +62,13 @@ public:
     //static MVPUniformBufferObject mvpUBO;
 
     /************
-     * 2 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP
+     * 3 GRAPHCIS_UNIFORMBUFFER_TEXT_MVP (for textbox)
      ************/
     static std::vector<CWxjBuffer> textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
     void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped);
 
     /************
-     * 3 GRAPHCIS_UNIFORMBUFFER_CUSTOM
-     ************/
-    static std::vector<CWxjBuffer> customUniformBuffers; 
-	static std::vector<void*> customUniformBuffersMapped;
-    static VkDeviceSize m_customUniformBufferSize;
-    void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
-    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
-
-    /************
-     * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING
+     * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING (for light)
      ************/
     //static LightingUniformBufferObject m_lightingUBO;
     static std::vector<CWxjBuffer> m_lightingUniformBuffers; 
@@ -77,7 +77,16 @@ public:
     void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped);
 
     /************
-     * 5 GRAPHCIS_UNIFORMBUFFER_VP
+     * 5 GRAPHCIS_UNIFORMBUFFER_CUSTOM
+     ************/
+    static std::vector<CWxjBuffer> customUniformBuffers; 
+	static std::vector<void*> customUniformBuffersMapped;
+    static VkDeviceSize m_customUniformBufferSize;
+    void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
+    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
+
+    /************
+     * 5.5 GRAPHCIS_UNIFORMBUFFER_VP (temp)
      ************/
     static std::vector<CWxjBuffer> vpUniformBuffers; 
 	//static std::vector<void*> vpUniformBuffersMapped;
