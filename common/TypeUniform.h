@@ -25,12 +25,12 @@ struct GlobalUniformBufferObject {
     alignas(16) glm::mat4 mainCameraView; //16*4=64 bytes
     alignas(16) glm::mat4 mainCameraViewInverse; //16*4=64 bytes
     alignas(16) glm::mat4 mainCameraProj; //16*4=64 bytes
-    //alignas(16) glm::mat4 mainCameraProjInverse; //16*4=64 bytes
+    alignas(16) glm::mat4 mainCameraProjInverse; //16*4=64 bytes
     alignas(16) glm::vec3 mainCameraPos;       // 12 bytes，need 16 bytes alignment
     alignas(4) float tanHalfFovY;          // 4 bytes
     alignas(4) float aspect;               // 4 bytes
-    //alignas(4) float padding[58];          // 4 × 58 = 232 bytes
-    alignas(4) float padding[14];
+    alignas(4) float padding[58];          // 4 × 58 = 232 bytes
+    //alignas(4) float padding[14];
     // Sum: 64*4 + 16 + 4 + 4 + 232 = 512 bytes, the size is defined in Config.h
 
     static VkDescriptorSetLayoutBinding GetBinding(){

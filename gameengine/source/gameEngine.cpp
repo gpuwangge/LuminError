@@ -184,7 +184,7 @@ void GameEngine::Update(){
     globalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
     globalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
     globalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
-    //globalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
+    globalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
     globalUniformBufferObject.mainCameraPos = mainCamera.Position;
     globalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
     float fovY = glm::radians(mainCamera.fov);

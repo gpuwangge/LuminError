@@ -123,15 +123,14 @@ void main() {
     vec4 dir_clip = vec4(x_ndc, y_ndc, 0.0, 1.0); // 在裁剪空间
     // 逆投影变换到视图空间: 屏幕像素 → 裁剪空间 → 视图空间 → 世界空间
     // 步骤1：裁剪空间 → 视图空间（逆投影）
-    vec4 dir_view = inverse(globalUBO.mainCameraProj) * dir_clip;
+    vec4 dir_view = globalUBO.mainCameraProjInverse * dir_clip;
     dir_view = vec4(dir_view.xy, -1.0, 0.0); // 看向-Z
     // 变换到世界空间
     // 步骤2：视图空间 → 世界空间（逆视图变换） 
-    //vec4 dir_world = inverse(globalUBO.mainCameraView) * dir_view;
     vec4 dir_world = globalUBO.mainCameraViewInverse * dir_view;
     ray.dir = normalize(dir_world.xyz);
 
-    //优化版本：在host端求inverse view，以避免在shader中计算
+    //优化版???
     //vec4 dir_world = globalUBO.mainCameraViewInverse * vec4(x_ndc, y_ndc, 0.0, 1.0);
     //ray.dir = normalize(dir_world.xyz / dir_world.w - globalUBO.mainCameraPos);
     
