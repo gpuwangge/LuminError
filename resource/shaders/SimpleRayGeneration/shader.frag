@@ -88,32 +88,58 @@ void main() {
     
     vec2 screenSize = vec2(800.0, 800.0);
     // ----------------------------
-    // 1. 像素坐标转标准化坐标 (0..1)
-    // Vulkan 的 gl_FragCoord 原点在 framebuffer 下方
+    // 1. Pixel cord conver to NDC(0..1)
     vec2 uv = gl_FragCoord.xy / screenSize;
 
     // ----------------------------
-    // 2. 转换到 NDC [-1, 1]
+    // 2. Convert to NDC [-1, 1]
     float x_ndc = uv.x * 2.0 - 1.0;
     float y_ndc = uv.y * 2.0 - 1.0;
 
     // ----------------------------
-    // 3. 投影到相机平面 (camera space)
-    // 这里假设相机朝 Z正方向
+    // 3. Project to camera space
     vec3 dir_cam = normalize(vec3(
         x_ndc * globalUBO.aspect * globalUBO.tanHalfFovY,
         y_ndc * globalUBO.tanHalfFovY,
-        1.0 //!not -1
+        1.0 //!not -1, because we want camera to look positive z direction
     ));
 
     // ----------------------------
-    // 4. 转换到 world space
+    // 4. Convert to world space
     Ray ray;
-    ray.dir = normalize((globalUBO.mainCameraModel * vec4(dir_cam, 0.0)).xyz);
-    ray.origin = vec3(globalUBO.mainCameraModel[3]);
+
+    //wrong
+    //ray.dir = normalize((globalUBO.mainCameraModel * vec4(dir_cam, 0.0)).xyz);
+
+    //假设 mainCameraModel 只包含旋转，但实际上它可能包含非均匀缩放或其他变换，导致方向失真。
+    //mat3 cameraRotation = mat3(globalUBO.mainCameraModel);
+    //ray.dir = normalize(cameraRotation * dir_cam);
+
+    //问题：这只在视图矩阵是纯旋转矩阵时才正确，但实际上视图矩阵包含从世界空间到相机空间的完整变换。
+    //mat3 viewRotation = mat3(globalUBO.mainCameraView);
+    //ray.dir = normalize((viewRotation) * dir_cam);
+
+    //可以运行的版本
+    vec4 dir_clip = vec4(x_ndc, y_ndc, 0.0, 1.0); // 在裁剪空间
+    // 逆投影变换到视图空间: 屏幕像素 → 裁剪空间 → 视图空间 → 世界空间
+    // 步骤1：裁剪空间 → 视图空间（逆投影）
+    vec4 dir_view = inverse(globalUBO.mainCameraProj) * dir_clip;
+    dir_view = vec4(dir_view.xy, -1.0, 0.0); // 看向-Z
+    // 变换到世界空间
+    // 步骤2：视图空间 → 世界空间（逆视图变换） 
+    //vec4 dir_world = inverse(globalUBO.mainCameraView) * dir_view;
+    vec4 dir_world = globalUBO.mainCameraViewInverse * dir_view;
+    ray.dir = normalize(dir_world.xyz);
+
+    //优化版本：在host端求inverse view，以避免在shader中计算
+    //vec4 dir_world = globalUBO.mainCameraViewInverse * vec4(x_ndc, y_ndc, 0.0, 1.0);
+    //ray.dir = normalize(dir_world.xyz / dir_world.w - globalUBO.mainCameraPos);
+    
+    ray.origin = globalUBO.mainCameraPos;
+    //ray.origin = vec3(globalUBO.mainCameraModel[3]); //an alternative to get camera pos
 
     // ----------------------------
-    // 5. 可视化输出：根据射线方向上色（调试用）
+    // 5. Output
     //vec3 color = 0.5 * (rayDir + vec3(1.0));
     //vec3 color = ray.dir;
     Sphere sphere0;
@@ -127,104 +153,4 @@ void main() {
     else color = vec3(0.7, 0.7, 0.7); // background
     
     outColor = vec4(color, 1.0);
-
-    //test1
-    // 直接在屏幕空间画圆，不依赖任何坐标系
-    // vec2 pixelCoord = gl_FragCoord.xy;
-    // vec2 screenCenter = vec2(400.0, 400.0); // 假设800x800屏幕
-    
-    // float dst = length(pixelCoord - screenCenter);
-    
-    // if (dst < 200.0) { // 半径为200像素的圆
-    //     outColor = vec4(1.0, 0.0, 0.0, 1.0); // 红色圆
-    // } else {
-    //     outColor = vec4(0.0, 0.0, 1.0, 1.0); // 蓝色背景
-    // }
-
-    //test2
-    // vec2 pixelCoord = gl_FragCoord.xy;
-    
-    // // 将屏幕分成4个区域，分别显示不同颜色
-    // if (pixelCoord.x < 400.0 && pixelCoord.y < 400.0) {
-    //     outColor = vec4(1.0, 0.0, 0.0, 1.0); // 左下：红
-    // } else if (pixelCoord.x >= 400.0 && pixelCoord.y < 400.0) {
-    //     outColor = vec4(0.0, 1.0, 0.0, 1.0); // 右下：绿
-    // } else if (pixelCoord.x < 400.0 && pixelCoord.y >= 400.0) {
-    //     outColor = vec4(0.0, 0.0, 1.0, 1.0); // 左上：蓝
-    // } else {
-    //     outColor = vec4(1.0, 1.0, 0.0, 1.0); // 右上：黄
-    // }
-
-    //test3
-    // uv = gl_FragCoord.xy / vec2(800.0, 800.0);
-    // vec2 ndc = (uv * 2.0 - 1.0);
-    
-    // // 只测试屏幕中心的一条光线
-    // if (length(ndc) < 0.1) { // 屏幕中心小区域
-    //     //Ray ray;
-    //     ray.origin = vec3(0.0, 0.0, 0.0);
-    //     ray.dir = vec3(0.0, 0.0, 1.0); // 直接看向正前方
-        
-    //     Sphere sphere;
-    //     sphere.radius = 0.5;
-    //     sphere.position = vec3(0.0, 0.0, 2.0);
-        
-    //     HitInfo hit = RaySphere(ray, sphere);
-        
-    //     if (hit.didHit) {
-    //         outColor = vec4(1.0, 0.0, 0.0, 1.0); // 中心命中：红色
-    //     } else {
-    //         outColor = vec4(0.0, 1.0, 0.0, 1.0); // 中心未命中：绿色
-    //     }
-    // } else {
-    //     outColor = vec4(0.0, 0.0, 1.0, 1.0); // 其他区域：蓝色
-    // }
-
-    //test4
-    // uv = gl_FragCoord.xy / vec2(800.0, 800.0);
-    // vec2 ndc = (uv * 2.0 - 1.0);
-    
-    // //ray.origin = vec3(0.0, 0.0, 0.0);
-    // //ray.dir = normalize(vec3(ndc.x, ndc.y, 1.0));
-    // ray.origin = vec3(0, 0, -3.0);
-    // ray.dir = normalize((globalUBO.mainCameraModel * vec4(dir_cam, 0.0)).xyz);
-    
-    // Sphere sphere;
-    // sphere.radius = 0.5;
-    // sphere.position = vec3(0.0, 0.0, 2.0); // 球在Z=2的位置
-    
-    // HitInfo hit = RaySphere(ray, sphere);
-    
-    // if (hit.didHit) {
-    //     // 命中：用法向量着色
-    //     outColor = vec4(0.5 * (hit.normal + vec3(1.0)), 1.0);
-    // } else {
-    //     outColor = vec4(0.0, 0.0, 0.3, 1.0); // 未命中：深蓝
-    // }
-
-    //test5
-    //  uv = gl_FragCoord.xy / vec2(800.0, 800.0);
-    // vec2 ndc = (uv * 2.0 - 1.0);
-    
-    //  ray;
-    // ray.origin = vec3(0.0, 0.0, 0.0);
-    // ray.dir = normalize(vec3(ndc.x, ndc.y, 1.0));
-    
-    // Sphere sphere;
-    // sphere.radius = 0.5;
-    // sphere.position = vec3(0.0, 0.0, 2.0);
-    
-    // // 直接计算，不调用函数
-    // vec3 oc = ray.origin - sphere.position;
-    // float a = dot(ray.dir, ray.dir);
-    // float b = 2.0 * dot(oc, ray.dir);
-    // float c = dot(oc, oc) - sphere.radius * sphere.radius;
-    // float discriminant = b * b - 4.0 * a * c;
-    
-    // // 调试输出
-    // if (discriminant > 0.0) {
-    //     outColor = vec4(1.0, 0.0, 0.0, 1.0); // 有解：红色
-    // } else {
-    //     outColor = vec4(0.0, 1.0, 0.0, 1.0); // 无解：绿色
-    // }
 }

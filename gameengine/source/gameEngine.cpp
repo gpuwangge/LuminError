@@ -181,9 +181,11 @@ void GameEngine::Update(){
 
     //global ubo must be uploaded after camera, and before object
     GlobalUniformBufferObject globalUniformBufferObject{};
-    globalUniformBufferObject.mainCameraModel = mainCamera.ModelMatrix;
     globalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
+    globalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
     globalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
+    //globalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
+    globalUniformBufferObject.mainCameraPos = mainCamera.Position;
     globalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
     float fovY = glm::radians(mainCamera.fov);
     globalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
