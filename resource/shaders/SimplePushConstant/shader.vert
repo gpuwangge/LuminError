@@ -1,10 +1,5 @@
 #version 450
 
-//layout(set = 0, binding = 0) uniform UniformBufferObject {
-//    mat4 view;
-//    mat4 proj;
-//} vpUBO;
-
 //The maximum push constant per shader is 128b~256b. One 4x4 matrix takes 4x4x4=64 bytes
 layout(push_constant) uniform PushConstant{
     mat4 model;

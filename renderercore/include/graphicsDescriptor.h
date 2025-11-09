@@ -84,14 +84,6 @@ public:
     void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
-     * 5.5 GRAPHCIS_UNIFORMBUFFER_VP (temp)
-     ************/
-    //static std::vector<CWxjBuffer> vpUniformBuffers; 
-	//static std::vector<void*> vpUniformBuffersMapped;
-    //void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped);
-    //static VPUniformBufferObject vpUBO;
-
-    /************
      * 6 GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE
      ************/
     static unsigned int textureImageSamplerSize;

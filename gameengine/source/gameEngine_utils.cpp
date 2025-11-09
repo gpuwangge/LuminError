@@ -134,7 +134,7 @@ void GameEngine::CleanUp(){
     *   vkDestroyDescriptorPool
     *   vkDestroyDescriptorSetLayout
     * 
-    * For buffers(objectUniformBuffers, textUniformBuffers, customUniformBuffers, vpUniformBuffers, m_lightingUniformBuffers)
+    * For buffers(objectUniformBuffers, textUniformBuffers, customUniformBuffers, m_lightingUniformBuffers)
     *   vkDestroyBuffer
     *   vkFreeMemory 
     ********************/

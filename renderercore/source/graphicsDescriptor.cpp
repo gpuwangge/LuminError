@@ -153,19 +153,9 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].stageFlags = customBinding->stageFlags;
 		bindingCounter++;
 	}//std::cout<<"!";
-    
-    // if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
-    //     VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
-    //     graphicsBindings[bindingCounter].binding = bindingCounter;
-	// 	graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
-	// 	graphicsBindings[bindingCounter].descriptorType = binding.descriptorType;
-	// 	graphicsBindings[bindingCounter].pImmutableSamplers = binding.pImmutableSamplers;
-	// 	graphicsBindings[bindingCounter].stageFlags = binding.stageFlags;
-	// 	bindingCounter++;
-    // }
+
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        //VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = 1;
 		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -175,7 +165,6 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        //VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = 1;
 		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -185,7 +174,6 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS){
         //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        //VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = LIGHT_MAX;
 		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -193,17 +181,6 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindingCounter++;
     }//std::cout<<"!";
-    /*
-    if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2){
-        //std::cout<<"createDescriptorSetLayout_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
-        VkDescriptorSetLayoutBinding binding = VPUniformBufferObject::GetBinding();
-        graphicsBindings[bindingCounter].binding = bindingCounter;
-		graphicsBindings[bindingCounter].descriptorCount = 1;
-		graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
-		graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		bindingCounter++;
-    }*/
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -347,20 +324,6 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             counter++;
         }
         
-        // VkDescriptorBufferInfo vpBufferInfo{}; //for vp
-        // if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP){
-        //     vpBufferInfo.buffer = vpUniformBuffers[i].buffer;
-        //     vpBufferInfo.offset = 0;
-        //     vpBufferInfo.range = sizeof(VPUniformBufferObject);
-        //     descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        //     descriptorWrites[counter].dstSet = descriptorSets_general[i];
-        //     descriptorWrites[counter].dstBinding = counter;
-        //     descriptorWrites[counter].dstArrayElement = 0;
-        //     descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        //     descriptorWrites[counter].descriptorCount = 1;
-        //     descriptorWrites[counter].pBufferInfo = &vpBufferInfo;
-        //     counter++;
-        // }
         VkDescriptorImageInfo depthImageInfo{}; //for depth sampler
         if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE){
             //std::cout<<"createDescriptorSets_General():GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE"<<std::endl;
@@ -798,9 +761,6 @@ void CGraphicsDescriptorManager::DestroyAndFree(){
 
     for (size_t i = 0; i < customUniformBuffers.size(); i++) 
         customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
-
-    // for (size_t i = 0; i < vpUniformBuffers.size(); i++) 
-    //     vpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     
     for (size_t i = 0; i < m_lightingUniformBuffers.size(); i++) 
         m_lightingUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
