@@ -12,7 +12,7 @@ layout (set = 0, binding = 4) uniform sampler2DMS depthSampler; //msaa, there is
 //layout (set = 0, binding = 4) uniform sampler2DMS lightDepthSampler; //msaa
 layout (set = 0, binding = 5) uniform sampler2DShadow lightDepthSampler[LIGHT_MAX];
 
-layout (set = 1, binding = 0) uniform sampler2D texSampler;
+layout (set = 1, binding = UNIFORM_TEXTURE_SAMPLER_BINDING) uniform sampler2D texSampler;
 
 layout (location = 0) in vec3 inNormal;
 layout (location = 1) in vec3 inColor; //inColor is not used here
@@ -21,7 +21,7 @@ layout (location = 3) in vec4 inPosWorld;
 
 //layout (location = 4) in vec4 inFragPosLightSpace;
 
-layout (location = UNIFORM_TEXTURE_SAMPLER_BINDING) out vec4 outColor;
+layout (location = 0) out vec4 outColor;
 
 //Normal Shadow: hard shadows
 //PCF: fixed fiter size, soft shadow, slow

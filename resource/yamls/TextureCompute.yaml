@@ -21,7 +21,8 @@ Features:
   feature_graphics_global_blend: false
   feature_graphics_rainbow_mipmap: false
   feature_graphics_observe_attachment_id: -1
-  feature_graphics_fps: false
+  feature_graphics_show_performance_control: false
+  feature_graphics_show_all_metric_controls: false
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
@@ -35,18 +36,6 @@ Subpasses:
   mainsceneRenderpass_subpasses_shadowmap: false
   mainsceneRenderpass_subpasses_draw: true
   mainsceneRenderpass_subpasses_observe: false
-MainCamera:
-  camera_mode: 0
-  camera_position: [0,0,-3]
-  camera_rotation: [0,0,0]
-  object_id_target: 0
-  camera_z: [0.1, 256]
-  camera_projection_enable_orthographic: false
-  camera_projection_perspective_fov: 90
-  camera_projection_orthographic_width: 8
-  camera_projection_orthographic_height: 8
-  camera_keyboard_sensitive: 3
-  camera_mouse_sensitive: 60
 
 
 
