@@ -1,11 +1,6 @@
 #version 450
 #include "../Common/constants.glsl"
-
-layout(set = 0, binding = UNIFROM_LIGHT_BINDING) uniform lightsBufferObject { 
-	LightAttribute lights[LIGHT_MAX];
-	vec4 mainCameraPos; 
-	int lightNum; //number of lights, max is LIGHT_MAX
-} lightsUBO;
+#include "../Common/lightsUBO.glsl"
 
 layout (set = 1, binding = UNIFORM_TEXTURE_SAMPLER_BINDING) uniform sampler2D texSampler;
 

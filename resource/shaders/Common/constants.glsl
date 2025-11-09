@@ -20,19 +20,4 @@ const int UNIFROM_LIGHT_BINDING = 3;
 const int UNIFORM_TEXTURE_SAMPLER_BINDING = 0;
 
 
-struct LightAttribute{
-	mat4 lightCameraProj;
-    mat4 lightCameraView;
-	vec4 lightPos;
-	vec4 lightDir;
-    vec4 lightColor; //RGBA
-	float ambientIntensity;
-	float diffuseIntensity;
-	float specularIntensity;
-	float dimmerSwitch;
-	float spotInnerAngle;
-    float spotOuterAngle;
-};
-
-
 #endif

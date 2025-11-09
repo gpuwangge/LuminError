@@ -1,5 +1,6 @@
 #version 450
 #include "../Common/constants.glsl"
+#include "../Common/lightsUBO.glsl"
 
 layout(push_constant) uniform PushConstant{
     int value; //the index of shadowmap renderpass
@@ -12,12 +13,6 @@ layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform StructObjectBuffer {
     bool padding_bool[2];
     vec4 padding[11];
 } objectUBO;
-
-layout(set = 0, binding = UNIFROM_LIGHT_BINDING) uniform UniformLightsBufferObject { 
-	LightAttribute lights[LIGHT_MAX];
-	vec4 mainCameraPos; 
-	int lightNum; //number of lights, max is LIGHT_MAX
-} lightsUBO;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor; //not used
