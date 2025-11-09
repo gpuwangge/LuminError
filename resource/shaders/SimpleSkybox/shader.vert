@@ -1,14 +1,7 @@
 #version 450
 #include "../Common/constants.glsl"
+#include "../Common/objectUBO.glsl"
 #include "../Common/globalUBO.glsl"
-
-layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform UniformBufferObject {
-    mat4 model;
-    bool identityCameraProj;
-    bool identityCameraView;
-    bool padding_bool[2];
-    vec4 padding[11];
-} objectUBO;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor; //no use
