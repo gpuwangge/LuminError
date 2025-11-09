@@ -88,22 +88,6 @@ public:
     ~StructTextUniformBuffer(){}
 };
 
-// struct VPUniformBufferObject {
-// 	//alignas(16) glm::mat4 model;
-// 	alignas(16) glm::mat4 view;
-// 	alignas(16) glm::mat4 proj;
-
-//     static VkDescriptorSetLayoutBinding GetBinding(){
-//         VkDescriptorSetLayoutBinding binding;
-//         binding.binding = 0;
-// 		binding.descriptorCount = 1;
-// 		binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-// 		binding.pImmutableSamplers = nullptr;
-// 		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-//         return binding;
-//     }
-// };
-
 struct ModelPushConstants{
     glm::mat4 model;
 };

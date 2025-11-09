@@ -8,7 +8,7 @@ Objects:
     object_angular_velocity: [0,0,0]
     resource_model_id: 2
     resource_texture_id_list: [1]
-    resource_default_graphics_pipeline_id: 0
+    resource_default_graphics_pipeline_id: 2
 
 Resources:
   - Fonts:
@@ -31,20 +31,20 @@ Resources:
       resource_texture_cubemap: false
       uniform_sampler_id: 0
   - Pipelines:
-    #- resource_graphics_pipeline_name: textboxImagePipeline
-    #  resource_graphics_pipeline_vertexshader_name: Common/textboxImage.vert.spv
-    #  resource_graphics_pipeline_fragmentshader_name: Common/textboxImage.frag.spv
-    #  resource_graphics_pipeline_vertexdatatype: 2  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
-    #  resource_graphics_pipeline_blend_enable: true
-    #  resource_graphics_pipeline_depth_test_enable: true
-    #  resource_graphics_pipeline_depth_write_enable: false
-    #- resource_graphics_pipeline_name: textQuadPipeline
-    #  resource_graphics_pipeline_vertexshader_name: Common/textQuad.vert.spv
-    #  resource_graphics_pipeline_fragmentshader_name: Common/textQuad.frag.spv
-    #  resource_graphics_pipeline_vertexdatatype: 4  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
-    #  resource_graphics_pipeline_blend_enable: true
-    #  resource_graphics_pipeline_depth_test_enable: true
-    #  resource_graphics_pipeline_depth_write_enable: false
+    - resource_graphics_pipeline_name: textboxImagePipeline
+      resource_graphics_pipeline_vertexshader_name: Common/textboxImage.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: Common/textboxImage.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 2  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
+    - resource_graphics_pipeline_name: textQuadPipeline
+      resource_graphics_pipeline_vertexshader_name: Common/textQuad.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: Common/textQuad.frag.spv
+      resource_graphics_pipeline_vertexdatatype: 4  #NoType,TwoDimension,ThreeDimension,ParticleType,TextQuad
+      resource_graphics_pipeline_blend_enable: true
+      resource_graphics_pipeline_depth_test_enable: true
+      resource_graphics_pipeline_depth_write_enable: false
     - resource_graphics_pipeline_name: pipeline
       resource_graphics_pipeline_vertexshader_name: simplePushConstant/shader.vert.spv
       resource_graphics_pipeline_fragmentshader_name: simplePushConstant/shader.frag.spv
@@ -52,9 +52,9 @@ Resources:
 Uniforms:
   Graphics:
     uniform_graphics_name: Graphics
-    uniform_graphics_global: false
+    uniform_graphics_global: true
     uniform_graphics_object_dynamic: true
-    uniform_graphics_text_dynamic: false
+    uniform_graphics_text_dynamic: true
     uniform_graphics_lighting: false
     uniform_graphics_custom: false
     uniform_graphics_depth_image_sampler: false
@@ -72,11 +72,11 @@ Uniforms:
 Features:
   feature_graphics_48pbt: false
   feature_graphics_push_constant: true
-  feature_graphics_global_blend: false
+  feature_graphics_global_blend: true
   feature_graphics_rainbow_mipmap: false
   feature_graphics_observe_attachment_id: -1
-  feature_graphics_show_performance_control: false
-  feature_graphics_show_all_metric_controls: false
+  feature_graphics_show_performance_control: true
+  feature_graphics_show_all_metric_controls: true
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
