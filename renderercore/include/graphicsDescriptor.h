@@ -56,15 +56,13 @@ public:
     /************
      * 2 GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC (for object)
      ************/
-    static std::vector<CWxjBuffer> objectUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-	//static std::vector<void*> mvpUniformBuffersMapped;
+    static std::vector<CWxjBuffer> objectUniformBuffers; //need one object buffer for each host resource: MAX_FRAMES_IN_FLIGHT
     void addObjectUniformBuffer(std::vector<void*>& objectUBMapped);
-    //static MVPUniformBufferObject objectUBO;
 
     /************
      * 3 GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC (for textbox)
      ************/
-    static std::vector<CWxjBuffer> textUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
+    static std::vector<CWxjBuffer> textUniformBuffers; //need one text buffer for each host resource: MAX_FRAMES_IN_FLIGHT
     void addTextUniformBuffer(std::vector<void*>& textUBMapped);
 
     /************
@@ -92,7 +90,6 @@ public:
 	//static std::vector<void*> vpUniformBuffersMapped;
     //void addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped);
     //static VPUniformBufferObject vpUBO;
-    //static bool CheckMVP(); //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
 
     /************
      * 6 GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE

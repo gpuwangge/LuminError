@@ -9,7 +9,7 @@ layout(set = 0, binding = UNIFORM_GLOBAL_BINDING) uniform GlobalBufferObject {
     float padding[30];
 } globalUBO;
 
-layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform MVPBufferObject {
+layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform StructObjectBuffer {
 	mat4 model;
     bool identityCameraProj;
     bool identityCameraView;

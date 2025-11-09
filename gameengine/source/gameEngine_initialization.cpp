@@ -74,22 +74,16 @@ void GameEngine::Initialize(){
     ****************************/
     if(appInfo->Uniform.b_uniform_graphics_custom) renderer->addGraphicsCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
     if(appInfo->Uniform.b_uniform_graphics_lighting) renderer->addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
-    if(appInfo->Uniform.b_uniform_graphics_object_mvp){
+    if(appInfo->Uniform.b_uniform_graphics_object_dynamic){
         renderer->AddObjectUniformBuffer(CObjectManager::objectUBMapped);
         renderer->SetEnableObject(true);
     }
-    if(appInfo->Uniform.b_uniform_graphics_text_mvp){
+    if(appInfo->Uniform.b_uniform_graphics_text_dynamic){
         renderer->AddTextUniformBuffer(CTextManager::textUBMapped);
         renderer->SetEnableText(true);
     }   
-    //if(appInfo->Uniform.b_uniform_graphics_object_vp){
-    //    renderer->addVPUniformBuffer(CObjectManager::vpUniformBuffersMapped);
-        //renderer.bUseObjectMVP = true; //reuse MVP bool
-        //renderer->SetEnableObjectMVP(true);
-    //}
     if(appInfo->Uniform.b_uniform_graphics_global){
         renderer->addGlobalUniformBuffer();
-        //renderer->SetEnableObjectMVP(true);
     }
     if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) renderer->addDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) renderer->addLightDepthImageSamplerUniformBuffer();
@@ -319,7 +313,7 @@ void GameEngine::Initialize(){
     /****************************
     * 8 Create Uniform Descriptors
     ****************************/
-    bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_mvp || appInfo->Uniform.b_uniform_graphics_text_mvp || appInfo->Uniform.b_uniform_graphics_global;
+    bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_dynamic || appInfo->Uniform.b_uniform_graphics_text_dynamic || appInfo->Uniform.b_uniform_graphics_global;
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_uniform_compute_storage || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     //UNIFORM STEP 1/3 (Pool)
     renderer->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler

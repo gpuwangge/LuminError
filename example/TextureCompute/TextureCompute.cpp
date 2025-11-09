@@ -5,7 +5,6 @@
  * textureCompute: read texture image, make changes(use compute shader to do blur effect), and write to texture image, and show to swapchain
  * This test use graphics pipeline but does not draw anything with it, because result is drawn directly to swap chain
  * The reason for graphics pipeline is to load texture to texture image
- * but why mvp? why color attachment?
  * no need bind graphics pipeline?
  * TODO: improve this sample, there is still something unknown for this test; something can be simplified
  * A texture image is presented on the screen. Image is blured. char is blue/white. background is yellow.

@@ -26,13 +26,11 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
         counter++;
     }
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){
-        //std::cout<<": MVP";
         graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
-        //std::cout<<": Text MVP";
         graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
@@ -121,7 +119,6 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     }
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){
         VkDescriptorSetLayoutBinding binding = StructObjectUniformBuffer::GetBinding();
-        //std::cout<<"DEBUG: MVP Layout binding="<<counter<<std::endl;
         graphicsBindings[bindingCounter].binding = bindingCounter;
         graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
         graphicsBindings[bindingCounter].descriptorType = binding.descriptorType;
@@ -131,7 +128,6 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
         VkDescriptorSetLayoutBinding binding = StructTextUniformBuffer::GetBinding();
-        //std::cout<<"DEBUG: MVP Layout binding="<<counter<<std::endl;
         graphicsBindings[bindingCounter].binding = bindingCounter;
         graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
         graphicsBindings[bindingCounter].descriptorType = binding.descriptorType;
@@ -292,36 +288,34 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             descriptorWrites[counter].pBufferInfo = &globalBufferInfo;
             counter++;
         }
-        VkDescriptorBufferInfo mvpBufferInfo{}; //for mvp
+        VkDescriptorBufferInfo objectBufferInfo{}; //for object
         if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){ //TODO: Getbinding
-            mvpBufferInfo.buffer = objectUniformBuffers[i].buffer;
-            mvpBufferInfo.offset = 0;
-            //sizeof(MVPUniformBufferObject) is MVPSIZE, including 2 mvp matrices. We only use one at a time.
+            objectBufferInfo.buffer = objectUniformBuffers[i].buffer;
+            objectBufferInfo.offset = 0;
             //spec requires alighment to be multiple of 256 (1080 TI). Maybe change this later?
-            mvpBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
+            objectBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
             descriptorWrites[counter].dstArrayElement = 0;
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             descriptorWrites[counter].descriptorCount = 1;
-            descriptorWrites[counter].pBufferInfo = &mvpBufferInfo;
+            descriptorWrites[counter].pBufferInfo = &objectBufferInfo;
             counter++;
         }
-        VkDescriptorBufferInfo textMVPBufferInfo{}; //for text mvp
+        VkDescriptorBufferInfo textBufferInfo{}; //for text
         if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){ //TODO: Getbinding
-            textMVPBufferInfo.buffer = textUniformBuffers[i].buffer;
-            textMVPBufferInfo.offset = 0;
-            //sizeof(MVPUniformBufferObject) is MVPSIZE, including 2 mvp matrices. We only use one at a time.
+            textBufferInfo.buffer = textUniformBuffers[i].buffer;
+            textBufferInfo.offset = 0;
             //spec requires alighment to be multiple of 256 (1080 TI). Maybe change this later?
-            textMVPBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
+            textBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
             descriptorWrites[counter].dstArrayElement = 0;
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             descriptorWrites[counter].descriptorCount = 1;
-            descriptorWrites[counter].pBufferInfo = &textMVPBufferInfo;
+            descriptorWrites[counter].pBufferInfo = &textBufferInfo;
             counter++;
         }
         VkDescriptorBufferInfo lightingBufferInfo{}; //for lighting uniform
@@ -473,12 +467,9 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
 /************
 * 1 GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC
 ************/
-std::vector<CWxjBuffer> CGraphicsDescriptorManager::objectUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-//std::vector<void*> CGraphicsDescriptorManager::mvpUniformBuffersMapped;
-//MVPUniformBufferObject CGraphicsDescriptorManager::objectUBO;
+std::vector<CWxjBuffer> CGraphicsDescriptorManager::objectUniformBuffers; //need one buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 void CGraphicsDescriptorManager::addObjectUniformBuffer(std::vector<void*>& objectUBMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC;
-    //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
     objectUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     objectUBMapped.resize(MAX_FRAMES_IN_FLIGHT);
@@ -492,12 +483,9 @@ void CGraphicsDescriptorManager::addObjectUniformBuffer(std::vector<void*>& obje
 /************
 * 2 GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC
 ************/
-std::vector<CWxjBuffer> CGraphicsDescriptorManager::textUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-//std::vector<void*> CGraphicsDescriptorManager::textMVPUniformBuffersMapped;
-//TextMVPUniformBufferObject CGraphicsDescriptorManager::textobjectUBO;
+std::vector<CWxjBuffer> CGraphicsDescriptorManager::textUniformBuffers; //need one buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 void CGraphicsDescriptorManager::addTextUniformBuffer(std::vector<void*>& textUBMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC;
-    //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
     textUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     textUBMapped.resize(MAX_FRAMES_IN_FLIGHT);
@@ -586,28 +574,6 @@ void CGraphicsDescriptorManager::uploadGlobalUniformBuffer(uint32_t currentFrame
         }
     }
 }
-
-/************
-* X5 GRAPHCIS_UNIFORMBUFFER_VP
-************/
-// std::vector<CWxjBuffer> CGraphicsDescriptorManager::vpUniformBuffers; 
-// void CGraphicsDescriptorManager::addVPUniformBuffer(std::vector<void*>& vpUniformBuffersMapped){
-//     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_VP;
-
-//     vpUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-//     vpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
-
-//     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-//         VkResult result = vpUniformBuffers[i].init(sizeof(VPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-//         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), vpUniformBuffers[i].deviceMemory, 0, sizeof(VPUniformBufferObject), 0, &vpUniformBuffersMapped[i]);
-//     }
-// }
-// bool CGraphicsDescriptorManager::CheckMVP(){ //to check if all objects associate this graphcis descriptor use MVP/VP or not. If return true, means it will use dynamic descriptor offset
-//     return ((graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC) 
-//         || (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC)
-//         || (graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_VP));
-// }
-
 
 /************
 * 6 GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE

@@ -45,11 +45,11 @@ struct FeatureConfig {
 
 struct UniformConfig {
     bool b_uniform_graphics_global = false;
-    bool b_uniform_graphics_object_mvp = false;
-    bool b_uniform_graphics_text_mvp = false;
+    bool b_uniform_graphics_object_dynamic = false;
+    bool b_uniform_graphics_text_dynamic = false;
     bool b_uniform_graphics_lighting = false;
     bool b_uniform_graphics_custom = false;
-    //bool b_uniform_graphics_object_vp = false;
+    //bool b_uniform_graphics_object_dynamic_vp = false;
     bool b_uniform_graphics_depth_image_sampler = false;
     bool b_uniform_graphics_lightdepth_image_sampler = false;
     bool b_uniform_graphics_lightdepth_image_sampler_hardware = false;
@@ -73,19 +73,19 @@ struct UniformConfig {
 
     void loadGraphicsFromYaml(const YAML::Node& node) {
         b_uniform_graphics_global                   = getOrDefault(node, "uniform_graphics_global", false);
-        b_uniform_graphics_object_mvp                        = getOrDefault(node, "uniform_graphics_object_mvp", false);
-        b_uniform_graphics_text_mvp                   = getOrDefault(node, "uniform_graphics_text_mvp", false);
+        b_uniform_graphics_object_dynamic                        = getOrDefault(node, "uniform_graphics_object_dynamic", false);
+        b_uniform_graphics_text_dynamic                   = getOrDefault(node, "uniform_graphics_text_dynamic", false);
         b_uniform_graphics_lighting                   = getOrDefault(node, "uniform_graphics_lighting", false);
         b_uniform_graphics_custom                     = getOrDefault(node, "uniform_graphics_custom", false);
-        //b_uniform_graphics_object_vp                         = getOrDefault(node, "uniform_graphics_object_vp", false);
+        //b_uniform_graphics_object_dynamic_vp                         = getOrDefault(node, "uniform_graphics_object_dynamic_vp", false);
         b_uniform_graphics_depth_image_sampler        = getOrDefault(node, "uniform_graphics_depth_image_sampler", false);
         b_uniform_graphics_lightdepth_image_sampler   = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler", false);
         b_uniform_graphics_lightdepth_image_sampler_hardware = getOrDefault(node, "uniform_graphics_lightdepth_image_sampler_hardware", false);
 
         // std::cout<<"b_uniform_graphics_custom "<<b_uniform_graphics_custom<<std::endl;
-        // std::cout<<"b_uniform_graphics_object_mvp "<<b_uniform_graphics_object_mvp<<std::endl;
-        // std::cout<<"b_uniform_graphics_text_mvp "<<b_uniform_graphics_text_mvp<<std::endl;
-        // std::cout<<"b_uniform_graphics_object_vp "<<b_uniform_graphics_object_vp<<std::endl;
+        // std::cout<<"b_uniform_graphics_object_dynamic "<<b_uniform_graphics_object_dynamic<<std::endl;
+        // std::cout<<"b_uniform_graphics_text_dynamic "<<b_uniform_graphics_text_dynamic<<std::endl;
+        // std::cout<<"b_uniform_graphics_object_dynamic_vp "<<b_uniform_graphics_object_dynamic_vp<<std::endl;
         // std::cout<<"b_uniform_graphics_lighting "<<b_uniform_graphics_lighting<<std::endl;
         // std::cout<<"b_uniform_graphics_depth_image_sampler "<<b_uniform_graphics_depth_image_sampler<<std::endl;
         // std::cout<<"b_uniform_graphics_lightdepth_image_sampler "<<b_uniform_graphics_lightdepth_image_sampler<<std::endl;

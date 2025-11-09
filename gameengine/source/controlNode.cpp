@@ -326,11 +326,11 @@ void CControlGraphicsUniform::Update(){
         else m_pTextboxes[1]->SetTextColor(greyColor);
         m_pTextboxes[1]->SetTextContent("Global");
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_mvp) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_object_dynamic) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Object Dynamic");
 
-        if(m_pApp->appInfo->Uniform.b_uniform_graphics_text_mvp) m_pTextboxes[3]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_uniform_graphics_text_dynamic) m_pTextboxes[3]->bFlash = true;
         else m_pTextboxes[3]->SetTextColor(greyColor);
         m_pTextboxes[3]->SetTextContent("Text Dynamic");
 

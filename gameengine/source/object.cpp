@@ -202,11 +202,8 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
     
     //std::cout<<"dsSets.size()="<<dsSets.size()<<std::endl;
     //std::cout<<"p_renderer->indices3Ds.size()="<<p_renderer->indices3Ds.size()<<std::endl;
-    
-    //if(dsSets.size() > 0){
-        //int dynamicObjectMVPOffset = -1; //-1 means not use dynamic offset (no MVP/VP used)
-        //if(bUseMVP_VP) 
-    int dynamicObjectOffset = m_object_id; //assume descriptor uniform(MVP/VP) offset is m_id
+
+    int dynamicObjectOffset = m_object_id;
     renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectOffset, 0);
     //}//else std::cout<<"No Descritpor is used."<<std::endl;
     //std::cout<<"test4."<<std::endl;

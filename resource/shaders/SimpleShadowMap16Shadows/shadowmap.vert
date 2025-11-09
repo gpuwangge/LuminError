@@ -5,7 +5,7 @@ layout(push_constant) uniform PushConstant{
     int value; //the index of shadowmap renderpass
 } pc;
 
-layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform MVPBufferObject {
+layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform StructObjectBuffer {
     mat4 model;
     bool identityCameraProj;
     bool identityCameraView;

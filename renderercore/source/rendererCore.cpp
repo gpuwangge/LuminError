@@ -474,17 +474,17 @@ void RendererCore::BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vec
         );
     }
 
-    //Issue here: there are 2 descriptor sets. say [0]] is mvp, [1] is texture
-    //If set offset to a positive number, both mvp and texture will have offset value
+    //Issue here: there are 2 descriptor sets. say [0]] is model transformation, [1] is texture
+    //If set offset to a positive number, both transform and texture will have offset value
     //However the texture dont have offset at all
-    //Reason is only VP/MVP uniform are set to be dynamic, so texture doesn't apply offset at all
+    //Reason is only uniform are set to be dynamic, so texture doesn't apply offset at all
     //So it is safe to set offset
 
     //vulkan specifies: dynamicOffsetCount should match dynamic uniform number
-    //only mvp/vp use dynamic uniform offset
+    //only use dynamic uniform offset
     //but how does renderer know this?
-    //this function is called by CObject, so CObject should know this... (some object use mvp, some not...)
-    //one solution is to force all object to use MVP/VP uniform...
+    //this function is called by CObject, so CObject should know this... (some object use model, some not...)
+    //one solution is to force all object to use uniform...
     //second solution is to can set a bool variable bDisableModelMat. for multiCubes, bDisableModelMat=false; for furMark, bDisableModelMat=true
     //all objects must have texture, so must create texture descriptor set
 

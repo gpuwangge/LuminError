@@ -5,7 +5,7 @@
 //Uniform Naming Rule: PipelineType_DescriptorType_Purpose
 enum UniformTypes {
     GRAPHCIS_UNIFORMBUFFER_GLOBAL =                 0x00000001,
-    GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC =         0x00000002, //assume app uses one: MVP or VP
+    GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC =         0x00000002,
     GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC =           0x00000004,
     GRAPHCIS_UNIFORMBUFFER_LIGHTING =               0x00000008,
     GRAPHCIS_UNIFORMBUFFER_CUSTOM =                 0x00000010,
@@ -41,7 +41,7 @@ struct GlobalUniformBufferObject {
     }
 };
 
-//!In graphicsDescriptor.cpp and rendererCore.cpp, assume MVPData is 256 bytes. If change size here, need adjust those sourcefiles
+//!In graphicsDescriptor.cpp and rendererCore.cpp, assume Data is 256 bytes. If change size here, need adjust those sourcefiles
 struct ObjectTextData{
     alignas(16) glm::mat4 model; //16*4=64 bytes
     alignas(4) bool identityCameraProj; // 4 byte
@@ -53,11 +53,9 @@ struct ObjectTextData{
 
 #define OBJECT_TEXT_NUM 256
 struct StructObjectUniformBuffer { //used in object.h/cpp and gameEngine_initialization.cpp
-	//MVPData *mvpData; //dynamic doesn't work
-
-    //for now, support two groups of mvpData. Each draw only use one mvpData matrices. Use offset to access.
-    //Each mvpData is to be aligned to be 256 bytes
-    //Support up to 256 (MVP) objects. buffer size is 256*256(TODO: update to 320) = 65536 bytes; Buffer range is 256 bytes(for each object)
+    //for now, support two groups of Data. Each draw only use one Data matrices. Use offset to access.
+    //Each Data is to be aligned to be 256 bytes
+    //Support up to 256 objects. buffer size is 256*256(TODO: update to 320) = 65536 bytes; Buffer range is 256 bytes(for each object)
     //65536 bytes = 64 kilo bytes
     ObjectTextData data[OBJECT_TEXT_NUM];
     static VkDescriptorSetLayoutBinding GetBinding(){
@@ -71,7 +69,6 @@ struct StructObjectUniformBuffer { //used in object.h/cpp and gameEngine_initial
     }
 public:
     StructObjectUniformBuffer(){}
-    //void init(int mvpCount){}
     ~StructObjectUniformBuffer(){}
 };
 

@@ -17,12 +17,6 @@ class CControlNode;
 class CRenderer;
 
 class CObject : public CEntity {
-    //std::vector<int> m_text_ids;
-    //bool b_isText = false;
-    //std::string m_text = ""; //not used yet
-
-    //bool bUseMVP_VP = false;
-
     //These will be used when recording draw cmd
     //CRenderer *p_renderer;
     LERenderer::IRendererCore *renderer = NULL;

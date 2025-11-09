@@ -47,8 +47,8 @@ Uniforms:
   Graphics:
     uniform_graphics_name: Graphics
     uniform_graphics_global: true
-    uniform_graphics_object_mvp: true
-    uniform_graphics_text_mvp: true
+    uniform_graphics_object_dynamic: true
+    uniform_graphics_text_dynamic: true
     uniform_graphics_lighting: false
     uniform_graphics_custom: false
     uniform_graphics_depth_image_sampler: false
