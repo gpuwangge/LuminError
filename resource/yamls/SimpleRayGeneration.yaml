@@ -1,7 +1,7 @@
 Objects:
   - object_name: Quad
     object_id: 0
-    object_sticker: false
+    object_sticker: true
     object_scale: 1.95
     object_position: [0,0,0]
     object_rotation: [0,0,0]
