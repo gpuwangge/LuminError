@@ -15,7 +15,7 @@ layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform UniformBufferObject {
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} mvpUBO;
+} objectUBO;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;   //no use
@@ -28,9 +28,9 @@ layout(location = 0) out vec3 pos;
 layout(location = 1) out vec3 normal;
 
 void main() {
-    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
+    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
     //fragColor = inColor;
     //fragTexCoord = inTexCoord;
-    pos = vec3(mvpUBO.model * vec4(inPosition, 1.0f));
-    normal = mat3(transpose(inverse(mvpUBO.model))) * inNormal;
+    pos = vec3(objectUBO.model * vec4(inPosition, 1.0f));
+    normal = mat3(transpose(inverse(objectUBO.model))) * inNormal;
 }

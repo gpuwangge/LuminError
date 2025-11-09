@@ -52,14 +52,14 @@ struct ObjectTextData{
 };
 
 #define OBJECT_TEXT_NUM 256
-struct StructObjectUniformBuffer {
+struct StructObjectUniformBuffer { //used in object.h/cpp and gameEngine_initialization.cpp
 	//MVPData *mvpData; //dynamic doesn't work
 
     //for now, support two groups of mvpData. Each draw only use one mvpData matrices. Use offset to access.
     //Each mvpData is to be aligned to be 256 bytes
     //Support up to 256 (MVP) objects. buffer size is 256*256(TODO: update to 320) = 65536 bytes; Buffer range is 256 bytes(for each object)
     //65536 bytes = 64 kilo bytes
-    ObjectTextData mvpData[OBJECT_TEXT_NUM];
+    ObjectTextData data[OBJECT_TEXT_NUM];
     static VkDescriptorSetLayoutBinding GetBinding(){
         VkDescriptorSetLayoutBinding binding;
         binding.binding = 0;
@@ -69,15 +69,14 @@ struct StructObjectUniformBuffer {
 		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         return binding;
     }
-
 public:
     StructObjectUniformBuffer(){}
     //void init(int mvpCount){}
     ~StructObjectUniformBuffer(){}
 };
 
-struct TextMVPUniformBufferObject {
-    ObjectTextData mvpData[OBJECT_TEXT_NUM];
+struct StructTextUniformBuffer { //used in textManager.h/cpp and gameEngine_initialization.cpp
+    ObjectTextData data[OBJECT_TEXT_NUM];
     static VkDescriptorSetLayoutBinding GetBinding(){
         VkDescriptorSetLayoutBinding binding;
         binding.binding = 0;
@@ -88,8 +87,8 @@ struct TextMVPUniformBufferObject {
         return binding;
     }
 public:
-    TextMVPUniformBufferObject(){}
-    ~TextMVPUniformBufferObject(){}
+    StructTextUniformBuffer(){}
+    ~StructTextUniformBuffer(){}
 };
 
 // struct VPUniformBufferObject {

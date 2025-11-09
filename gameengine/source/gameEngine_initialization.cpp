@@ -75,14 +75,12 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_uniform_graphics_custom) renderer->addGraphicsCustomUniformBuffer(appInfo->Uniform.GraphicsCustom.Size);
     if(appInfo->Uniform.b_uniform_graphics_lighting) renderer->addLightingUniformBuffer(CLightManager::m_lightingUniformBuffersMapped);
     if(appInfo->Uniform.b_uniform_graphics_object_mvp){
-        renderer->addMVPUniformBuffer(CObjectManager::mvpUniformBuffersMapped);
-        //renderer.bUseObjectMVP = true;
-        renderer->SetEnableObjectMVP(true);
+        renderer->AddObjectUniformBuffer(CObjectManager::objectUBMapped);
+        renderer->SetEnableObject(true);
     }
     if(appInfo->Uniform.b_uniform_graphics_text_mvp){
-        renderer->addTextMVPUniformBuffer(CTextManager::textMVPUniformBuffersMapped);
-        //renderer.bUseTextboxMVP = true;
-        renderer->SetEnableTextboxMVP(true);
+        renderer->AddTextUniformBuffer(CTextManager::textUBMapped);
+        renderer->SetEnableText(true);
     }   
     //if(appInfo->Uniform.b_uniform_graphics_object_vp){
     //    renderer->addVPUniformBuffer(CObjectManager::vpUniformBuffersMapped);

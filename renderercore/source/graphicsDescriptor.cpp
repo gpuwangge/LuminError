@@ -130,7 +130,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
         bindingCounter++;
     }//std::cout<<"!";
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
-        VkDescriptorSetLayoutBinding binding = TextMVPUniformBufferObject::GetBinding();
+        VkDescriptorSetLayoutBinding binding = StructTextUniformBuffer::GetBinding();
         //std::cout<<"DEBUG: MVP Layout binding="<<counter<<std::endl;
         graphicsBindings[bindingCounter].binding = bindingCounter;
         graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
@@ -294,11 +294,11 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
         }
         VkDescriptorBufferInfo mvpBufferInfo{}; //for mvp
         if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){ //TODO: Getbinding
-            mvpBufferInfo.buffer = mvpUniformBuffers[i].buffer;
+            mvpBufferInfo.buffer = objectUniformBuffers[i].buffer;
             mvpBufferInfo.offset = 0;
             //sizeof(MVPUniformBufferObject) is MVPSIZE, including 2 mvp matrices. We only use one at a time.
             //spec requires alighment to be multiple of 256 (1080 TI). Maybe change this later?
-            mvpBufferInfo.range = MVPSIZE;
+            mvpBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
@@ -310,11 +310,11 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
         }
         VkDescriptorBufferInfo textMVPBufferInfo{}; //for text mvp
         if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){ //TODO: Getbinding
-            textMVPBufferInfo.buffer = textMVPUniformBuffers[i].buffer;
+            textMVPBufferInfo.buffer = textUniformBuffers[i].buffer;
             textMVPBufferInfo.offset = 0;
             //sizeof(MVPUniformBufferObject) is MVPSIZE, including 2 mvp matrices. We only use one at a time.
             //spec requires alighment to be multiple of 256 (1080 TI). Maybe change this later?
-            textMVPBufferInfo.range = MVPSIZE;
+            textMVPBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
@@ -473,38 +473,38 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
 /************
 * 1 GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC
 ************/
-std::vector<CWxjBuffer> CGraphicsDescriptorManager::mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
+std::vector<CWxjBuffer> CGraphicsDescriptorManager::objectUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 //std::vector<void*> CGraphicsDescriptorManager::mvpUniformBuffersMapped;
-//MVPUniformBufferObject CGraphicsDescriptorManager::mvpUBO;
-void CGraphicsDescriptorManager::addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped){
+//MVPUniformBufferObject CGraphicsDescriptorManager::objectUBO;
+void CGraphicsDescriptorManager::addObjectUniformBuffer(std::vector<void*>& objectUBMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC;
     //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
-    mvpUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    mvpUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+    objectUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    objectUBMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = mvpUniformBuffers[i].init(sizeof(StructObjectUniformBuffer), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), mvpUniformBuffers[i].deviceMemory, 0, sizeof(StructObjectUniformBuffer), 0, &mvpUniformBuffersMapped[i]);
+        VkResult result = objectUniformBuffers[i].init(sizeof(StructObjectUniformBuffer), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), objectUniformBuffers[i].deviceMemory, 0, sizeof(StructObjectUniformBuffer), 0, &objectUBMapped[i]);
     }
 }
 
 /************
 * 2 GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC
 ************/
-std::vector<CWxjBuffer> CGraphicsDescriptorManager::textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
+std::vector<CWxjBuffer> CGraphicsDescriptorManager::textUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 //std::vector<void*> CGraphicsDescriptorManager::textMVPUniformBuffersMapped;
-//TextMVPUniformBufferObject CGraphicsDescriptorManager::textMVPUBO;
-void CGraphicsDescriptorManager::addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped){
+//TextMVPUniformBufferObject CGraphicsDescriptorManager::textobjectUBO;
+void CGraphicsDescriptorManager::addTextUniformBuffer(std::vector<void*>& textUBMapped){
     graphicsUniformTypes |= GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC;
     //std::cout<<"addMVPUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 
-    textMVPUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    textMVPUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+    textUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    textUBMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = textMVPUniformBuffers[i].init(sizeof(TextMVPUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), textMVPUniformBuffers[i].deviceMemory, 0, sizeof(TextMVPUniformBufferObject), 0, &textMVPUniformBuffersMapped[i]);
+        VkResult result = textUniformBuffers[i].init(sizeof(StructTextUniformBuffer), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), textUniformBuffers[i].deviceMemory, 0, sizeof(StructTextUniformBuffer), 0, &textUBMapped[i]);
     }
 }
 
@@ -824,11 +824,11 @@ void CGraphicsDescriptorManager::DestroyAndFree(){
     vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler, nullptr);
     vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), lightDepthImageSampler_hardwareDepthBias, nullptr);
     
-    for (size_t i = 0; i < mvpUniformBuffers.size(); i++) 
-        mvpUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    for (size_t i = 0; i < objectUniformBuffers.size(); i++) 
+        objectUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 
-    for (size_t i = 0; i < textMVPUniformBuffers.size(); i++) 
-        textMVPUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    for (size_t i = 0; i < textUniformBuffers.size(); i++) 
+        textUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
 
     for (size_t i = 0; i < customUniformBuffers.size(); i++) 
         customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());

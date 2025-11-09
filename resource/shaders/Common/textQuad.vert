@@ -15,7 +15,7 @@ layout(set = 0, binding = UNIFORM_TEXT_BINDING) uniform TextUniformBufferObject 
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} textMvpUBO;
+} textobjectUBO;
 
 //legacy code: (vertex buffer layout without instance data)
 // layout(location = 0) in vec3 inPosition;
@@ -35,11 +35,11 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-   // gl_Position = mvpUBO.mainCameraProj * mvpUBO.mainCameraView * mvpUBO.model * vec4(inPosition+inOffset, 0.0, 1.0);
+   // gl_Position = objectUBO.mainCameraProj * objectUBO.mainCameraView * objectUBO.model * vec4(inPosition+inOffset, 0.0, 1.0);
 
-	mat4 p = textMvpUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
-	mat4 v = textMvpUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
-	gl_Position = p * v * textMvpUBO.model * vec4(inPosition * inScale + inOffset, 0.0, 1.0);
+	mat4 p = textobjectUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
+	mat4 v = textobjectUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
+	gl_Position = p * v * textobjectUBO.model * vec4(inPosition * inScale + inOffset, 0.0, 1.0);
 
     fragColor = inColor;
 

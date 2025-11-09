@@ -19,7 +19,7 @@ layout(set = 0, binding = 1) uniform UniformBufferObject {
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} mvpUBO;
+} objectUBO;
 
 layout(set = 0, binding = 2) uniform UniformCustomBufferObject { 
     vec3 color;
@@ -34,7 +34,7 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
+    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
     fragColor = customUBO.color; //color attribute of each vertex will be assigned to each fragment. If all colors are the same, this is not good. should use ubo instead
     fragTexCoord = inTexCoord;
 }

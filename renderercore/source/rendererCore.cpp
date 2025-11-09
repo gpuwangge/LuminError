@@ -431,7 +431,7 @@ void RendererCore::BindExternalBuffer(std::vector<CWxjBuffer> &buffer){
 }
 void RendererCore::BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, 
         VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, 
-        uint32_t dynamicObjectMVPOffset, uint32_t dynamicTextboxMVPOffset){
+        uint32_t dynamicObjectOffset, uint32_t dynamicTextOffset){
     //you can bind many descriptor sets for one mesh, they are identified in shader by set index
     //also, each descriptor set can have multiple writes, they are identified in shader by binding index
     //unsigned int setCount = 1;
@@ -445,22 +445,22 @@ void RendererCore::BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vec
         sets[i] = descriptorSets[i][currentFrame];
     }
 
-    if(bUseObjectMVP && bUseTextboxMVP && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[2] ={MVPSIZE * dynamicObjectMVPOffset, MVPSIZE * dynamicTextboxMVPOffset};
+    if(bEnableObject && bEnableText && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
+        uint32_t offsets[2] ={OBJECT_TEXT_STRUCTURE_SIZE * dynamicObjectOffset, OBJECT_TEXT_STRUCTURE_SIZE * dynamicTextOffset};
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             2, //dynamicOffsetCount. # means there is (exact)# uniforms in the descriptor sets that are set to be dynamic 
             offsets 
         );
-    }else if (bUseObjectMVP && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[1] ={MVPSIZE * dynamicObjectMVPOffset}; 
+    }else if (bEnableObject && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
+        uint32_t offsets[1] ={OBJECT_TEXT_STRUCTURE_SIZE * dynamicObjectOffset}; 
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             1,
             offsets 
         );
-    }else if (bUseTextboxMVP && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[1] ={MVPSIZE * dynamicTextboxMVPOffset}; 
+    }else if (bEnableText && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
+        uint32_t offsets[1] ={OBJECT_TEXT_STRUCTURE_SIZE * dynamicTextOffset}; 
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             1,
@@ -489,8 +489,8 @@ void RendererCore::BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vec
     //all objects must have texture, so must create texture descriptor set
 
 }
-void RendererCore::BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectMVPOffset, uint32_t dynamicTextboxMVPOffset){
-    BindDescriptorSets(pipelineLayout, descriptorSets, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsCmdId, dynamicObjectMVPOffset, dynamicTextboxMVPOffset);
+void RendererCore::BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectOffset, uint32_t dynamicTextOffset){
+    BindDescriptorSets(pipelineLayout, descriptorSets, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsCmdId, dynamicObjectOffset, dynamicTextOffset);
 }
 void RendererCore::BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets){
     BindDescriptorSets(pipelineLayout, descriptorSets, VK_PIPELINE_BIND_POINT_COMPUTE, computeCmdId);

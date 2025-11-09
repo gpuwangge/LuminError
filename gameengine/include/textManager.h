@@ -94,8 +94,8 @@ class CTextManager {
     glm::vec4 m_textcolor = glm::vec4(0.0f);
     
 public:
-    inline static std::vector<void*> textMVPUniformBuffersMapped;
-    inline static TextMVPUniformBufferObject textMVPUBO;
+    inline static std::vector<void*> textUBMapped;
+    inline static StructTextUniformBuffer textUBO;
 
     std::vector<CTextbox> m_textBoxes;
 

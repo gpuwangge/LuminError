@@ -40,10 +40,10 @@ namespace LERenderer{
         //Expose to application
         void SetRenderMode(int value) override { m_renderMode = (RenderModes)value; }
         int GetRenderMode() override { return m_renderMode; }
-        void SetEnableObjectMVP(bool value) override { bUseObjectMVP = value; }
-        int GetEnableObjectMVP() override { return bUseObjectMVP; }
-        void SetEnableTextboxMVP(bool value) override { bUseTextboxMVP = value; }
-        int GetEnableTextboxMVP() override { return bUseTextboxMVP; }
+        void SetEnableObject(bool value) override { bEnableObject = value; }
+        int GetEnableObject() override { return bEnableObject; }
+        void SetEnableText(bool value) override { bEnableText = value; }
+        int GetEnableText() override { return bEnableText; }
         uint32_t GetCurrentFrame() override { return currentFrame; }
         void SetCurrentFrame(uint32_t value) override { currentFrame = value; }
         VkCommandPool& GetCommandPool() override { return commandPool; }
@@ -56,8 +56,8 @@ namespace LERenderer{
          * ***********************/
         RenderModes m_renderMode = GRAPHICS;
 
-        bool bUseObjectMVP = false;
-        bool bUseTextboxMVP = false;
+        bool bEnableObject = false;
+        bool bEnableText = false;
         //bool bUseGlobal = false;
 
         void AquireSwapchainImage(VkSwapchainKHR swapchainHandle) override;
@@ -91,8 +91,8 @@ namespace LERenderer{
         void BindVertexInstanceBuffer(int modelId, VkBuffer *pBuffer) override;
         void BindIndexBuffer(int modelId) override;
         void BindExternalBuffer(std::vector<CWxjBuffer> &buffer) override;
-        void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectMVPOffset = -1, uint32_t dynamicTextboxMVPOffset = -1) override;
-        void BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectMVPOffset = -1, uint32_t dynamicTextboxMVPOffset = -1) override;
+        void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) override;
+        void BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) override;
         void BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) override;
 
         //Draw
@@ -264,8 +264,8 @@ namespace LERenderer{
         void createGraphicsDescriptorSetLayout_TextureImageSampler() override { graphicsDescriptorManager.createDescriptorSetLayout_TextureImageSampler(); }
         void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) override { graphicsDescriptorManager.createDescriptorSets_General(depthImageView, depthlight_imageviews); }
 
-        void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped) override { graphicsDescriptorManager.addMVPUniformBuffer(mvpUniformBuffersMapped); }
-        void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped) override { graphicsDescriptorManager.addTextMVPUniformBuffer(textMVPUniformBuffersMapped); }
+        void AddObjectUniformBuffer(std::vector<void*>& objectUniformBuffersMapped) override { graphicsDescriptorManager.addObjectUniformBuffer(objectUniformBuffersMapped); }
+        void AddTextUniformBuffer(std::vector<void*>& textUniformBuffersMapped) override { graphicsDescriptorManager.addTextUniformBuffer(textUniformBuffersMapped); }
         void addGraphicsCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { graphicsDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
         void uploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
         void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) override { graphicsDescriptorManager.addLightingUniformBuffer(lightingUniformBuffersMapped); }

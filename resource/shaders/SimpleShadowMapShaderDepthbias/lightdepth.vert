@@ -7,7 +7,7 @@ layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform UniformBufferObject {
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} mvpUBO;
+} objectUBO;
 
 layout(set = 0, binding = UNIFROM_LIGHT_BINDING) uniform UniformLightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
@@ -22,6 +22,6 @@ layout(location = 2) in vec2 inTexCoord; //not used
 layout(location = 3) in vec3 inNormal; //not used
 
 void main() {
-	//gl_Position = mvpUBO.lightCameraProj * mvpUBO.lightCameraView * mvpUBO.model * vec4(inPosition, 1.0); //use light camera view to generate light depth image
-	gl_Position = lightsUBO.lights[0].lightCameraProj * lightsUBO.lights[0].lightCameraView * mvpUBO.model * vec4(inPosition, 1.0);
+	//gl_Position = objectUBO.lightCameraProj * objectUBO.lightCameraView * objectUBO.model * vec4(inPosition, 1.0); //use light camera view to generate light depth image
+	gl_Position = lightsUBO.lights[0].lightCameraProj * lightsUBO.lights[0].lightCameraView * objectUBO.model * vec4(inPosition, 1.0);
 }

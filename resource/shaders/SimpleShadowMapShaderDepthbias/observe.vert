@@ -15,7 +15,7 @@ layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform UniformBufferObject {
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} mvpUBO;
+} objectUBO;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
@@ -26,8 +26,8 @@ layout (location = 0) out vec2 outTexCoord;
 
 
 void main() {
-	mat4 p = mvpUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
-	mat4 v = mvpUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
-	gl_Position = p * v * mvpUBO.model * vec4(inPosition, 1.0);
+	mat4 p = objectUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
+	mat4 v = objectUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
+	gl_Position = p * v * objectUBO.model * vec4(inPosition, 1.0);
 	outTexCoord = inTexCoord;
 }

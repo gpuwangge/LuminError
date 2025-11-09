@@ -14,59 +14,24 @@ void CObject::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC){
         //update model matrix to ubo
         if(p_controlNode == NULL) {
-            CObjectManager::mvpUBO.mvpData[m_object_id].model = ModelMatrix;
+            CObjectManager::objectUBO.data[m_object_id].model = ModelMatrix;
         //    std::cout<<"CObject::Update: object id="<<m_object_id<<" has no control node, use its own model matrix"<<std::endl;
         }else {
-            CObjectManager::mvpUBO.mvpData[m_object_id].model = p_controlNode->ModelMatrix * ModelMatrix;
-        //     std::cout<<"CObject::Update: object id="<<m_object_id<<" use control node model matrix"<<std::endl;
-        //     std::cout<<"p_controlNode->ModelMatrix:"<<std::endl;
-        //     std::cout<<p_controlNode->ModelMatrix[0][0]<<","<<p_controlNode->ModelMatrix[0][1]<<","<<p_controlNode->ModelMatrix[0][2]<<","<<p_controlNode->ModelMatrix[0][3]<<std::endl;
-        //     std::cout<<p_controlNode->ModelMatrix[1][0]<<","<<p_controlNode->ModelMatrix[1][1]<<","<<p_controlNode->ModelMatrix[1][2]<<","<<p_controlNode->ModelMatrix[1][3]<<std::endl;
-        //     std::cout<<p_controlNode->ModelMatrix[2][0]<<","<<p_controlNode->ModelMatrix[2][1]<<","<<p_controlNode->ModelMatrix[2][2]<<","<<p_controlNode->ModelMatrix[2][3]<<std::endl;
-        //     std::cout<<p_controlNode->ModelMatrix[3][0]<<","<<p_controlNode->ModelMatrix[3][1]<<","<<p_controlNode->ModelMatrix[3][2]<<","<<p_controlNode->ModelMatrix[3][3]<<std::endl;
-        //     std::cout<<"ModelMatrix:"<<std::endl;
-        //     std::cout<<ModelMatrix[0][0]<<","<<ModelMatrix[0][1]<<","<<ModelMatrix[0][2]<<","<<ModelMatrix[0][3]<<std::endl;
-        //     std::cout<<ModelMatrix[1][0]<<","<<ModelMatrix[1][1]<<","<<ModelMatrix[1][2]<<","<<ModelMatrix[1][3]<<std::endl;
-        //     std::cout<<ModelMatrix[2][0]<<","<<ModelMatrix[2][1]<<","<<ModelMatrix[2][2]<<","<<ModelMatrix[2][3]<<std::endl;
-        //     std::cout<<ModelMatrix[3][0]<<","<<ModelMatrix[3][1]<<","<<ModelMatrix[3][2]<<","<<ModelMatrix[3][3]<<std::endl;
+            CObjectManager::objectUBO.data[m_object_id].model = p_controlNode->ModelMatrix * ModelMatrix;
         }
 
         if(bSticker){
-            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraProj = true;
-            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraView = true;
+            CObjectManager::objectUBO.data[m_object_id].identityCameraProj = true;
+            CObjectManager::objectUBO.data[m_object_id].identityCameraView = true;
         }else{
-            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraProj = false;
-            CObjectManager::mvpUBO.mvpData[m_object_id].identityCameraView = false;
+            CObjectManager::objectUBO.data[m_object_id].identityCameraProj = false;
+            CObjectManager::objectUBO.data[m_object_id].identityCameraView = false;
         }
 
-        // std::cout<<"myUBO.mvpDATA["<<m_object_id<<"] lightCameraProj:"<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[0][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[0][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[0][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[0][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[1][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[1][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[1][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[1][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[2][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[2][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[2][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[2][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[3][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[3][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[3][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraProj[3][3]<<std::endl;
-
-        // std::cout<<"myUBO.mvpDATA["<<m_object_id<<"] lightCameraView:"<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[0][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[0][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[0][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[0][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[1][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[1][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[1][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[1][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[2][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[2][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[2][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[2][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[3][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[3][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[3][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].lightCameraView[3][3]<<std::endl;
-
-        // std::cout<<"myUBO.mvpDATA["<<m_object_id<<"] model:"<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[0][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[0][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[0][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[0][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[1][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[2][3]<<std::endl;
-        // std::cout<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][0]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][1]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][2]<<","<<CGraphicsDescriptorManager::mvpUBO.mvpData[m_object_id].model[3][3]<<std::endl;
-        
-
         //memcpy to GPU memory
-        memcpy(CObjectManager::mvpUniformBuffersMapped[currentFrame], &CObjectManager::mvpUBO, sizeof(CObjectManager::mvpUBO));
+        memcpy(CObjectManager::objectUBMapped[currentFrame], &CObjectManager::objectUBO, sizeof(CObjectManager::objectUBO));
     }
 
-    // if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_VP){
-    //     CObjectManager::vpUBO.view = mainCamera.matrices.view;
-    //     CObjectManager::vpUBO.proj = mainCamera.matrices.projection;
-    //     memcpy(CObjectManager::vpUniformBuffersMapped[currentFrame], &CObjectManager::vpUBO, sizeof(CObjectManager::vpUBO));
-    // }
 }
 
 // float CObject::ComputeDifference(glm::vec3 v1, glm::vec3 v2){
@@ -241,9 +206,8 @@ void CObject::Draw(int graphicsPipelineId, uint32_t n){
     //if(dsSets.size() > 0){
         //int dynamicObjectMVPOffset = -1; //-1 means not use dynamic offset (no MVP/VP used)
         //if(bUseMVP_VP) 
-    int dynamicObjectMVPOffset = m_object_id; //assume descriptor uniform(MVP/VP) offset is m_id
-    //p_renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
-    renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectMVPOffset, 0);
+    int dynamicObjectOffset = m_object_id; //assume descriptor uniform(MVP/VP) offset is m_id
+    renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, dynamicObjectOffset, 0);
     //}//else std::cout<<"No Descritpor is used."<<std::endl;
     //std::cout<<"test4."<<std::endl;
     //if(!vertices3D.empty() || !vertices2D.empty()){

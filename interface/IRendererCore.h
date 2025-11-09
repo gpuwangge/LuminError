@@ -22,10 +22,10 @@ namespace LERenderer{
 
         virtual void SetRenderMode(int value) = 0;
         virtual int GetRenderMode() = 0;
-        virtual void SetEnableObjectMVP(bool value) = 0;
-        virtual int GetEnableObjectMVP() = 0;
-        virtual void SetEnableTextboxMVP(bool value) = 0;
-        virtual int GetEnableTextboxMVP() = 0;
+        virtual void SetEnableObject(bool value) = 0;
+        virtual int GetEnableObject() = 0;
+        virtual void SetEnableText(bool value) = 0;
+        virtual int GetEnableText() = 0;
         virtual uint32_t GetCurrentFrame() = 0;
         virtual void SetCurrentFrame(uint32_t value) = 0;
         virtual VkCommandPool& GetCommandPool() = 0;
@@ -61,8 +61,8 @@ namespace LERenderer{
         virtual void BindVertexInstanceBuffer(int modelId, VkBuffer *pBuffer) = 0;
         virtual void BindIndexBuffer(int modelId)  = 0;
         virtual void BindExternalBuffer(std::vector<CWxjBuffer> &buffer) = 0;
-        virtual void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectMVPOffset = -1, uint32_t dynamicTextboxMVPOffset = -1) = 0;
-        virtual void BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectMVPOffset = -1, uint32_t dynamicTextboxMVPOffset = -1) = 0;
+        virtual void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) = 0;
+        virtual void BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) = 0;
         virtual void BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) = 0;
 
         virtual void EndGraphicsCommandBuffer() = 0;
@@ -180,8 +180,8 @@ namespace LERenderer{
         virtual void createGraphicsDescriptorSetLayout_TextureImageSampler() = 0;
         virtual void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) = 0;
 
-        virtual void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped) = 0;
-        virtual void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped) = 0;
+        virtual void AddObjectUniformBuffer(std::vector<void*>& objectUniformBuffersMapped) = 0;
+        virtual void AddTextUniformBuffer(std::vector<void*>& textUniformBuffersMapped) = 0;
         virtual void addGraphicsCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
         virtual void uploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) = 0;

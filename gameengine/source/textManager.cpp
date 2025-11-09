@@ -113,8 +113,8 @@ void CTextbox::Draw(){
     //std::cout<<"TextBox ID: "<<m_textBoxID<<", descriptorSets size: "<<dsSets.size()<<std::endl;
 
     if(dsSets.size() > 0){
-        int dynamicTextboxMVPOffset = m_textBoxID; //use offset for textboxID=0
-        renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, 0, dynamicTextboxMVPOffset);
+        int dynamicTextOffset = m_textBoxID; //use offset for textboxID=0
+        renderer->BindGraphicsDescriptorSets(*p_graphicsPipelineLayout, dsSets, 0, dynamicTextOffset);
     }
 
   
@@ -285,30 +285,6 @@ void CTextbox::SetTextContent(std::string text_content){
         }
     }
     if(bFlash) AdvanceHighlightedChar();
-     
-
-    // float textline_width = 0.1 * sum_scale_x; //0.1 is quad height in NDC
-    // if(p_controlNode != NULL){
-    //     if(textline_width > p_controlNode->Scale.x){
-    //         //std::cout<<"TextBox ID: "<<m_textBoxID<<", text line width: "<<textline_width<<", larger than control node scale x: "<<p_controlNode->Scale.x<<", ";
-    //         //std::cout<<"text content: \""<<m_text_content<<"\", char count: "<<m_currentCharCount<<std::endl; 
-    //         //p_controlNode->Scale.x = textline_width;
-    //         if(p_controlNode->Scale.x < penX * sx * Scale.x * 1.2){ //1.2 is a little margin
-    //             p_controlNode->Scale.x = penX * sx * Scale.x * 1.2;
-    //             std::cout<<"TextBox ID: "<<m_textBoxID<<", text line width: "<<textline_width<<", larger than control node scale x: "<<p_controlNode->Scale.x<<std::endl;
-    //         }
-    //     }
-    // }
-    
-    // if(p_controlNode && m_textBoxID == 23){
-    //     float textWidth = penX * sx;
-    //     std::cout<<"TextBox ID: "<<m_textBoxID<<", text content: \""<<m_text_content<<"\", char count: "<<m_currentCharCount<<std::endl;
-    //     std::cout<<"    ControlNode Name: \""<<p_controlNode->Name<<"\", Length: "<<p_controlNode->Length.x<<","<<p_controlNode->Length.y<<","<<p_controlNode->Length.z<<std::endl;
-    //     std::cout<<"    scale sum x: "<<sum_scale_x<<", calculated textbox width: "<< 0.1 * sum_scale_x<<std::endl;
-    //     std::cout<<"    "<<p_controlNode->m_pObjects[0]->Name<<", length: "<<p_controlNode->m_pObjects[0]->Length.x<<","<<p_controlNode->m_pObjects[0]->Length.y<<","<<p_controlNode->m_pObjects[0]->Length.z<<std::endl;
-    //     std::cout<<"    penX: "<<penX<<", sx: "<<sx<<", textWidth: "<<textWidth<<std::endl;
-    // }
-
 
     if(!bInitialized) {
         VkDeviceSize bufferSize = sizeof(instanceData[0]) * instanceData.size();
@@ -329,36 +305,18 @@ void CTextbox::Update(float deltaTime, int currentFrame, Camera &mainCamera){
     * Calculate model matrix based on Translation, Rotation and Scale
     ********************************/
    if(renderer->GetGraphicsUniformTypes() & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC){
-        if(p_controlNode == NULL)  CTextManager::textMVPUBO.mvpData[m_textBoxID].model = ModelMatrix;
-        else CTextManager::textMVPUBO.mvpData[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
+        if(p_controlNode == NULL)  CTextManager::textUBO.data[m_textBoxID].model = ModelMatrix;
+        else CTextManager::textUBO.data[m_textBoxID].model = p_controlNode->TransRotation * ModelMatrix; //textbox follow control node translation and rotation, but not scale
 
-        //std::cout<< "TextBox ID: " << m_textBoxID << " Model Matrix: " << glm::to_string(CGraphicsDescriptorManager::textMVPUBO.mvpData[m_textBoxID].model) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " TranslateMatrix: " << glm::to_string(TranslateMatrix) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " RotateMatrix: " << glm::to_string(RotationMatrix) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " ScaleMatrix: " << glm::to_string(ScaleMatrix) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " Velocity: " << glm::to_string(Velocity) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " AngularVelocity: " << glm::to_string(AngularVelocity) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " TempVelocity: " << glm::to_string(TempVelocity[0]) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " TempAngularVelocity: " << glm::to_string(TempAngularVelocity[0]) << std::endl;
-        // std::cout<< "TextBox ID: " << m_textBoxID << " TempMoveAngularVelocity: " << glm::to_string(TempMoveAngularVelocity) << std::endl;
-        //std::cout<< "Delta Time: " << deltaTime << std::endl;
-
-        // if(!bSticker){
-        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = mainCamera.matrices.projection;
-        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = mainCamera.matrices.view;
-        // }else{
-        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraProj = glm::mat4(1.0f);
-        //     CTextManager::textMVPUBO.mvpData[m_textBoxID].mainCameraView = glm::mat4(1.0f);
-        // }
         if(bSticker){
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraProj = true;
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraView = true;
+            CTextManager::textUBO.data[m_textBoxID].identityCameraProj = true;
+            CTextManager::textUBO.data[m_textBoxID].identityCameraView = true;
         }else{
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraProj = false;
-            CTextManager::textMVPUBO.mvpData[m_textBoxID].identityCameraView = false;
+            CTextManager::textUBO.data[m_textBoxID].identityCameraProj = false;
+            CTextManager::textUBO.data[m_textBoxID].identityCameraView = false;
         }
 
-        memcpy(CTextManager::textMVPUniformBuffersMapped[currentFrame], &CTextManager::textMVPUBO, sizeof(CTextManager::textMVPUBO));
+        memcpy(CTextManager::textUBMapped[currentFrame], &CTextManager::textUBO, sizeof(CTextManager::textUBO));
    }
     //for(auto& ch : m_characters){ 
         //ch.Update();

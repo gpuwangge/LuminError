@@ -15,7 +15,7 @@ layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform MVPBufferObject {
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} mvpUBO;
+} objectUBO;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
@@ -37,12 +37,12 @@ layout (location = 3) out vec4 outPosWorld;
 // 	0.5, 0.5, 0.0, 1.0 );
 
 void main() {
-	gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * mvpUBO.model * vec4(inPosition, 1.0);
+	gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
 
-	outNormal = mat3(mvpUBO.model) * inNormal;
+	outNormal = mat3(objectUBO.model) * inNormal;
 	outColor = inColor;
 	outTexCoord = inTexCoord;
-	outPosWorld = mvpUBO.model * vec4(inPosition, 1.0);
+	outPosWorld = objectUBO.model * vec4(inPosition, 1.0);
 
-	//outFragPosLightSpace = mvpUBO.lightCameraProj * mvpUBO.lightCameraView * mvpUBO.model * vec4(inPosition, 1.0); 
+	//outFragPosLightSpace = objectUBO.lightCameraProj * objectUBO.lightCameraView * objectUBO.model * vec4(inPosition, 1.0); 
 }

@@ -56,16 +56,16 @@ public:
     /************
      * 2 GRAPHCIS_UNIFORMBUFFER_OBJECT_DYNAMIC (for object)
      ************/
-    static std::vector<CWxjBuffer> mvpUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
+    static std::vector<CWxjBuffer> objectUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
 	//static std::vector<void*> mvpUniformBuffersMapped;
-    void addMVPUniformBuffer(std::vector<void*>& mvpUniformBuffersMapped);
-    //static MVPUniformBufferObject mvpUBO;
+    void addObjectUniformBuffer(std::vector<void*>& objectUBMapped);
+    //static MVPUniformBufferObject objectUBO;
 
     /************
      * 3 GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC (for textbox)
      ************/
-    static std::vector<CWxjBuffer> textMVPUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
-    void addTextMVPUniformBuffer(std::vector<void*>& textMVPUniformBuffersMapped);
+    static std::vector<CWxjBuffer> textUniformBuffers; //need one mvp buffer for each host resource: MAX_FRAMES_IN_FLIGHT
+    void addTextUniformBuffer(std::vector<void*>& textUBMapped);
 
     /************
      * 4 GRAPHCIS_UNIFORMBUFFER_LIGHTING (for light)

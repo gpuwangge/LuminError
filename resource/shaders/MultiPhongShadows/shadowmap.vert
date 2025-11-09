@@ -11,7 +11,7 @@ layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform MVPBufferObject {
     bool identityCameraView;
     bool padding_bool[2];
     vec4 padding[11];
-} mvpUBO;
+} objectUBO;
 
 layout(set = 0, binding = UNIFROM_LIGHT_BINDING) uniform UniformLightsBufferObject { 
 	LightAttribute lights[LIGHT_MAX];
@@ -25,5 +25,5 @@ layout(location = 2) in vec2 inTexCoord; //not used
 layout(location = 3) in vec3 inNormal; //not used
 
 void main() {
-	gl_Position = lightsUBO.lights[pc.value].lightCameraProj * lightsUBO.lights[pc.value].lightCameraView * mvpUBO.model * vec4(inPosition, 1.0);
+	gl_Position = lightsUBO.lights[pc.value].lightCameraProj * lightsUBO.lights[pc.value].lightCameraView * objectUBO.model * vec4(inPosition, 1.0);
 }
