@@ -55,7 +55,10 @@ public:
 		this->znear = znear;
 		this->zfar = zfar;
 		matrices.projection = glm::perspective(glm::radians(fov), aspect, znear, zfar);
-		//if (flipY) matrices.projection[1][1] *= -1.0f;
+		
+		//TODO: other place may have alrady adjustted (where?)
+		//matrices.projection[1][1] *= -1.0f; //glm use OpenGL preset, need compensate this in Vulkan.
+		//In Vulkan, Y points down, use right hand clip space, and NDC z is [0,1]
 	};
 
 	void setOrthographic(float left, float right, float bottom, float top, float znear, float zfar){

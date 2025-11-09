@@ -86,7 +86,6 @@ HitInfo RaySphere(Ray ray, Sphere sphere){
 void main() {
 	//outColor = texture(texSampler, fragTexCoord);
     
-    //vec2 screenSize = vec2(1.0, 1.0);//or 800 x 800?
     vec2 screenSize = vec2(800.0, 800.0);
     // ----------------------------
     // 1. 像素坐标转标准化坐标 (0..1)
@@ -95,32 +94,23 @@ void main() {
 
     // ----------------------------
     // 2. 转换到 NDC [-1, 1]
-    uv.x = 1.0 - uv.x; //why?
-    uv.y = 1.0 - uv.y; //why?
     float x_ndc = uv.x * 2.0 - 1.0;
     float y_ndc = uv.y * 2.0 - 1.0;
 
     // ----------------------------
     // 3. 投影到相机平面 (camera space)
-    // 这里假设相机朝 -Z，看向前方
-    //camera_position: [0,0,-3]
+    // 这里假设相机朝 Z正方向
     vec3 dir_cam = normalize(vec3(
         x_ndc * globalUBO.aspect * globalUBO.tanHalfFovY,
         y_ndc * globalUBO.tanHalfFovY,
-        -1.0
+        1.0 //!not -1
     ));
 
     // ----------------------------
     // 4. 转换到 world space
     Ray ray;
     ray.dir = normalize((globalUBO.mainCameraModel * vec4(dir_cam, 0.0)).xyz);
-    //ray.origin = vec3(globalUBO.mainCameraModel[3]);
-    //ray.dir = normalize(vec3(x_ndc, y_ndc, 1.0));
-    ray.origin = vec3(0, 0, 3.0); //camera should be 0,0,-3??
-    //vec3 rayOrigin = cam.camPos; //todo:?
-    //if(rayDir.x < 0) rayDir.x = 0;
-    //if(rayDir.y < 0) rayDir.y = 0;
-    //if(rayDir.z < 0) rayDir.z = 0;
+    ray.origin = vec3(globalUBO.mainCameraModel[3]);
 
     // ----------------------------
     // 5. 可视化输出：根据射线方向上色（调试用）
@@ -130,19 +120,13 @@ void main() {
     sphere0.radius = 0.5f;
     sphere0.position = vec3(0,0,0);
     HitInfo hitInfo = RaySphere(ray, sphere0);
-    vec3 color = vec3(hitInfo.didHit, hitInfo.didHit, hitInfo.didHit);
+    //vec3 color = vec3(hitInfo.didHit, hitInfo.didHit, hitInfo.didHit);
 
-    if (hitInfo.didHit) {
-        // 用法向量着色，更容易看到效果
-        color = 0.5 * (hitInfo.normal + vec3(1.0));
-    } else {
-        color = vec3(0.0, 0.0, 0.2); // 深蓝色背景
-    }
-
+    vec3 color;
+    if (hitInfo.didHit) color = 0.5 * (hitInfo.normal + vec3(1.0));
+    else color = vec3(0.7, 0.7, 0.7); // background
     
     outColor = vec4(color, 1.0);
-
-    //outColor = vec4(uv, 0.0, 1.0);
 
     //test1
     // 直接在屏幕空间画圆，不依赖任何坐标系
