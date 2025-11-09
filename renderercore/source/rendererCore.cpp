@@ -445,22 +445,24 @@ void RendererCore::BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vec
         sets[i] = descriptorSets[i][currentFrame];
     }
 
+    int object_size = sizeof(ObjectTextData);
+    int text_size = sizeof(ObjectTextData);
     if(bEnableObject && bEnableText && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[2] ={OBJECT_TEXT_STRUCTURE_SIZE * dynamicObjectOffset, OBJECT_TEXT_STRUCTURE_SIZE * dynamicTextOffset};
+        uint32_t offsets[2] ={object_size * dynamicObjectOffset, text_size * dynamicTextOffset};
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             2, //dynamicOffsetCount. # means there is (exact)# uniforms in the descriptor sets that are set to be dynamic 
             offsets 
         );
     }else if (bEnableObject && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[1] ={OBJECT_TEXT_STRUCTURE_SIZE * dynamicObjectOffset}; 
+        uint32_t offsets[1] ={object_size * dynamicObjectOffset}; 
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             1,
             offsets 
         );
     }else if (bEnableText && pipelineBindPoint == VK_PIPELINE_BIND_POINT_GRAPHICS){
-        uint32_t offsets[1] ={OBJECT_TEXT_STRUCTURE_SIZE * dynamicTextOffset}; 
+        uint32_t offsets[1] ={text_size * dynamicTextOffset}; 
         vkCmdBindDescriptorSets(commandBuffers[commandBufferIndex][currentFrame], pipelineBindPoint, pipelineLayout, 0, 
             setCount, sets,  
             1,

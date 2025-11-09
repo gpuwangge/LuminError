@@ -270,7 +270,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             objectBufferInfo.buffer = objectUniformBuffers[i].buffer;
             objectBufferInfo.offset = 0;
             //spec requires alighment to be multiple of 256 (1080 TI). Maybe change this later?
-            objectBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
+            objectBufferInfo.range = sizeof(ObjectTextData);
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
@@ -285,7 +285,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             textBufferInfo.buffer = textUniformBuffers[i].buffer;
             textBufferInfo.offset = 0;
             //spec requires alighment to be multiple of 256 (1080 TI). Maybe change this later?
-            textBufferInfo.range = OBJECT_TEXT_STRUCTURE_SIZE;
+            textBufferInfo.range = sizeof(ObjectTextData);
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
