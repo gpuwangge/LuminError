@@ -1,13 +1,6 @@
 #version 450
 #include "../Common/constants.glsl"
-
-layout(set = 0, binding = UNIFORM_GLOBAL_BINDING) uniform GlobalBufferObject {
-	mat4 mainCameraProj;
-    mat4 mainCameraView;
-    float tanHalfFovY;
-    float aspect;
-    float padding[30];
-} globalUBO;
+#include "../Common/globalUBO.glsl"
 
 layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform UniformBufferObject {
     mat4 model;
@@ -26,7 +19,9 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
+    mat4 p = objectUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
+	mat4 v = objectUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
+    gl_Position = p * v * objectUBO.model * vec4(inPosition, 1.0);
     fragColor = inColor;
 	fragTexCoord = inTexCoord;
 }

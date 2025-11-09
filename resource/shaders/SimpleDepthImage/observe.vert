@@ -1,13 +1,6 @@
 #version 450
 #include "../Common/constants.glsl"
-
-layout(set = 0, binding = 0) uniform GlobalBufferObject {
-    mat4 mainCameraProj;
-    mat4 mainCameraView;
-    float tanHalfFovY;
-    float aspect;
-    float padding[30];
-} globalUBO;
+#include "../Common/globalUBO.glsl"
 
 layout(set = 0, binding = 1) uniform UniformBufferObject {
     mat4 model;

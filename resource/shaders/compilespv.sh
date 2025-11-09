@@ -6,7 +6,8 @@ else
     search_dir="$1"
 fi
 
-count=0
+pass=0
+error=0
 skipped=0
 
 compile_if_newer() {
@@ -14,14 +15,22 @@ compile_if_newer() {
     local output_file="${source_file}.spv"
     
     if [ ! -f "$output_file" ]; then
-        count=$((count+1))
         echo "📦 Compile ${source_file} (new)"
         glslc.exe "${source_file}" -o "${output_file}"
+        if [ $? -ne 0 ]; then
+            error=$((error+1))
+        else
+            pass=$((pass+1))
+        fi
         return 0
     elif [ "$source_file" -nt "$output_file" ]; then
-        count=$((count+1))
         echo "🔄 Compile ${source_file} (updated)"
         glslc.exe "${source_file}" -o "${output_file}"
+        if [ $? -ne 0 ]; then
+            error=$((error+1))
+        else
+            pass=$((pass+1))
+        fi
         return 0
     else
         skipped=$((skipped+1))
@@ -53,11 +62,14 @@ do
     fi
 done
 
+total=$((pass+error+skipped))
+
 echo ""
 echo "📊 Compilation summary:"
-echo "   Compiled: ${count}"
-echo "   Skipped: ${skipped}"
-echo "   Total: $((count + skipped))"
+echo "   Error: ${error}/${total}"
+echo "   Passed: ${pass}/${total}"
+echo "   Skipped: ${skipped}/${total}"
+echo "📊 Press ENTER to exit..."
 
 read
 

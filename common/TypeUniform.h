@@ -22,12 +22,13 @@ enum UniformTypes {
 };
 
 struct GlobalUniformBufferObject {
-    alignas(16) glm::mat4 mainCameraProj; //16*4=64 bytes
+    alignas(16) glm::mat4 mainCameraModel; //16*4=64 bytes
     alignas(16) glm::mat4 mainCameraView; //16*4=64 bytes
+    alignas(16) glm::mat4 mainCameraProj; //16*4=64 bytes
     alignas(4) float tanHalfFovY;          // 4 bytes
     alignas(4) float aspect;               // 4 bytes
-    alignas(4) float padding[30];          // 4 × 30 = 120 bytes
-    // Sum: 64 + 64 + 4 + 4 + 120 = 256 bytes
+    alignas(4) float padding[14];          // 4 × 14 = 56 bytes
+    // Sum: 64 + 64 + 64 + 4 + 4 + 56 = 256 bytes
 
     static VkDescriptorSetLayoutBinding GetBinding(){
         VkDescriptorSetLayoutBinding binding;

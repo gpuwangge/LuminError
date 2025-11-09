@@ -1,18 +1,11 @@
 #version 450
 #include "../Common/constants.glsl"
+#include "../Common/globalUBO.glsl"
 
 //difference of ubo and vertex buffer:
 //vertex buffer: each vertex has different buffer(store different attributes)
 //ubo: universal same
 //If you need different attribute for each vertex, use vertex buffer; otherwise use ubo
-
-layout(set = 0, binding = UNIFORM_GLOBAL_BINDING) uniform GlobalBufferObject {
-	mat4 mainCameraProj;
-    mat4 mainCameraView;
-    float tanHalfFovY;
-    float aspect;
-    float padding[30];
-} globalUBO;
 
 layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform UniformBufferObject {
 	mat4 model;
