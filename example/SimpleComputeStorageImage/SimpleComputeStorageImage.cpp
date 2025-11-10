@@ -19,10 +19,19 @@ namespace LuminError{
             GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
         }
 
-        void PostInitialize() override{
-            //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
-            GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage(200, 300, 1);
+        void RecordComputeCommandBuffer() override{
+            //Option 2: record command buffer every frame
+            GameEngine->ComputeDispatch(200, 300, 1);
+            
+            //Option 3: another test function
+            //GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage_(200, 300, 1); 
         }
+
+        //void PostInitialize() override{
+            //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
+            //Option 1: record command buffer once
+            //GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage(200, 300, 1);
+        //}
     };
 }
 #include "Launcher.hpp"

@@ -362,6 +362,7 @@ void GameEngine::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasC
     vkCmdSetDepthBias(renderer->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 }
 
+/*
 void GameEngine::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
     std::vector<VkCommandBuffer> &commandBuffers = renderer->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
     std::vector<VkImage> &swapChainImages = renderer->GetSwapchain_Images();
@@ -399,6 +400,37 @@ void GameEngine::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWo
     //renderer.currentFrame = 0;
     renderer->SetCurrentFrame(0);
 }
+void GameEngine::CreateComputeCommandBuffers_DispatchForSwapchainImage_(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
+    std::vector<VkCommandBuffer> &commandBuffers = renderer->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];
+    std::vector<VkImage> &swapChainImages = renderer->GetSwapchain_Images();
+    //renderer->SetCurrentFrame(i);
+    //std::cout<<"commandbuffer i: "<<i<<std::endl;
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+    //if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+    //    throw std::runtime_error("failed to begin recording command buffer!");
+    //}
+    //renderer.StartRecordComputeCommandBuffer(renderProcess.computePipeline, renderProcess.computePipelineLayout);
+    renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
+
+    renderer->RecordImageBarrier(commandBuffers[renderer->GetCurrentFrame()], swapChainImages[renderer->GetCurrentFrame()],
+        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
+        VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+
+    Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+
+    renderer->RecordImageBarrier(commandBuffers[renderer->GetCurrentFrame()], swapChainImages[renderer->GetCurrentFrame()],
+        VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+        VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+
+    //if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+    //    throw std::runtime_error("failed to record command buffer!");
+    //}
+    renderer->EndRecordComputeCommandBuffer();
+}*/
 
 }//namespace
 

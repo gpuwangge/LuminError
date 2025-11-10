@@ -17,9 +17,8 @@ namespace LuminError{
             GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
         }
 
-        void PostInitialize() override{
-            //Note: in this test, commandBuffers are recorded once(because they do not change every frame)
-            GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage(200, 300, 1);
+        void RecordComputeCommandBuffer() override{
+            GameEngine->ComputeDispatch(200, 300, 1);
         }
     };
 }
