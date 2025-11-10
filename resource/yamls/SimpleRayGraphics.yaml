@@ -42,8 +42,8 @@ Resources:
       resource_graphics_pipeline_depth_test_enable: true
       resource_graphics_pipeline_depth_write_enable: false
     - resource_graphics_pipeline_name: pipeline
-      resource_graphics_pipeline_vertexshader_name: simpleRayGeneration/shader.vert.spv
-      resource_graphics_pipeline_fragmentshader_name: simpleRayGeneration/shader.frag.spv
+      resource_graphics_pipeline_vertexshader_name: simpleRayGraphics/shader.vert.spv
+      resource_graphics_pipeline_fragmentshader_name: simpleRayGraphics/shader.frag.spv
 
 Uniforms:
   Graphics:
