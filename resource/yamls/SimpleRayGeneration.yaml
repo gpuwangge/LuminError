@@ -8,7 +8,6 @@ Objects:
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
     resource_model_id: 2
-    resource_texture_id_list: [1]
     resource_default_graphics_pipeline_id: 2
 
 Resources:
@@ -24,10 +23,6 @@ Resources:
     - resource_model_name: CUSTOM3D0
   - Textures:
     - resource_texture_name: textbox_cyber.png
-      resource_texture_miplevels: 1
-      resource_texture_cubemap: false
-      uniform_sampler_id: 0
-    - resource_texture_name: texture.jpg
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
@@ -77,7 +72,7 @@ Features:
   feature_graphics_rainbow_mipmap: false
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: true
-  feature_graphics_show_all_metric_controls: true
+  feature_graphics_show_all_metric_controls: false
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
