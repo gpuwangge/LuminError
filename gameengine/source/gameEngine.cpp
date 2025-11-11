@@ -180,17 +180,28 @@ void GameEngine::Update(){
     mainCamera.update(deltaTime);
 
     //global ubo must be uploaded after camera, and before object
-    GlobalUniformBufferObject globalUniformBufferObject{};
-    globalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
-    globalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
-    globalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
-    globalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
-    globalUniformBufferObject.mainCameraPos = mainCamera.Position;
-    globalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+    StructGraphicsGlobalUniformBuffer graphicsGlobalUniformBufferObject{};
+    graphicsGlobalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
+    graphicsGlobalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
+    graphicsGlobalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
+    graphicsGlobalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
+    graphicsGlobalUniformBufferObject.mainCameraPos = mainCamera.Position;
+    graphicsGlobalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
     float fovY = glm::radians(mainCamera.fov);
-    globalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
-    
-    renderer->uploadGraphicsGlobalUniformBuffer(renderer->GetCurrentFrame(), &globalUniformBufferObject, sizeof(GlobalUniformBufferObject));
+    graphicsGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
+    renderer->uploadGraphicsGlobalUniformBuffer(renderer->GetCurrentFrame(), &graphicsGlobalUniformBufferObject, sizeof(StructGraphicsGlobalUniformBuffer));
+
+    StructComputeGlobalUniformBuffer computeGlobalUniformBufferObject{};
+    computeGlobalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
+    computeGlobalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
+    computeGlobalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
+    computeGlobalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
+    computeGlobalUniformBufferObject.mainCameraPos = mainCamera.Position;
+    computeGlobalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+    fovY = glm::radians(mainCamera.fov);
+    computeGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
+    renderer->uploadComputeGlobalUniformBuffer(renderer->GetCurrentFrame(), &computeGlobalUniformBufferObject, sizeof(StructComputeGlobalUniformBuffer));
+
 
     for(int i = 0; i < lights.size(); i++){//lightCameras.size()
         if(lights.size() > 0 && lightCameras[i].focusObjectId < objects.size())

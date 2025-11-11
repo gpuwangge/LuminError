@@ -20,12 +20,11 @@ void CComputeDescriptorManager::createDescriptorPool(){
     //std::cout<<"createDescriptorPool::textureSamplers.size() = " << textureSamplers.size()<<std::endl;
     std::cout<<"Compute Pool size = " << getPoolSize()<<std::endl;
 
-    if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
-        //std::cout<<": Custom Buffer";
+    if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL){
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	 	computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-		counter++;
-	}
+        computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+    }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_DOUBLE){
         //std::cout<<": Storage Buffer(2)";
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -37,6 +36,12 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
+    if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
+        //std::cout<<": Custom Buffer";
+        computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	 	computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		counter++;
+	}
     if(computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE){
         //std::cout<<": Storage Image(for Texture)";
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
@@ -75,16 +80,15 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
 	int counter = 0;
     std::cout<<"Layout(Compute) size = " << getLayoutSize()<<std::endl;
     //std::cout.flush();
-
-    if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
+    if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL){
+        VkDescriptorSetLayoutBinding binding = StructComputeGlobalUniformBuffer::GetBinding();
         computeBindings[counter].binding = counter;
-		computeBindings[counter].descriptorCount = customBinding->descriptorCount;
-		computeBindings[counter].descriptorType = customBinding->descriptorType;
-		computeBindings[counter].pImmutableSamplers = customBinding->pImmutableSamplers;
-		computeBindings[counter].stageFlags = customBinding->stageFlags;
+		computeBindings[counter].descriptorCount = binding.descriptorCount;
+		computeBindings[counter].descriptorType = binding.descriptorType;
+		computeBindings[counter].pImmutableSamplers = binding.pImmutableSamplers;
+		computeBindings[counter].stageFlags = binding.stageFlags;
 		counter++;
-	}
-
+    }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_DOUBLE){
         computeBindings[counter].binding = counter;
         computeBindings[counter].descriptorCount = 1;
@@ -101,6 +105,14 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
         computeBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
         counter++;
     }
+    if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
+        computeBindings[counter].binding = counter;
+		computeBindings[counter].descriptorCount = customBinding->descriptorCount;
+		computeBindings[counter].descriptorType = customBinding->descriptorType;
+		computeBindings[counter].pImmutableSamplers = customBinding->pImmutableSamplers;
+		computeBindings[counter].stageFlags = customBinding->stageFlags;
+		counter++;
+	}
     if(computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE){
         computeBindings[counter].binding = counter;
         computeBindings[counter].descriptorCount = 1;
@@ -163,19 +175,19 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
         descriptorWrites.resize(descriptorSize);
         int counter = 0;
 
-        //std::cout<<"m_customUniformBufferSize = "<<m_customUniformBufferSize<<std::endl;
-        VkDescriptorBufferInfo customBufferInfo{}; //for custom uniform
-        if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
-            customBufferInfo.buffer = customUniformBuffers[i].buffer;
-            customBufferInfo.offset = 0;
-            customBufferInfo.range = m_customUniformBufferSize;
+        VkDescriptorBufferInfo globalBufferInfo{}; //for global
+        if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL){
+            //std::cout<<"Global3"<<std::endl;
+            globalBufferInfo.buffer = m_globalUniformBuffers[i].buffer;
+            globalBufferInfo.offset = 0;
+            globalBufferInfo.range = sizeof(StructComputeGlobalUniformBuffer);
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets[i];
             descriptorWrites[counter].dstBinding = counter;
             descriptorWrites[counter].dstArrayElement = 0;
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites[counter].descriptorCount = 1;
-            descriptorWrites[counter].pBufferInfo = &customBufferInfo;
+            descriptorWrites[counter].pBufferInfo = &globalBufferInfo;
             counter++;
         }
 
@@ -208,6 +220,22 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             descriptorWrites[counter].descriptorCount = 1;
             descriptorWrites[counter].pBufferInfo = &storageBufferInfo_2;
+            counter++;
+        }
+
+        //std::cout<<"m_customUniformBufferSize = "<<m_customUniformBufferSize<<std::endl;
+        VkDescriptorBufferInfo customBufferInfo{}; //for custom uniform
+        if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
+            customBufferInfo.buffer = customUniformBuffers[i].buffer;
+            customBufferInfo.offset = 0;
+            customBufferInfo.range = m_customUniformBufferSize;
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &customBufferInfo;
             counter++;
         }
 
@@ -254,35 +282,31 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
     //std::cout<<"Done set descriptor(compute). "<<std::endl;
 }
 
-
- /************
- * 1 COMPUTE_UNIFORMBUFFER_CUSTOM
+/************
+ * 1 COMPUTE_UNIFORMBUFFER_GLOBAL
  ************/
-std::vector<CWxjBuffer> CComputeDescriptorManager::customUniformBuffers;
-std::vector<void*> CComputeDescriptorManager::customUniformBuffersMapped;
-VkDeviceSize CComputeDescriptorManager::m_customUniformBufferSize;
-void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUniformBufferSize){
-    computeUniformTypes |= COMPUTE_UNIFORMBUFFER_CUSTOM;
-    //std::cout<<"addCustomUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
+std::vector<CWxjBuffer> CComputeDescriptorManager::m_globalUniformBuffers; 
+std::vector<void*> CComputeDescriptorManager::m_globalUniformBuffersMapped;
+//VkDeviceSize CComputeDescriptorManager::m_globalUniformBufferSize;
+void CComputeDescriptorManager::addGlobalUniformBuffer(){
+    computeUniformTypes |= COMPUTE_UNIFORMBUFFER_GLOBAL;
 
-	customUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	customUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+    m_globalUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    m_globalUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
-	m_customUniformBufferSize = customUniformBufferSize;
-
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
-	}    
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        VkResult result = m_globalUniformBuffers[i].init(sizeof(StructComputeGlobalUniformBuffer), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_globalUniformBuffers[i].deviceMemory, 0, sizeof(StructComputeGlobalUniformBuffer), 0, &m_globalUniformBuffersMapped[i]);
+    }
 }
-void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
-    if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
+void CComputeDescriptorManager::uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize){
+    if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL) {
         if (data && dataSize > 0) {
-            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+            memcpy(m_globalUniformBuffersMapped[currentFrame], data, dataSize);
         }
     }
 }
-
+ 
 
 /************
  * 2 COMPUTE_STORAGEBUFFER_DOUBLE
@@ -320,6 +344,34 @@ void CComputeDescriptorManager::downloadStorageBuffer(uint32_t currentFrame, voi
 }
 
 /************
+ * 3 COMPUTE_UNIFORMBUFFER_CUSTOM
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::customUniformBuffers;
+std::vector<void*> CComputeDescriptorManager::customUniformBuffersMapped;
+VkDeviceSize CComputeDescriptorManager::m_customUniformBufferSize;
+void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUniformBufferSize){
+    computeUniformTypes |= COMPUTE_UNIFORMBUFFER_CUSTOM;
+    //std::cout<<"addCustomUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
+
+	customUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	customUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+	m_customUniformBufferSize = customUniformBufferSize;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
+	}    
+}
+void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
+    if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
+        if (data && dataSize > 0) {
+            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+        }
+    }
+}
+
+/************
  * 3 COMPUTE_STORAGEIMAGE_TEXTURE
  * 4 COMPUTE_STORAGEIMAGE_SWAPCHAIN
  ************/
@@ -333,9 +385,9 @@ void CComputeDescriptorManager::addStorageImage(VkBufferUsageFlags usage){
 int CComputeDescriptorManager::getPoolSize(){
     //std::cout<<"getPoolSize::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 	int descriptorPoolSize = 0;
-    
+    descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL ? 1:0;
+    descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_DOUBLE ? 2:0; //add 2 because use storage for input/output,count as 2 unique uniforms
 	descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
-	descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_DOUBLE ? 2:0; //add 2 because use storage for input/output,count as 2 unique uniforms
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN ? 1:0;
 	return descriptorPoolSize;
@@ -349,11 +401,13 @@ int CComputeDescriptorManager::getSetSize(){
 }
 
 void CComputeDescriptorManager::DestroyAndFree(){
-    for (size_t i = 0; i < customUniformBuffers.size(); i++) {
-        customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
-    }
+    for (size_t i = 0; i < m_globalUniformBuffers.size(); i++) 
+        m_globalUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     for (size_t i = 0; i < storageBuffers.size(); i++) {
         storageBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < customUniformBuffers.size(); i++) {
+        customUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
 
     vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), computeDescriptorPool, nullptr);

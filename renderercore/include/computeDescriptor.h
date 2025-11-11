@@ -41,14 +41,13 @@ public:
 
 
     /************
-     * 1 COMPUTE_UNIFORMBUFFER_CUSTOM
+     * 1 COMPUTE_UNIFORMBUFFER_GLOBAL
      ************/
-    static std::vector<CWxjBuffer> customUniformBuffers; 
-	static std::vector<void*> customUniformBuffersMapped;
-    static VkDeviceSize m_customUniformBufferSize;
-    void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
-    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
-
+    static std::vector<CWxjBuffer> m_globalUniformBuffers; 
+	static std::vector<void*> m_globalUniformBuffersMapped;
+    //static VkDeviceSize m_globalUniformBufferSize;
+    void addGlobalUniformBuffer();
+    void uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
      * 2 COMPUTE_STORAGEBUFFER_DOUBLE
@@ -60,6 +59,18 @@ public:
     void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT); //the same function to add storage 1&2
     void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size);
     void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size);
+
+    /************
+     * 3 COMPUTE_UNIFORMBUFFER_CUSTOM
+     ************/
+    static std::vector<CWxjBuffer> customUniformBuffers; 
+	static std::vector<void*> customUniformBuffersMapped;
+    static VkDeviceSize m_customUniformBufferSize;
+    void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
+    void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
+
+
+    
 
 
     /************

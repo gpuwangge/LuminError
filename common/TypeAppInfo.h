@@ -57,8 +57,9 @@ struct UniformConfig {
         VkDescriptorSetLayoutBinding Binding{};
     } GraphicsCustom;
 
-    bool b_uniform_compute_custom = false;
+    bool b_uniform_compute_global = false;
     bool b_uniform_compute_storage = false;
+    bool b_uniform_compute_custom = false;
     bool b_uniform_compute_swapchain_storage = false;
     bool b_uniform_compute_texture_storage = false;
     struct ComputeCustomInfo {
@@ -82,8 +83,9 @@ struct UniformConfig {
     }
 
     void loadComputeFromYaml(const YAML::Node& node) {
-        b_uniform_compute_custom                       = getOrDefault(node, "uniform_compute_custom", false);
+        b_uniform_compute_global                      = getOrDefault(node, "uniform_compute_global", false);
         b_uniform_compute_storage                      = getOrDefault(node, "uniform_compute_storage", false);
+        b_uniform_compute_custom                       = getOrDefault(node, "uniform_compute_custom", false);
         b_uniform_compute_swapchain_storage           = getOrDefault(node, "uniform_compute_swapchain_storage", false);
         b_uniform_compute_texture_storage             = getOrDefault(node, "uniform_compute_texture_storage", false);
     }

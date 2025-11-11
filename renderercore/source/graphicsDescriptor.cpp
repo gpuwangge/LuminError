@@ -109,7 +109,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_GLOBAL){
         //std::cout<<"Global2"<<std::endl;
-        VkDescriptorSetLayoutBinding binding = GlobalUniformBufferObject::GetBinding();
+        VkDescriptorSetLayoutBinding binding = StructGraphicsGlobalUniformBuffer::GetBinding();
         graphicsBindings[bindingCounter].binding = bindingCounter;
 		graphicsBindings[bindingCounter].descriptorCount = binding.descriptorCount;
 		graphicsBindings[bindingCounter].descriptorType = binding.descriptorType;
@@ -255,7 +255,7 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             //std::cout<<"Global3"<<std::endl;;
             globalBufferInfo.buffer = m_globalUniformBuffers[i].buffer;
             globalBufferInfo.offset = 0;
-            globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
+            globalBufferInfo.range = sizeof(StructGraphicsGlobalUniformBuffer);
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets_general[i];
             descriptorWrites[counter].dstBinding = counter;
@@ -526,8 +526,8 @@ void CGraphicsDescriptorManager::addGlobalUniformBuffer(){
     m_globalUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkResult result = m_globalUniformBuffers[i].init(sizeof(GlobalUniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_globalUniformBuffers[i].deviceMemory, 0, sizeof(GlobalUniformBufferObject), 0, &m_globalUniformBuffersMapped[i]);
+        VkResult result = m_globalUniformBuffers[i].init(sizeof(StructGraphicsGlobalUniformBuffer), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), m_globalUniformBuffers[i].deviceMemory, 0, sizeof(StructGraphicsGlobalUniformBuffer), 0, &m_globalUniformBuffersMapped[i]);
     }
 }
 void CGraphicsDescriptorManager::uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {

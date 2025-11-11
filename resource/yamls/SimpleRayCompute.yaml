@@ -5,8 +5,9 @@ Resources:
 Uniforms:
   Compute:
     uniform_compute_name: Compute
-    uniform_compute_custom: false
+    uniform_compute_global: true
     uniform_compute_storage: false
+    uniform_compute_custom: false
     uniform_compute_texture_storage: false
     uniform_compute_swapchain_storage: true
   
@@ -19,4 +20,15 @@ Features:
   feature_graphics_show_performance_control: false
   feature_graphics_show_all_metric_controls: false
 
-
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,0,-2.55]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 90
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60

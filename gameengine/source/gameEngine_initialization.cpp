@@ -83,7 +83,10 @@ void GameEngine::Initialize(){
         renderer->SetEnableText(true);
     }   
     if(appInfo->Uniform.b_uniform_graphics_global){
-        renderer->addGlobalUniformBuffer();
+        renderer->addGraphicsGlobalUniformBuffer();
+    }
+    if(appInfo->Uniform.b_uniform_compute_global){
+        renderer->addComputeGlobalUniformBuffer();
     }
     if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) renderer->addDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) renderer->addLightDepthImageSamplerUniformBuffer();

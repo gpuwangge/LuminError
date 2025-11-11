@@ -269,7 +269,7 @@ namespace LERenderer{
         void addGraphicsCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { graphicsDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
         void uploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { graphicsDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
         void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) override { graphicsDescriptorManager.addLightingUniformBuffer(lightingUniformBuffersMapped); }
-        void addGlobalUniformBuffer() override { graphicsDescriptorManager.addGlobalUniformBuffer(); }
+        void addGraphicsGlobalUniformBuffer() override { graphicsDescriptorManager.addGlobalUniformBuffer(); }
         void uploadGraphicsGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { graphicsDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
         void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) override { graphicsDescriptorManager.addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats); }
         void addDepthImageSamplerUniformBuffer() override {graphicsDescriptorManager.addDepthImageSamplerUniformBuffer(); }
@@ -292,6 +292,8 @@ namespace LERenderer{
         void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { computeDescriptorManager.createDescriptorSetLayout(customBinding); }
         void createComputeDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL) override { computeDescriptorManager.createDescriptorSets(textureImageView, swapchainImageViews); }
 
+        void addComputeGlobalUniformBuffer() { computeDescriptorManager.addGlobalUniformBuffer(); }
+        void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) { computeDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
         void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { computeDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
         void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
         void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer(storageBufferSize, usage); }

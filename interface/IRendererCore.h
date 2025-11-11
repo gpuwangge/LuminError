@@ -185,7 +185,7 @@ namespace LERenderer{
         virtual void addGraphicsCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
         virtual void uploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addLightingUniformBuffer(std::vector<void*>& lightingUniformBuffersMapped) = 0;
-        virtual void addGlobalUniformBuffer() = 0;
+        virtual void addGraphicsGlobalUniformBuffer() = 0;
         virtual void uploadGraphicsGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addTextureImageSamplerUniformBuffer(std::vector<int> &mipLevels, std::vector<std::array<bool,3>> &UVWRepeats) = 0;
         virtual void addDepthImageSamplerUniformBuffer() = 0;
@@ -206,6 +206,8 @@ namespace LERenderer{
         virtual void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
         virtual void createComputeDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL) = 0;
 
+        virtual void addComputeGlobalUniformBuffer() = 0;
+        virtual void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
         virtual void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) = 0; //the same function to add storage 1&2

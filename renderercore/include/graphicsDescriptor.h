@@ -49,7 +49,7 @@ public:
      ************/
     static std::vector<CWxjBuffer> m_globalUniformBuffers; 
 	static std::vector<void*> m_globalUniformBuffersMapped;
-    static VkDeviceSize m_globalUniformBufferSize;
+    //static VkDeviceSize m_globalUniformBufferSize;
     void addGlobalUniformBuffer();
     void uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
