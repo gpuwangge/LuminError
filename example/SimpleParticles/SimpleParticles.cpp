@@ -38,10 +38,12 @@ namespace LuminError{
 
         void Initialize() override {
             GameEngine->SetRenderMode(RenderModes::COMPUTE_GRAPHICS);
+            
             GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
             //std::cout<<"sizeof(StructCustomUniformBuffer)="<<sizeof(StructCustomUniformBuffer)<<std::endl;
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
+
             GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
             //std::cout<<"sizeof(StructStorageBuffer)="<<sizeof(StructStorageBuffer)<<std::endl;
             GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
