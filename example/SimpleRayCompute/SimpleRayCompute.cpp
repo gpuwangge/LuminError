@@ -18,7 +18,7 @@ namespace LuminError{
         }
 
         void RecordComputeCommandBuffer() override{
-            GameEngine->ComputeDispatch(200, 300, 1);
+            GameEngine->ComputeDispatch(50, 50, 1);
         }
     };
 }
