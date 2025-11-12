@@ -1,15 +1,16 @@
-/* ***********
+/************
  * Implement Ray Tracking using compute pipeline
  * Use SSBO(Shader Storage Buffer Object, or compute storage uniform) as input (and internal output)
  * Use swapchain image as final output
- * *********** */
+ ************ */
 #include "IGame.h"
 #include "Enum.h"
 #include "Config.h"
 namespace LuminError{
     class Game : public IGame {
         struct StructStorageBuffer {
-            glm::vec4 data;
+            //glm::vec4 data;
+            glm::vec4 data[800 * 800] = {};
         };
         StructStorageBuffer storageBufferObject{};
 
@@ -45,11 +46,15 @@ namespace LuminError{
             GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
         }
 
+        void PostInitialize() override{
+            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //initialize to zeros
+        }
+
         void Update() override {
             double et = GameEngine->GetElapseTime();
 
-            storageBufferObject.data = {1.0f, 2.0f, 3.0f, 4.0f};
-            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
+            //storageBufferObject.data = {1.0f, 2.0f, 3.0f, 4.0f};
+            //GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
 
             customUniformBufferObject.spherePos0 = glm::vec3(1.1*cos(et * 0.5), 0.2, 1.1*sin(et * 0.5)-1);
             customUniformBufferObject.spherePos1 = glm::vec3(0.5*sin(0.5+et * 0.75), 1.0, 0.5*cos(et * 0.75)-1);

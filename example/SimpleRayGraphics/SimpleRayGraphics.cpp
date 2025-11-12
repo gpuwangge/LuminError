@@ -1,6 +1,6 @@
 /************
  * Use Graphics pipeline to implement ray tracing
- * *********** */
+ *************/
 #include "IGame.h"
 #include "TypeVertex.h"
 
