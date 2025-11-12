@@ -10,6 +10,7 @@
 namespace LuminError{
     class Game : public IGame {
         const int KernelRunNumber = 5;
+
         struct StructStorageBuffer {
             glm::vec4 data;
         };
@@ -17,7 +18,7 @@ namespace LuminError{
 
         void Initialize() override{
             GameEngine->SetRenderMode(RenderModes::COMPUTE);
-            GameEngine->SetComputeStorageBufferSize(1); //this can be any non-zero number, in order to enable storage buffer
+            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
             GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         }
 

@@ -8,6 +8,11 @@
 #include "Config.h"
 namespace LuminError{
     class Game : public IGame {
+        struct StructStorageBuffer {
+            glm::vec4 data;
+        };
+        StructStorageBuffer storageBufferObject{};
+
         struct StructCustomUniformBuffer {
             alignas(16) glm::vec3 spherePos0 = glm::vec3(0,0,0);
             alignas(16) glm::vec3 spherePos1 = glm::vec3(0,0,0);
@@ -32,6 +37,9 @@ namespace LuminError{
         void Initialize() override {
             GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
 
+            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
+            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
             GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
@@ -39,6 +47,10 @@ namespace LuminError{
 
         void Update() override {
             double et = GameEngine->GetElapseTime();
+
+            storageBufferObject.data = {1.0f, 2.0f, 3.0f, 4.0f};
+            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
+
             customUniformBufferObject.spherePos0 = glm::vec3(1.1*cos(et * 0.5), 0.2, 1.1*sin(et * 0.5)-1);
             customUniformBufferObject.spherePos1 = glm::vec3(0.5*sin(0.5+et * 0.75), 1.0, 0.5*cos(et * 0.75)-1);
 		    GameEngine->UploadComputeCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));

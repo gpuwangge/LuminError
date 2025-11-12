@@ -5,8 +5,9 @@ Resources:
 Uniforms:
   Compute:
     uniform_compute_name: Compute
-    uniform_compute_custom: false
+    uniform_compute_global: false
     uniform_compute_storage: true
+    uniform_compute_custom: false
     uniform_compute_texture_storage: false
     uniform_compute_swapchain_storage: false
   
