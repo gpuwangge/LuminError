@@ -268,7 +268,12 @@ void main() {
 
     // ----------------------------
     // 5. Output
-    uint state = 12345u;
+    //uint state = uint(gl_FragCoord.x) ^ uint(gl_FragCoord.y);
+    uint state = uint(gl_FragCoord.x);
+    state = state * 747796405u + uint(gl_FragCoord.y);
+    //state = state * 747796405u + customUBO.frameCount;
+    state = state * 747796405u + 2891336453u;
+
     vec3 birghtness_score_sum = vec3(0.0);
     for(int i = 0; i < RAY_PER_PIXEL; i++)
         birghtness_score_sum += TraceRay(ray, state);

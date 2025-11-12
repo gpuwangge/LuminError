@@ -120,6 +120,8 @@ namespace LEGameEngine{
 
         AppInfo* appInfo = nullptr;
 
+        int GetFrameCount() override { return frameCount; }
+
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override;
         bool Get_feature_graphics_show_all_metric_controls() override;
