@@ -197,10 +197,9 @@ vec3 TraceRay(Ray ray, inout uint state){
         // 处理折射/透射材质（玻璃、水等）
         if (mat.transmission > 0.0) {
             float refractionRatio = mat.ior;
+            bool entering = dot(hitInfo.normal, -ray.dir) > 0.0;
             
-            // 判断是进入还是离开材质
-            if (dot(hitInfo.normal, -ray.dir) < 0.0) {
-                // 离开材质，翻转法线和折射率
+            if (!entering) {
                 hitInfo.normal = -hitInfo.normal;
                 refractionRatio = 1.0 / mat.ior;
             }
@@ -208,26 +207,25 @@ vec3 TraceRay(Ray ray, inout uint state){
             // 计算折射方向
             vec3 refractedDir = refract(ray.dir, hitInfo.normal, refractionRatio);
             
-            // 如果发生全反射，则只反射
-            if (length(refractedDir) < 0.001) {
-                // 全反射
+            float reflectionProbability = (F.r + F.g + F.b) / 3.0;
+            
+            // 对于玻璃，降低反射概率阈值，让更多光线折射
+            if (length(refractedDir) < 0.001 || Rand(state) < reflectionProbability * 0.8) {
+                // 反射
                 ray.dir = reflect(ray.dir, hitInfo.normal);
-                throughput *= F;
-            } else {
-                // 根据菲涅尔项决定反射和折射的比例
-                float reflectionProbability = (F.r + F.g + F.b) / 3.0;
-                
-                if (Rand(state) < reflectionProbability) {
-                    // 反射
-                    ray.dir = reflect(ray.dir, hitInfo.normal);
-                    throughput *= F / reflectionProbability;
-                } else {
-                    // 折射
-                    ray.dir = refractedDir;
-                    throughput *= mat.transmissionColor * (1.0 - F) / (1.0 - reflectionProbability);
+                // 添加粗糙度影响
+                if (mat.roughness > 0.0) {
+                    ray.dir = normalize(mix(ray.dir, RandomDirectionInHemisphere(hitInfo.normal, state), mat.roughness));
                 }
+                throughput *= F / max(reflectionProbability, 0.1);
+            } else {
+                // 折射 - 玻璃的主要路径
+                ray.dir = refractedDir;
+                // 玻璃内部吸收很少，保持高吞吐量
+                vec3 glassColor = mat.transmissionColor * mat.albedo;
+                throughput *= glassColor * (1.0 - F) / max(1.0 - reflectionProbability, 0.1);
             }
-        } 
+        }
         // 处理金属材质（高反射）
         else if (mat.metallic > 0.8) {
             // 金属材质主要进行镜面反射
@@ -291,16 +289,16 @@ void main(){
     spheres[0].material.transmission = 0.0;            // 不透光
     spheres[0].material.transmissionColor = vec3(1.0);
 
-    // 玻璃球体 - 透明玻璃材质7
+    // 玻璃球体 - 透明玻璃材质
     spheres[1].radius = 0.75f;
     spheres[1].position = vec3(0, 0, -1);
     spheres[1].material.albedo = vec3(1.0, 1.0, 1.0);  // 白色
     spheres[1].material.metallic = 0.0;                // 非金属
-    spheres[1].material.roughness = 0.02;              // 非常光滑
+    spheres[1].material.roughness = 0.05;              // 非常光滑
     spheres[1].material.alpha = 0.1;                   // 透明
     spheres[1].material.emissionStrength = 0.0f;       // 不自发光
     spheres[1].material.emissionColor = vec3(0.0);
-    spheres[1].material.reflectance = 0.04;
+    spheres[1].material.reflectance = 0.05;
     spheres[1].material.specular = 1.0;
     spheres[1].material.ior = 1.5;                     // 玻璃的折射率
     spheres[1].material.transmission = 0.9;            // 高透射率
