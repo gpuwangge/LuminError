@@ -1,4 +1,4 @@
-project(logcore)
+project(core_log)
 
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")

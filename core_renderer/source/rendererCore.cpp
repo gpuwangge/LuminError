@@ -632,7 +632,7 @@ void RendererCore::SetApplication(LEGameEngine::IGameEngine* pApplication) {
 
     void* pVoid = nullptr;
         //Load Log Core Module
-    LoadModuleAndInstance(handle_module_logcore, pVoid, "logcore.dll");
+    LoadModuleAndInstance(handle_module_logcore, pVoid, "core_log.dll");
     //logger = std::shared_ptr<LELog::ILogCore>(static_cast<LELog::ILogCore*>(pVoid));
     logger = static_cast<LELog::ILogCore*>(pVoid);
 

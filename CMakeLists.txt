@@ -13,7 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) #all lib goes here
 
 add_subdirectory(common)
 add_subdirectory(interface)
-add_subdirectory(logcore)
+add_subdirectory(core_log)
 add_subdirectory(yamlcore)
 add_subdirectory(sdlcore)
 add_subdirectory(resourcecore)
