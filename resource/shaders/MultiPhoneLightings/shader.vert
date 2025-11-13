@@ -1,7 +1,7 @@
 #version 450 core
 #include "../Common/constants.glsl"
 #include "../Common/objectUBO.glsl"
-#include "../Common/globalUBO.glsl"
+#include "../Common/graphicsGlobalUBO.glsl"
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;

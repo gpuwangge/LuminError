@@ -1,5 +1,5 @@
-#ifndef GLOBALUBO_GLSL
-#define GLOBALUBO_GLSL
+#ifndef GRAPHICSGLOBALUBO_GLSL
+#define GRAPHICSGLOBALUBO_GLSL
 
 layout(set = 0, binding = UNIFORM_GLOBAL_BINDING) uniform GlobalBufferObject {
     mat4 mainCameraView;

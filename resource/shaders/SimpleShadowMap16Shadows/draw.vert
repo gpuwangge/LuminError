@@ -1,6 +1,6 @@
 #version 450
 #include "../Common/constants.glsl"
-#include "../Common/globalUBO.glsl"
+#include "../Common/graphicsGlobalUBO.glsl"
 
 layout(set = 0, binding = UNIFORM_OBJECT_BINDING) uniform StructObjectBuffer {
     mat4 model;

@@ -1,6 +1,6 @@
 #version 450
 #include "constants.glsl"
-#include "globalUBO.glsl"
+#include "graphicsGlobalUBO.glsl"
 
 layout(set = 0, binding = UNIFORM_TEXT_BINDING) uniform TextUniformBufferObject {
     mat4 model;
