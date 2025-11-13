@@ -33,21 +33,20 @@ public:
 		glm::mat4 view;
 	} matrices;
 
-	struct{
-		bool forward = false;
-		bool backward = false;
-		bool left = false;
-		bool right = false;
-		bool up = false;
-		bool down = false;
-		
-		bool pitchup = false;
-		bool pitchdown = false;
-		bool yawleft = false;
-		bool yawright = false;
-		bool rollleft = false;
-		bool rollright = false;
-	} state;
+	// struct{
+	// 	bool forward = false;
+	// 	bool backward = false;
+	// 	bool left = false;
+	// 	bool right = false;
+	// 	bool up = false;
+	// 	bool down = false;
+	// 	bool pitchup = false;
+	// 	bool pitchdown = false;
+	// 	bool yawleft = false;
+	// 	bool yawright = false;
+	// 	bool rollleft = false;
+	// 	bool rollright = false;
+	// } state;
 
 	//this function is provided to user
 	void setPerspective(float fov, float aspect, float znear, float zfar){ 

@@ -23,6 +23,9 @@ layout(set = 0, binding = 2, std430) buffer SBOOut {
 
 layout (set = 0, binding = 3) uniform CustomBufferObject {
     int frameCount;
+    bool cameraInMotion;
+    int padding1;
+    int padding2;
     //vec3 spherePos0;
     //vec3 spherePos1;
 } customUBO;
@@ -412,10 +415,12 @@ void main(){
     //pixelsOut[index] = (vec4(finalColor, 1.0) + pixelsOut[index]) / 2.0f;
     //float coff = 0.75f;
     //sboOut.pixels[index] = (vec4(currentFrameColor, 1.0)*coff + sboIn.pixels[index]*coff );
-    float alpha = 0.1;
-    sboOut.pixels[index] = vec4(currentFrameColor, 1.0) * alpha + 
-                        sboIn.pixels[index] * (1.0 - alpha);
-
+    if(customUBO.cameraInMotion){
+        sboOut.pixels[index] = vec4(currentFrameColor, 1.0);
+    }else{
+        float alpha = 0.01f;
+        sboOut.pixels[index] = vec4(currentFrameColor, 1.0) * alpha + sboIn.pixels[index] * (1.0 - alpha);
+    }
 
     
     imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), sboOut.pixels[index]);

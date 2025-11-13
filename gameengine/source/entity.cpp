@@ -86,6 +86,15 @@ void CEntity::Update(float deltaTime){
         TempMoveAngularVelocity.w -= deltaTime;
     }
 
+    const float EPSILON = 1e-2f;
+    bool isVecZero = glm::dot(CurrentVelocity, CurrentVelocity) < EPSILON;
+    bool isAngVecZero = glm::dot(CurrentAngularVelocity, CurrentAngularVelocity) < EPSILON;
+    if(isVecZero && isAngVecZero){
+        bInMotion = false;
+        //return; //can not return here, because even entity is not in motion, rotation and scale still works
+    }else bInMotion = true;
+
+
     /**********
     * Vulkan Screen Coordinate: Right Hand Rule, x from left to right, y from up to bottom, z from far to near 
     **********/

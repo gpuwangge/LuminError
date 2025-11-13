@@ -18,6 +18,9 @@ public:
     glm::vec3 LengthMax_original = glm::vec3();
     glm::vec3 Length = glm::vec3(); //length after scale, the true "length"
 
+    bool bInMotion = false;
+    bool IsInMotion() { return bInMotion; }
+
     /******************
     * Tranformation
     *******************/

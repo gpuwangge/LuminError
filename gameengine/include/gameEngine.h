@@ -121,6 +121,7 @@ namespace LEGameEngine{
         AppInfo* appInfo = nullptr;
 
         int GetFrameCount() override { return frameCount; }
+        bool GetCameraInMotion() override { return mainCamera.IsInMotion(); }
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override;

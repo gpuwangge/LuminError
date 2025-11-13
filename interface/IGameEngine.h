@@ -23,6 +23,7 @@ namespace LEGameEngine{
         virtual void SetGameContent(LuminError::IGame* gameContent) = 0;
 
         virtual int GetFrameCount() = 0;
+        virtual bool GetCameraInMotion() = 0;
 
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;

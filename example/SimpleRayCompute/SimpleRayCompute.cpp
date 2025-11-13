@@ -15,7 +15,10 @@ namespace LuminError{
         StructStorageBuffer storageBufferObject{};
 
         struct StructCustomUniformBuffer {
-            alignas(16) int frameCount = 0;
+            alignas(4) int frameCount = 0;
+            alignas(4) bool cameraInMotion = false;
+            alignas(4) int padding1 = 0;
+            alignas(4) int padding2 = 0;
             //alignas(16) glm::vec3 spherePos0 = glm::vec3(0,0,0);
             //alignas(16) glm::vec3 spherePos1 = glm::vec3(0,0,0);
 
@@ -59,6 +62,7 @@ namespace LuminError{
             //GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
 
             customUniformBufferObject.frameCount = GameEngine->GetFrameCount();
+            customUniformBufferObject.cameraInMotion = GameEngine->GetCameraInMotion();
             //customUniformBufferObject.spherePos0 = glm::vec3(1.1*cos(et * 0.5), 0.2, 1.1*sin(et * 0.5)-1);
             //customUniformBufferObject.spherePos1 = glm::vec3(0.5*sin(0.5+et * 0.75), 1.0, 0.5*cos(et * 0.75)-1);
 		    GameEngine->UploadComputeCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
