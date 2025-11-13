@@ -411,10 +411,6 @@ void main(){
     // 6. Accumulate
     uint index = gl_GlobalInvocationID.y * gridSize.x + gl_GlobalInvocationID.x;
 
-    //sboOut.pixels[index] = vec4(currentFrameColor, 1.0);
-    //pixelsOut[index] = (vec4(finalColor, 1.0) + pixelsOut[index]) / 2.0f;
-    //float coff = 0.75f;
-    //sboOut.pixels[index] = (vec4(currentFrameColor, 1.0)*coff + sboIn.pixels[index]*coff );
     if(customUBO.cameraInMotion){
         sboOut.pixels[index] = vec4(currentFrameColor, 1.0);
     }else{

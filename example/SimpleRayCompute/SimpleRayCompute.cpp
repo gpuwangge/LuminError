@@ -62,9 +62,6 @@ namespace LuminError{
         void Update() override {
             double et = GameEngine->GetElapseTime();
 
-            //storageBufferObject.data = {1.0f, 2.0f, 3.0f, 4.0f};
-            //GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
-
             customUniformBufferObject.frameCount = GameEngine->GetFrameCount();
             customUniformBufferObject.cameraInMotion = GameEngine->GetCameraInMotion();
             //customUniformBufferObject.spherePos0 = glm::vec3(1.1*cos(et * 0.5), 0.2, 1.1*sin(et * 0.5)-1);
