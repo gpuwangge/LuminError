@@ -17,7 +17,7 @@ add_subdirectory(logcore)
 add_subdirectory(yamlcore)
 add_subdirectory(sdlcore)
 add_subdirectory(resourcecore)
-add_subdirectory(renderercore)
+add_subdirectory(core_renderer)
 add_subdirectory(gameengine)
 add_subdirectory(example)
 

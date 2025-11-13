@@ -19,7 +19,7 @@ function(add_example EXAMPLENAME)
     target_link_libraries(${EXAMPLENAME} PRIVATE leinterface lecommon)
 
     add_custom_command(TARGET ${EXAMPLENAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${EXAMPLENAME}.dll <<<<<<<<<<<<<<<<<<"
+        COMMAND ${CMAKE_COMMAND} -E echo ">>>>>>>>>>>>>>>>>> Linked ${EXAMPLENAME}.exe <<<<<<<<<<<<<<<<<<"
     )
 endfunction()
 

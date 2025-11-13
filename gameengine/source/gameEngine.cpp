@@ -29,7 +29,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     sdler->SetApplication(this);
 
     //Load Renderer Core Module
-    LoadModuleAndInstance(handle_module_renderercore, pVoid, "renderercore.dll");
+    LoadModuleAndInstance(handle_module_renderercore, pVoid, "core_renderer.dll");
     renderer = static_cast<LERenderer::IRendererCore*>(pVoid);
     renderer->SetApplication(this); //also load log dll and create logger here
 

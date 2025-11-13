@@ -1,4 +1,4 @@
-project(renderercore)
+project(core_renderer)
 
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")
