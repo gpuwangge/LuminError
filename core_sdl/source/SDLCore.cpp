@@ -166,14 +166,14 @@ namespace LESDL{
                     break;
                 case SDL_EVENT_MOUSE_MOTION:
                     //std::cout<<"SDL_EVENT_MOUSE_MOTION: "<<event.motion.yrel<<", "<<event.motion.xrel<<std::endl;
-                    ref_diff_x = -mouse_sensitive*event.motion.yrel;
-                    ref_diff_y = mouse_sensitive*event.motion.xrel;
+                    ref_diff_x = -mouse_move_sensitive*event.motion.yrel;
+                    ref_diff_y = mouse_move_sensitive*event.motion.xrel;
                     break;
                 case SDL_EVENT_MOUSE_WHEEL:
-                    if(event.wheel.x == 1) game->MoveMainCameraLeft(1,2);
-                    else if(event.wheel.x == -1) game->MoveMainCameraRight(1,2);
-                    if(event.wheel.y == 1) game->MoveMainCameraForward(1,2);
-                    else if(event.wheel.y == -1) game->MoveMainCameraBackward(1,2);
+                    if(event.wheel.x == 1) game->MoveMainCameraLeft(mouse_wheel_sensitive, 2);
+                    else if(event.wheel.x == -1) game->MoveMainCameraRight(mouse_wheel_sensitive, 2);
+                    if(event.wheel.y == 1) game->MoveMainCameraForward(mouse_wheel_sensitive, 2);
+                    else if(event.wheel.y == -1) game->MoveMainCameraBackward(mouse_wheel_sensitive, 2);
                     break;
                 case SDL_EVENT_QUIT:
                     bStillRunning = false;

@@ -36,7 +36,8 @@ namespace LESDL{
         bool bMouseDown = false;
 
         float keyboard_sensitive = 3;
-        float mouse_sensitive = 60;//0.2f;
+        float mouse_move_sensitive = 60;//0.2f;
+        float mouse_wheel_sensitive = 1;
         
         //float previous_mouse_x = 0;
         //float previous_mouse_y = 0;
@@ -48,7 +49,7 @@ namespace LESDL{
         void createSurface(VkInstance instance, VkSurfaceKHR &surface) override;
         void eventHandle() override;
 
-        void SetMouseSensibility(float value) override { mouse_sensitive = value; }
+        void SetMouseSensibility(float value) override { mouse_move_sensitive = value; mouse_wheel_sensitive = value/60.0f; }
         void SetKeyboardSensibility(float value) override {keyboard_sensitive = value; }
         
     };
