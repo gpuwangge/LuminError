@@ -6,11 +6,15 @@
 #include "IGame.h"
 #include "Enum.h"
 #include "Config.h"
+#include <cstring>
 namespace LuminError{
     class Game : public IGame {
         struct StructStorageBuffer {
-            //glm::vec4 data;
-            glm::vec4 data[800 * 800] = {};
+            static constexpr size_t WIDTH = 800;
+            static constexpr size_t HEIGHT = 800;
+            static constexpr size_t SIZE = WIDTH * HEIGHT;
+            glm::vec4 data[SIZE]; //do not initialize here, to reduce compiling cost
+            StructStorageBuffer() { std::memset(data, 0, sizeof(data)); }
         };
         StructStorageBuffer storageBufferObject{};
 
