@@ -19,12 +19,12 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     void* pVoid = nullptr;
 
     //Load YAML Core Module
-    LoadModuleAndInstance(handle_module_yamlcore, pVoid, "yamlcore.dll");
+    LoadModuleAndInstance(handle_module_yamlcore, pVoid, "core_yaml.dll");
     yamler = static_cast<LEYAML::IYAMLCore*>(pVoid);
     appInfo = &yamler->GetAppInfo();
     
     //Load SDL Core Module
-    LoadModuleAndInstance(handle_module_sdlcore, pVoid, "sdlcore.dll");
+    LoadModuleAndInstance(handle_module_sdlcore, pVoid, "core_sdl.dll");
     sdler = static_cast<LESDL::ISDLCore*>(pVoid);
     sdler->SetApplication(this);
 
@@ -39,7 +39,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     logger = static_cast<LELog::ILogCore*>(pVoid);
 
     //Load Resource Core Module
-    LoadModuleAndInstance(handle_module_resourcecore, pVoid, "resourcecore.dll");
+    LoadModuleAndInstance(handle_module_resourcecore, pVoid, "core_resource.dll");
     resourcer = static_cast<LEResource::IResourceCore*>(pVoid);
     resourcer->SetApplication(this, logger);
 

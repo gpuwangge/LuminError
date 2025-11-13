@@ -7,9 +7,9 @@
 #include <memory>
 
 int main(int argc, char* argv[]) {
-    HMODULE handle_gameEngine= LoadLibraryA("gameengine.dll"); //Windows.h
+    HMODULE handle_gameEngine= LoadLibraryA("game_engine.dll"); //Windows.h
     if(!handle_gameEngine) { 
-        std::cerr << "Module load failed! Module Name = gameengine.dll" << std::endl; //Windows.h
+        std::cerr << "Module load failed! Module Name = game_engine.dll" << std::endl; //Windows.h
         return -1; 
     }
 

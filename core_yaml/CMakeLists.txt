@@ -1,4 +1,4 @@
-project(yamlcore)
+project(core_yaml)
 
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")

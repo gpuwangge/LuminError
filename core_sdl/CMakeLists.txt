@@ -1,4 +1,4 @@
-project(sdlcore)
+project(core_sdl)
  
 file(GLOB SOURCES "source/*.cpp")
 file(GLOB HEADERS "include/*.h")
