@@ -25,7 +25,7 @@ compile_if_newer() {
         return 0
     elif [ "$source_file" -nt "$output_file" ] || \
         [ "Common/constants.glsl" -nt "$output_file" ] || \
-        [ "Common/globalUBO.glsl" -nt "$output_file" ] || \
+        [ "Common/graphicsGlobalUBO.glsl" -nt "$output_file" ] || \
         [ "Common/lightsUBO.glsl" -nt "$output_file" ] || \
         [ "Common/objectUBO.glsl" -nt "$output_file" ]; then
         echo "🔄 Compile ${source_file} (updated)"

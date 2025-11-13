@@ -30,7 +30,7 @@ layout (location = 3) out vec4 outPosWorld;
 // 	0.5, 0.5, 0.0, 1.0 );
 
 void main() {
-	gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
+	gl_Position = graphicsGlobalUBO.mainCameraProj * graphicsGlobalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
 
 	outNormal = mat3(objectUBO.model) * inNormal;
 	outColor = inColor;

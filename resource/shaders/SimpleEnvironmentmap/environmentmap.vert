@@ -14,7 +14,7 @@ layout(location = 0) out vec3 pos;
 layout(location = 1) out vec3 normal;
 
 void main() {
-    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
+    gl_Position = graphicsGlobalUBO.mainCameraProj * graphicsGlobalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
     //fragColor = inColor;
     //fragTexCoord = inTexCoord;
     pos = vec3(objectUBO.model * vec4(inPosition, 1.0f));

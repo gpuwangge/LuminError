@@ -30,8 +30,8 @@ layout(location = 1) out vec2 fragTexCoord;
 void main() {
    // gl_Position = objectUBO.mainCameraProj * objectUBO.mainCameraView * objectUBO.model * vec4(inPosition+inOffset, 0.0, 1.0);
 
-	mat4 p = textobjectUBO.identityCameraProj ? mat4(1.0) : globalUBO.mainCameraProj;
-	mat4 v = textobjectUBO.identityCameraView ? mat4(1.0) : globalUBO.mainCameraView;
+	mat4 p = textobjectUBO.identityCameraProj ? mat4(1.0) : graphicsGlobalUBO.mainCameraProj;
+	mat4 v = textobjectUBO.identityCameraView ? mat4(1.0) : graphicsGlobalUBO.mainCameraView;
 	gl_Position = p * v * textobjectUBO.model * vec4(inPosition * inScale + inOffset, 0.0, 1.0);
 
     fragColor = inColor;

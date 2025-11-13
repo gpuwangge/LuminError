@@ -21,7 +21,7 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = globalUBO.mainCameraProj * globalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
+    gl_Position = graphicsGlobalUBO.mainCameraProj * graphicsGlobalUBO.mainCameraView * objectUBO.model * vec4(inPosition, 1.0);
     fragColor = customUBO.color; //color attribute of each vertex will be assigned to each fragment. If all colors are the same, this is not good. should use ubo instead
     fragTexCoord = inTexCoord;
 }

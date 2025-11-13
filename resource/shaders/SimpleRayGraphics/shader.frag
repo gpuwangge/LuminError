@@ -224,8 +224,8 @@ void main() {
     // ----------------------------
     // 3. Project to camera space
     vec3 dir_cam = normalize(vec3(
-        x_ndc * globalUBO.aspect * globalUBO.tanHalfFovY,
-        y_ndc * globalUBO.tanHalfFovY,
+        x_ndc * graphicsGlobalUBO.aspect * graphicsGlobalUBO.tanHalfFovY,
+        y_ndc * graphicsGlobalUBO.tanHalfFovY,
         1.0 //!not -1, because we want camera to look positive z direction
     ));
 
@@ -234,37 +234,37 @@ void main() {
     Ray ray;
 
     //wrong
-    //ray.dir = normalize((globalUBO.mainCameraModel * vec4(dir_cam, 0.0)).xyz);
+    //ray.dir = normalize((graphicsGlobalUBO.mainCameraModel * vec4(dir_cam, 0.0)).xyz);
 
     //假设 mainCameraModel 只包含旋转，但实际上它可能包含非均匀缩放或其他变换，导致方向失真。
-    //mat3 cameraRotation = mat3(globalUBO.mainCameraModel);
+    //mat3 cameraRotation = mat3(graphicsGlobalUBO.mainCameraModel);
     //ray.dir = normalize(cameraRotation * dir_cam);
 
     //问题：这只在视图矩阵是纯旋转矩阵时才正确，但实际上视图矩阵包含从世界空间到相机空间的完整变换。
-    //mat3 viewRotation = mat3(globalUBO.mainCameraView);
+    //mat3 viewRotation = mat3(graphicsGlobalUBO.mainCameraView);
     //ray.dir = normalize((viewRotation) * dir_cam);
 
     //可以运行的版本
     // vec4 dir_clip = vec4(x_ndc, y_ndc, 0.0, 1.0); // 在裁剪空间
     // // 逆投影变换到视图空间: 屏幕像素 → 裁剪空间 → 视图空间 → 世界空间
     // // 步骤1：裁剪空间 → 视图空间（逆投影）
-    // vec4 dir_view = globalUBO.mainCameraProjInverse * dir_clip;
+    // vec4 dir_view = graphicsGlobalUBO.mainCameraProjInverse * dir_clip;
     // dir_view = vec4(dir_view.xy, -1.0, 0.0); // 看向-Z
     // // 变换到世界空间
     // // 步骤2：视图空间 → 世界空间（逆视图变换） 
-    // vec4 dir_world = globalUBO.mainCameraViewInverse * dir_view;
+    // vec4 dir_world = graphicsGlobalUBO.mainCameraViewInverse * dir_view;
     // ray.dir = normalize(dir_world.xyz);
 
     // 简洁但正确的版本
     vec4 clip_coord = vec4(x_ndc, y_ndc, -1.0, 1.0);  // 看向远平面
-    vec4 view_coord = globalUBO.mainCameraProjInverse * clip_coord;
+    vec4 view_coord = graphicsGlobalUBO.mainCameraProjInverse * clip_coord;
     view_coord = vec4(view_coord.xy, -1.0, 0.0);      // 方向向量
-    vec4 world_coord = globalUBO.mainCameraViewInverse * view_coord;
+    vec4 world_coord = graphicsGlobalUBO.mainCameraViewInverse * view_coord;
     ray.dir = normalize(world_coord.xyz);
 
     
-    ray.origin = globalUBO.mainCameraPos;
-    //ray.origin = vec3(globalUBO.mainCameraModel[3]); //an alternative to get camera pos
+    ray.origin = graphicsGlobalUBO.mainCameraPos;
+    //ray.origin = vec3(graphicsGlobalUBO.mainCameraModel[3]); //an alternative to get camera pos
 
     // ----------------------------
     // 5. Output
