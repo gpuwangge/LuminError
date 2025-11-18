@@ -306,7 +306,9 @@ void CPhysicalDevice::displayPhysicalDevices(){
     delete[] deviceLayers;
     //debugger->flush();
 
-    logger->Log("\n\tMax Uniform Buffer Range: {} bytes", (unsigned int)PhysicalDeviceProperties.limits.maxUniformBufferRange);
+    logger->Log("\n\tMax Per Stage Descriptor Uniform Buffers: {}", (unsigned int)PhysicalDeviceProperties.limits.maxPerStageDescriptorUniformBuffers);
+    logger->Log("  \tMax Uniform Buffer Range: {} bytes", (unsigned int)PhysicalDeviceProperties.limits.maxUniformBufferRange);
+    logger->Log("  \tMax Per Stage Descriptor Storage Buffers: {}", (unsigned int)PhysicalDeviceProperties.limits.maxPerStageDescriptorStorageBuffers);
     logger->Log("  \tMax Storage Buffer Range: {} bytes", (unsigned int)PhysicalDeviceProperties.limits.maxStorageBufferRange);
     logger->Log("  \tMax Descriptor Set Uniform Buffers: {}", (unsigned int)PhysicalDeviceProperties.limits.maxDescriptorSetUniformBuffers);
     logger->Log("  \tMax Descriptor Set Uniform Buffers Dynamic: {}", (unsigned int)PhysicalDeviceProperties.limits.maxDescriptorSetUniformBuffersDynamic);

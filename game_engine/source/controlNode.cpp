@@ -661,9 +661,6 @@ void CControlHotkey::Update(){
     }
 
 	if(currentTrigger!=lastTrigger) {
-        // m_pTextboxes[1]->SetTextContent("FPS:" + std::to_string((int)(1.0f/m_pApp->deltaTime)));
-        // m_pTextboxes[2]->SetTextContent("Time:" + to_string_prec(m_pApp->elapseTime) + "s");
-        // m_pTextboxes[3]->SetTextContent("Frame:" + std::to_string(m_pApp->frameCount));
         for(int i = 1; i <= 3; i++) if(m_pTextboxes[i]->bFlash) m_pTextboxes[i]->SetTextContent(); //to update the text color
             
         lastTrigger = currentTrigger;
@@ -873,9 +870,6 @@ void CControlStatistics::Update(){
     }
 
 	if(currentTrigger!=lastTrigger) {
-        // m_pTextboxes[1]->SetTextContent("FPS:" + std::to_string((int)(1.0f/m_pApp->deltaTime)));
-        // m_pTextboxes[2]->SetTextContent("Time:" + to_string_prec(m_pApp->elapseTime) + "s");
-        // m_pTextboxes[3]->SetTextContent("Frame:" + std::to_string(m_pApp->frameCount));
         for(int i = 1; i <= 3; i++) if(m_pTextboxes[i]->bFlash) m_pTextboxes[i]->SetTextContent(); //to update the text color
             
         lastTrigger = currentTrigger;

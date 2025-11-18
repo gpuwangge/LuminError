@@ -67,6 +67,8 @@ namespace LuminError{
             //customUniformBufferObject.spherePos0 = glm::vec3(1.1*cos(et * 0.5), 0.2, 1.1*sin(et * 0.5)-1);
             //customUniformBufferObject.spherePos1 = glm::vec3(0.5*sin(0.5+et * 0.75), 1.0, 0.5*cos(et * 0.75)-1);
 		    GameEngine->UploadComputeCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+
+            GameEngine->PrintFPS(1.0f);
         }
 
         void RecordComputeCommandBuffer() override{

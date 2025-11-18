@@ -122,6 +122,16 @@ namespace LEGameEngine{
 
         int GetFrameCount() override { return frameCount; }
         bool GetCameraInMotion() override { return mainCamera.IsInMotion(); }
+        float GetFPS() override { return (deltaTime > 0) ? (1.0f / static_cast<float>(deltaTime)) : 0.0f; }
+        void PrintFPS(float interval) override {
+            static float elapsed = 0.0f;
+            elapsed += static_cast<float>(deltaTime);
+            if (elapsed < interval) return;
+            elapsed = 0.0f;
+
+            float fps = GetFPS();
+            std::cout<<"FPS: "<<fps<<std::endl;
+        }
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override;

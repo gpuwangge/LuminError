@@ -24,6 +24,8 @@ namespace LEGameEngine{
 
         virtual int GetFrameCount() = 0;
         virtual bool GetCameraInMotion() = 0;
+        virtual float GetFPS() = 0;
+        virtual void PrintFPS(float interval) = 0;
 
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;
