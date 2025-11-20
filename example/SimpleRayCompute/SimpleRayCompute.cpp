@@ -6,17 +6,11 @@
 #include "IGame.h"
 #include "Enum.h"
 #include "Config.h"
-#include <cstring>
+#include "TypeUniform.h"
 namespace LuminError{
     class Game : public IGame {
-        struct StructStorageBuffer {
-            static constexpr size_t WIDTH = 800;
-            static constexpr size_t HEIGHT = 800;
-            static constexpr size_t SIZE = WIDTH * HEIGHT;
-            glm::vec4 data[SIZE]; //do not initialize here, to reduce compiling cost
-            StructStorageBuffer() { std::memset(data, 0, sizeof(data)); }
-        };
-        StructStorageBuffer storageBufferObject{};
+        
+        StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{};
 
         struct StructCustomUniformBuffer {
             alignas(4) int frameCount = 0;
@@ -47,8 +41,8 @@ namespace LuminError{
         void Initialize() override {
             GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
 
-            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
-            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            //GameEngine->SetComputeStorageBufferSize_WindowSwap(sizeof(StructStorageBuffer_WindowSwap));
+            //GameEngine->SetComputeStorageBufferUsage_WindowSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 
             GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
@@ -56,7 +50,7 @@ namespace LuminError{
         }
 
         void PostInitialize() override{
-            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //initialize to zeros
+            GameEngine->UploadComputeStorageBuffer_WindowSwap(GameEngine->GetCurrentFrame(), &storageBufferObject_WindowSwap, sizeof(storageBufferObject_WindowSwap)); //initialize to zeros
         }
 
         void Update() override {

@@ -210,9 +210,14 @@ namespace LERenderer{
         virtual void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
         virtual void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) = 0;
         virtual void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
-        virtual void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) = 0; //the same function to add storage 1&2
-        virtual void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size) = 0;
+        
+        virtual void addStorageBuffer_windowswap() = 0; //the same function to add storage 1&2
+        virtual void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) = 0;
+        virtual void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) = 0; //the same function to add storage 1&2
+        virtual void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size) = 0;
+        
         virtual void addStorageImage(VkBufferUsageFlags usage) = 0;
 
 	    virtual void ComputeDescriptorManagerDestroyAndFree() = 0;

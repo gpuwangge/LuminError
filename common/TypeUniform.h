@@ -1,5 +1,7 @@
 #pragma once
 #include "utility.h"
+#include "Foundation.h"
+#include <cstring>
 #include <vulkan/vulkan.h>
 
 //Uniform Naming Rule: PipelineType_DescriptorType_Purpose
@@ -13,12 +15,25 @@ enum UniformTypes {
     GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE =                          0x00000040,  //for main camera
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE =                     0x00000080,  //for light camera
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS =   0x00000100,  //for light camera(Hardware depth bias, use two renderpass, dynamic depth bias)
-    COMPUTE_UNIFORMBUFFER_GLOBAL =   0x00000200,
-    COMPUTE_STORAGEBUFFER_DOUBLE =   0x00000400,
-    COMPUTE_UNIFORMBUFFER_CUSTOM =   0x00000800,
-    COMPUTE_STORAGEIMAGE_TEXTURE =   0x00001000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN = 0x00002000
+    COMPUTE_UNIFORMBUFFER_GLOBAL =      0x00000200,
+    COMPUTE_STORAGEBUFFER_WINDOWSWAP =  0x00000400,
+    COMPUTE_STORAGEBUFFER_MATERIAL =    0x00000800,
+    COMPUTE_STORAGEBUFFER_TRIANGLE =    0x00001000,
+    COMPUTE_STORAGEBUFFER_SPHERE =      0x00002000,
+    COMPUTE_UNIFORMBUFFER_CUSTOM =      0x00004000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =  0x00008000,
+    COMPUTE_STORAGEIMAGE_TEXTURE =      0x00010000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =    0x00020000
 };
+
+static constexpr size_t WINDOW_SIZE = WINDOW_WIDTH * WINDOW_HEIGHT;  
+struct StructStorageBuffer_WindowSwap {
+    //static constexpr size_t WIDTH = 800; // 属于类，不属于对象,不占内存
+    //static constexpr size_t HEIGHT = 800;
+    glm::vec4 pixels[WINDOW_SIZE]; //do not initialize here, to reduce compiling cost。唯一占内存的数据
+    StructStorageBuffer_WindowSwap() { std::memset(pixels, 0, sizeof(pixels)); }
+};
+
 
 struct StructGraphicsGlobalUniformBuffer {
     alignas(16) glm::mat4 mainCameraView; //16*4=64 bytes

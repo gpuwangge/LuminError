@@ -285,7 +285,7 @@ namespace LERenderer{
 
         int GetComputeUniformTypes() override { return computeDescriptorManager.computeUniformTypes; }
         VkDescriptorSetLayout& GetComputeDescriptorSetLayout() override { return computeDescriptorManager.descriptorSetLayout; }
-        std::vector<CWxjBuffer>& GetStorageBuffers() override { return computeDescriptorManager.storageBuffers; }
+        std::vector<CWxjBuffer>& GetStorageBuffers() override { return computeDescriptorManager.storageBuffers_customswap; }
         std::vector<VkDescriptorSet>& GetDescriptorSets() override { return computeDescriptorManager.descriptorSets; }
 
         void createComputeDescriptorPool() override { computeDescriptorManager.createDescriptorPool(); }
@@ -296,9 +296,15 @@ namespace LERenderer{
         void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) { computeDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
         void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { computeDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
         void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
-        void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer(storageBufferSize, usage); }
-        void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer(currentFrame, data, size); }
-        void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer(currentFrame, data, size); }
+        
+        void addStorageBuffer_windowswap() override { computeDescriptorManager.addStorageBuffer_windowswap(); }
+        void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_windowswap(currentFrame, data, size); }
+        void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer_windowswap(currentFrame, data, size); }
+        
+        void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer_customswap(storageBufferSize, usage); }
+        void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_customswap(currentFrame, data, size); }
+        void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer_customswap(currentFrame, data, size); }
+        
         void addStorageImage(VkBufferUsageFlags usage) override { computeDescriptorManager.addStorageImage(usage); }
 
 	    void ComputeDescriptorManagerDestroyAndFree() override { computeDescriptorManager.DestroyAndFree(); }

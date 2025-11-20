@@ -75,12 +75,18 @@ namespace LEGameEngine{
 
         //Expose functions for Example(GemmCompute) to use
         virtual void SetRenderMode(int mode) = 0;
-        virtual void SetComputeStorageBufferSize(int size) = 0;
-        virtual void SetComputeStorageBufferUsage(int usage) = 0;
-        virtual void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
+        
+        // virtual void SetComputeStorageBufferSize_WindowSwap(int size) = 0;
+        // virtual void SetComputeStorageBufferUsage_WindowSwap(int usage) = 0;
+        virtual void UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
+        virtual void DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) = 0;
+        virtual void SetComputeStorageBufferSize_CustomSwap(int size) = 0;
+        virtual void SetComputeStorageBufferUsage_CustomSwap(int usage) = 0;
+        virtual void UploadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
+        virtual void DownloadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) = 0;
+        
         virtual void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
         virtual void DeviceWaitIdle() = 0;
-        virtual void DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) = 0;
         virtual void SetPause(bool value) = 0;
         virtual void LogContext(std::string s, float *n, int size) = 0;
         virtual void LogContext(std::string s) = 0;

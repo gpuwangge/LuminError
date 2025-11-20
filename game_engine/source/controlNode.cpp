@@ -441,7 +441,7 @@ void CControlComputeUniform::Update(){
         else m_pTextboxes[1]->SetTextColor(greyColor);
         m_pTextboxes[1]->SetTextContent("Custom");
         
-        if(m_pApp->appInfo->Uniform.b_uniform_compute_storage) m_pTextboxes[2]->bFlash = true;
+        if(m_pApp->appInfo->Uniform.b_storage_compute_customswap) m_pTextboxes[2]->bFlash = true;
         else m_pTextboxes[2]->SetTextColor(greyColor);
         m_pTextboxes[2]->SetTextContent("Storage");
 

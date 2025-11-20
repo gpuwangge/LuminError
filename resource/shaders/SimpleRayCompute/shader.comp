@@ -38,16 +38,18 @@ layout (set = 0, binding = 3) uniform CustomBufferObject {
 //     Material materials[];
 // } sbo_materialBuffer;
 
-// layout(set = 0, binding = ?, std430) readonly buffer SBO_SphereData {
-//    Sphere spheres[5]; // 静态场景数据（球体等）
-//    uint materialIndices[];
-// } sbo_sphereData;
-
 // 网格数据SSBO（包含材质索引）
 // layout(set = 0, binding = ?, std430) readonly buffer SBO_TriangleData {
 //     Triangle triangles[];
 //     uint materialIndices[];  // 每个三角形的材质索引
 // } sbo_triangleData;
+
+// layout(set = 0, binding = ?, std430) readonly buffer SBO_SphereData {
+//    Sphere spheres[5]; // 静态场景数据（球体等）
+//    uint materialIndices[];
+// } sbo_sphereData;
+
+
 
 
 

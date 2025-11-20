@@ -58,8 +58,13 @@ struct UniformConfig {
     } GraphicsCustom;
 
     bool b_uniform_compute_global = false;
-    bool b_uniform_compute_storage = false;
+    bool b_storage_compute_windowswap = false;
+    bool b_storage_compute_material = false;
+    bool b_storage_compute_triangle = false;
+    bool b_storage_compute_sphere = false;
     bool b_uniform_compute_custom = false;
+    bool b_storage_compute_customswap = false;
+
     bool b_uniform_compute_swapchain_storage = false;
     bool b_uniform_compute_texture_storage = false;
     struct ComputeCustomInfo {
@@ -84,8 +89,17 @@ struct UniformConfig {
 
     void loadComputeFromYaml(const YAML::Node& node) {
         b_uniform_compute_global                      = getOrDefault(node, "uniform_compute_global", false);
-        b_uniform_compute_storage                      = getOrDefault(node, "uniform_compute_storage", false);
-        b_uniform_compute_custom                       = getOrDefault(node, "uniform_compute_custom", false);
+
+        //b_uniform_compute_storage                      = getOrDefault(node, "uniform_compute_storage", false);
+        //b_uniform_compute_custom                       = getOrDefault(node, "uniform_compute_custom", false);
+
+        b_storage_compute_windowswap                        = getOrDefault(node, "storage_compute_windowswap", false);
+        b_storage_compute_material                          = getOrDefault(node, "storage_compute_material", false);
+        b_storage_compute_triangle                          = getOrDefault(node, "storage_compute_triangle", false);
+        b_storage_compute_sphere                            = getOrDefault(node, "storage_compute_sphere", false);
+        b_uniform_compute_custom                            = getOrDefault(node, "uniform_compute_custom", false);
+        b_storage_compute_customswap                        = getOrDefault(node, "storage_compute_customswap", false);
+
         b_uniform_compute_swapchain_storage           = getOrDefault(node, "uniform_compute_swapchain_storage", false);
         b_uniform_compute_texture_storage             = getOrDefault(node, "uniform_compute_texture_storage", false);
     }

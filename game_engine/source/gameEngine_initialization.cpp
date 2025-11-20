@@ -91,8 +91,18 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_uniform_graphics_depth_image_sampler) renderer->addDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler) renderer->addLightDepthImageSamplerUniformBuffer();
     if(appInfo->Uniform.b_uniform_graphics_lightdepth_image_sampler_hardware) renderer->addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
+    
+    //if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
+    //if(appInfo->Uniform.b_uniform_compute_storage) renderer->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
+    
+    if(appInfo->Uniform.b_storage_compute_windowswap) renderer->addStorageBuffer_windowswap();
+    if(appInfo->Uniform.b_storage_compute_material);
+    if(appInfo->Uniform.b_storage_compute_triangle);
+    if(appInfo->Uniform.b_storage_compute_sphere);
     if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
-    if(appInfo->Uniform.b_uniform_compute_storage) renderer->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
+    if(appInfo->Uniform.b_storage_compute_customswap) renderer->addStorageBuffer_customswap(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
+
+
     if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
     if(appInfo->Uniform.b_uniform_compute_swapchain_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
 
@@ -317,7 +327,10 @@ void GameEngine::Initialize(){
     * 8 Create Uniform Descriptors
     ****************************/
     bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_dynamic || appInfo->Uniform.b_uniform_graphics_text_dynamic || appInfo->Uniform.b_uniform_graphics_global;
-    bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_uniform_compute_storage || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
+    bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_global || appInfo->Uniform.b_storage_compute_windowswap || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
+    b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_storage_compute_material || appInfo->Uniform.b_storage_compute_triangle || appInfo->Uniform.b_storage_compute_sphere;
+    b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap;
+
     //UNIFORM STEP 1/3 (Pool)
     renderer->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
     renderer->createComputeDescriptorPool();
@@ -476,7 +489,9 @@ void GameEngine::Initialize(){
     }
     if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
+        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute layout"<<std::endl;
         renderer->CreateComputePipelineLayout(renderer->GetComputeDescriptorSetLayout());
+        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute pipeline"<<std::endl;
         renderer->CreateComputePipeline(resourcer->GetComputeShaderModule(0));
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;

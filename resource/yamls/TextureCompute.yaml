@@ -10,8 +10,13 @@ Resources:
 Uniforms:
   Compute:
     uniform_compute_name: Compute
+    uniform_compute_global: false
+    storage_compute_windowswap: false
+    storage_compute_material: false
+    storage_compute_triangle: false
+    storage_compute_sphere: false
     uniform_compute_custom: false
-    uniform_compute_storage: false
+    storage_compute_customswap: false
     uniform_compute_texture_storage: true
     uniform_compute_swapchain_storage: true
 

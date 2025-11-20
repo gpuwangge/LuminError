@@ -297,13 +297,23 @@ void GameEngine::SetComputeCustomBinding(void* binding) {
 void GameEngine::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
     renderer->uploadComputeCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
-void GameEngine::SetComputeStorageBufferSize(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
-void GameEngine::SetComputeStorageBufferUsage(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
-void GameEngine::UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
-    renderer->uploadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+
+// void GameEngine::SetComputeStorageBufferSize_WindowSwap(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
+// void GameEngine::SetComputeStorageBufferUsage_WindowSwap(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
+void GameEngine::UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
+    renderer->uploadStorageBuffer_windowswap(currentFrame, storageBufferObject, dataSize);
 }
-void GameEngine::DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
-    renderer->downloadStorageBuffer(currentFrame, storageBufferObject, dataSize);
+void GameEngine::DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
+    renderer->downloadStorageBuffer_windowswap(currentFrame, storageBufferObject, dataSize);
+}
+
+void GameEngine::SetComputeStorageBufferSize_CustomSwap(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
+void GameEngine::SetComputeStorageBufferUsage_CustomSwap(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
+void GameEngine::UploadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {
+    renderer->uploadStorageBuffer_customswap(currentFrame, storageBufferObject, dataSize);
+}
+void GameEngine::DownloadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) {
+    renderer->downloadStorageBuffer_customswap(currentFrame, storageBufferObject, dataSize);
 }
 
 void GameEngine::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }

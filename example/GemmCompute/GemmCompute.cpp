@@ -25,8 +25,8 @@ namespace LuminError{
 
         void Initialize() override{
             GameEngine->SetRenderMode(RenderModes::COMPUTE);
-            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
-            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            GameEngine->SetComputeStorageBufferSize_CustomSwap(sizeof(StructStorageBuffer));
+            GameEngine->SetComputeStorageBufferUsage_CustomSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         }
 
         void PostInitialize() override{
@@ -50,7 +50,7 @@ namespace LuminError{
             //- computation starts with flight0, so initialize buffer1 only
             //- the result will be downloaded back to SBO(only MatC has value)
             //game->UploadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer0. because buffer0 will be output for frame0, no need to initialize.
-            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame()+1, &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer1: this is the input for the first flight
+            GameEngine->UploadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame()+1, &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer1: this is the input for the first flight
         }
 
         void Update() override {
@@ -77,7 +77,7 @@ namespace LuminError{
                 cpu_result0 = cpu_result[0];
             }
 
-            if(bVerbose) GameEngine->DownloadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //for the first flight, download result from buffer0 back to SBO. SBO.MatC has result, and SBO.MatA/B will be reset to zero.
+            if(bVerbose) GameEngine->DownloadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //for the first flight, download result from buffer0 back to SBO. SBO.MatC has result, and SBO.MatA/B will be reset to zero.
             if(bVerbose) GameEngine->LogContext("C: ", storageBufferObject.MatC, DIM_M*DIM_N);
 
             if(bVerify){

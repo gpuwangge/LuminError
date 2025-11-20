@@ -18,8 +18,8 @@ namespace LuminError{
 
         void Initialize() override{
             GameEngine->SetRenderMode(RenderModes::COMPUTE);
-            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
-            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            GameEngine->SetComputeStorageBufferSize_CustomSwap(sizeof(StructStorageBuffer));
+            GameEngine->SetComputeStorageBufferUsage_CustomSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         }
 
         void Update() override {
@@ -30,7 +30,7 @@ namespace LuminError{
 
             //Host >> Device
             //computeDescriptorManager.updateStorageBuffer<StructStorageBuffer>(renderer.currentFrame, storageBufferObject);
-            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
+            GameEngine->UploadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
             //std::cout<<"update(): Delta Time: "<<deltaTime<<", Duration Time: "<<durationTime<<std::endl;
 
             if(counter==KernelRunNumber) GameEngine->SetPause(true);
@@ -50,7 +50,7 @@ namespace LuminError{
             //std::cout<<"compute(): Current Frame = "<<renderer.currentFrame<<": "<<std::endl;
             //memcpy(data, computeDescriptorManager.storageBuffersMapped[renderer.currentFrame], sizeof(data));
             ///game->DownloadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject));
-            GameEngine->DownloadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &data, sizeof(data));
+            GameEngine->DownloadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame(), &data, sizeof(data));
             GameEngine->LogContext("compute() read data: ", data, 4);
             std::cout<<"compute() read data: "<<data[0]<<", "<<data[1]<<", "<<data[2]<<", "<<data[3]<<", "<<std::endl;
 

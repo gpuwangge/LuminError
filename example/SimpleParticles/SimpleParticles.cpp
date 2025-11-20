@@ -44,9 +44,9 @@ namespace LuminError{
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
 
-            GameEngine->SetComputeStorageBufferSize(sizeof(StructStorageBuffer));
+            GameEngine->SetComputeStorageBufferSize_CustomSwap(sizeof(StructStorageBuffer));
             //std::cout<<"sizeof(StructStorageBuffer)="<<sizeof(StructStorageBuffer)<<std::endl;
-            GameEngine->SetComputeStorageBufferUsage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            GameEngine->SetComputeStorageBufferUsage_CustomSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
         }
 
         void PostInitialize() override{
@@ -76,7 +76,7 @@ namespace LuminError{
             // Alternative: create particle info in a buffer, and copybuffer to all storage buffers
             for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
                 //computeDescriptorManager.updateStorageBuffer<StructStorageBuffer>(i, storageBufferObject);
-                GameEngine->UploadComputeStorageBuffer(i, &storageBufferObject, sizeof(StructStorageBuffer));
+                GameEngine->UploadComputeStorageBuffer_CustomSwap(i, &storageBufferObject, sizeof(StructStorageBuffer));
             //descriptors[1].updateStorageBuffer<StructStorageBuffer>(renderer.currentFrame+1, durationTime, storageBufferObject);
             
             std::cout<<"Host >> Device done."<<std::endl;

@@ -50,18 +50,31 @@ public:
     void uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
-     * 2 COMPUTE_STORAGEBUFFER_DOUBLE
+     * 2 COMPUTE_STORAGEBUFFER_WINDOWSWAP
      ************/
-    //define two set of storage buffers, one for input, the other for output
-	static std::vector<CWxjBuffer> storageBuffers;
-    static std::vector<void*> storageBuffersMapped;
-    static VkDeviceSize m_storageBufferSize;
-    void addStorageBuffer(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT); //the same function to add storage 1&2
-    void uploadStorageBuffer(uint32_t currentFrame, const void* data, size_t size);
-    void downloadStorageBuffer(uint32_t currentFrame, void* data, size_t size);
+    //define two sets(and layouts) of storage buffers, one for input, the other for output; however they share the same descriptor pool
+	static std::vector<CWxjBuffer> storageBuffers_windowswap;
+    static std::vector<void*> storageBuffersMapped_windowswap;
+    //static VkDeviceSize m_storageBufferSize_windowswap;
+    void addStorageBuffer_windowswap(); //the same function to add storage 1&2
+    void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size);
+    void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size);
+    
 
     /************
-     * 3 COMPUTE_UNIFORMBUFFER_CUSTOM
+     * 3 COMPUTE_STORAGEBUFFER_MATERIAL
+     ************/
+
+    /************
+     * 4 COMPUTE_STORAGEBUFFER_TRIANGLE
+     ************/
+
+    /************
+     * 5 COMPUTE_STORAGEBUFFER_SPHERE
+     ************/
+
+    /************
+     * 6 COMPUTE_UNIFORMBUFFER_CUSTOM
      ************/
     static std::vector<CWxjBuffer> customUniformBuffers; 
 	static std::vector<void*> customUniformBuffersMapped;
@@ -69,13 +82,23 @@ public:
     void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
     void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
+    /************
+     * 7 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
+     ************/
+    //define two sets(and layouts) of storage buffers, one for input, the other for output; however they share the same descriptor pool
+	static std::vector<CWxjBuffer> storageBuffers_customswap;
+    static std::vector<void*> storageBuffersMapped_customswap;
+    static VkDeviceSize m_storageBufferSize_customswap;
+    void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT); //the same function to add storage 1&2
+    void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size);
+    void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size);
 
     
 
 
     /************
-     * 3 COMPUTE_STORAGEIMAGE_TEXTURE
-     * 4 COMPUTE_STORAGEIMAGE_SWAPCHAIN
+     * 8 COMPUTE_STORAGEIMAGE_TEXTURE
+     * 9 COMPUTE_STORAGEIMAGE_SWAPCHAIN
      ************/
     void addStorageImage(VkBufferUsageFlags usage);
    

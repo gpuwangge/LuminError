@@ -176,10 +176,16 @@ namespace LEGameEngine{
         void SetComputeCustomSize(int size) override;
         void SetComputeCustomBinding(void* binding) override;
         void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override;
-        void SetComputeStorageBufferSize(int size) override;
-        void SetComputeStorageBufferUsage(int usage) override;
-        void UploadComputeStorageBuffer(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
-        void DownloadComputeStorageBuffer(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
+        
+        //void SetComputeStorageBufferSize_WindowSwap(int size) override;
+        //void SetComputeStorageBufferUsage_WindowSwap(int usage) override;
+        void UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
+
+        void SetComputeStorageBufferSize_CustomSwap(int size) override;
+        void SetComputeStorageBufferUsage_CustomSwap(int usage) override;
+        void UploadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void DownloadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
 
         void SetGraphicsCustomSize(int size) override;
         void SetGraphicsCustomBinding(void* binding) override ;
