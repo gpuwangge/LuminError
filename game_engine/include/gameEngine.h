@@ -82,7 +82,9 @@ namespace LEGameEngine{
 
         std::string m_sampleName = "CSimpleTriangle";
 
-        std::vector<std::unique_ptr<CControlNode>> controlNodes;  
+        std::vector<std::unique_ptr<CControlNode>> controlNodes;
+
+        //StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{}; //?define here not work?
 
         /******************
         * Helper Functions

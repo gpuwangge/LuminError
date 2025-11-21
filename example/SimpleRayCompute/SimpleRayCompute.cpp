@@ -9,9 +9,9 @@
 #include "TypeUniform.h"
 namespace LuminError{
     class Game : public IGame {
-        
+        //Must define storage buffer object here
+        //If define in engine.h, it won't be initialized before engine use it.
         StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{};
-
         struct StructCustomUniformBuffer {
             alignas(4) int frameCount = 0;
             alignas(4) bool cameraInMotion = false;
@@ -19,7 +19,6 @@ namespace LuminError{
             alignas(4) int padding2 = 0;
             //alignas(16) glm::vec3 spherePos0 = glm::vec3(0,0,0);
             //alignas(16) glm::vec3 spherePos1 = glm::vec3(0,0,0);
-
 
             static VkDescriptorSetLayoutBinding GetBinding(){
                 VkDescriptorSetLayoutBinding binding;
@@ -41,18 +40,15 @@ namespace LuminError{
         void Initialize() override {
             GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
 
-            //GameEngine->SetComputeStorageBufferSize_WindowSwap(sizeof(StructStorageBuffer_WindowSwap));
-            //GameEngine->SetComputeStorageBufferUsage_WindowSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-
             GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
         }
 
         void PostInitialize() override{
-            GameEngine->UploadComputeStorageBuffer_WindowSwap(GameEngine->GetCurrentFrame(), &storageBufferObject_WindowSwap, sizeof(storageBufferObject_WindowSwap)); //initialize to zeros
+            //the code works even without this? put it here to be sure
+            GameEngine->UploadComputeStorageBuffer_WindowSwap(GameEngine->GetCurrentFrame(), &storageBufferObject_WindowSwap, sizeof(StructStorageBuffer_WindowSwap)); //initialize to zeros
         }
-
         void Update() override {
             double et = GameEngine->GetElapseTime();
 

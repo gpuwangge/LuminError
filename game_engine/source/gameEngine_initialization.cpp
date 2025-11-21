@@ -100,7 +100,7 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_storage_compute_triangle);
     if(appInfo->Uniform.b_storage_compute_sphere);
     if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
-    if(appInfo->Uniform.b_storage_compute_customswap) renderer->addStorageBuffer_customswap(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
+    if(appInfo->Uniform.b_storage_compute_customswap) renderer->addStorageBuffer_customswap(appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size, appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Usage);
 
 
     if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);

@@ -71,10 +71,10 @@ struct UniformConfig {
         VkDeviceSize Size = 0;
         VkDescriptorSetLayoutBinding Binding{};
     } ComputeCustom;
-    struct ComputeStorageBufferInfo {
+    struct StructComputeStorageBufferInfo {
         VkDeviceSize Size = 0;
         VkBufferUsageFlags Usage = 0;
-    } ComputeStorageBuffer;
+    } ComputeStorageBufferInfo_CustomSwap;
 
     void loadGraphicsFromYaml(const YAML::Node& node) {
         b_uniform_graphics_global                   = getOrDefault(node, "uniform_graphics_global", false);

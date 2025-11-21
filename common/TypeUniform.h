@@ -3,6 +3,8 @@
 #include "Foundation.h"
 #include <cstring>
 #include <vulkan/vulkan.h>
+// #include <iostream>
+// #include <chrono>
 
 //Uniform Naming Rule: PipelineType_DescriptorType_Purpose
 enum UniformTypes {
@@ -30,8 +32,13 @@ static constexpr size_t WINDOW_SIZE = WINDOW_WIDTH * WINDOW_HEIGHT;
 struct StructStorageBuffer_WindowSwap {
     //static constexpr size_t WIDTH = 800; // 属于类，不属于对象,不占内存
     //static constexpr size_t HEIGHT = 800;
-    glm::vec4 pixels[WINDOW_SIZE]; //do not initialize here, to reduce compiling cost。唯一占内存的数据
-    StructStorageBuffer_WindowSwap() { std::memset(pixels, 0, sizeof(pixels)); }
+    glm::vec4 pixels[WINDOW_SIZE]; //do not initialize here, to reduce compiling cost。唯一占内存的数据; size: 800*800*16=10,240,000 bytes = ~10 MB
+    StructStorageBuffer_WindowSwap() {
+        // std::cout<<"StructStorageBuffer_WindowSwap constructor called - Time: " 
+        //      << std::chrono::steady_clock::now().time_since_epoch().count() 
+        //      << std::endl;
+        std::memset(pixels, 0, sizeof(pixels)); 
+    }
 };
 
 
