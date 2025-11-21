@@ -24,10 +24,8 @@ layout(set = 0, binding = 2, std430) buffer SBOOut {
 layout (set = 0, binding = 3) uniform CustomBufferObject {
     int frameCount;
     bool cameraInMotion;
-    int padding1;
-    int padding2;
-    // uint triangleCount;
-    // uint materialCount;
+    uint triangleCount;
+    uint materialCount;
 } customUBO;
 
 //to be added (Vulkan support up to ? SB bindings, for 1080TI it is unlimited)
