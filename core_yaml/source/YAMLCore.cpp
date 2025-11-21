@@ -5,8 +5,8 @@
 
 namespace LEYAML{
 
-void YAMLCore::ReadYAMLFile(const std::string& filename) {
-    std::string fullYamlName = YAML_PATH + filename + ".yaml";
+void YAMLCore::ReadYAMLFile(const std::string& examplename) {
+    std::string fullYamlName = YAML_PATH + examplename + "/" + examplename + ".yaml";
     std::cout<<"Loading YAML file: "<<fullYamlName<<std::endl;
     try{
         yamlNode = YAML::LoadFile(fullYamlName);

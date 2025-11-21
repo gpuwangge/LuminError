@@ -7,5 +7,5 @@ const uint32_t WINDOW_HEIGHT = 800; //1280;//2400;
 #define SHADER_PATH "../../resource/shaders/"
 #define TEXTURE_PATH "../../resource/textures/"
 #define MODEL_PATH "../../resource/models/"
-#define YAML_PATH "../../resource/yamls/"
+#define YAML_PATH "../../example/"
 #define LOG_PATH "../../logs/"
