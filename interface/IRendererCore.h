@@ -215,7 +215,9 @@ namespace LERenderer{
         virtual void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) = 0;
         virtual void addStorageBuffer_material() = 0;
-        virtual void updateStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addStorageBuffer_sphere() = 0;
+        virtual void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) = 0; //the same function to add storage 1&2
         virtual void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size) = 0;

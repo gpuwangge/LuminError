@@ -41,6 +41,11 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE){
+        computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+    }
     if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
         //std::cout<<": Custom Buffer";
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -122,6 +127,14 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
         counter++;
     }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL){
+        computeBindings[counter].binding = counter;
+        computeBindings[counter].descriptorCount = 1;
+        computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        computeBindings[counter].pImmutableSamplers = nullptr;
+        computeBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        counter++;
+    }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE){
         computeBindings[counter].binding = counter;
         computeBindings[counter].descriptorCount = 1;
         computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -268,6 +281,22 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
             storageBufferInfo.buffer = storageBuffers_material[i].buffer;
             storageBufferInfo.offset = 0;
             storageBufferInfo.range = sizeof(StructStorageBuffer_Material);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
+            counter++;
+        }
+
+        if(computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE){
+            VkDescriptorBufferInfo storageBufferInfo{};
+            storageBufferInfo.buffer = storageBuffers_sphere[i].buffer;
+            storageBufferInfo.offset = 0;
+            storageBufferInfo.range = sizeof(StructStorageBuffer_Sphere);
 
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets[i];
@@ -448,12 +477,35 @@ void CComputeDescriptorManager::addStorageBuffer_material(){
     }
 }
 void CComputeDescriptorManager::uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size){
-if (data && size > 0) {
+    if (data && size > 0) {
         //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
         memcpy(storageBuffersMapped_material[currentFrame], data, size);
     }
 }
 
+/************
+ * 5 COMPUTE_STORAGEBUFFER_SPHERE
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_sphere;
+std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_sphere;
+void CComputeDescriptorManager::addStorageBuffer_sphere(){
+    computeUniformTypes |= COMPUTE_STORAGEBUFFER_SPHERE;
+
+    storageBuffers_sphere.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_sphere.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_sphere[i].init(sizeof(StructStorageBuffer_Sphere), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_sphere[i].deviceMemory, 0, sizeof(StructStorageBuffer_Sphere), 0, &storageBuffersMapped_sphere[i]);
+ 
+    }
+}
+void CComputeDescriptorManager::uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size){
+    if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_sphere[currentFrame], data, size);
+    }
+}
 
 /************
  * 6 COMPUTE_UNIFORMBUFFER_CUSTOM
@@ -536,6 +588,7 @@ int CComputeDescriptorManager::getPoolSize(){
     descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_WINDOWSWAP ? 2:0; //add 2 because use storage for input/output,count as 2 unique uniforms
 	descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL ? 1:0;
+    descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
@@ -558,6 +611,9 @@ void CComputeDescriptorManager::DestroyAndFree(){
     }
     for (size_t i = 0; i < storageBuffers_material.size(); i++) {
         storageBuffers_material[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < storageBuffers_sphere.size(); i++) {
+        storageBuffers_sphere[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
     for (size_t i = 0; i < storageBuffers_customswap.size(); i++) {
         storageBuffers_customswap[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());

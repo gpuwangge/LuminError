@@ -88,10 +88,10 @@ void CEntity::Update(float deltaTime){
 
     //const float EPSILON = 1e-2f;
     const float EPSILON = 5;
-    //bool isVecZero = glm::dot(CurrentVelocity, CurrentVelocity) < EPSILON;
-    //bool isAngVecZero = glm::dot(CurrentAngularVelocity, CurrentAngularVelocity) < EPSILON;
-    bool isVecZero = glm::dot(Velocity, Velocity) < EPSILON;
-    bool isAngVecZero = glm::dot(AngularVelocity, AngularVelocity) < EPSILON;
+    bool isVecZero = glm::dot(CurrentVelocity, CurrentVelocity) < EPSILON;
+    bool isAngVecZero = glm::dot(CurrentAngularVelocity, CurrentAngularVelocity) < EPSILON;
+    //bool isVecZero = glm::dot(Velocity, Velocity) < EPSILON;
+    //bool isAngVecZero = glm::dot(AngularVelocity, AngularVelocity) < EPSILON;
     if(isVecZero && isAngVecZero){
         bInMotion = false;
         //return; //can not return here, because even entity is not in motion, rotation and scale still works

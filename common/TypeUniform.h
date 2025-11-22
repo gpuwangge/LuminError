@@ -28,6 +28,20 @@ enum UniformTypes {
     COMPUTE_STORAGEIMAGE_SWAPCHAIN =    0x00020000
 };
 
+struct alignas(16) SphereInfo{
+    alignas(16) glm::vec3 position;
+    alignas(4) float radius;
+    alignas(4) int material_id;
+    alignas(4) float padding[2];
+};  //total size: 16+4+4+4*2=32 bytes
+
+static constexpr size_t SPHERE_SIZE = 64;//assume max 64 materials for now
+struct StructStorageBuffer_Sphere{
+    SphereInfo spheres[SPHERE_SIZE];
+};
+
+
+
 struct alignas(16) MaterialInfo{
     alignas(16) glm::vec3 albedo;
     alignas(16) glm::vec3 emissionColor;

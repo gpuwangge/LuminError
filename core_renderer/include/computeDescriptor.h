@@ -68,7 +68,7 @@ public:
      ************/
     static std::vector<CWxjBuffer> storageBuffers_material;
     static std::vector<void*> storageBuffersMapped_material;
-    void addStorageBuffer_material(); //the same function to add storage 1&2
+    void addStorageBuffer_material();
     void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
@@ -78,6 +78,10 @@ public:
     /************
      * 5 COMPUTE_STORAGEBUFFER_SPHERE
      ************/
+    static std::vector<CWxjBuffer> storageBuffers_sphere;
+    static std::vector<void*> storageBuffersMapped_sphere;
+    void addStorageBuffer_sphere();
+    void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 6 COMPUTE_UNIFORMBUFFER_CUSTOM

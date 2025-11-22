@@ -164,7 +164,33 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             storageBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
         }
     }
+    if(appInfo->Uniform.b_storage_compute_sphere){
+        //for (int i = 0; i < 5; i++){
+            storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
+            storageBufferObject_Sphere.spheres[0].radius = 8.0f;
+            storageBufferObject_Sphere.spheres[0].material_id = 0;
+        //}
 
+
+
+        storageBufferObject_Sphere.spheres[1].position = glm::vec3(0, 0, -1);
+        storageBufferObject_Sphere.spheres[1].radius = 0.75f;
+        storageBufferObject_Sphere.spheres[1].material_id = 1;
+
+
+        storageBufferObject_Sphere.spheres[2].position = glm::vec3(-0.95, 0.2, -1.75);
+        storageBufferObject_Sphere.spheres[2].radius = 0.35f;
+        storageBufferObject_Sphere.spheres[2].material_id = 2;
+
+        storageBufferObject_Sphere.spheres[3].position = glm::vec3(0.5, 0.6, -1.8);
+        storageBufferObject_Sphere.spheres[3].radius = 0.35f;
+        storageBufferObject_Sphere.spheres[3].material_id = 3;
+
+        storageBufferObject_Sphere.spheres[4].position = glm::vec3(0, 3, -1);
+        storageBufferObject_Sphere.spheres[4].radius = 1.15f;
+        storageBufferObject_Sphere.spheres[4].material_id = 4;
+
+    }
             
 
     Initialize();
@@ -174,6 +200,10 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
+    }
+    if(appInfo->Uniform.b_storage_compute_sphere){
+        UploadComputeStorageBuffer_Sphere(GetCurrentFrame(), &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));
+        UploadComputeStorageBuffer_Sphere(GetCurrentFrame()+1, &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));
     }
 
     gamer->PostInitialize();

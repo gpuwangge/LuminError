@@ -9,7 +9,7 @@ Uniforms:
     storage_compute_windowswap: true
     storage_compute_material: true
     storage_compute_triangle: false
-    storage_compute_sphere: false
+    storage_compute_sphere: true
     uniform_compute_custom: true
     storage_compute_customswap: false
     uniform_compute_texture_storage: false
