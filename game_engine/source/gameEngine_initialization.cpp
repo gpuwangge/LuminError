@@ -96,7 +96,7 @@ void GameEngine::Initialize(){
     //if(appInfo->Uniform.b_uniform_compute_storage) renderer->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
     
     if(appInfo->Uniform.b_storage_compute_windowswap) renderer->addStorageBuffer_windowswap();
-    if(appInfo->Uniform.b_storage_compute_material);
+    if(appInfo->Uniform.b_storage_compute_material) renderer->addStorageBuffer_material();
     if(appInfo->Uniform.b_storage_compute_triangle);
     if(appInfo->Uniform.b_storage_compute_sphere);
     if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);

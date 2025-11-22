@@ -307,6 +307,10 @@ void GameEngine::DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, 
     renderer->downloadStorageBuffer_windowswap(currentFrame, storageBufferObject, dataSize);
 }
 
+void GameEngine::UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->updateStorageBuffer_material(currentFrame, storageBufferObject, dataSize);
+}
+
 void GameEngine::SetComputeStorageBufferSize_CustomSwap(int size) { appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size = size; }
 void GameEngine::SetComputeStorageBufferUsage_CustomSwap(int usage) {appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Usage = usage; }
 void GameEngine::UploadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {

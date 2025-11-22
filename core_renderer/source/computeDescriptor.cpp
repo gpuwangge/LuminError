@@ -36,6 +36,11 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL){
+        computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+    }
     if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM){
         //std::cout<<": Custom Buffer";
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -109,6 +114,14 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
         counter++;
         //}
         //if(uniformBufferUsageFlags & UNIFORM_BUFFER_STORAGE_2_BIT){
+        computeBindings[counter].binding = counter;
+        computeBindings[counter].descriptorCount = 1;
+        computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        computeBindings[counter].pImmutableSamplers = nullptr;
+        computeBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        counter++;
+    }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL){
         computeBindings[counter].binding = counter;
         computeBindings[counter].descriptorCount = 1;
         computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -247,6 +260,22 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             descriptorWrites[counter].descriptorCount = 1;
             descriptorWrites[counter].pBufferInfo = &storageBufferInfo_2;
+            counter++;
+        }
+
+        if(computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL){
+            VkDescriptorBufferInfo storageBufferInfo{};
+            storageBufferInfo.buffer = storageBuffers_material[i].buffer;
+            storageBufferInfo.offset = 0;
+            storageBufferInfo.range = sizeof(StructStorageBuffer_Material);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
             counter++;
         }
 
@@ -402,6 +431,59 @@ void CComputeDescriptorManager::downloadStorageBuffer_windowswap(uint32_t curren
 }
 
 /************
+ * 3 COMPUTE_STORAGEBUFFER_MATERIAL
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_material;
+std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_material;
+void CComputeDescriptorManager::addStorageBuffer_material(){
+    computeUniformTypes |= COMPUTE_STORAGEBUFFER_MATERIAL;
+
+    storageBuffers_material.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_material.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_material[i].init(sizeof(StructStorageBuffer_Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_material[i].deviceMemory, 0, sizeof(StructStorageBuffer_Material), 0, &storageBuffersMapped_material[i]);
+ 
+    }
+}
+void CComputeDescriptorManager::uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size){
+if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_material[currentFrame], data, size);
+    }
+}
+
+
+/************
+ * 6 COMPUTE_UNIFORMBUFFER_CUSTOM
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::customUniformBuffers;
+std::vector<void*> CComputeDescriptorManager::customUniformBuffersMapped;
+VkDeviceSize CComputeDescriptorManager::m_customUniformBufferSize;
+void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUniformBufferSize){
+    computeUniformTypes |= COMPUTE_UNIFORMBUFFER_CUSTOM;
+    //std::cout<<"addCustomUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
+
+	customUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	customUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+	m_customUniformBufferSize = customUniformBufferSize;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
+	}    
+}
+void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
+    if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
+        if (data && dataSize > 0) {
+            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
+        }
+    }
+}
+
+/************
  * 7 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_customswap;
@@ -436,37 +518,10 @@ void CComputeDescriptorManager::downloadStorageBuffer_customswap(uint32_t curren
     }
 }
 
-/************
- * 3 COMPUTE_UNIFORMBUFFER_CUSTOM
- ************/
-std::vector<CWxjBuffer> CComputeDescriptorManager::customUniformBuffers;
-std::vector<void*> CComputeDescriptorManager::customUniformBuffersMapped;
-VkDeviceSize CComputeDescriptorManager::m_customUniformBufferSize;
-void CComputeDescriptorManager::addCustomUniformBuffer(VkDeviceSize customUniformBufferSize){
-    computeUniformTypes |= COMPUTE_UNIFORMBUFFER_CUSTOM;
-    //std::cout<<"addCustomUniformBuffer::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
-
-	customUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	customUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
-
-	m_customUniformBufferSize = customUniformBufferSize;
-
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		VkResult result = customUniformBuffers[i].init(m_customUniformBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-		vkMapMemory(CContext::GetHandle().GetLogicalDevice(), customUniformBuffers[i].deviceMemory, 0, m_customUniformBufferSize, 0, &customUniformBuffersMapped[i]);
-	}    
-}
-void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) {
-    if (computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM) {
-        if (data && dataSize > 0) {
-            memcpy(customUniformBuffersMapped[currentFrame], data, dataSize);
-        }
-    }
-}
 
 /************
- * 3 COMPUTE_STORAGEIMAGE_TEXTURE
- * 4 COMPUTE_STORAGEIMAGE_SWAPCHAIN
+ * 8 COMPUTE_STORAGEIMAGE_TEXTURE
+ * 9 COMPUTE_STORAGEIMAGE_SWAPCHAIN
  ************/
 void CComputeDescriptorManager::addStorageImage(VkBufferUsageFlags usage){
     computeUniformTypes |= usage;
@@ -480,7 +535,8 @@ int CComputeDescriptorManager::getPoolSize(){
 	int descriptorPoolSize = 0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_WINDOWSWAP ? 2:0; //add 2 because use storage for input/output,count as 2 unique uniforms
-	descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
+	descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL ? 1:0;
+    descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN ? 1:0;
@@ -499,6 +555,9 @@ void CComputeDescriptorManager::DestroyAndFree(){
         m_globalUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     for (size_t i = 0; i < storageBuffers_windowswap.size(); i++) {
         storageBuffers_windowswap[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < storageBuffers_material.size(); i++) {
+        storageBuffers_material[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
     for (size_t i = 0; i < storageBuffers_customswap.size(); i++) {
         storageBuffers_customswap[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());

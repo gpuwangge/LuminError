@@ -51,6 +51,7 @@ public:
 
     /************
      * 2 COMPUTE_STORAGEBUFFER_WINDOWSWAP
+     * Read and Write
      ************/
     //define two sets(and layouts) of storage buffers, one for input, the other for output; however they share the same descriptor pool
 	static std::vector<CWxjBuffer> storageBuffers_windowswap;
@@ -63,7 +64,12 @@ public:
 
     /************
      * 3 COMPUTE_STORAGEBUFFER_MATERIAL
+     * Read only
      ************/
+    static std::vector<CWxjBuffer> storageBuffers_material;
+    static std::vector<void*> storageBuffersMapped_material;
+    void addStorageBuffer_material(); //the same function to add storage 1&2
+    void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 4 COMPUTE_STORAGEBUFFER_TRIANGLE
@@ -84,6 +90,8 @@ public:
 
     /************
      * 7 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
+     * Read and Write
+     * Need get size from game example
      ************/
     //define two sets(and layouts) of storage buffers, one for input, the other for output; however they share the same descriptor pool
 	static std::vector<CWxjBuffer> storageBuffers_customswap;

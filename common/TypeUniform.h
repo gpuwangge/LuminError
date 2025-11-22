@@ -28,6 +28,25 @@ enum UniformTypes {
     COMPUTE_STORAGEIMAGE_SWAPCHAIN =    0x00020000
 };
 
+struct alignas(16) MaterialInfo{
+    alignas(16) glm::vec3 albedo;
+    alignas(16) glm::vec3 emissionColor;
+    alignas(16) glm::vec3 transmissionColor;
+    alignas(4) float metallic;
+    alignas(4) float roughness;
+    alignas(4) float alpha;
+    alignas(4) float emissionStrength;
+    alignas(4) float reflectance;
+    alignas(4) float specular;
+    alignas(4) float ior;
+    alignas(4) float transmission;
+};
+
+static constexpr size_t MATERIAL_SIZE = 64;//assume max 64 materials for now
+struct StructStorageBuffer_Material{
+    MaterialInfo materials[MATERIAL_SIZE];
+};
+
 static constexpr size_t WINDOW_SIZE = WINDOW_WIDTH * WINDOW_HEIGHT;  
 struct StructStorageBuffer_WindowSwap {
     //static constexpr size_t WIDTH = 800; // 属于类，不属于对象,不占内存

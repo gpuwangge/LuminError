@@ -184,6 +184,8 @@ namespace LEGameEngine{
         void UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
 
+        void UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+
         void SetComputeStorageBufferSize_CustomSwap(int size) override;
         void SetComputeStorageBufferUsage_CustomSwap(int usage) override;
         void UploadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
