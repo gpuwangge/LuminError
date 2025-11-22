@@ -1,0 +1,66 @@
+Materials:
+  - material_name: rough_plastic
+    material_id: 0
+    albedo: [0.8, 0.8, 0.8]         #Material Color
+    emissionColor: [0.0, 0.0, 0.0]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 0.0
+    roughness: 0.9
+    alpha: 1.0
+    emissionStrength: 0.0
+    reflectance: 0.04
+    specular: 0.5
+    ior: 1.45                    #Index of Refraction
+    transmission: 0.0            #Whether it transmits light
+  - material_name: transparent_glass
+    material_id: 1
+    albedo: [1.0, 1.0, 1.0]
+    emissionColor: [0.0, 0.0, 0.0]
+    transmissionColor: [0.95, 1.0, 0.98]
+    metallic: 0.0
+    roughness: 0.05
+    alpha: 0.1
+    emissionStrength: 0.0
+    reflectance: 0.05
+    specular: 1.0
+    ior: 1.5
+    transmission: 0.85
+  - material_name: gold
+    material_id: 2
+    albedo: [1.0, 0.86, 0.35]
+    emissionColor: [0.0, 0.0, 0.0]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 1.0
+    roughness: 0.1
+    alpha: 1.0
+    emissionStrength: 0.0
+    reflectance: 1.0
+    specular: 1.0
+    ior: 0.47
+    transmission: 0.0
+  - material_name: red_plastic_ceramic
+    material_id: 3
+    albedo: [0.8, 0.2, 0.2]
+    emissionColor: [0.0, 0.0, 0.0]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 0.0
+    roughness: 0.3
+    alpha: 1.0
+    emissionStrength: 0.0
+    reflectance: 0.04
+    specular: 0.5
+    ior: 1.45
+    transmission: 0.0
+  - material_name: light_sphere
+    material_id: 4
+    albedo: [1.0, 1.0, 1.0]
+    emissionColor: [1.0, 0.9, 0.7]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+    alpha: 1.0
+    emissionStrength: 5.0
+    reflectance: 0.04
+    specular: 0.0
+    ior: 1.0
+    transmission: 0.0

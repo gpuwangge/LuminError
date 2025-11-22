@@ -11,7 +11,8 @@ namespace LEYAML{
     public:
         YAMLCore(){}
         ~YAMLCore(){}
-        void ReadYAMLFile(const std::string& filename) override;
+        void ReadExampleYAMLFile(const std::string& filename) override;
+        void ReadMaterialYAMLFile(const std::string& filename) override;
     private:
         YAML::Node yamlNode;
     };

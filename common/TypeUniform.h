@@ -40,7 +40,8 @@ struct alignas(16) MaterialInfo{
     alignas(4) float specular;
     alignas(4) float ior;
     alignas(4) float transmission;
-};
+    //alignas(4) float padding[44]; //44*4=176 bytes 
+}; //total size: 16*3+4*8=80, need+176=256 bytes but no need?
 
 static constexpr size_t MATERIAL_SIZE = 64;//assume max 64 materials for now
 struct StructStorageBuffer_Material{

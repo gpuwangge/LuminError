@@ -80,11 +80,12 @@ namespace LEGameEngine{
         int frameCount = 0;
         double totalInitTime = 0;
 
-        std::string m_sampleName = "CSimpleTriangle";
+        //std::string m_exampleName = "CSimpleTriangle";
 
         std::vector<std::unique_ptr<CControlNode>> controlNodes;
 
         //StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{}; //?define here not work?
+        StructStorageBuffer_Material storageBufferObject_Material{};
 
         /******************
         * Helper Functions

@@ -5,9 +5,9 @@
 
 namespace LEYAML{
 
-void YAMLCore::ReadYAMLFile(const std::string& examplename) {
+void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
     std::string fullYamlName = YAML_PATH + examplename + "/" + examplename + ".yaml";
-    std::cout<<"Loading YAML file: "<<fullYamlName<<std::endl;
+    std::cout<<"Loading Example YAML file: "<<fullYamlName<<std::endl;
     try{
         yamlNode = YAML::LoadFile(fullYamlName);
     } catch (...){
@@ -129,6 +129,55 @@ void YAMLCore::ReadYAMLFile(const std::string& examplename) {
     if (yamlNode["MainCamera"]) appInfo.MainCamera.loadFromYaml(yamlNode["MainCamera"]);
     if (yamlNode["LightCamera"]) appInfo.LightCamera.loadFromYaml(yamlNode["LightCamera"]);
 
-}//end of ReadYAMLFile()
+}
+
+void YAMLCore::ReadMaterialYAMLFile(const std::string& filename){
+    std::string fullYamlName = MATERIAL_YAML_PATH + filename + ".yaml";
+    std::cout<<"Loading Material YAML file: "<<fullYamlName<<std::endl;
+
+    try{
+        yamlNode = YAML::LoadFile(fullYamlName);
+    } catch (...){
+        std::cout<<"Error loading yaml file"<<std::endl;
+        return;
+    }
+
+    int max_material_id = -1;
+    if (yamlNode["Materials"]) {
+        for (const auto& mat : yamlNode["Materials"]) {
+            int material_id = mat["material_id"] ? mat["material_id"].as<int>() : 0;
+            max_material_id = (material_id > max_material_id) ? material_id : max_material_id;
+        }
+    }
+    int customMaterialCount = ((max_material_id+1) < yamlNode["Materials"].size()) ? (max_material_id+1) : yamlNode["Materials"].size();
+    //std::cout<<"Detected "<<customMaterialCount<<" custom materials in the YAML file."<<std::endl;
+    appInfo.Materials.resize(customMaterialCount);
+    if (yamlNode["Materials"]) {
+        //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
+        for (const auto& mat : yamlNode["Materials"]) {
+            int material_id = mat["material_id"] ? mat["material_id"].as<int>() : 0;
+            appInfo.Materials[material_id].loadFromYaml(mat);
+        }
+    }
+
+
+    // for(int i = 0; i < appInfo.Materials.size(); i++){
+    //     std::cout << "Material ID " << i << ": Name = " << appInfo.Materials[i].material_name << std::endl;
+    //     std::cout << "material_id: " << appInfo.Materials[i].material_id << std::endl;
+    //     std::cout << "albedo: " << appInfo.Materials[i].albedo[0] << ", " << appInfo.Materials[i].albedo[1] << ", " << appInfo.Materials[i].albedo[2] << std::endl;
+    //     std::cout << "emissionColor: " << appInfo.Materials[i].emissionColor[0] << ", " << appInfo.Materials[i].emissionColor[1] << ", " << appInfo.Materials[i].emissionColor[2] << std::endl;
+    //     std::cout << "transmissionColor: " << appInfo.Materials[i].transmissionColor[0] << ", " << appInfo.Materials[i].transmissionColor[1] << ", " << appInfo.Materials[i].transmissionColor[2] << std::endl;
+    //     std::cout << "metallic: " << appInfo.Materials[i].metallic << std::endl;
+    //     std::cout << "roughness: " << appInfo.Materials[i].roughness << std::endl;
+    //     std::cout << "alpha: " << appInfo.Materials[i].alpha << std::endl;
+    //     std::cout << "emissionStrength: " << appInfo.Materials[i].emissionStrength << std::endl;
+    //     std::cout << "reflectance: " << appInfo.Materials[i].reflectance << std::endl;
+    //     std::cout << "specular: " << appInfo.Materials[i].specular << std::endl;
+    //     std::cout << "ior: " << appInfo.Materials[i].ior << std::endl;
+    //     std::cout << "transmission: " << appInfo.Materials[i].transmission << std::endl << std::endl;
+    // }
+
+
+}
 
 }//end of namespace

@@ -7,7 +7,8 @@ namespace LEYAML{
     class IYAMLCore {
     public:
         virtual ~IYAMLCore() = default;
-        virtual void ReadYAMLFile(const std::string& filename) = 0;
+        virtual void ReadExampleYAMLFile(const std::string& filename) = 0;
+        virtual void ReadMaterialYAMLFile(const std::string& filename) = 0;
         AppInfo& GetAppInfo() { return appInfo; }
     protected:
         AppInfo appInfo;

@@ -43,9 +43,9 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     resourcer = static_cast<LEResource::IResourceCore*>(pVoid);
     resourcer->SetApplication(this, logger);
 
-    m_sampleName = GetPureName(exampleName);
+    exampleName = GetPureName(exampleName);
     //std::cout<<"exampleName: "<<exampleName<<std::endl;
-    std::string logName = logger->GetLogFileName(m_sampleName);
+    std::string logName = logger->GetLogFileName(exampleName);
     std::string folderPath = logger->CreateDateFolder(LOG_PATH);
     std::string fullLogName = folderPath + "/" + logName;
     //std::cout<<"fullLogName: "<<fullLogName<<std::endl;
@@ -74,7 +74,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
     *****************/
-    sdler->createWindow(OUT windowWidth, OUT windowHeight, m_sampleName);
+    sdler->createWindow(OUT windowWidth, OUT windowHeight, exampleName);
 	//PRINT("run: Created Window. Window width = %d,  height = %d.", windowWidth, windowHeight);
 
     /**************** 
@@ -145,8 +145,37 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     TimePoint T0 = now();
     gamer->Initialize();
-    yamler->ReadYAMLFile(m_sampleName);
+
+    yamler->ReadExampleYAMLFile(exampleName);
+
+    if(appInfo->Uniform.b_storage_compute_material){
+        yamler->ReadMaterialYAMLFile("Materials");
+        for(int i = 0; i < appInfo->Materials.size(); i++){
+            storageBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
+            storageBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
+            storageBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
+            storageBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
+            storageBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
+            storageBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
+            storageBufferObject_Material.materials[i].emissionStrength = appInfo->Materials[i].emissionStrength;
+            storageBufferObject_Material.materials[i].reflectance = appInfo->Materials[i].reflectance;
+            storageBufferObject_Material.materials[i].specular = appInfo->Materials[i].specular;
+            storageBufferObject_Material.materials[i].ior = appInfo->Materials[i].ior;
+            storageBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
+        }
+    }
+
+            
+
     Initialize();
+
+    if(appInfo->Uniform.b_storage_compute_material){
+        //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
+        UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
+    }
+
     gamer->PostInitialize();
 
     TimePoint T1 = now();

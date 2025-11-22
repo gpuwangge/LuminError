@@ -342,10 +342,43 @@ struct SamplerConfig{
     }
 };
 
+struct MaterialConfig {
+    std::string material_name;
+    int material_id = -1;
+    std::array<float, 3> albedo{1.0f, 1.0f, 1.0f};
+    std::array<float, 3> emissionColor{0.0f, 0.0f, 0.0f};
+    std::array<float, 3> transmissionColor{1.0f, 1.0f, 1.0f};
+    float metallic = 0.0f;
+    float roughness = 1.0f;
+    float alpha = 1.0f;
+    float emissionStrength = 0.0f;
+    float reflectance = 0.04f;
+    float specular = 0.5f;
+    float ior = 1.0f;
+    float transmission = 0.0f;
+
+    void loadFromYaml(const YAML::Node& node) {
+        material_name = getOrDefault(node, "material_name", std::string{"Default"});
+        material_id = getOrDefault(node, "material_id", -1);
+        albedo = getOrDefault(node, "albedo", std::array<float, 3>{1.0f, 1.0f, 1.0f});
+        emissionColor = getOrDefault(node, "emissionColor", std::array<float, 3>{0.0f, 0.0f, 0.0f});
+        transmissionColor = getOrDefault(node, "transmissionColor", std::array<float, 3>{1.0f, 1.0f, 1.0f});
+        metallic = getOrDefault(node, "metallic", 0.0f);
+        roughness = getOrDefault(node, "roughness", 1.0f);
+        alpha = getOrDefault(node, "alpha", 1.0f);
+        emissionStrength = getOrDefault(node, "emissionStrength", 0.0f);
+        reflectance = getOrDefault(node, "reflectance", 0.04f);
+        specular = getOrDefault(node, "specular", 0.5f);
+        ior = getOrDefault(node, "ior", 1.0f);
+        transmission = getOrDefault(node, "transmission", 0.0f);
+    }
+};
+
 struct AppInfo{
     std::vector<ObjectConfig> Objects;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
+    std::vector<MaterialConfig> Materials;
 
     FontConfig Font;
     std::vector<ModelConfig> Models;

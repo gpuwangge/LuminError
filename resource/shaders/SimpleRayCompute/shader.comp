@@ -23,11 +23,11 @@ layout(set = 0, binding = 2, std430) buffer SBOOut {
 
 struct Material {
     vec3 albedo;
-    float _padding0;
+    //float _padding0;
     vec3 emissionColor;
-    float _padding1;
+    //float _padding1;
     vec3 transmissionColor;
-    float _padding2;
+    //float _padding2;
     float metallic;
     float roughness;
     float alpha;
@@ -36,6 +36,7 @@ struct Material {
     float specular;
     float ior;
     float transmission;
+    //float padding[44];
 };
 
 layout(set = 0, binding = 3, std430) readonly buffer SBOMaterial {
@@ -89,7 +90,8 @@ struct Ray{
 struct Sphere{
     float radius;
     vec3 position;
-    Material material;
+    int material_id;
+    //Material material;
 };
 Sphere spheres[NUM_SPHERES];
 
@@ -100,7 +102,7 @@ struct Triangle{
     vec3 normal_a;
     vec3 normal_b;
     vec3 normal_c;
-    Material material;
+    int material_id;
 };
 Triangle triangles[NUM_TRIANGLES];
 
@@ -109,7 +111,7 @@ struct HitInfo{
     float dst;
     vec3 hitPoint;
     vec3 normal;
-    Material material;
+    int material_id;
     //vec3 debugColor;
 };
 
@@ -173,7 +175,7 @@ HitInfo RaySphereHitCheck(Ray ray, Sphere sphere){
         hitInfo.dst = t;
         hitInfo.hitPoint = ray.origin + ray.dir * t;
         hitInfo.normal = normalize(hitInfo.hitPoint - sphere.position);
-        hitInfo.material = sphere.material;
+        hitInfo.material_id = sphere.material_id;
     }
 
     return hitInfo;
@@ -208,7 +210,7 @@ HitInfo RayTriangleHitCheck(Ray ray, Triangle tri){
         hitInfo.dst = t;
         hitInfo.hitPoint = ray.origin + ray.dir * t;
         hitInfo.normal = normalize(tri.normal_a * w + tri.normal_b * u + tri.normal_c * v);
-        hitInfo.material = tri.material;
+        hitInfo.material_id = tri.material_id;
 
         //hitInfo.debugColor = vec3(t*0.1);
     }else{
@@ -256,7 +258,7 @@ vec3 TraceRay(Ray ray, inout uint state){
             break;
         }
 
-        Material mat = hitInfo.material;
+        Material mat = sboMaterial.materials[hitInfo.material_id];
         
         // 添加自发光贡献
         vec3 emittedLight = mat.emissionColor * mat.emissionStrength;
@@ -363,81 +365,88 @@ vec3 TraceRay(Ray ray, inout uint state){
 void main(){
     // ----------------------------
     // 0. Initialization
+    spheres[0].material_id = 0;
+    spheres[1].material_id = 1;
+    spheres[2].material_id = 2;
+    spheres[3].material_id = 3;
+    spheres[4].material_id = 4;
+
     // 地面 - 粗糙塑料材质
     spheres[0].radius = 8.0f;
     spheres[0].position = vec3(0, -8, 0);
-    spheres[0].material.albedo = vec3(0.8, 0.8, 0.8);  // 浅灰色
-    spheres[0].material.metallic = 0.0;                // 非金属
-    spheres[0].material.roughness = 0.9;               // 高粗糙度，漫反射为主
-    spheres[0].material.alpha = 1.0;                   // 不透明
-    spheres[0].material.emissionStrength = 0.0f;       // 不自发光
-    spheres[0].material.emissionColor = vec3(0.0);
-    spheres[0].material.reflectance = 0.04;            // 塑料的基础反射率
-    spheres[0].material.specular = 0.5;
-    spheres[0].material.ior = 1.45;                    // 塑料的折射率
-    spheres[0].material.transmission = 0.0;            // 不透光
-    spheres[0].material.transmissionColor = vec3(1.0);
-    spheres[0].material = sboMaterial.materials[0];
+    // spheres[0].material.albedo = vec3(0.8, 0.8, 0.8);  // 浅灰色
+    // spheres[0].material.metallic = 0.0;                // 非金属
+    // spheres[0].material.roughness = 0.9;               // 高粗糙度，漫反射为主
+    // spheres[0].material.alpha = 1.0;                   // 不透明
+    // spheres[0].material.emissionStrength = 0.0f;       // 不自发光
+    // spheres[0].material.emissionColor = vec3(0.0);
+    // spheres[0].material.reflectance = 0.04;            // 塑料的基础反射率
+    // spheres[0].material.specular = 0.5;
+    // spheres[0].material.ior = 1.45;                    // 塑料的折射率
+    // spheres[0].material.transmission = 0.0;            // 不透光
+    // spheres[0].material.transmissionColor = vec3(1.0);
+    //spheres[0].material = sboMaterial.materials[0];
 
     // 玻璃球体 - 透明玻璃材质
     spheres[1].radius = 0.75f;
     spheres[1].position = vec3(0, 0, -1);
-    spheres[1].material.albedo = vec3(1.0, 1.0, 1.0);  // 白色
-    spheres[1].material.metallic = 0.0;                // 非金属
-    spheres[1].material.roughness = 0.05;              // 非常光滑
-    spheres[1].material.alpha = 0.1;                   // 透明
-    spheres[1].material.emissionStrength = 0.0f;       // 不自发光
-    spheres[1].material.emissionColor = vec3(0.0);
-    spheres[1].material.reflectance = 0.05;
-    spheres[1].material.specular = 1.0;
-    spheres[1].material.ior = 1.5;                     // 玻璃的折射率
-    spheres[1].material.transmission = 0.85;            // 高透射率
-    spheres[1].material.transmissionColor = vec3(0.95, 1.0, 0.98); // 略带蓝色的透射
+    // spheres[1].material.albedo = vec3(1.0, 1.0, 1.0);  // 白色
+    // spheres[1].material.metallic = 0.0;                // 非金属
+    // spheres[1].material.roughness = 0.05;              // 非常光滑
+    // spheres[1].material.alpha = 0.1;                   // 透明
+    // spheres[1].material.emissionStrength = 0.0f;       // 不自发光
+    // spheres[1].material.emissionColor = vec3(0.0);
+    // spheres[1].material.reflectance = 0.05;
+    // spheres[1].material.specular = 1.0;
+    // spheres[1].material.ior = 1.5;                     // 玻璃的折射率
+    // spheres[1].material.transmission = 0.85;            // 高透射率
+    // spheres[1].material.transmissionColor = vec3(0.95, 1.0, 0.98); // 略带蓝色的透射
+    //spheres[1].material = sboMaterial.materials[1];
 
     // 金属球体 - 黄金材质
     spheres[2].radius = 0.35f;
     spheres[2].position = vec3(-0.95, 0.2, -1.75);
-    spheres[2].material.albedo = vec3(1.0, 0.86, 0.35); // 金色
-    spheres[2].material.metallic = 1.0;                 // 纯金属
-    spheres[2].material.roughness = 0.1;                // 较光滑的表面
-    spheres[2].material.alpha = 1.0;                    // 不透明
-    spheres[2].material.emissionStrength = 0.0f;        // 不自发光
-    spheres[2].material.emissionColor = vec3(0.0);
-    spheres[2].material.reflectance = 1.0;
-    spheres[2].material.specular = 1.0;
-    spheres[2].material.ior = 0.47;                     // 黄金的复杂IOR，这里简化
-    spheres[2].material.transmission = 0.0;             // 金属不透明
-    spheres[2].material.transmissionColor = vec3(1.0);
+    // spheres[2].material.albedo = vec3(1.0, 0.86, 0.35); // 金色
+    // spheres[2].material.metallic = 1.0;                 // 纯金属
+    // spheres[2].material.roughness = 0.1;                // 较光滑的表面
+    // spheres[2].material.alpha = 1.0;                    // 不透明
+    // spheres[2].material.emissionStrength = 0.0f;        // 不自发光
+    // spheres[2].material.emissionColor = vec3(0.0);
+    // spheres[2].material.reflectance = 1.0;
+    // spheres[2].material.specular = 1.0;
+    // spheres[2].material.ior = 0.47;                     // 黄金的复杂IOR，这里简化
+    // spheres[2].material.transmission = 0.0;             // 金属不透明
+    // spheres[2].material.transmissionColor = vec3(1.0);
 
     // 电介质球体 - 红色塑料/陶瓷
     spheres[3].radius = 0.35f;
     spheres[3].position = vec3(0.5, 0.6, -1.8);
-    spheres[3].material.albedo = vec3(0.8, 0.2, 0.2);  // 红色
-    spheres[3].material.metallic = 0.0;                 // 非金属
-    spheres[3].material.roughness = 0.3;                // 中等粗糙度
-    spheres[3].material.alpha = 1.0;                    // 不透明
-    spheres[3].material.emissionStrength = 0.0f;        // 不自发光
-    spheres[3].material.emissionColor = vec3(0.0);
-    spheres[3].material.reflectance = 0.04;
-    spheres[3].material.specular = 0.5;
-    spheres[3].material.ior = 1.45;                     // 塑料折射率
-    spheres[3].material.transmission = 0.0;             // 不透光
-    spheres[3].material.transmissionColor = vec3(1.0);
+    // spheres[3].material.albedo = vec3(0.8, 0.2, 0.2);  // 红色
+    // spheres[3].material.metallic = 0.0;                 // 非金属
+    // spheres[3].material.roughness = 0.3;                // 中等粗糙度
+    // spheres[3].material.alpha = 1.0;                    // 不透明
+    // spheres[3].material.emissionStrength = 0.0f;        // 不自发光
+    // spheres[3].material.emissionColor = vec3(0.0);
+    // spheres[3].material.reflectance = 0.04;
+    // spheres[3].material.specular = 0.5;
+    // spheres[3].material.ior = 1.45;                     // 塑料折射率
+    // spheres[3].material.transmission = 0.0;             // 不透光
+    // spheres[3].material.transmissionColor = vec3(1.0);
 
     // 可以添加第五个球体作为光源
     spheres[4].radius = 1.15f;
     spheres[4].position = vec3(0, 3, -1);
-    spheres[4].material.albedo = vec3(1.0);
-    spheres[4].material.metallic = 0.0;
-    spheres[4].material.roughness = 1.0;
-    spheres[4].material.alpha = 1.0;
-    spheres[4].material.emissionStrength = 5.0f;        // 强发光
-    spheres[4].material.emissionColor = vec3(1.0, 0.9, 0.7); // 暖白色光
-    spheres[4].material.reflectance = 0.04;
-    spheres[4].material.specular = 0.0;
-    spheres[4].material.ior = 1.0;
-    spheres[4].material.transmission = 0.0;
-    spheres[4].material.transmissionColor = vec3(1.0);
+    // spheres[4].material.albedo = vec3(1.0);
+    // spheres[4].material.metallic = 0.0;
+    // spheres[4].material.roughness = 1.0;
+    // spheres[4].material.alpha = 1.0;
+    // spheres[4].material.emissionStrength = 5.0f;        // 强发光
+    // spheres[4].material.emissionColor = vec3(1.0, 0.9, 0.7); // 暖白色光
+    // spheres[4].material.reflectance = 0.04;
+    // spheres[4].material.specular = 0.0;
+    // spheres[4].material.ior = 1.0;
+    // spheres[4].material.transmission = 0.0;
+    // spheres[4].material.transmissionColor = vec3(1.0);
 
     vec3 positions[4] = vec3[4](
         vec3(0.0,  3.0, 6.0),   // 前面
@@ -449,17 +458,18 @@ void main(){
         triangles[i].a = positions[i] + vec3(-1.0, -1.0, 0.0);
         triangles[i].b = positions[i] + vec3( 1.0, -1.0, 0.0);
         triangles[i].c = positions[i] + vec3( 0.0,  1.0, 0.0);
-        triangles[i].material.albedo = vec3(1.0, 0.86, 0.35); // 金色
-        triangles[i].material.metallic = 1.0;                 // 纯金属
-        triangles[i].material.roughness = 0.1;                // 较光滑的表面
-        triangles[i].material.alpha = 1.0;                    // 不透明
-        triangles[i].material.emissionStrength = 0.0f;        // 不自发光
-        triangles[i].material.emissionColor = vec3(0.0);
-        triangles[i].material.reflectance = 1.0;
-        triangles[i].material.specular = 1.0;
-        triangles[i].material.ior = 0.47;                     // 黄金的复杂IOR，这里简化
-        triangles[i].material.transmission = 0.0;             // 金属不透明
-        triangles[i].material.transmissionColor = vec3(1.0);
+        triangles[i].material_id = i;
+        // triangles[i].material.albedo = vec3(1.0, 0.86, 0.35); // 金色
+        // triangles[i].material.metallic = 1.0;                 // 纯金属
+        // triangles[i].material.roughness = 0.1;                // 较光滑的表面
+        // triangles[i].material.alpha = 1.0;                    // 不透明
+        // triangles[i].material.emissionStrength = 0.0f;        // 不自发光
+        // triangles[i].material.emissionColor = vec3(0.0);
+        // triangles[i].material.reflectance = 1.0;
+        // triangles[i].material.specular = 1.0;
+        // triangles[i].material.ior = 0.47;                     // 黄金的复杂IOR，这里简化
+        // triangles[i].material.transmission = 0.0;             // 金属不透明
+        // triangles[i].material.transmissionColor = vec3(1.0);
     }
     // ----------------------------
     // 1. Pixel cord conver to NDC(0..1)
@@ -514,14 +524,18 @@ void main(){
     // 6. Accumulate
     uint index = gl_GlobalInvocationID.y * gridSize.x + gl_GlobalInvocationID.x;
 
-    if(customUBO.cameraInMotion){
-        sboOut.pixels[index] = vec4(currentFrameColor, 1.0);
-    }else{
+    //if(customUBO.cameraInMotion){
+    //    sboOut.pixels[index] = vec4(currentFrameColor, 1.0); //disalbe accumulate when camera in motion
+    //}else{
         float alpha = 0.01f;
         sboOut.pixels[index] = vec4(currentFrameColor, 1.0) * alpha + sboIn.pixels[index] * (1.0 - alpha);
-    }
+    //}
 
     
     imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), sboOut.pixels[index]);
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(currentFrameColor, 1.0)); //no accumulate
+    //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(sboMaterial.materials[1].reflectance, sboMaterial.materials[1].reflectance, sboMaterial.materials[1].reflectance, 1.0));
+    //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(0.05, 0.05, 0.05, 1.0));
+
+    
 }
