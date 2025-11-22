@@ -1,6 +1,6 @@
 #version 450
-#include "../Common/constants.glsl"
-#include "../Common/lightsUBO.glsl"
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/lightsUBO.glsl"
 
 //layout (set = 0, binding = 3) uniform sampler2D depthSampler;//single sampled
 layout (set = 0, binding = 4) uniform sampler2DMS depthSampler; //msaa, there is no use to this uniform in this shader

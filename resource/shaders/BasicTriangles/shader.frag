@@ -1,5 +1,5 @@
 #version 450
-#include "../Common/constants.glsl"
+#include "../CommonShaders/constants.glsl"
 
 layout(set = 1, binding = UNIFORM_TEXTURE_SAMPLER_BINDING) uniform sampler2D texSampler;
 

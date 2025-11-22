@@ -1,6 +1,6 @@
 #version 450
-#include "../Common/constants.glsl"
-#include "../Common/lightsUBO.glsl"
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/lightsUBO.glsl"
 
 layout (set = 0, binding = 4) uniform sampler2D depthSampler;//test
 layout (set = 1, binding = UNIFORM_TEXTURE_SAMPLER_BINDING) uniform sampler2D texSampler;

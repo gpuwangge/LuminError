@@ -1,6 +1,6 @@
 #version 450
-#include "../Common/constants.glsl"
-#include "../Common/graphicsGlobalUBO.glsl"
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/graphicsGlobalUBO.glsl"
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;

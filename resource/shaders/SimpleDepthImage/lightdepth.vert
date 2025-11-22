@@ -1,7 +1,7 @@
 #version 450
-#include "../Common/constants.glsl"
-#include "../Common/objectUBO.glsl"
-#include "../Common/lightsUBO.glsl"
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/objectUBO.glsl"
+#include "../CommonShaders/lightsUBO.glsl"
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor; //not used

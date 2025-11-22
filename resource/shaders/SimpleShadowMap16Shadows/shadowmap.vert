@@ -1,6 +1,6 @@
 #version 450
-#include "../Common/constants.glsl"
-#include "../Common/lightsUBO.glsl"
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/lightsUBO.glsl"
 
 layout(push_constant) uniform PushConstant{
     int value; //the index of shadowmap renderpass

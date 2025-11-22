@@ -1,7 +1,7 @@
 #version 450
-#include "../Common/constants.glsl"
-#include "../Common/objectUBO.glsl"
-#include "../Common/graphicsGlobalUBO.glsl"
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/objectUBO.glsl"
+#include "../CommonShaders/graphicsGlobalUBO.glsl"
 
 //difference of ubo and vertex buffer:
 //vertex buffer: each vertex has different buffer(store different attributes)
