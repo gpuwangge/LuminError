@@ -20,12 +20,34 @@ enum UniformTypes {
     COMPUTE_UNIFORMBUFFER_GLOBAL =      0x00000200,
     COMPUTE_STORAGEBUFFER_WINDOWSWAP =  0x00000400,
     COMPUTE_STORAGEBUFFER_MATERIAL =    0x00000800,
-    COMPUTE_STORAGEBUFFER_TRIANGLE =    0x00001000,
-    COMPUTE_STORAGEBUFFER_SPHERE =      0x00002000,
-    COMPUTE_UNIFORMBUFFER_CUSTOM =      0x00004000,
-    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =  0x00008000,
-    COMPUTE_STORAGEIMAGE_TEXTURE =      0x00010000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =    0x00020000
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX =      0x00001000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEINDEX =       0x00002000,
+    COMPUTE_STORAGEBUFFER_SPHERE =      0x00004000,
+    COMPUTE_UNIFORMBUFFER_CUSTOM =      0x00008000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =  0x00010000,
+    COMPUTE_STORAGEIMAGE_TEXTURE =      0x00020000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =    0x00040000
+};
+
+
+struct alignas(16) TriangleVertexInfo{
+    alignas(16) glm::vec3 position;
+    alignas(16) glm::vec3 normal;
+    alignas(16) glm::vec3 tangent;
+    alignas(16) glm::vec3 color;
+    alignas(16) glm::vec2 uv;
+    alignas(4) int material_id;
+    alignas(4) float padding[15]; //60 bytes
+    //total size: 16*4+4+60=128 bytes
+};
+static constexpr size_t TriangleVertex_SIZE = 256;
+struct StructStorageBuffer_TriangleVertex{
+    TriangleVertexInfo vertices[TriangleVertex_SIZE];
+};
+
+static constexpr size_t TriangleIndex_SIZE = 256;
+struct StructStorageBuffer_TriangleIndex{
+    unsigned int indices[TriangleIndex_SIZE]; //each triangle has 3 indices
 };
 
 struct alignas(16) SphereInfo{
@@ -34,13 +56,10 @@ struct alignas(16) SphereInfo{
     alignas(4) int material_id;
     alignas(4) float padding[2];
 };  //total size: 16+4+4+4*2=32 bytes
-
 static constexpr size_t SPHERE_SIZE = 64;//assume max 64 materials for now
 struct StructStorageBuffer_Sphere{
     SphereInfo spheres[SPHERE_SIZE];
 };
-
-
 
 struct alignas(16) MaterialInfo{
     alignas(16) glm::vec3 albedo;

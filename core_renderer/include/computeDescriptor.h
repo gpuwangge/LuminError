@@ -72,11 +72,23 @@ public:
     void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 4 COMPUTE_STORAGEBUFFER_TRIANGLE
+     * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX
      ************/
+    static std::vector<CWxjBuffer> storageBuffers_triangleVertex;
+    static std::vector<void*> storageBuffersMapped_triangleVertex;
+    void addStorageBuffer_triangleVertex();
+    void uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 5 COMPUTE_STORAGEBUFFER_SPHERE
+     * 5 COMPUTE_STORAGEBUFFER_TRIANGLEINDEX
+     ************/
+    static std::vector<CWxjBuffer> storageBuffers_triangleIndex;
+    static std::vector<void*> storageBuffersMapped_triangleIndex;
+    void addStorageBuffer_triangleIndex();
+    void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size);
+
+    /************
+     * 6 COMPUTE_STORAGEBUFFER_SPHERE
      ************/
     static std::vector<CWxjBuffer> storageBuffers_sphere;
     static std::vector<void*> storageBuffersMapped_sphere;
@@ -84,7 +96,7 @@ public:
     void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 6 COMPUTE_UNIFORMBUFFER_CUSTOM
+     * 7 COMPUTE_UNIFORMBUFFER_CUSTOM
      ************/
     static std::vector<CWxjBuffer> customUniformBuffers; 
 	static std::vector<void*> customUniformBuffersMapped;
@@ -93,7 +105,7 @@ public:
     void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
-     * 7 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
+     * 8 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
      * Read and Write
      * Need get size from game example
      ************/
@@ -109,8 +121,8 @@ public:
 
 
     /************
-     * 8 COMPUTE_STORAGEIMAGE_TEXTURE
-     * 9 COMPUTE_STORAGEIMAGE_SWAPCHAIN
+     * 9 COMPUTE_STORAGEIMAGE_TEXTURE
+     * 10 COMPUTE_STORAGEIMAGE_SWAPCHAIN
      ************/
     void addStorageImage(VkBufferUsageFlags usage);
    

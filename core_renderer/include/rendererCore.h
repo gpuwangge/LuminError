@@ -303,6 +303,10 @@ namespace LERenderer{
         
         void addStorageBuffer_material() override { computeDescriptorManager.addStorageBuffer_material(); }
         void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_material(currentFrame, data, size); }
+        void addStorageBuffer_triangleVertex() override { computeDescriptorManager.addStorageBuffer_triangleVertex(); }
+        void uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleVertex(currentFrame, data, size); }
+        void addStorageBuffer_triangleIndex() override { computeDescriptorManager.addStorageBuffer_triangleIndex(); }
+        void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleIndex(currentFrame, data, size); }
         void addStorageBuffer_sphere() override { computeDescriptorManager.addStorageBuffer_sphere(); }
         void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_sphere(currentFrame, data, size); }
 

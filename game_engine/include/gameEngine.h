@@ -86,6 +86,8 @@ namespace LEGameEngine{
 
         //StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{}; //?define here not work?
         StructStorageBuffer_Material storageBufferObject_Material{};
+        StructStorageBuffer_TriangleVertex storageBufferObject_TriangleVertex{};
+        StructStorageBuffer_TriangleIndex storageBufferObject_TriangleIndex{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
 
         /******************
@@ -187,6 +189,8 @@ namespace LEGameEngine{
         void DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
 
         void UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void UploadComputeStorageBuffer_TriangleVertex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void UploadComputeStorageBuffer_TriangleIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_Sphere(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
 
         void SetComputeStorageBufferSize_CustomSwap(int size) override;

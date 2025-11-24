@@ -41,6 +41,16 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX){
+        computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+    }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEINDEX){
+        computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+    }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE){
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -127,6 +137,22 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
         counter++;
     }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL){
+        computeBindings[counter].binding = counter;
+        computeBindings[counter].descriptorCount = 1;
+        computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        computeBindings[counter].pImmutableSamplers = nullptr;
+        computeBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        counter++;
+    }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX){
+        computeBindings[counter].binding = counter;
+        computeBindings[counter].descriptorCount = 1;
+        computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        computeBindings[counter].pImmutableSamplers = nullptr;
+        computeBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        counter++;
+    }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEINDEX){
         computeBindings[counter].binding = counter;
         computeBindings[counter].descriptorCount = 1;
         computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -281,6 +307,38 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
             storageBufferInfo.buffer = storageBuffers_material[i].buffer;
             storageBufferInfo.offset = 0;
             storageBufferInfo.range = sizeof(StructStorageBuffer_Material);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
+            counter++;
+        }
+
+        if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX){
+            VkDescriptorBufferInfo storageBufferInfo{};
+            storageBufferInfo.buffer = storageBuffers_triangleVertex[i].buffer;
+            storageBufferInfo.offset = 0;
+            storageBufferInfo.range = sizeof(StructStorageBuffer_TriangleVertex);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
+            counter++;
+        }
+
+        if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEINDEX){
+            VkDescriptorBufferInfo storageBufferInfo{};
+            storageBufferInfo.buffer = storageBuffers_triangleIndex[i].buffer;
+            storageBufferInfo.offset = 0;
+            storageBufferInfo.range = sizeof(StructStorageBuffer_TriangleIndex);
 
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets[i];
@@ -484,7 +542,55 @@ void CComputeDescriptorManager::uploadStorageBuffer_material(uint32_t currentFra
 }
 
 /************
- * 5 COMPUTE_STORAGEBUFFER_SPHERE
+ * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_triangleVertex;
+std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_triangleVertex;
+void CComputeDescriptorManager::addStorageBuffer_triangleVertex(){
+    computeUniformTypes |= COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX;
+
+    storageBuffers_triangleVertex.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_triangleVertex.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_triangleVertex[i].init(sizeof(StructStorageBuffer_TriangleVertex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_triangleVertex[i].deviceMemory, 0, sizeof(StructStorageBuffer_TriangleVertex), 0, &storageBuffersMapped_triangleVertex[i]);
+ 
+    }
+}
+void CComputeDescriptorManager::uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size){
+    if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_triangleVertex[currentFrame], data, size);
+    }
+}
+
+/************
+ * 5 COMPUTE_STORAGEBUFFER_TRIANGLEINDEX
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_triangleIndex;
+std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_triangleIndex;
+void CComputeDescriptorManager::addStorageBuffer_triangleIndex(){
+    computeUniformTypes |= COMPUTE_STORAGEBUFFER_TRIANGLEINDEX;
+
+    storageBuffers_triangleIndex.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_triangleIndex.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_triangleIndex[i].init(sizeof(StructStorageBuffer_TriangleIndex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_triangleIndex[i].deviceMemory, 0, sizeof(StructStorageBuffer_TriangleIndex), 0, &storageBuffersMapped_triangleIndex[i]);
+ 
+    }
+}
+void CComputeDescriptorManager::uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size){
+    if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_triangleIndex[currentFrame], data, size);
+    }
+}
+
+/************
+ * 6 COMPUTE_STORAGEBUFFER_SPHERE
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_sphere;
 std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_sphere;
@@ -508,7 +614,7 @@ void CComputeDescriptorManager::uploadStorageBuffer_sphere(uint32_t currentFrame
 }
 
 /************
- * 6 COMPUTE_UNIFORMBUFFER_CUSTOM
+ * 7 COMPUTE_UNIFORMBUFFER_CUSTOM
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::customUniformBuffers;
 std::vector<void*> CComputeDescriptorManager::customUniformBuffersMapped;
@@ -536,7 +642,7 @@ void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame,
 }
 
 /************
- * 7 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
+ * 8 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_customswap;
 std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_customswap;
@@ -572,8 +678,8 @@ void CComputeDescriptorManager::downloadStorageBuffer_customswap(uint32_t curren
 
 
 /************
- * 8 COMPUTE_STORAGEIMAGE_TEXTURE
- * 9 COMPUTE_STORAGEIMAGE_SWAPCHAIN
+ * 9 COMPUTE_STORAGEIMAGE_TEXTURE
+ * 10 COMPUTE_STORAGEIMAGE_SWAPCHAIN
  ************/
 void CComputeDescriptorManager::addStorageImage(VkBufferUsageFlags usage){
     computeUniformTypes |= usage;
@@ -588,6 +694,8 @@ int CComputeDescriptorManager::getPoolSize(){
     descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_WINDOWSWAP ? 2:0; //add 2 because use storage for input/output,count as 2 unique uniforms
 	descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL ? 1:0;
+    descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX ? 1:0;
+    descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEINDEX ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
@@ -611,6 +719,12 @@ void CComputeDescriptorManager::DestroyAndFree(){
     }
     for (size_t i = 0; i < storageBuffers_material.size(); i++) {
         storageBuffers_material[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < storageBuffers_triangleVertex.size(); i++) {
+        storageBuffers_triangleVertex[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < storageBuffers_triangleIndex.size(); i++) {
+        storageBuffers_triangleIndex[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
     for (size_t i = 0; i < storageBuffers_sphere.size(); i++) {
         storageBuffers_sphere[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());

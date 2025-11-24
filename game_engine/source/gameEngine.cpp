@@ -171,12 +171,9 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             storageBufferObject_Sphere.spheres[0].material_id = 0;
         //}
 
-
-
         storageBufferObject_Sphere.spheres[1].position = glm::vec3(0, 0, -1);
         storageBufferObject_Sphere.spheres[1].radius = 0.75f;
         storageBufferObject_Sphere.spheres[1].material_id = 1;
-
 
         storageBufferObject_Sphere.spheres[2].position = glm::vec3(-0.95, 0.2, -1.75);
         storageBufferObject_Sphere.spheres[2].radius = 0.35f;
@@ -189,7 +186,6 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         storageBufferObject_Sphere.spheres[4].position = glm::vec3(0, 3, -1);
         storageBufferObject_Sphere.spheres[4].radius = 1.15f;
         storageBufferObject_Sphere.spheres[4].material_id = 4;
-
     }
             
 
@@ -200,6 +196,42 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
+    }
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex){
+        //TODO: fill storageBufferObject_TriangleVertex data
+        // std::vector<Vertex3D> vertices3D = {
+        //     { { -0.5f, 0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
+        //     { { -0.5f, -0.5f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 1.0f } ,{ 0.0f, 0.0f, 1.0f }},
+        //     { { 0.5f, 0.5f, 0.0f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
+        //     { { 0.5f, -0.5f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 1.0f, 1.0f } ,{ 0.0f, 0.0f, 1.0f }}
+        // };
+        storageBufferObject_TriangleVertex.vertices[0].position = glm::vec3(-0.5f, 0.5f, 0.0f);
+        storageBufferObject_TriangleVertex.vertices[1].position = glm::vec3(-0.5f, -0.5f, 0.0f);
+        storageBufferObject_TriangleVertex.vertices[2].position = glm::vec3(0.5f, 0.5f, 0.0f);
+        storageBufferObject_TriangleVertex.vertices[3].position = glm::vec3(0.5f, -0.5f, 0.0f);
+        storageBufferObject_TriangleVertex.vertices[0].normal = glm::vec3(0.0f, 0.0f, 1.0f);
+        storageBufferObject_TriangleVertex.vertices[1].normal = glm::vec3(0.0f, 0.0f, 1.0f);
+        storageBufferObject_TriangleVertex.vertices[2].normal = glm::vec3(0.0f, 0.0f, 1.0f);
+        storageBufferObject_TriangleVertex.vertices[3].normal = glm::vec3(0.0f, 0.0f, 1.0f);
+        storageBufferObject_TriangleVertex.vertices[0].material_id = 1;
+        storageBufferObject_TriangleVertex.vertices[1].material_id = 0;
+        storageBufferObject_TriangleVertex.vertices[2].material_id = 0;
+        storageBufferObject_TriangleVertex.vertices[3].material_id = 0;
+
+        UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame(), &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
+        UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame()+1, &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
+    }
+    if(appInfo->Uniform.b_storage_compute_triangle_index){
+        //TODO: fill storageBufferObject_TriangleIndex data
+        //std::vector<uint32_t> indices3D = { 0, 1, 2, 2, 1, 3}; will not work here! TODO: why?
+        storageBufferObject_TriangleIndex.indices[0] = 0;
+        storageBufferObject_TriangleIndex.indices[1] = 1;
+        storageBufferObject_TriangleIndex.indices[2] = 3;
+        storageBufferObject_TriangleIndex.indices[3] = 0;
+        storageBufferObject_TriangleIndex.indices[4] = 3;
+        storageBufferObject_TriangleIndex.indices[5] = 2;
+        UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
+        UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
     }
     if(appInfo->Uniform.b_storage_compute_sphere){
         UploadComputeStorageBuffer_Sphere(GetCurrentFrame(), &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));

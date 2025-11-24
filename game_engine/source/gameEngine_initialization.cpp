@@ -97,7 +97,8 @@ void GameEngine::Initialize(){
     
     if(appInfo->Uniform.b_storage_compute_windowswap) renderer->addStorageBuffer_windowswap();
     if(appInfo->Uniform.b_storage_compute_material) renderer->addStorageBuffer_material();
-    if(appInfo->Uniform.b_storage_compute_triangle);
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex) renderer->addStorageBuffer_triangleVertex();
+    if(appInfo->Uniform.b_storage_compute_triangle_index) renderer->addStorageBuffer_triangleIndex();
     if(appInfo->Uniform.b_storage_compute_sphere) renderer->addStorageBuffer_sphere();
     if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
     if(appInfo->Uniform.b_storage_compute_customswap) renderer->addStorageBuffer_customswap(appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size, appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Usage);
@@ -328,7 +329,7 @@ void GameEngine::Initialize(){
     ****************************/
     bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_dynamic || appInfo->Uniform.b_uniform_graphics_text_dynamic || appInfo->Uniform.b_uniform_graphics_global;
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_global || appInfo->Uniform.b_storage_compute_windowswap || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
-    b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_storage_compute_material || appInfo->Uniform.b_storage_compute_triangle || appInfo->Uniform.b_storage_compute_sphere;
+    b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_storage_compute_material || appInfo->Uniform.b_storage_compute_triangle_vertex || appInfo->Uniform.b_storage_compute_triangle_index || appInfo->Uniform.b_storage_compute_sphere;
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap;
 
     //UNIFORM STEP 1/3 (Pool)

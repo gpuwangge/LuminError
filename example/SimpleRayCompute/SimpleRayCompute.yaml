@@ -8,7 +8,8 @@ Uniforms:
     uniform_compute_global: true
     storage_compute_windowswap: true
     storage_compute_material: true
-    storage_compute_triangle: false
+    storage_compute_triangle_vertex: true
+    storage_compute_triangle_index: true
     storage_compute_sphere: true
     uniform_compute_custom: true
     storage_compute_customswap: false
