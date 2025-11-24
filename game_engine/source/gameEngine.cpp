@@ -167,11 +167,11 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     if(appInfo->Uniform.b_storage_compute_sphere){
         //for (int i = 0; i < 5; i++){
             storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
-            storageBufferObject_Sphere.spheres[0].radius = 8.0f;
+            storageBufferObject_Sphere.spheres[0].radius = 8.0;
             storageBufferObject_Sphere.spheres[0].material_id = 0;
         //}
 
-        storageBufferObject_Sphere.spheres[1].position = glm::vec3(0, 0, -1);
+        storageBufferObject_Sphere.spheres[1].position = glm::vec3(0, 0, 0);
         storageBufferObject_Sphere.spheres[1].radius = 0.75f;
         storageBufferObject_Sphere.spheres[1].material_id = 1;
 
@@ -205,17 +205,22 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         //     { { 0.5f, 0.5f, 0.0f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 0.0f } ,{ 0.0f, 0.0f, 1.0f }},
         //     { { 0.5f, -0.5f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 1.0f, 1.0f } ,{ 0.0f, 0.0f, 1.0f }}
         // };
-        storageBufferObject_TriangleVertex.vertices[0].position = glm::vec3(-0.5f, 0.5f, 0.0f);
-        storageBufferObject_TriangleVertex.vertices[1].position = glm::vec3(-0.5f, -0.5f, 0.0f);
-        storageBufferObject_TriangleVertex.vertices[2].position = glm::vec3(0.5f, 0.5f, 0.0f);
-        storageBufferObject_TriangleVertex.vertices[3].position = glm::vec3(0.5f, -0.5f, 0.0f);
+
+        //Vulkan use right-hand coordinate system, glm use right-hand too
+        //Vulkan NDC: +X right, +Y down, +Z forward
+        //glm NDC: +X right, +Y up, +Z backward
+        //World space: +X right, +Y up, +Z forward
+        storageBufferObject_TriangleVertex.vertices[0].position = glm::vec3(-1.5f, 1.5f, 0.0f); //in world space, this is top-left
+        storageBufferObject_TriangleVertex.vertices[1].position = glm::vec3(-1.5f, -1.5f, 0.0f); //in world space, this is bottom-left
+        storageBufferObject_TriangleVertex.vertices[2].position = glm::vec3(1.5f, 1.5f, 0.0f); //in world space, this is top-right
+        storageBufferObject_TriangleVertex.vertices[3].position = glm::vec3(1.5f, -1.5f, 0.0f); //in world space, this is bottom-right
         storageBufferObject_TriangleVertex.vertices[0].normal = glm::vec3(0.0f, 0.0f, 1.0f);
         storageBufferObject_TriangleVertex.vertices[1].normal = glm::vec3(0.0f, 0.0f, 1.0f);
         storageBufferObject_TriangleVertex.vertices[2].normal = glm::vec3(0.0f, 0.0f, 1.0f);
         storageBufferObject_TriangleVertex.vertices[3].normal = glm::vec3(0.0f, 0.0f, 1.0f);
         storageBufferObject_TriangleVertex.vertices[0].material_id = 1;
         storageBufferObject_TriangleVertex.vertices[1].material_id = 0;
-        storageBufferObject_TriangleVertex.vertices[2].material_id = 0;
+        storageBufferObject_TriangleVertex.vertices[2].material_id = 1;
         storageBufferObject_TriangleVertex.vertices[3].material_id = 0;
 
         UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame(), &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
@@ -223,13 +228,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
     if(appInfo->Uniform.b_storage_compute_triangle_index){
         //TODO: fill storageBufferObject_TriangleIndex data
-        //std::vector<uint32_t> indices3D = { 0, 1, 2, 2, 1, 3}; will not work here! TODO: why?
+        //std::vector<uint32_t> indices3D = { 0, 1, 2, 2, 1, 3};
+
         storageBufferObject_TriangleIndex.indices[0] = 0;
         storageBufferObject_TriangleIndex.indices[1] = 1;
-        storageBufferObject_TriangleIndex.indices[2] = 3;
-        storageBufferObject_TriangleIndex.indices[3] = 0;
-        storageBufferObject_TriangleIndex.indices[4] = 3;
-        storageBufferObject_TriangleIndex.indices[5] = 2;
+        storageBufferObject_TriangleIndex.indices[2] = 2;
+        storageBufferObject_TriangleIndex.indices[3] = 2;
+        storageBufferObject_TriangleIndex.indices[4] = 1;
+        storageBufferObject_TriangleIndex.indices[5] = 3;
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
     }
