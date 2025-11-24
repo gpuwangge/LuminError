@@ -90,6 +90,10 @@ namespace LEGameEngine{
         StructStorageBuffer_TriangleIndex storageBufferObject_TriangleIndex{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
 
+        //make these global so compute shader can access. TODO: support multiple models
+        std::vector<Vertex3D> modelVertices3D;
+        std::vector<uint32_t> modelIndices3D;
+
         /******************
         * Helper Functions
         ******************/

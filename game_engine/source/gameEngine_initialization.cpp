@@ -276,13 +276,13 @@ void GameEngine::Initialize(){
                 resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel2DLength(0)[2]);
             }else{
                 //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
-                std::vector<Vertex3D> modelVertices3D;
-                std::vector<uint32_t> modelIndices3D;
+                //std::vector<Vertex3D> modelVertices3D;
+                //std::vector<uint32_t> modelIndices3D;
                 resourcer->LoadModelObj(modelName, modelVertices3D, modelIndices3D);
                 renderer->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
                 renderer->CreateIndexBuffer(modelIndices3D);
+                std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
             }
-            //std::cout<<"test end"<<std::endl;
         }
 
     }

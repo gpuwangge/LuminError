@@ -281,8 +281,7 @@ HitInfo RayHitCheck(Ray ray){
     //     }
     // }
 
-    for(int i = 0; i < 2; i++){
-        //for(int j = 0; j < 3; j++){
+    for(int i = 0; i < 12; i++){
         Triangle tri;
         tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
         tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
@@ -298,7 +297,6 @@ HitInfo RayHitCheck(Ray ray){
         }else if(hitInfo_current.didHit){ //current hit and no previous hit
             hitInfo_closest = hitInfo_current;
         }
-        //}    
     }
 
     return hitInfo_closest;
