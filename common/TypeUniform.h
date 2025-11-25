@@ -40,12 +40,12 @@ struct alignas(16) TriangleVertexInfo{
     alignas(4) float padding[15]; //60 bytes
     //total size: 16*4+4+60=128 bytes
 };
-static constexpr size_t TriangleVertex_SIZE = 256;
+static constexpr size_t TriangleVertex_SIZE = 500;
 struct StructStorageBuffer_TriangleVertex{
     TriangleVertexInfo vertices[TriangleVertex_SIZE];
 };
 
-static constexpr size_t TriangleIndex_SIZE = 256;
+static constexpr size_t TriangleIndex_SIZE = 800;
 struct StructStorageBuffer_TriangleIndex{
     unsigned int indices[TriangleIndex_SIZE]; //each triangle has 3 indices
 };

@@ -165,11 +165,11 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         }
     }
     if(appInfo->Uniform.b_storage_compute_sphere){
-        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -13.0f, 0.0f);
+        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
         storageBufferObject_Sphere.spheres[0].radius = 8.0;
         storageBufferObject_Sphere.spheres[0].material_id = 0;
 
-        storageBufferObject_Sphere.spheres[1].position = glm::vec3(0, -5, 0);
+        storageBufferObject_Sphere.spheres[1].position = glm::vec3(3, 0, 0);
         storageBufferObject_Sphere.spheres[1].radius = 0.75f;
         storageBufferObject_Sphere.spheres[1].material_id = 1;
 
@@ -189,15 +189,43 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     Initialize();
 
+    //std::cout<<"Model Loaded, Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
+    //std::cout<<"Number of Objects: "<<objects.size()<<std::endl;
+
     if(appInfo->Uniform.b_storage_compute_material){
         //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
         UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
     }
-    std::cout<<"Model Loaded, Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
+
+
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index){
+        int vertexCount = 0;
+        int indexCount = 0;
+        for(int j = 0; j < objects.size(); j++){ //Assume each object uses one model for now
+            //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
+            // Vertex Data for a cube model
+            for(int i = 0; i < modelVertices3D.size(); i++){
+                storageBufferObject_TriangleVertex.vertices[vertexCount].position = modelVertices3D[i].pos + objects[j].Position;
+                storageBufferObject_TriangleVertex.vertices[vertexCount].normal = modelVertices3D[i].normal;
+                storageBufferObject_TriangleVertex.vertices[vertexCount].material_id = 2;
+                //std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
+                vertexCount++;
+            }
+            // Index Data for a cube model
+            for(int i = 0; i < modelIndices3D.size(); i++){
+                storageBufferObject_TriangleIndex.indices[indexCount] = modelVertices3D.size()*j + modelIndices3D[i];
+                //std::cout<<"Index "<<i<<": "<<modelIndices3D[i]<<std::endl;
+                //std::cout<<"Filling index "<<indexCount<<": "<<storageBufferObject_TriangleIndex.indices[indexCount]<<std::endl;
+                indexCount++;
+            }
+            std::cout<<vertexCount<<" vertices and "<<indexCount<<" indices filled so far."<<std::endl;
+        }
+    }
+    
     if(appInfo->Uniform.b_storage_compute_triangle_vertex){
-        //Data for a quad(two triangles)
+        //Vertex Data for a quad(two triangles)
         //Vulkan use right-hand coordinate system, glm use right-hand too
         //Vulkan NDC: +X right, +Y down, +Z forward
         //glm NDC: +X right, +Y up, +Z backward
@@ -214,33 +242,17 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         // storageBufferObject_TriangleVertex.vertices[1].material_id = 0;
         // storageBufferObject_TriangleVertex.vertices[2].material_id = 1;
         // storageBufferObject_TriangleVertex.vertices[3].material_id = 0;
-
-        //Data for a cube
-        for(int i = 0; i < modelVertices3D.size() && i < TriangleVertex_SIZE; i++){
-            storageBufferObject_TriangleVertex.vertices[i].position = modelVertices3D[i].pos;
-            storageBufferObject_TriangleVertex.vertices[i].normal = modelVertices3D[i].normal;
-            storageBufferObject_TriangleVertex.vertices[i].material_id = 2;
-            std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
-        }
-
         UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame(), &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
         UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame()+1, &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
     }
     if(appInfo->Uniform.b_storage_compute_triangle_index){
-        //Data for a quad(two triangles)
+        // Index Data for a quad(two triangles)
         // storageBufferObject_TriangleIndex.indices[0] = 0;
         // storageBufferObject_TriangleIndex.indices[1] = 1;
         // storageBufferObject_TriangleIndex.indices[2] = 2;
         // storageBufferObject_TriangleIndex.indices[3] = 2;
         // storageBufferObject_TriangleIndex.indices[4] = 1;
         // storageBufferObject_TriangleIndex.indices[5] = 3;
-
-        //Data for a model
-        for(int i = 0; i < modelIndices3D.size() && i < TriangleIndex_SIZE; i++){
-            storageBufferObject_TriangleIndex.indices[i] = modelIndices3D[i];
-            std::cout<<"Index "<<i<<": "<<modelIndices3D[i]<<std::endl;
-        }
-
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
     }

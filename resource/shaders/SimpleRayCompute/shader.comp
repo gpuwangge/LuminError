@@ -92,30 +92,18 @@ layout (set = 0, binding = 7) uniform CustomBufferObject {
 //to be added (Vulkan support up to ? SB bindings, for 1080TI it is unlimited)
 //(SB Size limit is separate, usually 128MB or more, for 1080TI it is 4GB)
 
-// 材质SSBO
-// layout(set = 0, binding = ?, std430) readonly buffer SBO_MaterialBuffer {
-//     Material materials[];
-// } sbo_materialBuffer;
 
-// 网格数据SSBO（包含材质索引）
-// layout(set = 0, binding = ?, std430) readonly buffer SBO_TriangleData {
-//     Triangle triangles[];
-//     uint materialIndices[];  // 每个三角形的材质索引
-// } sbo_triangleData;
 
-// layout(set = 0, binding = ?, std430) readonly buffer SBO_SphereData {
-//    Sphere spheres[5]; // 静态场景数据（球体等）
-//    uint materialIndices[];
-// } sbo_sphereData;
+
+
 
 layout (set = 0, binding = 8, rgba8 ) uniform writeonly image2D resultImage;
 
 /***************************
 * Constants
 ***************************/
-const int BOUNCE_LIMIT = 10;
+const int BOUNCE_LIMIT = 5;
 const int RAY_PER_PIXEL = 10;
-const int NUM_TRIANGLES = 4;
 
 /***************************
 * Ray Tracing Data Structure
@@ -134,7 +122,6 @@ struct Triangle{
     vec3 normal_c;
     int material_id;
 };
-Triangle triangles[NUM_TRIANGLES];
 
 struct HitInfo{
     bool didHit;
@@ -281,7 +268,7 @@ HitInfo RayHitCheck(Ray ray){
     //     }
     // }
 
-    for(int i = 0; i < 12; i++){
+    for(int i = 0; i < 228; i++){ //indices/3 is number of triangles, for low poly tree it is 228
         Triangle tri;
         tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
         tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
@@ -421,27 +408,9 @@ vec3 TraceRay(Ray ray, inout uint state){
 
 void main(){
     // ----------------------------
-    // 0. Initialization
-    vec3 positions[4] = vec3[4](
-        vec3(0.0,  3.0, 6.0),   // 前面
-        vec3(0.0,  3.0, 0.0),  // 后面  
-        vec3(-3.0, 3.0, 3.0),  // 左边
-        vec3(3.0,  3.0, 3.0)    // 右边
-    );
-    for(int i = 0; i < NUM_TRIANGLES; i++) {
-        triangles[i].a = positions[i] + vec3(-1.0, -1.0, 0.0);
-        triangles[i].b = positions[i] + vec3( 1.0, -1.0, 0.0);
-        triangles[i].c = positions[i] + vec3( 0.0,  1.0, 0.0);
-        triangles[i].material_id = i;
-        //triangles[i].material_id = int(sboTriangleIndex.indices[2]);
-    }
-    // ----------------------------
     // 1. Pixel cord conver to NDC(0..1)
-    //vec2 screenSize = vec2(800.0, 800.0);
-    //vec2 uv = gl_FragCoord.xy / screenSize;
     ivec2 gridSize = ivec2(gl_NumWorkGroups.xy * gl_WorkGroupSize.xy);
-    //vec2 normalizedCoord = vec2(gl_GlobalInvocationID.xy) / vec2(gridSize);
-    vec2 uv = vec2(gl_GlobalInvocationID.xy) / vec2(gridSize);
+    vec2 uv = vec2(gl_GlobalInvocationID.xy) / vec2(gridSize); //normalizedCoord
 
     // ----------------------------
     // 2. Convert to NDC [-1, 1]

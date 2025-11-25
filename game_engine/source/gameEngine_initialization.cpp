@@ -281,7 +281,7 @@ void GameEngine::Initialize(){
                 resourcer->LoadModelObj(modelName, modelVertices3D, modelIndices3D);
                 renderer->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
                 renderer->CreateIndexBuffer(modelIndices3D);
-                std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
+                //std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
             }
         }
 

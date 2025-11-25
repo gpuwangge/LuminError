@@ -1,6 +1,29 @@
+Objects:
+  - object_name: Cube
+    object_id: 0
+    object_scale: 2 #no use
+    object_position: [0,0,0]
+    object_rotation: [0,0,0] #no use
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    resource_model_id: 1
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Cube
+  #   object_id: 1
+  #   object_scale: 2 #no use
+  #   object_position: [3,3,0]
+  #   object_rotation: [0,0,0] #no use
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   resource_model_id: 0
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+
 Resources:
   - Models:
-    - resource_model_name: cube.obj
+    - resource_model_name: low_poly_tree.obj
+    #- resource_model_name: cube.obj
   - ComputeShaders:
     - resource_computeshader_name: simpleRayCompute/shader.comp.spv
 

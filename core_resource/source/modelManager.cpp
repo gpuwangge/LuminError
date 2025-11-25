@@ -1,6 +1,7 @@
 #include "modelManager.h"
 #include "Foundation.h"
 #include <unordered_map>
+#include <iostream>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../external/tiny_obj_loader.h"
@@ -76,13 +77,32 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 
-
+	//std::cout<<"Loading model: "<< modelName <<std::endl;
 	std::string fullModelPath = MODEL_PATH + modelName;
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())) {
-		fullModelPath = "models/" + modelName;
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())) 
-			throw std::runtime_error(warn + err);
+
+	// if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())) {
+	// 	fullModelPath = "models/" + modelName;
+	// 	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())){
+	// 		throw std::runtime_error(warn + err);
+	// 		std::cout<<"Failed to load model: "<< modelName <<std::endl;
+	// 	}
+	// }
+	tinyobj::ObjReaderConfig config;
+	config.triangulate = true;     // 强烈建议开
+	config.vertex_color = false;   // 可选
+	config.mtl_search_path = "";   // 避免解析 mtl
+
+	tinyobj::ObjReader reader;
+
+	if (!reader.ParseFromFile(fullModelPath, config)) {
+		if (!reader.Error().empty())
+			throw std::runtime_error(reader.Error());
 	}
+
+	attrib   = reader.GetAttrib();
+	shapes   = reader.GetShapes();
+	materials = reader.GetMaterials();
+	//std::cout<<"Model "<< modelName <<" loaded successfully."<<std::endl;
 	
 	//if use unordered_map, need to implement size_t operator()(Vertex3D const& vertex) const. 
 	//for some reason(c++ 11 stl not recognized in GLM) android version doesn't support <glm/gtx/hash.hpp>
@@ -95,7 +115,9 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	float max_x = 0, max_y = 0, max_z = 0;
 	float min_x = 0, min_y = 0, min_z = 0;
 	for (const auto& shape : shapes) {
+		//std::cout<<"Processing shape with "<<shape.mesh.indices.size()<<" indices."<<std::endl;
 		for (const auto& index : shape.mesh.indices) {
+			//std::cout<<"Processing index: v_idx="<<index.vertex_index<<", vt_idx="<<index.texcoord_index<<", vn_idx="<<index.normal_index<<std::endl;
 			Vertex3D vertex{};
 
 			vertex.pos = {
@@ -112,16 +134,33 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 
 			vertex.color = { 1.0f, 1.0f, 1.0f };
 
-			vertex.texCoord = {
-				attrib.texcoords[2 * index.texcoord_index + 0],
-				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-			};
+			// vertex.texCoord = {
+			// 	attrib.texcoords[2 * index.texcoord_index + 0],
+			// 	1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+			// };
+			if (index.texcoord_index >= 0) {
+				vertex.texCoord = {
+					attrib.texcoords[2 * index.texcoord_index + 0],
+					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+				};
+			} else {
+				vertex.texCoord = {0.0f, 0.0f};
+			}
 
-			vertex.normal = {
-				attrib.normals[3 * index.normal_index + 0],
-				attrib.normals[3 * index.normal_index + 1],
-				attrib.normals[3 * index.normal_index + 2]
-			};
+			// vertex.normal = {
+			// 	attrib.normals[3 * index.normal_index + 0],
+			// 	attrib.normals[3 * index.normal_index + 1],
+			// 	attrib.normals[3 * index.normal_index + 2]
+			// };
+			if (index.normal_index >= 0) {
+				vertex.normal = {
+					attrib.normals[3 * index.normal_index + 0],
+					attrib.normals[3 * index.normal_index + 1],
+					attrib.normals[3 * index.normal_index + 2]
+				};
+			} else {
+				vertex.normal = {0.0f, 1.0f, 0.0f}; // 或者等下自己计算法线
+			}
 
 			if (uniqueVertices.count(vertex) == 0) {
 				uniqueVertices[vertex] = static_cast<uint32_t>(vertices3D.size());
@@ -135,6 +174,8 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	modelLengths.push_back(glm::vec3(max_x-min_x, max_y-min_y, max_z-min_z));
 	modelLengthsMin.push_back(glm::vec3(min_x, min_y, min_z));
 	modelLengthsMax.push_back(glm::vec3(max_x, max_y, max_z));
+
+	//std::cout<<"Model "<< modelName <<" has "<<vertices3D.size()<<" unique vertices and "<<indices3D.size()/3<<" triangles."<<std::endl;
 }
 
 }//namespace
