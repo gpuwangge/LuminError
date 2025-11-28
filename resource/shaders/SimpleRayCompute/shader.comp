@@ -268,7 +268,8 @@ HitInfo RayHitCheck(Ray ray){
     //     }
     // }
 
-    for(int i = 0; i < 228; i++){ //indices/3 is number of triangles, for low poly tree it is 228
+    //for(int i = 0; i < 228; i++){ //low_poly_tree
+    for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
         Triangle tri;
         tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
         tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;

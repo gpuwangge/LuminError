@@ -148,6 +148,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     yamler->ReadExampleYAMLFile(exampleName);
 
+    //Ray Tracing Setup 1: prepare material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){
         yamler->ReadMaterialYAMLFile("Materials");
         for(int i = 0; i < appInfo->Materials.size(); i++){
@@ -164,6 +165,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             storageBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
         }
     }
+    //Ray Tracing Setup 2: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
         storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
         storageBufferObject_Sphere.spheres[0].radius = 8.0;
@@ -192,6 +194,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     //std::cout<<"Model Loaded, Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
     //std::cout<<"Number of Objects: "<<objects.size()<<std::endl;
 
+    //Ray Tracing Setup 3: upload material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){
         //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
         UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
@@ -199,13 +202,13 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
     }
 
-
+    //Ray Tracing Setup 4: prepare triangle vertex and index storage buffer data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index){
         int vertexCount = 0;
         int indexCount = 0;
         for(int j = 0; j < objects.size(); j++){ //Assume each object uses one model for now
             //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
-            // Vertex Data for a cube model
+            // Vertex Data for a 3d model
             for(int i = 0; i < modelVertices3D.size(); i++){
                 storageBufferObject_TriangleVertex.vertices[vertexCount].position = modelVertices3D[i].pos + objects[j].Position;
                 storageBufferObject_TriangleVertex.vertices[vertexCount].normal = modelVertices3D[i].normal;
@@ -213,7 +216,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
                 //std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
                 vertexCount++;
             }
-            // Index Data for a cube model
+            // Index Data for a 3d model
             for(int i = 0; i < modelIndices3D.size(); i++){
                 storageBufferObject_TriangleIndex.indices[indexCount] = modelVertices3D.size()*j + modelIndices3D[i];
                 //std::cout<<"Index "<<i<<": "<<modelIndices3D[i]<<std::endl;
@@ -223,7 +226,12 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             std::cout<<vertexCount<<" vertices and "<<indexCount<<" indices filled so far."<<std::endl;
         }
     }
+
+    //Ray Tracing Setup 4.5: create BVH for triangle data
+    std::cout<<"Create BVH for triangle data: "<<std::endl;
+    //BVHNode
     
+    //Ray Tracing Setup 5: upload triangle vertex and index storage buffer data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex){
         //Vertex Data for a quad(two triangles)
         //Vulkan use right-hand coordinate system, glm use right-hand too
@@ -256,6 +264,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
     }
+    //Ray Tracing Setup 6: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
         UploadComputeStorageBuffer_Sphere(GetCurrentFrame(), &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));
         UploadComputeStorageBuffer_Sphere(GetCurrentFrame()+1, &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));
