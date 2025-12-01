@@ -3,7 +3,7 @@
 #include <locale>
 #include <iomanip>
 #include <iostream>
-//#include "shaderManager.h"
+#include "bvhBuilder.h"
 
 namespace LEGameEngine{
 
@@ -228,8 +228,17 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
 
     //Ray Tracing Setup 4.5: create BVH for triangle data
-    std::cout<<"Create BVH for triangle data: "<<std::endl;
-    //BVHNode
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index){
+        std::cout<<"Create BVH for triangle data: "<<std::endl;
+        std::vector<Triangle> tris;
+        CreateTestCase2(tris, false);
+
+        std::vector<BVHNode> nodes;
+        BVHBuilder builder(tris, nodes, 1);
+
+        builder.Build(false);
+        ValidateBVH(nodes, tris.size(), false);
+    }
     
     //Ray Tracing Setup 5: upload triangle vertex and index storage buffer data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex){
