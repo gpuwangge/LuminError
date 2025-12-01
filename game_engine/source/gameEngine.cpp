@@ -230,8 +230,20 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     //Ray Tracing Setup 4.5: create BVH for triangle data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index){
         std::cout<<"Create BVH for triangle data: "<<std::endl;
+        std::cout<<"Number of vertices: "<<modelVertices3D.size()* objects.size()<<std::endl;
+        std::cout<<"Each object has "<<modelVertices3D.size()<<" vertices."<<std::endl;
+        std::cout<<"Each object has "<<modelIndices3D.size()/3<<" triangles."<<std::endl;
+        std::cout<<"Number of triangles: "<<modelIndices3D.size()/3 * objects.size()<<std::endl;
+
         std::vector<Triangle> tris;
-        CreateTestCase2(tris, false);
+        //CreateTestCase2(tris, false);
+        for(int i = 0; i < modelIndices3D.size(); i+=3){
+            glm::vec3 v0 = modelVertices3D[modelIndices3D[i]].pos;
+            glm::vec3 v1 = modelVertices3D[modelIndices3D[i+1]].pos;
+            glm::vec3 v2 = modelVertices3D[modelIndices3D[i+2]].pos;
+            tris.emplace_back(v0, v1, v2);
+        }
+        std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
 
         std::vector<BVHNode> nodes;
         BVHBuilder builder(tris, nodes, 1);

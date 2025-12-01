@@ -39,13 +39,15 @@ enum UniformTypes {
 //     alignas(4) float padding[4]; //16 bytes
 // }; //total size: 16+16+4*4+16=64 bytes
 
-struct BVHNode {
-    glm::vec3 bbox_min;
-    glm::vec3 bbox_max;
-    int left;
-    int right;
-    int tri_start;
-    int tri_count;
+struct alignas(16) BVHNode {
+    alignas(16) glm::vec3 bbox_min; //16 bytes
+    alignas(16) glm::vec3 bbox_max; //16 bytes
+    alignas(4) int left; //4 bytes
+    alignas(4) int right; //4 bytes
+    alignas(4) int tri_start; //4 bytes
+    alignas(4) int tri_count; //4 bytes
+    alignas(4) float padding[4]; //16 bytes
+    //total size: 16+16+4*4+16=64 bytes
 
     BVHNode()
         : bbox_min(0), bbox_max(0),

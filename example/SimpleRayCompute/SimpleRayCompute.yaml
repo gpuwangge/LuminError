@@ -22,8 +22,8 @@ Objects:
 
 Resources:
   - Models:
-    #- resource_model_name: low_poly_tree.obj
-    - resource_model_name: cube.obj
+    - resource_model_name: low_poly_tree.obj
+    #- resource_model_name: cube.obj
   - ComputeShaders:
     - resource_computeshader_name: simpleRayCompute/shader.comp.spv
 
