@@ -51,6 +51,11 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
     }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_BVHNODE){
+        computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+    }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE){
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	    computeDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -153,6 +158,14 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
         counter++;
     }
     if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEINDEX){
+        computeBindings[counter].binding = counter;
+        computeBindings[counter].descriptorCount = 1;
+        computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        computeBindings[counter].pImmutableSamplers = nullptr;
+        computeBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        counter++;
+    }
+    if(computeUniformTypes & COMPUTE_STORAGEBUFFER_BVHNODE){
         computeBindings[counter].binding = counter;
         computeBindings[counter].descriptorCount = 1;
         computeBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -340,6 +353,21 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
             storageBufferInfo.offset = 0;
             storageBufferInfo.range = sizeof(StructStorageBuffer_TriangleIndex);
 
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
+            counter++;
+        }
+
+        if(computeUniformTypes & COMPUTE_STORAGEBUFFER_BVHNODE){
+            VkDescriptorBufferInfo storageBufferInfo{};
+            storageBufferInfo.buffer = storageBuffers_bvhNode[i].buffer;
+            storageBufferInfo.offset = 0;
+            storageBufferInfo.range = sizeof(StructStorageBuffer_BVHNode);
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets[i];
             descriptorWrites[counter].dstBinding = counter;
@@ -590,7 +618,31 @@ void CComputeDescriptorManager::uploadStorageBuffer_triangleIndex(uint32_t curre
 }
 
 /************
- * 6 COMPUTE_STORAGEBUFFER_SPHERE
+ * 6 COMPUTE_STORAGEBUFFER_BVHNODE
+ ************/
+std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_bvhNode;
+std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_bvhNode;
+void CComputeDescriptorManager::addStorageBuffer_bvhNode(){
+    computeUniformTypes |= COMPUTE_STORAGEBUFFER_BVHNODE;
+
+    storageBuffers_bvhNode.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_bvhNode.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_bvhNode[i].init(sizeof(StructStorageBuffer_BVHNode), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_bvhNode[i].deviceMemory, 0, sizeof(StructStorageBuffer_BVHNode), 0, &storageBuffersMapped_bvhNode[i]);
+ 
+    }
+}
+void CComputeDescriptorManager::uploadStorageBuffer_bvhNode(uint32_t currentFrame, const void* data, size_t size){
+    if (data && size > 0) {
+        memcpy(storageBuffersMapped_bvhNode[currentFrame], data, size);
+    }
+}
+
+
+/************
+ * 7 COMPUTE_STORAGEBUFFER_SPHERE
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_sphere;
 std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_sphere;
@@ -614,7 +666,7 @@ void CComputeDescriptorManager::uploadStorageBuffer_sphere(uint32_t currentFrame
 }
 
 /************
- * 7 COMPUTE_UNIFORMBUFFER_CUSTOM
+ * 8 COMPUTE_UNIFORMBUFFER_CUSTOM
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::customUniformBuffers;
 std::vector<void*> CComputeDescriptorManager::customUniformBuffersMapped;
@@ -642,7 +694,7 @@ void CComputeDescriptorManager::uploadCustomUniformBuffer(uint32_t currentFrame,
 }
 
 /************
- * 8 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
+ * 9 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
  ************/
 std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_customswap;
 std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_customswap;
@@ -678,8 +730,8 @@ void CComputeDescriptorManager::downloadStorageBuffer_customswap(uint32_t curren
 
 
 /************
- * 9 COMPUTE_STORAGEIMAGE_TEXTURE
- * 10 COMPUTE_STORAGEIMAGE_SWAPCHAIN
+ * 10 COMPUTE_STORAGEIMAGE_TEXTURE
+ * 11 COMPUTE_STORAGEIMAGE_SWAPCHAIN
  ************/
 void CComputeDescriptorManager::addStorageImage(VkBufferUsageFlags usage){
     computeUniformTypes |= usage;
@@ -696,6 +748,7 @@ int CComputeDescriptorManager::getPoolSize(){
 	descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_MATERIAL ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEINDEX ? 1:0;
+    descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_BVHNODE ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_SPHERE ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
@@ -725,6 +778,9 @@ void CComputeDescriptorManager::DestroyAndFree(){
     }
     for (size_t i = 0; i < storageBuffers_triangleIndex.size(); i++) {
         storageBuffers_triangleIndex[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < storageBuffers_bvhNode.size(); i++) {
+        storageBuffers_bvhNode[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
     for (size_t i = 0; i < storageBuffers_sphere.size(); i++) {
         storageBuffers_sphere[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());

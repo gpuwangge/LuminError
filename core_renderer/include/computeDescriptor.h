@@ -88,7 +88,15 @@ public:
     void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 6 COMPUTE_STORAGEBUFFER_SPHERE
+     * 6 COMPUTE_STORAGEBUFFER_BVHNODE
+     ************/
+    static std::vector<CWxjBuffer> storageBuffers_bvhNode;
+    static std::vector<void*> storageBuffersMapped_bvhNode;
+    void addStorageBuffer_bvhNode();
+    void uploadStorageBuffer_bvhNode(uint32_t currentFrame, const void* data, size_t size);
+
+    /************
+     * 7 COMPUTE_STORAGEBUFFER_SPHERE
      ************/
     static std::vector<CWxjBuffer> storageBuffers_sphere;
     static std::vector<void*> storageBuffersMapped_sphere;
@@ -96,7 +104,7 @@ public:
     void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 7 COMPUTE_UNIFORMBUFFER_CUSTOM
+     * 8 COMPUTE_UNIFORMBUFFER_CUSTOM
      ************/
     static std::vector<CWxjBuffer> customUniformBuffers; 
 	static std::vector<void*> customUniformBuffersMapped;
@@ -105,7 +113,7 @@ public:
     void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
-     * 8 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
+     * 9 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
      * Read and Write
      * Need get size from game example
      ************/
@@ -121,8 +129,8 @@ public:
 
 
     /************
-     * 9 COMPUTE_STORAGEIMAGE_TEXTURE
-     * 10 COMPUTE_STORAGEIMAGE_SWAPCHAIN
+     * 10 COMPUTE_STORAGEIMAGE_TEXTURE
+     * 11 COMPUTE_STORAGEIMAGE_SWAPCHAIN
      ************/
     void addStorageImage(VkBufferUsageFlags usage);
    

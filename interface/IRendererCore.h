@@ -220,6 +220,8 @@ namespace LERenderer{
         virtual void uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_triangleIndex() = 0;
         virtual void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addStorageBuffer_bvhNode() = 0;
+        virtual void uploadStorageBuffer_bvhNode(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_sphere() = 0;
         virtual void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) = 0; //the same function to add storage 1&2

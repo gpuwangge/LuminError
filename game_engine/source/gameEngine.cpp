@@ -167,11 +167,11 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
     //Ray Tracing Setup 2: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
-        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
+        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -13.0f, 0.0f);
         storageBufferObject_Sphere.spheres[0].radius = 8.0;
         storageBufferObject_Sphere.spheres[0].material_id = 0;
 
-        storageBufferObject_Sphere.spheres[1].position = glm::vec3(3, 0, 0);
+        storageBufferObject_Sphere.spheres[1].position = glm::vec3(3, -5, 0);
         storageBufferObject_Sphere.spheres[1].radius = 0.75f;
         storageBufferObject_Sphere.spheres[1].material_id = 1;
 
@@ -228,7 +228,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
 
     //Ray Tracing Setup 4.5: create BVH for triangle data
-    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index){
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index && appInfo->Uniform.b_storage_compute_bvhnode){
         std::cout<<"Create BVH for triangle data: "<<std::endl;
         std::cout<<"Number of vertices: "<<modelVertices3D.size()* objects.size()<<std::endl;
         std::cout<<"Each object has "<<modelVertices3D.size()<<" vertices."<<std::endl;
@@ -246,13 +246,18 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
 
         std::vector<BVHNode> nodes;
-        BVHBuilder builder(tris, nodes, 1);
+        BVHBuilder builder(tris, nodes, 3);
 
-        builder.Build(false);
-        ValidateBVH(nodes, tris.size(), false);
+        builder.Build(true);
+        ValidateBVH(nodes, tris.size(), true);
+
+        for (int i = 0; i < nodes.size(); i++){
+            //nodes[i].left = 1;//test
+            storageBufferObject_BVHNode.nodes[i] = nodes[i];
+        }
     }
     
-    //Ray Tracing Setup 5: upload triangle vertex and index storage buffer data
+    //Ray Tracing Setup 5: upload triangle vertex and index and bvh storage buffer data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex){
         //Vertex Data for a quad(two triangles)
         //Vulkan use right-hand coordinate system, glm use right-hand too
@@ -284,6 +289,10 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         // storageBufferObject_TriangleIndex.indices[5] = 3;
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
+    }
+    if(appInfo->Uniform.b_storage_compute_bvhnode){
+        UploadComputeStorageBuffer_BVHNode(GetCurrentFrame(), &storageBufferObject_BVHNode, sizeof(StructStorageBuffer_BVHNode));
+        UploadComputeStorageBuffer_BVHNode(GetCurrentFrame()+1, &storageBufferObject_BVHNode, sizeof(StructStorageBuffer_BVHNode));
     }
     //Ray Tracing Setup 6: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){

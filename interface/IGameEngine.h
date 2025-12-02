@@ -83,6 +83,7 @@ namespace LEGameEngine{
         virtual void UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
         virtual void UploadComputeStorageBuffer_TriangleVertex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
         virtual void UploadComputeStorageBuffer_TriangleIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
+        virtual void UploadComputeStorageBuffer_BVHNode(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
         virtual void UploadComputeStorageBuffer_Sphere(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
         virtual void SetComputeStorageBufferSize_CustomSwap(int size) = 0;
         virtual void SetComputeStorageBufferUsage_CustomSwap(int usage) = 0;

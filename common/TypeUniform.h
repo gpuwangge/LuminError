@@ -17,27 +17,18 @@ enum UniformTypes {
     GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE =                          0x00000040,  //for main camera
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE =                     0x00000080,  //for light camera
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS =   0x00000100,  //for light camera(Hardware depth bias, use two renderpass, dynamic depth bias)
-    COMPUTE_UNIFORMBUFFER_GLOBAL =      0x00000200,
-    COMPUTE_STORAGEBUFFER_WINDOWSWAP =  0x00000400,
-    COMPUTE_STORAGEBUFFER_MATERIAL =    0x00000800,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX =      0x00001000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEINDEX =       0x00002000,
-    COMPUTE_STORAGEBUFFER_SPHERE =      0x00004000,
-    COMPUTE_UNIFORMBUFFER_CUSTOM =      0x00008000,
-    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =  0x00010000,
-    COMPUTE_STORAGEIMAGE_TEXTURE =      0x00020000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =    0x00040000
+    COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000200,
+    COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00000400,
+    COMPUTE_STORAGEBUFFER_MATERIAL =                                    0x00000800,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX =                              0x00001000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEINDEX =                               0x00002000,
+    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00004000,
+    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00008000,
+    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00010000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00020000,
+    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00040000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00080000
 };
-
-// struct alignas(16) BVHNode{
-//     alignas(16) glm::vec3 bbox_min; //16 bytes
-//     alignas(16) glm::vec3 bbox_max; //16 bytes
-//     alignas(4) int left;      //4 bytes
-//     alignas(4) int right;      //4 bytes
-//     alignas(4) int tri_start;       //4 bytes
-//     alignas(4) int tri_count;       //4 bytes
-//     alignas(4) float padding[4]; //16 bytes
-// }; //total size: 16+16+4*4+16=64 bytes
 
 struct alignas(16) BVHNode {
     alignas(16) glm::vec3 bbox_min; //16 bytes
@@ -53,6 +44,10 @@ struct alignas(16) BVHNode {
         : bbox_min(0), bbox_max(0),
           left(-1), right(-1),
           tri_start(-1), tri_count(0) {}
+};
+static constexpr size_t BVHNODE_SIZE = 1024;
+struct StructStorageBuffer_BVHNode {
+    BVHNode nodes[BVHNODE_SIZE];
 };
 
 

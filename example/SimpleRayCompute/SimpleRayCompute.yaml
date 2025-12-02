@@ -22,8 +22,8 @@ Objects:
 
 Resources:
   - Models:
-    - resource_model_name: low_poly_tree.obj
-    #- resource_model_name: cube.obj
+    #- resource_model_name: low_poly_tree.obj
+    - resource_model_name: cube.obj
   - ComputeShaders:
     - resource_computeshader_name: simpleRayCompute/shader.comp.spv
 
@@ -35,6 +35,7 @@ Uniforms:
     storage_compute_material: true
     storage_compute_triangle_vertex: true
     storage_compute_triangle_index: true
+    storage_compute_bvhnode: true
     storage_compute_sphere: true
     uniform_compute_custom: true
     storage_compute_customswap: false

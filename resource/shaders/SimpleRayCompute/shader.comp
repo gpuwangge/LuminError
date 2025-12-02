@@ -68,6 +68,23 @@ layout(set = 0, binding = 5, std430) readonly buffer SBOTriangleIndex {
    uint indices[];
 } sboTriangleIndex;
 
+struct BVHNode {
+    vec3 bbox_min; //16 bytes
+    //float _padding0;
+    vec3 bbox_max; //16 bytes
+    //float _padding1;
+    int left; //4 bytes
+    int right; //4 bytes
+    int tri_start; //4 bytes
+    int tri_count; //4 bytes
+    float padding[4]; //16 bytes
+    //total size: 16+16+4*4+16=64 bytes
+};
+
+layout(set = 0, binding = 6, std430) readonly buffer SBOBVHNode {
+   BVHNode nodes[];
+} sboBVHNode;
+
 
 struct Sphere{
     vec3 position;
@@ -78,11 +95,11 @@ struct Sphere{
 const int NUM_SPHERES = 5;
 //Sphere spheres[NUM_SPHERES];
 
-layout(set = 0, binding = 6, std430) readonly buffer SBOSphere {
+layout(set = 0, binding = 7, std430) readonly buffer SBOSphere {
    Sphere spheres[];
 } sboSphere;
 
-layout (set = 0, binding = 7) uniform CustomBufferObject {
+layout (set = 0, binding = 8) uniform CustomBufferObject {
     int frameCount;
     bool cameraInMotion;
     uint triangleCount;
@@ -97,7 +114,7 @@ layout (set = 0, binding = 7) uniform CustomBufferObject {
 
 
 
-layout (set = 0, binding = 8, rgba8 ) uniform writeonly image2D resultImage;
+layout (set = 0, binding = 9, rgba8 ) uniform writeonly image2D resultImage;
 
 /***************************
 * Constants
@@ -244,6 +261,115 @@ HitInfo RayTriangleHitCheck(Ray ray, Triangle tri){
     return hitInfo;
 }
 
+bool RayAABBHit(
+    Ray ray,
+    vec3 bmin,
+    vec3 bmax,
+    out float tmin_out
+){
+    float tmin = 0.0;
+    float tmax = 1e30;
+
+    for (int i=0;i<3;i++){
+        float o = ray.origin[i];
+        float d = ray.dir[i];
+
+        if (abs(d) < 1e-6){
+            if (o < bmin[i] || o > bmax[i])
+                return false;
+            continue;
+        }
+
+        float iD = 1.0/d;
+        float t0 = (bmin[i]-o)*iD;
+        float t1 = (bmax[i]-o)*iD;
+        if (t0 > t1){
+            float tmp = t0; t0 = t1; t1 = tmp;
+        }
+
+        tmin = max(tmin, t0);
+        tmax = min(tmax, t1);
+
+        if (tmax < tmin) return false;
+    }
+
+    tmin_out = tmin;
+    return true;
+}
+void RayTraceWithBVH(Ray ray, inout HitInfo best)
+{
+    int stack[128];
+    float tstack[128];
+    int sp = 0;
+
+    stack[sp] = 0;
+    tstack[sp] = 0;
+    sp++;
+
+    while (sp > 0)
+    {
+        sp--;
+        int idx = stack[sp];
+        BVHNode node = sboBVHNode.nodes[idx];
+
+        if (node.tri_count > 0)
+        {
+            // leaf
+            for (int i=0; i<node.tri_count; i++)
+            {
+                int ti = node.tri_start + i;
+
+                // 从 tri_index 取得一个三角形
+                uint idx0 = sboTriangleIndex.indices[ (ti * 3) + 0 ];
+                uint idx1 = sboTriangleIndex.indices[ (ti * 3) + 1 ];
+                uint idx2 = sboTriangleIndex.indices[ (ti * 3) + 2 ];
+
+                Triangle tri;
+                tri.a = sboTriangleVertex.vertices[idx0].position;
+                tri.b = sboTriangleVertex.vertices[idx1].position;
+                tri.c = sboTriangleVertex.vertices[idx2].position;
+                tri.material_id = sboTriangleVertex.vertices[idx0].material_id;
+
+                HitInfo h = RayTriangleHitCheck(ray, tri);
+                if (h.didHit && (!best.didHit || h.dst < best.dst))
+                    best = h;
+            }
+            continue;
+        }
+
+        float tL, tR;
+        bool hitL = false, hitR = false;
+
+        if (node.left >= 0)
+            hitL = RayAABBHit(ray, sboBVHNode.nodes[node.left].bbox_min,
+                                   sboBVHNode.nodes[node.left].bbox_max,
+                                   tL);
+
+        if (node.right >= 0)
+            hitR = RayAABBHit(ray, sboBVHNode.nodes[node.right].bbox_min,
+                                    sboBVHNode.nodes[node.right].bbox_max,
+                                    tR);
+
+        if (hitL && hitR)
+        {
+            // near first
+            if (tL < tR) {
+                stack[sp] = node.right; tstack[sp] = tR; sp++;
+                stack[sp] = node.left;  tstack[sp] = tL; sp++;
+            } else {
+                stack[sp] = node.left;  tstack[sp] = tL; sp++;
+                stack[sp] = node.right; tstack[sp] = tR; sp++;
+            }
+        }
+        else if (hitL) {
+            stack[sp] = node.left; tstack[sp] = tL; sp++;
+        }
+        else if (hitR) {
+            stack[sp] = node.right; tstack[sp] = tR; sp++;
+        }
+    }
+}
+
 HitInfo RayHitCheck(Ray ray){
     HitInfo hitInfo_closest;
     hitInfo_closest.didHit = false;
@@ -268,24 +394,25 @@ HitInfo RayHitCheck(Ray ray){
     //     }
     // }
 
-    //for(int i = 0; i < 228; i++){ //low_poly_tree
-    for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
-        Triangle tri;
-        tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
-        tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
-        tri.c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].position;
-        //tri.normal_a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].normal;
-        //tri.normal_b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].normal;
-        //tri.normal_c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].normal;
-        tri.material_id = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].material_id;
+    // for(int i = 0; i < 228; i++){ //low_poly_tree
+    // for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
+    //     Triangle tri;
+    //     tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
+    //     tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
+    //     tri.c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].position;
+    //     //tri.normal_a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].normal;
+    //     //tri.normal_b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].normal;
+    //     //tri.normal_c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].normal;
+    //     tri.material_id = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].material_id;
 
-        HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
-        if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
-            if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
-        }else if(hitInfo_current.didHit){ //current hit and no previous hit
-            hitInfo_closest = hitInfo_current;
-        }
-    }
+    //     HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
+    //     if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
+    //         if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
+    //     }else if(hitInfo_current.didHit){ //current hit and no previous hit
+    //         hitInfo_closest = hitInfo_current;
+    //     }
+    // }
+    RayTraceWithBVH(ray, hitInfo_closest);
 
     return hitInfo_closest;
 }
@@ -467,9 +594,10 @@ void main(){
 
     
     imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), sboOut.pixels[index]);
+
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(currentFrameColor, 1.0)); //no accumulate
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(sboMaterial.materials[1].reflectance, sboMaterial.materials[1].reflectance, sboMaterial.materials[1].reflectance, 1.0));
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(0.05, 0.05, 0.05, 1.0));
-
+    //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(sboBVHNode.nodes[0].left, 1, 1, 1.0));
     
 }
