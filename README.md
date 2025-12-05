@@ -43,6 +43,7 @@ Required for compiling the project on Windows using the MinGW toolchain.
 Make sure the following tools are available in your system PATH:  
 gcc, g++, gdb, make  
 Download: https://www.mingw-w64.org/  
+
 Once all prerequisites are installed, you can proceed to configuring and building the project using CMake.  
 
 # Integrated Components
@@ -63,4 +64,5 @@ Used for parsing and handling YAML configuration files.
 Header-only library for loading image files (PNG, JPG, etc.).  
 • tinyobjloader  
 A lightweight library for loading OBJ 3D model files.  
+
 All components are bundled inside the repository under external/, and the CMake build system is already configured to include them.  
