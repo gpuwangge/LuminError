@@ -11,8 +11,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     include
-    $ENV{INCLUDE} #for glm
-    $ENV{VULKAN_SDK}/Include
+    #$ENV{INCLUDE} #for glm
+    ${CMAKE_SOURCE_DIR}/external/glm/0.9.9.8
+    ${CMAKE_SOURCE_DIR}/external/vulkan/1.4.328.1/Include
+    #$ENV{VULKAN_SDK}/Include
     #${CMAKE_SOURCE_DIR}/external #for yaml headers
 )
 

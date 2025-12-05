@@ -11,7 +11,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include
-    $ENV{INCLUDE} #for sdl3 headers
+    #$ENV{INCLUDE} #for sdl3 headers
+    ${CMAKE_SOURCE_DIR}/external/glm/0.9.9.8
+    ${CMAKE_SOURCE_DIR}/external/vulkan/1.4.328.1/Include
+    ${CMAKE_SOURCE_DIR}/external/sdl/Include
 )
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/sdl) #put SDL3.dll, SDL3_ttf.dll 

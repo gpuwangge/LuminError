@@ -395,7 +395,9 @@ void GameEngine::Record_Present(){
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer->EndRecordGraphicsCommandBuffer();
 
+            //std::cout<<"DEBUG Application: Finished recording graphics command buffer. currentFrame = "<< renderer->GetCurrentFrame() <<std::endl;
             renderer->SubmitGraphics();
+            //std::cout<<"DEBUG Application: Submitted graphics command buffer. currentFrame = "<< renderer->GetCurrentFrame() <<std::endl;
 
             renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
         break;

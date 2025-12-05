@@ -14,7 +14,11 @@ function(add_example EXAMPLENAME)
 
     target_compile_definitions(${EXAMPLENAME} PRIVATE EXAMPLE_NAME="${EXAMPLENAME}")
 
-    target_include_directories(${EXAMPLENAME} PRIVATE $ENV{INCLUDE}) #glm
+    target_include_directories(${EXAMPLENAME} PRIVATE
+        ${CMAKE_SOURCE_DIR}/external/glm/0.9.9.8
+        ${CMAKE_SOURCE_DIR}/external/vulkan/1.4.328.1/Include
+        #$ENV{INCLUDE}
+    ) #glm
 
     target_link_libraries(${EXAMPLENAME} PRIVATE leinterface lecommon)
 

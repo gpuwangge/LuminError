@@ -103,7 +103,22 @@ void RendererCore::CreateCommandBuffers() {
  * ***********************/
 //void RendererCore::AquireSwapchainImage(CSwapchain &swapchain){
 void RendererCore::AquireSwapchainImage(VkSwapchainKHR swapchainHandle){
+    // std::cout <<"Before vkAcquireNextImageKHR(): "
+    //       << "Frame " << currentFrame 
+    //       << " acquired image " << imageIndex
+    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
+    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
+    //       << std::endl;
+
     VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    
+    // std::cout <<"After vkAcquireNextImageKHR(): "
+    //       << "Frame " << currentFrame 
+    //       << " acquired image " << imageIndex
+    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
+    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
+    //       << std::endl;
+
 }
 
 void RendererCore::WaitForComputeFence(){
@@ -170,10 +185,24 @@ void RendererCore::SubmitCompute(){
 }
 
 void RendererCore::WaitForGraphicsFence(){
+    // std::cout <<"Before WaitForGraphicsFence(): "
+    //       << "Frame " << currentFrame 
+    //       << " acquired image " << imageIndex
+    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
+    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
+    //       << std::endl;
+          
     VkResult result = vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);//must call vkWaitForFences before record command buffer
     //Validation Error: vkBeginCommandBuffer() on active VkCommandBuffer 0x8c99500[] before it has completed. 
     //You must check command buffer fence before this call. 
     //The Vulkan spec states: commandBuffer must not be in the recording or pending state
+
+    // std::cout <<"After WaitForGraphicsFence(): "
+    //       << "Frame " << currentFrame 
+    //       << " acquired image " << imageIndex
+    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
+    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
+    //       << std::endl;
 }
 
 void RendererCore::SubmitGraphics(){
@@ -222,6 +251,11 @@ void RendererCore::SubmitGraphics(){
         break;
     }
    
+    // std::cout << "Frame " << currentFrame 
+    //       << " acquired image " << imageIndex
+    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
+    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
+    //       << std::endl;
 
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffers[graphicsCmdId][currentFrame];
@@ -294,11 +328,11 @@ void RendererCore::CreateSyncObjects(int swapchainSize) {
 
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     //computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
     //computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
-    computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);;
-    computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);;
+    computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     //imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
     //imagesInFlight.resize(swapchainSize, VK_NULL_HANDLE);

@@ -11,7 +11,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     include
-    $ENV{VULKAN_SDK}/Include
+    #$ENV{VULKAN_SDK}/Include
+    ${CMAKE_SOURCE_DIR}/external/vulkan/1.4.328.1/Include
     ${CMAKE_SOURCE_DIR}/external #for yaml-cpp/ headers
 )
 
