@@ -8,6 +8,7 @@
 #include <locale>
 #include "ILogCore.h"
 #include "Utility.h"
+#include <memory>
 
 class CPhysicalDevice{
 public:

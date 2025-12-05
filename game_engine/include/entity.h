@@ -2,6 +2,7 @@
 #include <string>
 #include "utility.h"
 #include <locale>
+#include <array>
 
 class CEntity{
 public:

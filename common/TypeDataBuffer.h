@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include "Config.h"
+#include <stdexcept>
 
 class CWxjBuffer final{
 public:
