@@ -50,18 +50,25 @@ Once all prerequisites are installed, you can proceed to configuring and buildin
 This project comes with several third-party libraries already integrated.  
 All headers and prebuilt libraries are located under the external/ directory, so no additional downloads are required.  
 The following components are included:  
+
 • Vulkan SDK (headers & libs)  
 Used for low-level graphics and compute operations.  
+
 • GLM  
 A header-only math library optimized for graphics applications.  
+
 • SDL3  
 Handles window creation, input, and cross-platform system utilities.  
+
 • SDL3_ttf  
 Provides TrueType font rendering support for text display.  
+
 • yaml-cpp  
 Used for parsing and handling YAML configuration files.  
+
 • stb_image  
 Header-only library for loading image files (PNG, JPG, etc.).  
+
 • tinyobjloader  
 A lightweight library for loading OBJ 3D model files.  
 
