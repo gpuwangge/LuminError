@@ -44,7 +44,7 @@ Make sure the following tools are available in your system PATH:
 gcc, g++, gdb, make  
 Download: https://www.mingw-w64.org/  
 
-5. Install Vulkan SDK  
+5. Vulkan SDK  
 https://vulkan.lunarg.com/sdk/home#windows  
 
 Once all prerequisites are installed, you can proceed to configuring and building the project using CMake.  
