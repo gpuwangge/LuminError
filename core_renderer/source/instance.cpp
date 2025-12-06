@@ -1,6 +1,7 @@
 #include "instance.h"
 #include <string.h>
 #include "Utility.h"
+#include <windows.h>
 
 CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions, LELog::ILogCore *logger_){
     //p_logManager = &logManager;
@@ -16,7 +17,7 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
-#ifndef ANDROID
+
     //First make sure required layer(s) are available
     if (enableValidationLayers) {
         uint32_t layerCount;
@@ -42,7 +43,7 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
 
         if (result != VK_SUCCESS) throw std::runtime_error("validation layers requested, but not available!");
     }
-#endif
+
 
     //Second set required extension(s)
     uint32_t extensionCount;
@@ -78,7 +79,15 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
     logger->Log("Vulkan Instance Required Extensions");
     DisplayExtensions(requiredExtensions);
 
+    SetupVulkanLayerPath();
+
     //Third create instance
+//     SetEnvironmentVariableA(
+//         "VK_LAYER_PATH",
+//         "E:/GitHubRepo/LuminError/external/vulkan/1.4.328.1/Bin"
+//         //"E:/GitHubRepo/LuminError/build/bin/vulkan/layers"
+//         //"<your_app_path>/vulkan/layers"
+// )   ;
     result = vkCreateInstance(&createInfo, nullptr, &handle);
     if (result != VK_SUCCESS) throw std::runtime_error("failed to create instance!");
 
@@ -240,3 +249,16 @@ void CInstance::DisplayExtensions(std::vector<const char*> &availableExtensions)
 
 
     
+std::string CInstance::MakeAbsolute(const std::string& relative)
+{
+    char buffer[MAX_PATH];
+    GetFullPathNameA(relative.c_str(), MAX_PATH, buffer, nullptr);
+    return std::string(buffer);
+}
+
+void CInstance::SetupVulkanLayerPath()
+{
+    std::string relative = ".\\vulkan\\layers";
+    std::string absolute = MakeAbsolute(relative);
+    SetEnvironmentVariableA("VK_LAYER_PATH", absolute.c_str());
+}

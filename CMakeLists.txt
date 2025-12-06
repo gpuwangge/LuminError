@@ -25,6 +25,9 @@ file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3.dll DESTINATION ${CMAKE_RUNTIM
 file(COPY ${PROJECT_SOURCE_DIR}/external/sdl/sdl3_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 file(COPY ${PROJECT_SOURCE_DIR}/external/fonts/NotoSansCJK-VF.otf.ttc DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
 file(COPY ${PROJECT_SOURCE_DIR}/external/yaml-cpp/lib/libyaml-cpp.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+file(COPY ${PROJECT_SOURCE_DIR}/external/vulkan/1.4.328.1/Bin/VkLayer_khronos_validation.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vulkan/layers/)
+file(COPY ${PROJECT_SOURCE_DIR}/external/vulkan/1.4.328.1/Bin/VkLayer_khronos_validation.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vulkan/layers/)
+
 
 # 创建 autotest.bat 文件
 file(WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/autotest.bat "@echo off\r\n")

@@ -44,9 +44,6 @@ Make sure the following tools are available in your system PATH:
 gcc, g++, gdb, make  
 Download: https://www.mingw-w64.org/  
 
-5. Vulkan SDK  
-https://vulkan.lunarg.com/sdk/home#windows  
-
 Once all prerequisites are installed, you can proceed to configuring and building the project using CMake.  
 
 # Integrated Components
@@ -54,7 +51,7 @@ This project comes with several third-party libraries already integrated.
 All headers and prebuilt libraries are located under the external/ directory, so no additional downloads are required.  
 The following components are included:  
 
-• Vulkan SDK (headers & libs)  
+• Vulkan SDK (headers & libs & layers)  
 Used for low-level graphics and compute operations.  
 
 • GLM  
