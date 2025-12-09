@@ -41,12 +41,12 @@ namespace LERenderer{
 
         virtual void CreateSyncObjects(int swapchainSize) = 0;
 
-        virtual void AquireSwapchainImage(VkSwapchainKHR swapchainHandle) = 0;
+        virtual void AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) = 0;
         virtual void WaitForComputeFence() = 0;
-        virtual void SubmitCompute() = 0;
+        virtual void SubmitCompute(bool bVerbose = false) = 0;
         virtual void WaitForGraphicsFence() = 0;
-        virtual void SubmitGraphics() = 0;
-        virtual void PresentSwapchainImage(VkSwapchainKHR swapchainHandle) = 0;
+        virtual void SubmitGraphics(bool bVerbose = false) = 0;
+        virtual void PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) = 0;
 
         //virtual void BeginCommandBuffer(int commandBufferIndex) = 0;
         virtual void BeginGraphicsCommandBuffer() = 0;

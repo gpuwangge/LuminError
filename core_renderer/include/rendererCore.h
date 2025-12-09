@@ -60,12 +60,12 @@ namespace LERenderer{
         bool bEnableText = false;
         //bool bUseGlobal = false;
 
-        void AquireSwapchainImage(VkSwapchainKHR swapchainHandle) override;
+        void AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) override;
         void WaitForComputeFence() override;
-        void SubmitCompute() override;
+        void SubmitCompute(bool bVerbose = false) override;
         void WaitForGraphicsFence() override;
-        void SubmitGraphics() override;
-        void PresentSwapchainImage(VkSwapchainKHR swapchainHandle) override; 
+        void SubmitGraphics(bool bVerbose = false) override;
+        void PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) override; 
 
 
         /**************************
@@ -152,6 +152,7 @@ namespace LERenderer{
         VkCommandPool commandPool;
 
 
+        int semaphoreIndex = 0;
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
