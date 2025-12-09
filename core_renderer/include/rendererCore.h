@@ -2,6 +2,7 @@
 #include "IRendererCore.h"
 #include <vulkan/vulkan.h>
 #include <vector>
+//#include <deque>
 #include "TypeDataBuffer.h"
 #include "Enum.h"
 #include "renderProcess.h"
@@ -136,7 +137,7 @@ namespace LERenderer{
         void CreateComputeCommandBuffer() override;
         void CreateCommandBuffers();
 
-        void CreateSyncObjects(int swapchainSize) override;
+        void CreateSyncObjects(int swapchainSize, bool bVerbose = false) override;
 
         void Destroy() override;
 
@@ -153,6 +154,8 @@ namespace LERenderer{
 
 
         int semaphoreIndex = 0;
+        //std::deque<VkSemaphore> availableSemaphores;
+
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;

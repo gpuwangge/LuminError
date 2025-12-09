@@ -690,7 +690,7 @@ void GameEngine::Initialize(){
     /****************************
     * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
     ****************************/
-    renderer->CreateSyncObjects(renderer->GetSwapchain_ImageSize());
+    renderer->CreateSyncObjects(renderer->GetSwapchain_ImageSize(), false);
     resourcer->DestroyShaderManager();
 
     TimePoint T13 = now();

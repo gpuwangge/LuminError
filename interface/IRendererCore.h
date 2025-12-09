@@ -39,7 +39,7 @@ namespace LERenderer{
         virtual void CreateGraphicsCommandBuffer() = 0;
         virtual void CreateComputeCommandBuffer() = 0;
 
-        virtual void CreateSyncObjects(int swapchainSize) = 0;
+        virtual void CreateSyncObjects(int swapchainSize, bool bVerbose = false) = 0;
 
         virtual void AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) = 0;
         virtual void WaitForComputeFence() = 0;

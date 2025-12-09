@@ -383,7 +383,7 @@ void GameEngine::Record_Present(){
             //must wait for fence before record command buffer
             renderer->WaitForGraphicsFence();
             //must aquire swap image before record command buffer
-            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle()); 
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle(), false); 
 
             vkResetCommandBuffer(renderer->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -396,10 +396,10 @@ void GameEngine::Record_Present(){
             renderer->EndRecordGraphicsCommandBuffer();
 
             //std::cout<<"DEBUG Application: Finished recording graphics command buffer. currentFrame = "<< renderer->GetCurrentFrame() <<std::endl;
-            renderer->SubmitGraphics();
+            renderer->SubmitGraphics(false);
             //std::cout<<"DEBUG Application: Submitted graphics command buffer. currentFrame = "<< renderer->GetCurrentFrame() <<std::endl;
 
-            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle(), false);
         break;
         case RenderModes::GRAPHICS_SHADOWMAP:
             //must wait for fence before record command buffer
@@ -497,7 +497,7 @@ void GameEngine::Record_Present(){
         //case renderer.RENDER_COMPUTE_GRAPHICS_Mode:
             renderer->WaitForComputeFence();//must wait for fence before record
             renderer->WaitForGraphicsFence();//must wait for fence before record
-            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle());//must aquire swap image before record command buffer
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle(), false);//must aquire swap image before record command buffer
 
             vkResetCommandBuffer(renderer->GetGraphicsCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
             vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
@@ -513,10 +513,10 @@ void GameEngine::Record_Present(){
             RecordGraphicsCommandBuffer_RenderpassMainscene();
             renderer->EndRecordGraphicsCommandBuffer();
             
-            renderer->SubmitCompute(); 
-            renderer->SubmitGraphics(); 
+            renderer->SubmitCompute(false); 
+            renderer->SubmitGraphics(false); 
 
-            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle()); 
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle(), false); 
         break;
         default:
         break;

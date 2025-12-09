@@ -103,29 +103,13 @@ void RendererCore::CreateCommandBuffers() {
  * ***********************/
 //void RendererCore::AquireSwapchainImage(CSwapchain &swapchain){
 void RendererCore::AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose){
-    // std::cout <<"Before vkAcquireNextImageKHR(): "
-    //       << "currentFrame = " << currentFrame 
-    //       << " acquired image imageIndex = " << imageIndex
-    //       << ", using semaphore imageAvailableSemaphores[imageIndex] = " << imageAvailableSemaphores[imageIndex]
-    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
-    //       << std::endl;
-
-    //VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
-    //VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, VK_NULL_HANDLE, inFlightFences[currentFrame], &imageIndex);
+    if(bVerbose) std::cout<<"--------currentFrame = " << currentFrame <<"--------"<<std::endl;
+    if(bVerbose) std::cout<<"vkAcquireNextImageKHR: imageAvailableSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<<", "<< imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize]<<std::endl;
+    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize], VK_NULL_HANDLE, &imageIndex);
     
-    if(bVerbose) std::cout<<"vkAcquireNextImageKHR: imageAvailableSemaphores index = "<<semaphoreIndex%3<<", "<< imageAvailableSemaphores[semaphoreIndex%3]<<std::endl;
-    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[semaphoreIndex%3], VK_NULL_HANDLE, &imageIndex);
-    
-
-    //std::cout << "After vkAcquireNextImageKHR(): imageIndex = " << imageIndex << std::endl;
-
-    // std::cout <<"After vkAcquireNextImageKHR(): "
-    //       << "Frame " << currentFrame 
-    //       << " acquired image " << imageIndex
-    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
-    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
-    //       << std::endl;
-
+    //VkSemaphore semaphore = availableSemaphores.front();
+    //availableSemaphores.pop_front();
+    //VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, semaphore, VK_NULL_HANDLE, &imageIndex);
 }
 
 void RendererCore::WaitForComputeFence(){
@@ -157,14 +141,14 @@ void RendererCore::SubmitCompute(bool bVerbose){
         case COMPUTE_SWAPCHAIN:
         {
             //Because this mode use swap image to present, wait swap image to be ready
-            VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] }; //to wait until image is ready
+            VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; //to wait until image is ready
             VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
             submitInfo.waitSemaphoreCount = 1;
             submitInfo.pWaitSemaphores = waitSemaphores;
             submitInfo.pWaitDstStageMask = waitStages;
 
             //Also because this mode need present swap image, need to tell present that compute is finished
-            VkSemaphore signalSemaphores[] = { computeFinishedSemaphores[currentFrame] }; 
+            VkSemaphore signalSemaphores[] = { computeFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; 
             submitInfo.signalSemaphoreCount = 1;
             submitInfo.pSignalSemaphores = signalSemaphores;
         }
@@ -172,7 +156,7 @@ void RendererCore::SubmitCompute(bool bVerbose){
         case COMPUTE_GRAPHICS:
         {
             //This mode doesn't interact with swap image, this semaphore is to tell graphics that compute is finished
-            VkSemaphore signalSemaphores[] = { computeFinishedSemaphores[currentFrame] }; 
+            VkSemaphore signalSemaphores[] = { computeFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; 
             submitInfo.signalSemaphoreCount = 1;
             submitInfo.pSignalSemaphores = signalSemaphores;
         }
@@ -192,25 +176,7 @@ void RendererCore::SubmitCompute(bool bVerbose){
 }
 
 void RendererCore::WaitForGraphicsFence(){
-    // std::cout <<"Before WaitForGraphicsFence(): "
-    //       << "Frame " << currentFrame 
-    //       << " acquired image " << imageIndex
-    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
-    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
-    //       << std::endl;
-          
     VkResult result = vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);//must call vkWaitForFences before record command buffer
-    //Validation Error: vkBeginCommandBuffer() on active VkCommandBuffer 0x8c99500[] before it has completed. 
-    //You must check command buffer fence before this call. 
-    //The Vulkan spec states: commandBuffer must not be in the recording or pending state
-
-    // std::cout <<"After WaitForGraphicsFence(): "
-    //       << "Frame " << currentFrame 
-    //       << " acquired image " << imageIndex
-    //       << ", using semaphore " << imageAvailableSemaphores[currentFrame]
-    //       << ", image was in flight: " << (inFlightFences[imageIndex] != VK_NULL_HANDLE) //如果这个值是1，表示图像正在飞行中(正在被GPU使用)；如果是0，代表没有被GPU使用，正空闲，之前如果有工作的话已完成，可以被CPU使用
-    //       << std::endl;
-
     vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &inFlightFences[currentFrame]);
 }
 
@@ -223,8 +189,8 @@ void RendererCore::SubmitGraphics(bool bVerbose){
         case GRAPHICS:
         {
             //pure graphics pipeline, need wait swap image is ready
-            if(bVerbose) std::cout<<"WaitSemaphore: imageAvailableSemaphores index = "<<semaphoreIndex%3<<std::endl;
-            VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[semaphoreIndex%3] };
+            if(bVerbose) std::cout<<"WaitSemaphore: imageAvailableSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<<std::endl;
+            VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] };
             
             VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
             submitInfo.waitSemaphoreCount = 1;
@@ -235,7 +201,7 @@ void RendererCore::SubmitGraphics(bool bVerbose){
         case GRAPHICS_SHADOWMAP:
         {
             //shadowmap pass, need wait for shadowmap to be ready
-            VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[imageIndex] };
+            VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] };
             VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT };
             submitInfo.waitSemaphoreCount = 1;
             submitInfo.pWaitSemaphores = waitSemaphores;
@@ -251,7 +217,7 @@ void RendererCore::SubmitGraphics(bool bVerbose){
         case COMPUTE_GRAPHICS:
         {
             //graphics/compute pipeline hybrid, need wait both swap image and compute are ready
-            VkSemaphore waitSemaphores[] = {computeFinishedSemaphores[currentFrame], imageAvailableSemaphores[currentFrame] };
+            VkSemaphore waitSemaphores[] = {computeFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize], imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] };
             VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
             submitInfo.waitSemaphoreCount = 2;
             submitInfo.pWaitSemaphores = waitSemaphores;
@@ -271,7 +237,7 @@ void RendererCore::SubmitGraphics(bool bVerbose){
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffers[graphicsCmdId][currentFrame];
 
-    VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[semaphoreIndex%3] };
+    VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] };
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -301,22 +267,22 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
     switch(m_renderMode){
         case GRAPHICS:
             //present only if render is finished
-            if(bVerbose) std::cout<<"signalSemaphores: renderFinishedSemaphores index = "<<semaphoreIndex%3<<std::endl;
-            signalSemaphores[0] = renderFinishedSemaphores[semaphoreIndex%3]; 
+            if(bVerbose) std::cout<<"signalSemaphores: renderFinishedSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<< renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]<<std::endl;
+            signalSemaphores[0] = renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]; 
         break;
         case GRAPHICS_SHADOWMAP:
-            signalSemaphores[0] = renderFinishedSemaphores[currentFrame];
+            signalSemaphores[0] = renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize];
         break;
         case COMPUTE:
             //no need to present image for pure compute application
         break;
         case COMPUTE_SWAPCHAIN:
             //present only if compute is finished
-            signalSemaphores[0] = computeFinishedSemaphores[currentFrame]; 
+            signalSemaphores[0] = computeFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]; 
         break;
         case COMPUTE_GRAPHICS:
             //present only if render is finished
-            signalSemaphores[0] = renderFinishedSemaphores[currentFrame]; 
+            signalSemaphores[0] = renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]; 
         break;
         default:
         break;
@@ -340,39 +306,55 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
 /**************************
  * Graphics Functions
  * ***********************/
-void RendererCore::CreateSyncObjects(int swapchainSize) {
+void RendererCore::CreateSyncObjects(int swapchainSize, bool bVerbose) {
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    //availableSemaphores.resize(swapchainSize);
+    // for(int i = 0; i < swapchainSize; i++){
+    //     if (vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &availableSemaphores[i]) != VK_SUCCESS){
+    //             throw std::runtime_error("failed to create synchronization objects for a swapchain image!");
+    //         }
+    // }
+
     imageAvailableSemaphores.resize(swapchainSize);
     renderFinishedSemaphores.resize(swapchainSize);
     //computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
-    //computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    computeFinishedSemaphores.resize(swapchainSize);
 
-    computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    //computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     //imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
     //imagesInFlight.resize(swapchainSize, VK_NULL_HANDLE);
     //imagesInFlight.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
     //imagesInFlight.resize(3, VK_NULL_HANDLE);///!!!
 
-    VkSemaphoreCreateInfo semaphoreInfo{};
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    
+    for(int i = 0; i < swapchainSize; i++){
+        if (vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS){
+                throw std::runtime_error("failed to create synchronization objects for a swapchain image!");
+            }
+        if(bVerbose){
+            std::cout<<"Created imageAvailableSemaphores["<<i<<"]: "<<imageAvailableSemaphores[i]<<std::endl;
+            std::cout<<"Created renderFinishedSemaphores["<<i<<"]: "<<renderFinishedSemaphores[i]<<std::endl;
+            std::cout<<"Created computeFinishedSemaphores["<<i<<"]: "<<computeFinishedSemaphores[i]<<std::endl;
+        }
+    }
+
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    for(int i = 0; i < swapchainSize; i++){
-        if (vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS){
-            throw std::runtime_error("failed to create synchronization objects for a swapchain image!");
-            }
-    }
+    
+    computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         if (vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS ||
-            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS) {
+            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
         //if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS ||
@@ -632,16 +614,20 @@ void RendererCore::Destroy(){
     //for(size_t i = 0; i < instanceDataBuffers.size(); i++) instanceDataBuffers[i].DestroyAndFree();
     indexDataBuffers.clear();
 
+    // for(int i = 0; i< availableSemaphores.size(); i++){
+    //     vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), availableSemaphores[i], nullptr);
+    // }
+
     for(int i = 0; i< renderFinishedSemaphores.size(); i++){
         vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), imageAvailableSemaphores[i], nullptr);
+        vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), computeFinishedSemaphores[i], nullptr);
     }
 
     //std::cout<<"Begin Destroy RenderCore(): sync objects"<<std::endl;
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), inFlightFences[i], nullptr);
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), computeInFlightFences[i], nullptr);
-        vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), computeFinishedSemaphores[i], nullptr);
     }
     renderFinishedSemaphores.clear();
     imageAvailableSemaphores.clear();
