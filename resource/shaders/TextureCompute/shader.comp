@@ -31,7 +31,7 @@ void main(){
 		blurColor += (imageLoad(inputTexture, ivec2(fetch)).rgba * _102[i+5]); 
     }
 	//blurColor = vec4(1,0,0,1);
-	imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), blurColor);
+	imageStore(outputImage, ivec2(gl_GlobalInvocationID.xy), blurColor.bgra);
 }
 
 

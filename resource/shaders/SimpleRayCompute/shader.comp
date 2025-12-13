@@ -99,7 +99,7 @@ layout(set = 0, binding = 7, std430) readonly buffer SBOSphere {
    Sphere spheres[];
 } sboSphere;
 
-layout (set = 0, binding = 8) uniform CustomBufferObject {
+layout(set = 0, binding = 8) uniform CustomBufferObject {
     int frameCount;
     bool cameraInMotion;
     uint triangleCount;
@@ -114,7 +114,7 @@ layout (set = 0, binding = 8) uniform CustomBufferObject {
 
 
 
-layout (set = 0, binding = 9, rgba8 ) uniform writeonly image2D resultImage;
+layout(set = 0, binding = 9, rgba8) uniform writeonly image2D resultImage;
 
 /***************************
 * Constants
@@ -593,11 +593,11 @@ void main(){
     }
 
     
-    imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), sboOut.pixels[index]);
+    imageStore(resultImage, ivec2(gl_GlobalInvocationID.xy), sboOut.pixels[index].bgra);
 
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(currentFrameColor, 1.0)); //no accumulate
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(sboMaterial.materials[1].reflectance, sboMaterial.materials[1].reflectance, sboMaterial.materials[1].reflectance, 1.0));
-    //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(0.05, 0.05, 0.05, 1.0));
+    //imageStore(resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(0.0, 0.0, 0.5, 1.0));
     //imageStore( resultImage, ivec2(gl_GlobalInvocationID.xy), vec4(sboBVHNode.nodes[0].left, 1, 1, 1.0));
     
 }

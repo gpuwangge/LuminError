@@ -670,7 +670,8 @@ void RendererCore::SetApplication(LEGameEngine::IGameEngine* pApplication) {
     game = pApplication;
     renderProcess.game = game;
     graphicsDescriptorManager.game = game;
-    computeDescriptorManager.game = game;
+    //computeDescriptorManager.game = game;
+    computeDescriptorManager.p_swapchain = &swapchain;
     swapchain.game = game;
 
     void* pVoid = nullptr;

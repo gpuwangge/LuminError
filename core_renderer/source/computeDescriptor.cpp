@@ -235,7 +235,7 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
 /************
  * Set
  ************/
-void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageView, std::vector<VkImageView> *swapchainImageViews){
+void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageView){
     //Descriptor Step 3/3
     //HERE_I_AM("wxjCreateDescriptorSets");
 
@@ -462,7 +462,8 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
         if(computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN){
             VkDescriptorImageInfo storageImageInfo{};
             storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-            storageImageInfo.imageView = (*swapchainImageViews)[i];
+            //storageImageInfo.imageView = (*swapchainImageViews)[i];
+            storageImageInfo.imageView = p_swapchain->intermediaColor[i].view;
             storageImageInfo.sampler = VK_NULL_HANDLE; //textureSamplers[0];
 
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

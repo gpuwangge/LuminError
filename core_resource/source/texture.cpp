@@ -106,11 +106,9 @@ void CTextImageManager::Destroy(){
 *	Texture Image: Basic
 ********************/
 CTextureImage::CTextureImage(){
-#ifndef ANDROID
-    m_imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
-#else
-	imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-#endif
+    //m_imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+	m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+
 	m_dstTexChannels = STBI_rgb_alpha;
 	//debugger = new CDebugger("../logs/texture.log");
 }

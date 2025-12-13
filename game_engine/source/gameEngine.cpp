@@ -302,6 +302,41 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     gamer->PostInitialize();
 
+    //for RenderModes::COMPUTE_SWAPCHAIN, need convert intermediaColor_Image to VK_IMAGE_LAYOUT_GENERAL
+    //intermediaColor_Image can only be created as VK_IMAGE_LAYOUT_UNDEFINED
+    if(renderer->GetRenderMode() == RenderModes::COMPUTE_SWAPCHAIN){
+        for(int i = 0; i < 2; i++){
+            renderer->SetCurrentFrame(i);
+
+            vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
+
+            renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
+            renderer->RecordImageBarrier(
+                renderer->GetComputeCommandBuffer(),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
+                VK_IMAGE_LAYOUT_UNDEFINED,
+                VK_IMAGE_LAYOUT_GENERAL,
+                0,
+                VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
+            );
+            renderer->EndRecordComputeCommandBuffer();
+
+            VkSubmitInfo submitInfo{};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &renderer->GetComputeCommandBuffer();
+
+            if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+                throw std::runtime_error("failed to submit draw command buffer!");
+            }
+        }
+        renderer->SetCurrentFrame(0);
+        vkDeviceWaitIdle(renderer->GetLogicalDevice());
+    }
+
+
     TimePoint T1 = now();
     totalInitTime = printElapsed("Application: Total Initialization cost", T0, T1);
 
@@ -460,7 +495,9 @@ void GameEngine::Record_Present(){
            // renderer.PresentSwapchainImage(swapchain); //???
         break;
         case RenderModes::COMPUTE_SWAPCHAIN:
-        //case renderer.RENDER_COMPUTE_SWAPCHAIN_Mode:
+        {
+            //std::cout<<"currentFrame: "<<renderer->GetCurrentFrame()<<", initialize_stage[]: "<<initialize_stage_0<<", "<<initialize_stage_1<<std::endl;
+
             //must wait for fence before record
             renderer->WaitForComputeFence();
             //must aquire swap image before record command buffer
@@ -478,21 +515,54 @@ void GameEngine::Record_Present(){
 
             //!For swapchain, need convert layout before write stuff in swapchain images
             renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
-            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
-                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
-                VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
-                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            
+            //The following code was used to write directly into swapchain image(Vulkan 1.4 no longer recommends this)     
+            // renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
+            //     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
+            //     VK_ACCESS_MEMORY_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT,
+            //     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            //gamer->RecordComputeCommandBuffer();
+            // renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
+            //     VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+            //     VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+            //     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+
             gamer->RecordComputeCommandBuffer();
-            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
-                VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, //before present, expect layout to be VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+            
+            VkImageCopy copy{};
+            copy.dstOffset = { 0,0,0 };
+            copy.extent = { renderer->GetSwapchainExtent().width, renderer->GetSwapchainExtent().height, 1};
+            copy.srcOffset = { 0,0,0 };
+
+            VkImageSubresourceLayers subresource{};
+            subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            subresource.baseArrayLayer = 0;
+            subresource.layerCount = 1;
+            subresource.mipLevel = 0;
+            copy.srcSubresource = subresource;
+            copy.dstSubresource = subresource;
+
+            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                VK_ACCESS_MEMORY_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT,
+                VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_HOST_BIT);
+
+            vkCmdCopyImage(renderer->GetComputeCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
+                renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
+
+            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                VK_ACCESS_MEMORY_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+                VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+            
+
             renderer->EndRecordComputeCommandBuffer();
 
-            renderer->SubmitCompute(); 
+            renderer->SubmitCompute();
 
-            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle()); 
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
         break;
+        }
         case RenderModes::COMPUTE_GRAPHICS:
         //case renderer.RENDER_COMPUTE_GRAPHICS_Mode:
             renderer->WaitForComputeFence();//must wait for fence before record

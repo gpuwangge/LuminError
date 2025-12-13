@@ -157,7 +157,7 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; 
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; 
     if(bComputeSwapChainImage)
         createInfo.imageUsage |= VK_IMAGE_USAGE_STORAGE_BIT; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage
 
@@ -193,6 +193,8 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+
+    createIntermediaColor(width, height); //this is only used when you try to use compute to render to swapchain(uniform_compute_swapchain_storage=true)
 }
 
 void CSwapchain::createSwapchainViews(VkImageAspectFlags aspectFlags){
@@ -201,6 +203,24 @@ void CSwapchain::createSwapchainViews(VkImageAspectFlags aspectFlags){
     for (size_t i = 0; i < swapchainImageSize; i++) {
         CWxjImageBuffer dummyImageBuffer(CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice()); //dummyImageBuffer doesn't really matter here, just use it's create function
 		swapchain_views[i] = dummyImageBuffer.createImageView_swapchain(swapchain_images[i], swapChainImageFormat, aspectFlags, 1);
+    }
+}
+
+//Resource#5.intermediaColor_images and IntermediaColor_views
+void CSwapchain::createIntermediaColor(int width, int height){
+    //std::cout<<"width = "<<width<<", height = "<<height<<std::endl;
+    VkImageUsageFlags usage = VK_IMAGE_LAYOUT_GENERAL | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    //VkFormat format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+
+    intermediaColor.resize(swapchainImageSize);
+    for(int i = 0; i < swapchainImageSize; i++){
+        //std::cout<<"create intermediaColor["<<i<<"]"<<std::endl;
+        intermediaColor[i].logicalDevice = CContext::GetHandle().GetLogicalDevice();
+	    intermediaColor[i].physicalDevice = CContext::GetHandle().GetPhysicalDevice();
+        intermediaColor[i].createImage(width, height, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, false, VK_IMAGE_LAYOUT_UNDEFINED); //VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_GENERAL
+        //std::cout<<"debug"<<std::endl;
+        intermediaColor[i].createImageView(format, VK_IMAGE_ASPECT_COLOR_BIT, 1, false);
     }
 }
 
@@ -424,6 +444,9 @@ void CSwapchain::CleanUp(){
     buffer_depthlight.clear();
     buffer_depthcamera.destroy();
     buffer_colorresolve.destroy();
+
+    for(int i = 0; i < intermediaColor.size(); i++)
+        intermediaColor[i].destroy();
 }
 
 // bool CSwapchain::CheckFormatSupport(VkPhysicalDevice gpu, VkFormat format, VkFormatFeatureFlags requestedSupport) {///!!!!

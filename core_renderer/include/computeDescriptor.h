@@ -3,6 +3,7 @@
 #include <vector>
 #include "TypeUniform.h"
 #include "TypeDataBuffer.h"
+#include "swapchain.h"
 
 namespace LEGameEngine{
     class IGameEngine;
@@ -15,7 +16,8 @@ public:
     CComputeDescriptorManager(){}
     ~CComputeDescriptorManager(){}
 
-    LEGameEngine::IGameEngine* game;
+    //LEGameEngine::IGameEngine* game;
+    CSwapchain* p_swapchain;
 
     /************
      * Pool
@@ -37,7 +39,7 @@ public:
      * Set
      ************/
     std::vector<VkDescriptorSet> descriptorSets; //one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
-    void createDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL);
+    void createDescriptorSets(VkImageView textureImageView = NULL);
 
 
     /************

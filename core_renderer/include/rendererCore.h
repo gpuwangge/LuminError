@@ -294,7 +294,7 @@ namespace LERenderer{
 
         void createComputeDescriptorPool() override { computeDescriptorManager.createDescriptorPool(); }
         void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { computeDescriptorManager.createDescriptorSetLayout(customBinding); }
-        void createComputeDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL) override { computeDescriptorManager.createDescriptorSets(textureImageView, swapchainImageViews); }
+        void createComputeDescriptorSets(VkImageView textureImageView = NULL) override { computeDescriptorManager.createDescriptorSets(textureImageView); }
 
         void addComputeGlobalUniformBuffer() { computeDescriptorManager.addGlobalUniformBuffer(); }
         void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) { computeDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
@@ -365,6 +365,7 @@ namespace LERenderer{
         VkImageView GetSwapchain_Buffer_DepthCamera_View() override { return swapchain.buffer_depthcamera.view; }
         std::vector<VkImageView>& GetSwapchain_Views() override { return swapchain.swapchain_views; }
         std::vector<VkImage>& GetSwapchain_Images() override { return swapchain.swapchain_images; }
+        VkImage GetIntermediaColor_Image(int index) override { return swapchain.intermediaColor[index].image; }
         VkSwapchainKHR GetSwapchainHandle() override { return swapchain.getHandle(); }
         std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() override { return swapchain.framebuffers_mainscene; }
         std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) override { return swapchain.framebuffers_shadowmap[index]; }

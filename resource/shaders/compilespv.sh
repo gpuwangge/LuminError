@@ -16,7 +16,7 @@ compile_if_newer() {
     
     if [ ! -f "$output_file" ]; then
         echo "📦 Compile ${source_file} (new)"
-        glslc.exe "${source_file}" -o "${output_file}"
+        ./glslc.exe "${source_file}" -o "${output_file}"
         if [ $? -ne 0 ]; then
             error=$((error+1))
         else
@@ -29,7 +29,7 @@ compile_if_newer() {
         [ "CommonShaders/lightsUBO.glsl" -nt "$output_file" ] || \
         [ "CommonShaders/objectUBO.glsl" -nt "$output_file" ]; then
         echo "🔄 Compile ${source_file} (updated)"
-        glslc.exe "${source_file}" -o "${output_file}"
+        ./glslc.exe "${source_file}" -o "${output_file}"
         if [ $? -ne 0 ]; then
             error=$((error+1))
         else

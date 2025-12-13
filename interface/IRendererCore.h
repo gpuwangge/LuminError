@@ -204,7 +204,7 @@ namespace LERenderer{
 
         virtual void createComputeDescriptorPool() = 0;
         virtual void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
-        virtual void createComputeDescriptorSets(VkImageView textureImageView = NULL, std::vector<VkImageView> *swapchainImageViews = NULL) = 0;
+        virtual void createComputeDescriptorSets(VkImageView textureImageView = NULL) = 0;
 
         virtual void addComputeGlobalUniformBuffer() = 0;
         virtual void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
@@ -271,6 +271,7 @@ namespace LERenderer{
         virtual VkImageView GetSwapchain_Buffer_DepthCamera_View() = 0;
         virtual std::vector<VkImageView>& GetSwapchain_Views() = 0;
         virtual std::vector<VkImage>& GetSwapchain_Images() = 0;
+        virtual VkImage GetIntermediaColor_Image(int index) = 0;
         virtual VkSwapchainKHR GetSwapchainHandle() = 0;
         virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() = 0;
         virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) = 0;

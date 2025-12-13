@@ -304,8 +304,8 @@ void GameEngine::Initialize(){
             //std::cout<<"appInfo->Feature.b_feature_graphics_48pbt="<<appInfo->Feature.b_feature_graphics_48pbt<<std::endl;
             if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
                 //std::cout<<"textureSamplerId = "<<textureSamplerId<<std::endl;
-                if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, renderer->GetSwapchainImageFormat());
-                else resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);  
+                if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
+                else resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
             }else{ //48bpt
                 //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
                 resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
@@ -361,9 +361,8 @@ void GameEngine::Initialize(){
     if(b_uniform_graphics) renderer->createGraphicsDescriptorSets_General(renderer->GetSwapchain_Buffer_DepthCamera_View(), depthlight_imageviews);
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
-            if(appInfo->Uniform.b_uniform_compute_texture_storage)
-                renderer->createComputeDescriptorSets(resourcer->GetTextureImageView(0), &(renderer->GetSwapchain_Views()));//this must be called after texture resource is loaded
-            else renderer->createComputeDescriptorSets(NULL, &(renderer->GetSwapchain_Views()));
+            if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->createComputeDescriptorSets(resourcer->GetTextureImageView(0));//this must be called after texture resource is loaded
+            else renderer->createComputeDescriptorSets(NULL);
         }else renderer->createComputeDescriptorSets();
     }
 

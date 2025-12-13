@@ -66,6 +66,9 @@ public:
     void createSwapchainImages(VkSurfaceKHR surface, int width, int height);
     void createSwapchainViews(VkImageAspectFlags aspectFlags);
 
+    //Resource#5.intermediaColor_images and IntermediaColor_views
+    std::vector<CWxjImageBuffer> intermediaColor;
+    void createIntermediaColor(int width, int height);
 
     /************************
     * Framebuffers
