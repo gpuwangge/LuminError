@@ -104,25 +104,25 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     }
     //logger->Log("Choose default swapchain format: format %4d, colorSpace %12d", surfaceFormat.format, surfaceFormat.colorSpace); 
 
-	if(bComputeSwapChainImage){//added VK_IMAGE_USAGE_STORAGE_BIT for image storage
-        //choose format (again) for requestedSupport
-        VkFormatFeatureFlags requestedSupport = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT | VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-        VkFormatProperties vkFormatProperties;
-        for (auto& swapchain_format : swapChainSupport.formats) {///!!!!
-            vkGetPhysicalDeviceFormatProperties(CContext::GetHandle().GetPhysicalDevice(), swapchain_format.format, &vkFormatProperties);
-            if ((vkFormatProperties.optimalTilingFeatures & requestedSupport) == requestedSupport){
-                //logger->Log("Choose swapchain format for storage image: format %4d, colorSpace %12d", swapchain_format.format, swapchain_format.colorSpace);
-                logger->Log("log test");
-                surfaceFormat.format = swapchain_format.format;///!!!!
-                break;///!!!!
-            }
+	// if(!bComputeSwapChainImage){ //?use swapchain to render, need this?
+    //     //choose format (again) for requestedSupport
+    //     VkFormatFeatureFlags requestedSupport = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT | VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+    //     VkFormatProperties vkFormatProperties;
+    //     for (auto& swapchain_format : swapChainSupport.formats) {///!!!!
+    //         vkGetPhysicalDeviceFormatProperties(CContext::GetHandle().GetPhysicalDevice(), swapchain_format.format, &vkFormatProperties);
+    //         if ((vkFormatProperties.optimalTilingFeatures & requestedSupport) == requestedSupport){
+    //             //logger->Log("Choose swapchain format for storage image: format %4d, colorSpace %12d", swapchain_format.format, swapchain_format.colorSpace);
+    //             logger->Log("log test");
+    //             surfaceFormat.format = swapchain_format.format;///!!!!
+    //             break;///!!!!
+    //         }
 
-            //if (CheckFormatSupport(CContext::GetHandle().GetPhysicalDevice(), format.format, requestedSupport)) {///!!!!
-            //    surfaceFormat.format = format.format;///!!!!
-            //    break;///!!!!
-            //}
-        }
-    }
+    //         //if (CheckFormatSupport(CContext::GetHandle().GetPhysicalDevice(), format.format, requestedSupport)) {///!!!!
+    //         //    surfaceFormat.format = format.format;///!!!!
+    //         //    break;///!!!!
+    //         //}
+    //     }
+    // }
 
     //tests for textureCompute
     //surfaceFormat.format = VK_FORMAT_B8G8R8A8_SRGB;//50 //validation error
@@ -157,9 +157,9 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; 
-    if(bComputeSwapChainImage)
-        createInfo.imageUsage |= VK_IMAGE_USAGE_STORAGE_BIT; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; 
+    //if(bComputeSwapChainImage)
+    createInfo.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage, VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 
     QueueFamilyIndices indices = CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating swapchain images");
     uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };

@@ -14,10 +14,9 @@
 #include "Config.h"
 namespace LuminError{
     class Game : public IGame {
-        void PreInitialize() override {
-            GameEngine->SetSwapchainImageSize(MAX_FRAMES_IN_FLIGHT);
-            GameEngine->EnableComputeSwapChainImage(true);
-	    }
+        //void PreInitialize() override {
+        //    GameEngine->EnableComputeSwapChainImage(true);
+	    //}
 
         void Initialize() override {
             GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);

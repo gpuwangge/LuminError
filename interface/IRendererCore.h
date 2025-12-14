@@ -27,6 +27,7 @@ namespace LERenderer{
         virtual void SetEnableText(bool value) = 0;
         virtual int GetEnableText() = 0;
         virtual uint32_t GetCurrentFrame() = 0;
+        virtual uint32_t GetCurrentImage() = 0;
         virtual void SetCurrentFrame(uint32_t value) = 0;
         virtual VkCommandPool& GetCommandPool() = 0;
         virtual VkCommandBuffer& GetGraphicsCommandBuffer() = 0;
@@ -245,7 +246,7 @@ namespace LERenderer{
         virtual int GetSwapchain_BufferSize_Depthlight() = 0;
         virtual int GetSwapchain_ImageSize() = 0;
         virtual void SetSwapchain_ImageSize(int value) = 0;
-        virtual void SetSwapchain_Compute_Image(bool value) = 0;
+        //virtual void SetSwapchain_Compute_Image(bool value) = 0;
         virtual void GetSwapchainMaxUsableSampleCount() = 0;
 
         virtual void CreateSwapchain_attachment_resource_depthlight(VkSampleCountFlagBits msaaSamples) = 0;

@@ -46,6 +46,7 @@ namespace LERenderer{
         void SetEnableText(bool value) override { bEnableText = value; }
         int GetEnableText() override { return bEnableText; }
         uint32_t GetCurrentFrame() override { return currentFrame; }
+        uint32_t GetCurrentImage() override { return currentImage; }
         void SetCurrentFrame(uint32_t value) override { currentFrame = value; }
         VkCommandPool& GetCommandPool() override { return commandPool; }
         VkCommandBuffer& GetGraphicsCommandBuffer() override { return commandBuffers[graphicsCmdId][currentFrame]; }
@@ -142,7 +143,7 @@ namespace LERenderer{
         void Destroy() override;
 
         uint32_t currentFrame = 0;
-        uint32_t imageIndex = 0;
+        uint32_t currentImage = 0;
         void Update() override; //update currentFrame
 
         std::vector<CWxjBuffer> vertexDataBuffers;  //each buffer object is for one model object, the index in this vector is object.id
@@ -339,7 +340,7 @@ namespace LERenderer{
         int GetSwapchain_BufferSize_Depthlight() override { return swapchain.buffer_depthlight.size(); }
         int GetSwapchain_ImageSize() override { return swapchain.swapchainImageSize; }
         void SetSwapchain_ImageSize(int value) override { swapchain.swapchainImageSize = value; }
-        void SetSwapchain_Compute_Image(bool value) override { swapchain.bComputeSwapChainImage = value; }
+        //void SetSwapchain_Compute_Image(bool value) override { swapchain.bComputeSwapChainImage = value; }
         void GetSwapchainMaxUsableSampleCount() override { swapchain.GetMaxUsableSampleCount(); }
 
         void CreateSwapchain_attachment_resource_depthlight(VkSampleCountFlagBits msaaSamples) override { swapchain.create_attachment_resource_depthlight(msaaSamples); }

@@ -378,7 +378,7 @@ double GameEngine::GetDeltaTime() { return deltaTime; }
 
 void GameEngine::CmdNextSubpass() { vkCmdNextSubpass(renderer->GetGraphicsCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE); }
 void GameEngine::SetSwapchainImageSize(int size) { renderer->SetSwapchain_ImageSize(size); }
-void GameEngine::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapchain_Compute_Image(enable); }
+//void GameEngine::EnableComputeSwapChainImage(bool enable) { renderer->SetSwapchain_Compute_Image(enable); }
 void GameEngine::DeviceWaitIdle() { vkDeviceWaitIdle(renderer->GetLogicalDevice()); }
 
 void GameEngine::PushConstantToCommand(void* pcData, int pipelineId) {

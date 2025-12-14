@@ -89,7 +89,7 @@ public:
     //CLogManager logManager;
 
     VkSwapchainKHR getHandle() const{ return handle;}
-    bool bComputeSwapChainImage = false; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage
+    //bool bComputeSwapChainImage = false; //added VK_IMAGE_USAGE_STORAGE_BIT for image storage
 
     void GetMaxUsableSampleCount();
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);

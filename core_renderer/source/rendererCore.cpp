@@ -105,7 +105,7 @@ void RendererCore::CreateCommandBuffers() {
 void RendererCore::AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose){
     if(bVerbose) std::cout<<"--------currentFrame = " << currentFrame <<"--------"<<std::endl;
     if(bVerbose) std::cout<<"vkAcquireNextImageKHR: imageAvailableSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<<", "<< imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize]<<std::endl;
-    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(CContext::GetHandle().GetLogicalDevice(), swapchainHandle, UINT64_MAX, imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize], VK_NULL_HANDLE, &currentImage);
     
     //VkSemaphore semaphore = availableSemaphores.front();
     //availableSemaphores.pop_front();
@@ -295,7 +295,7 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
 
-    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pImageIndices = &currentImage;
 
     VkResult result = vkQueuePresentKHR(CContext::GetHandle().GetPresentQueue(), &presentInfo);
 
@@ -397,7 +397,7 @@ void RendererCore::BeginRenderPass(VkRenderPass &renderPass, std::vector<VkFrame
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
     if(useSingleFramebuffer) renderPassInfo.framebuffer = swapChainFramebuffers[0];
-    else renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+    else renderPassInfo.framebuffer = swapChainFramebuffers[currentImage];
     renderPassInfo.renderArea.offset = { 0, 0 };
     renderPassInfo.renderArea.extent = extent;//swapchain.swapChainExtent;
 

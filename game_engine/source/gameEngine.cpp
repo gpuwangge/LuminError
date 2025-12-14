@@ -575,13 +575,13 @@ void GameEngine::Record_Present(){
 
             //barrier 隐含的前提是： swapchain image 的旧内容可以被丢弃
 
-            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
+            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentImage()],
                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 0, VK_ACCESS_TRANSFER_WRITE_BIT, //AccessMask
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT); //StageMask
 
             vkCmdCopyImage(renderer->GetComputeCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
-                renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
+                renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
 
             //一句话精准总结（推荐记住这一句）
             //这个 barrier 的作用是：
@@ -605,7 +605,7 @@ void GameEngine::Record_Present(){
             //!VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT is working but is legacy
             //新的标准建议用VK_PIPELINE_STAGE_NONE，但是需要在device里添加sync2和features2支持
 
-            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
+            renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentImage()],
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                 VK_ACCESS_TRANSFER_WRITE_BIT, 0, //AccessMask
                 VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT); //StageMask, 

@@ -244,7 +244,7 @@ namespace LEGameEngine{
 
         void CmdNextSubpass() override;
         void SetSwapchainImageSize(int size) override;
-        void EnableComputeSwapChainImage(bool enable) override;
+        //void EnableComputeSwapChainImage(bool enable) override;
         void DeviceWaitIdle() override;
 
         void PushConstantToCommand(void* pcData, int pipelineId) override;
