@@ -37,11 +37,6 @@ Attachments:
   mainsceneRenderpass_attachment_color_resovle: false
   mainsceneRenderpass_attachment_color_present: false
 
-Subpasses:
-  shadowmapRenderpass_subpasses_shadowmap: false
-  mainsceneRenderpass_subpasses_shadowmap: false
-  mainsceneRenderpass_subpasses_draw: true
-  mainsceneRenderpass_subpasses_observe: false
 
 
 
