@@ -121,7 +121,7 @@ namespace LERenderer{
          * Utility Functions
          * ***********************/
         void RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
-                VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind) override;
+                VkAccessFlags scrAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask) override;
 
         /**************************
          * MISC Functions

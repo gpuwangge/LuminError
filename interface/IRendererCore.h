@@ -72,7 +72,7 @@ namespace LERenderer{
         virtual void StartRecordComputeCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout) = 0;
         virtual void EndRecordComputeCommandBuffer() = 0;
         virtual void RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
-                VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind) = 0;
+                VkAccessFlags scrAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask) = 0;
 
         virtual void StartRecordGraphicsCommandBuffer(VkRenderPass &renderPass, 
             std::vector<VkFramebuffer> &swapChainFramebuffers, VkExtent2D &extent,

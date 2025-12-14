@@ -574,15 +574,15 @@ void RendererCore::EndRecordComputeCommandBuffer(){ EndCommandBuffer(computeCmdI
  * Utility Functions
  * ***********************/
 void RendererCore::RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
-            VkAccessFlags scrAccess, VkAccessFlags dstAccess, VkPipelineStageFlags srcBind, VkPipelineStageFlags dstBind) {
+            VkAccessFlags scrAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask) {
             VkImageMemoryBarrier barrier{};
             barrier.image = image;
             barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             barrier.oldLayout = oldLayout;
             barrier.newLayout = newLayout;
-            barrier.srcAccessMask = scrAccess;
-            barrier.dstAccessMask = dstAccess;
+            barrier.srcAccessMask = scrAccessMask;
+            barrier.dstAccessMask = dstAccessMask;
             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
             VkImageSubresourceRange sub{};
             sub.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -592,7 +592,7 @@ void RendererCore::RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkI
             sub.levelCount = VK_REMAINING_MIP_LEVELS;
             barrier.subresourceRange = sub;
 
-            vkCmdPipelineBarrier(buffer, srcBind, dstBind,
+            vkCmdPipelineBarrier(buffer, srcStageMask, dstStageMask,
                 0, 0, nullptr, 0, nullptr, 1, &barrier);
         }
 

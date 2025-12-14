@@ -542,18 +542,73 @@ void GameEngine::Record_Present(){
             copy.srcSubresource = subresource;
             copy.dstSubresource = subresource;
 
+            //这条代码的唯一目的是： 告诉 Vulkan：接下来我要把 swapchain image 当作 TRANSFER 目标来写（vkCmdCopyImage），请保证它是可写的，并且 layout 正确
+            //oldLayout = VK_IMAGE_LAYOUT_UNDEFINED: acquire 回来的 image 内容本来就是 undefined, 你马上会完整覆盖它
+            //newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: 这张 image 马上要作为 transfer 写入目标
+            
+            //accessMask 决定“等什么操作”, 资源访问类型（what）
+            //srcAccessMask = 0: Vulkan 明确规定, 从 UNDEFINED 转换 layout 时，不需要等待任何之前的访问, 也就是说：不存在“之前的读/写”, 所以也就不存在要同步的 access
+            //dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT: 后续的 transfer 写操作（vkCmdCopyImage）必须在 barrier 之后才能开始
+
+            //stageMask 决定“等到哪一步”, 时间点（when）
+            //srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT: 没有任何之前的 GPU stage 需要等。从时间轴最早点开始即可。这和 srcAccessMask = 0 是成对出现的。TOP_OF_PIPE ≈ “什么都没发生之前”。
+            //dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT: Vulkan 会保证：在 transfer stage 执行 copy 之前, layout transition + 可写性已经完成
+
+            //能不能只设置accessMask，不设置stageMask?不能
+            //所以如果你只给 access：TRANSFER_WRITE
+            //Vulkan 根本不知道：
+            //是 copy？
+            //是 blit？
+            //是 clear？
+            //是 resolve？
+            //是什么时候发生？
+            //必须用 stage 精确定位。
+
+            //精确版一句话总结
+            //这个 barrier 的作用是：在任何传输（TRANSFER）写操作开始之前，
+            //保证该 image 已经完成 layout transition，并且不存在需要等待的旧访问。
+
+            //它的真实 Vulkan 语义是：
+            //把 swapchain image 直接“初始化”为：
+            //接下来将在 TRANSFER 阶段被写入的目标。
+            //不等待任何之前的访问。
+
+            //barrier 隐含的前提是： swapchain image 的旧内容可以被丢弃
+
             renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                VK_ACCESS_MEMORY_READ_BIT, VK_ACCESS_MEMORY_WRITE_BIT,
-                VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_HOST_BIT);
+                0, VK_ACCESS_TRANSFER_WRITE_BIT, //AccessMask
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT); //StageMask
 
             vkCmdCopyImage(renderer->GetComputeCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
                 renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
 
+            //一句话精准总结（推荐记住这一句）
+            //这个 barrier 的作用是：
+            //在 swapchain image 的所有 transfer 写完成之后，
+            //将它转换为可被呈现引擎读取的状态（PRESENT_SRC_KHR）。
+
+            //oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: 这个 image 刚刚作为 transfer 目标被写完
+            //newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR: 现在我要把它切换成可以 present 的 layout
+
+            //srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT: 关心的是：刚才 transfer 阶段对它的写入。
+            //dstAccessMask = 0: 接下来不是 Vulkan pipeline 要访问它，而是交给 presentation engine（WSI），所以不需要指定 Vulkan 的访问类型。
+
+            //srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT: 这些写发生在 transfer 阶段。
+            //dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT: 在所有 Vulkan pipeline 阶段结束之后，再把 image 交给 present
+
+            //合起来的完整语义（规范版）
+            //保证所有 transfer 阶段对 swapchain image 的写入完成，
+            //并在 Vulkan pipeline 结束后，
+            //将 image 安全地移交给 presentation engine 使用。
+
+            //!VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT is working but is legacy
+            //新的标准建议用VK_PIPELINE_STAGE_NONE，但是需要在device里添加sync2和features2支持
+
             renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                VK_ACCESS_MEMORY_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
-                VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+                VK_ACCESS_TRANSFER_WRITE_BIT, 0, //AccessMask
+                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT); //StageMask, 
             
 
             renderer->EndRecordComputeCommandBuffer();
