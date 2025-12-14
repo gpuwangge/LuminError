@@ -24,7 +24,6 @@ Textboxes:
     #resource_text_id_list: [1]
     resource_default_graphics_pipeline_id: 1
 
-
 Resources:
   - Fonts:
     - resource_font_name: AscII
@@ -86,6 +85,7 @@ Uniforms:
     uniform_compute_swapchain_storage: false
   
 Features:
+  feature_rendermode: 0 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
   feature_graphics_48pbt: false
   feature_graphics_push_constant: false
   feature_graphics_global_blend: true

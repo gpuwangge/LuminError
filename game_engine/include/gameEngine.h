@@ -234,7 +234,7 @@ namespace LEGameEngine{
         void LogContext(std::string s, float n) override;
         void LogContext(std::string s, int n1, int n2) override;
 
-        void SetRenderMode(int mode) override;
+        //void SetRenderMode(int mode) override;
         void SetPause(bool value) override;
         int GetWindowWidth() override;
         int GetWindowHeight() override;

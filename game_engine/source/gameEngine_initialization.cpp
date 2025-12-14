@@ -9,7 +9,7 @@ void GameEngine::Initialize(){
     * 1 Process blend and push constant
     ****************************/   
     //renderer.m_renderMode = (RenderModes)appInfo->RenderMode;
-    renderer->SetRenderMode(appInfo->RenderMode);
+    renderer->SetRenderMode(appInfo->Feature.feature_rendermode);
     if(appInfo->Feature.b_feature_graphics_push_constant)
         resourcer->CreateShaderPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelPushConstants));
         //shaderManager.CreatePushConstantRange<ModelPushConstants>(VK_SHADER_STAGE_VERTEX_BIT, 0);

@@ -147,6 +147,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     gamer->Initialize();
 
     yamler->ReadExampleYAMLFile(exampleName);
+    //SetRenderMode(appInfo->Feature.feature_rendermode);
 
     //Ray Tracing Setup 1: prepare material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){

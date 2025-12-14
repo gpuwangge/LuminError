@@ -32,13 +32,7 @@ namespace LuminError{
         };
         StructCustomUniformBuffer customUniformBufferObject{};
 
-        //void PreInitialize() override {
-        //    GameEngine->EnableComputeSwapChainImage(true);
-	    //}
-
         void Initialize() override {
-            GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
-
             GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));

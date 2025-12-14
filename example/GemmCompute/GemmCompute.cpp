@@ -24,7 +24,6 @@ namespace LuminError{
 	    bool bVerify = true;
 
         void Initialize() override{
-            GameEngine->SetRenderMode(RenderModes::COMPUTE);
             GameEngine->SetComputeStorageBufferSize_CustomSwap(sizeof(StructStorageBuffer));
             GameEngine->SetComputeStorageBufferUsage_CustomSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
         }

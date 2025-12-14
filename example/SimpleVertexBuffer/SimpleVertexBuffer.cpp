@@ -13,7 +13,6 @@ namespace LuminError{
             GameEngine->CreateCustomModel2D(vertices);
         }
 
-
         void Record() override{
             GameEngine->DrawObject(0, -1, 3); //objectId=0, use default pipeline, draw 3 veritices
             GameEngine->DrawObjects(1, GameEngine->GetObjectSize()-1);

@@ -111,6 +111,7 @@ Uniforms:
       uniform_graphics_texture_image_sampler_miplevel: 9
   
 Features:
+  feature_rendermode: 0 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
   feature_graphics_48pbt: false
   feature_graphics_push_constant: false
   feature_graphics_global_blend: true

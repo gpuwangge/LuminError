@@ -74,7 +74,7 @@ namespace LEGameEngine{
         virtual int GetWindowHeight() = 0;
 
         //Expose functions for Example(GemmCompute) to use
-        virtual void SetRenderMode(int mode) = 0;
+        //virtual void SetRenderMode(int mode) = 0;
         
         // virtual void SetComputeStorageBufferSize_WindowSwap(int size) = 0;
         // virtual void SetComputeStorageBufferUsage_WindowSwap(int usage) = 0;

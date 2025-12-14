@@ -37,8 +37,6 @@ namespace LuminError{
         //StructStorageBufferOutput storageBufferObjectOutput;	
 
         void Initialize() override {
-            GameEngine->SetRenderMode(RenderModes::COMPUTE_GRAPHICS);
-            
             GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
             //std::cout<<"sizeof(StructCustomUniformBuffer)="<<sizeof(StructCustomUniformBuffer)<<std::endl;
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();

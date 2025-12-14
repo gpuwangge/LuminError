@@ -11,10 +11,6 @@
 #include "TypeUniform.h"
 namespace LuminError{
     class Game : public IGame {
-        void Initialize() override{
-            GameEngine->SetRenderMode(RenderModes::GRAPHICS_SHADOWMAP);
-        }
-
         void PostInitialize() override{
             GameEngine->SetMainCameraSensitivity(20.0f);
 

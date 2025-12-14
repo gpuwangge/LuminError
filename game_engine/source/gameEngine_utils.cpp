@@ -368,7 +368,7 @@ void GameEngine::LogContext(std::string s) { logger->Print(s); }
 void GameEngine::LogContext(std::string s, float n) { logger->Print(s, n); }
 void GameEngine::LogContext(std::string s, int n1, int n2) { logger->Log(s, n1, n2); }
 
-void GameEngine::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)mode; }
+//void GameEngine::SetRenderMode(int mode) { appInfo->RenderMode = (RenderModes)mode; }
 void GameEngine::SetPause(bool value) { NeedToPause = value; }
 int GameEngine::GetWindowWidth() { return windowWidth; }
 int GameEngine::GetWindowHeight() { return windowHeight; }

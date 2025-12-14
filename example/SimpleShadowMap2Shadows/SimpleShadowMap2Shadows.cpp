@@ -11,10 +11,6 @@
 #include "TypeUniform.h"
 namespace LuminError{
     class Game : public IGame {
-        void Initialize() override{
-            GameEngine->SetRenderMode(RenderModes::GRAPHICS_SHADOWMAP);
-        }
-
         void Update() override{
             double et = GameEngine->GetElapseTime();
             for(int i = 0; i < GameEngine->GetLightSize(); i++) {

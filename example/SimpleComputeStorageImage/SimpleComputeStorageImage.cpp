@@ -10,14 +10,6 @@
 #include "Config.h"
 namespace LuminError{
     class Game : public IGame {
-        //void PreInitialize() override {
-            //GameEngine->EnableComputeSwapChainImage(true);
-	    //}
-
-        void Initialize() override {
-            GameEngine->SetRenderMode(RenderModes::COMPUTE_SWAPCHAIN);
-        }
-
         void RecordComputeCommandBuffer() override{
             //Option 2: record command buffer every frame
             GameEngine->ComputeDispatch(200, 300, 1);

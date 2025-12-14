@@ -18,6 +18,7 @@ T getOrDefault(const YAML::Node& node, const std::string& key, const T& defaultV
  * APP INFO
  *******/
 struct FeatureConfig {
+    int feature_rendermode = 0;
     bool b_feature_graphics_48pbt = false;
     bool b_feature_graphics_push_constant = false;
     bool b_feature_graphics_global_blend = false;
@@ -30,11 +31,12 @@ struct FeatureConfig {
     bool feature_graphics_enable_controls = false; //this is not read from yaml
 
     void loadFromYaml(const YAML::Node& node) {
+        feature_rendermode                          = getOrDefault(node, "feature_rendermode", 0);
         b_feature_graphics_48pbt                    = getOrDefault(node, "feature_graphics_48pbt", false);
         b_feature_graphics_push_constant            = getOrDefault(node, "feature_graphics_push_constant", false);
-        b_feature_graphics_global_blend                    = getOrDefault(node, "feature_graphics_global_blend", false);
+        b_feature_graphics_global_blend             = getOrDefault(node, "feature_graphics_global_blend", false);
         b_feature_graphics_rainbow_mipmap           = getOrDefault(node, "feature_graphics_rainbow_mipmap", false);
-        //feature_graphics_pipeline_skybox_id         = getOrDefault(node, "feature_graphics_pipeline_skybox_id", -1);
+        //feature_graphics_pipeline_skybox_id       = getOrDefault(node, "feature_graphics_pipeline_skybox_id", -1);
         feature_graphics_observe_attachment_id      = getOrDefault(node, "feature_graphics_observe_attachment_id", -1);
         feature_graphics_show_performance_control   = getOrDefault(node, "feature_graphics_show_performance_control", false);
         feature_graphics_show_all_metric_controls   = getOrDefault(node, "feature_graphics_show_all_metric_controls", false);
@@ -402,5 +404,5 @@ struct AppInfo{
     SubpassConfig Subpass;
 
     //RenderModes RenderMode = RenderModes::GRAPHICS;
-    int RenderMode = 0;
+    //int RenderMode = 0;
 };
