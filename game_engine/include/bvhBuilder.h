@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cassert>
 #include "TypeUniform.h"
+#include "ILogCore.h"
 
 // =========================
 // Geometry Types
@@ -95,7 +96,7 @@ public:
         : triangles(tris), nodes(nodes), max_leaf_size(leaf_size)
     {}
 
-    bool Build(bool bVerbose = false);
+    bool Build(LELog::ILogCore *logger = NULL);
 
 private:
     std::vector<Triangle>& triangles;
@@ -104,13 +105,13 @@ private:
     int max_leaf_size;
 
     AABB ComputeTriangleAABB(const Triangle& tri);
-    int BuildRecursive(int start, int count, int depth, bool bVerbose = false);
+    int BuildRecursive(int start, int count, int depth, LELog::ILogCore *logger = NULL);
 };
 
 // =========================
 // BVH Validation
 // =========================
-void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, bool bVerbose = false);
+void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, LELog::ILogCore *logger = NULL);
 
 
 // =========================

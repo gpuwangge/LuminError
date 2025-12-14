@@ -1,5 +1,7 @@
 #include "bvhBuilder.h"
 
+#define LOGSPACE 4
+
 AABB BVHBuilder::ComputeTriangleAABB(const Triangle& tri) {
     AABB box;
     box.Expand(tri.v0);
@@ -18,22 +20,32 @@ AABB BVHBuilder::ComputeTriangleAABB(const Triangle& tri) {
     return box;
 }
 
-bool BVHBuilder::Build(bool bVerbose) {
+bool BVHBuilder::Build(LELog::ILogCore *logger) {
 	try {
-		std::cout << "== BVH Build Start ==\n";
+		//std::cout << "== BVH Build Start ==\n";
+		if(logger) logger->Log("======BVH Build Start=====");
 
 		primitives.clear();
 		primitives.reserve(triangles.size());
 
-		std::cout << "Generating primitive info...\n";
+		//std::cout << "Generating primitive info...\n";
+		if(logger) logger->Log("Generating primitive info...");
+
 		for (int i = 0; i < triangles.size(); i++) {
 			AABB b = ComputeTriangleAABB(triangles[i]);
 			glm::vec3 c = (triangles[i].v0 + triangles[i].v1 + triangles[i].v2) * (1.f / 3.f);
 
-			if(bVerbose) std::cout << "Tri " << i
-						<< " AABB min(" << b.min.x << "," << b.min.y << "," << b.min.z << ")"
-						<< " max(" << b.max.x << "," << b.max.y << "," << b.max.z << ")"
-						<< " centroid(" << c.x << "," << c.y << "," << c.z << ")\n";
+			if(logger){
+				logger->Log("Tri {} AABB min=[{}, {}, {}] max=[{}, {}, {}] centroid=[{}, {}, {}]",
+					i, 
+					b.min.x, b.min.y, b.min.z,
+					b.max.x, b.max.y, b.max.z,
+					c.x, c.y, c.z);
+			} 
+			// std::cout << "Tri " << i
+			// 			<< " AABB min(" << b.min.x << "," << b.min.y << "," << b.min.z << ")"
+			// 			<< " max(" << b.max.x << "," << b.max.y << "," << b.max.z << ")"
+			// 			<< " centroid(" << c.x << "," << c.y << "," << c.z << ")\n";
 
 			primitives.emplace_back(i, b, c);
 		}
@@ -41,9 +53,13 @@ bool BVHBuilder::Build(bool bVerbose) {
 		nodes.clear();
 		nodes.reserve(triangles.size() * 2);
 
-		int root_index = BuildRecursive(0, (int)primitives.size(), 0, bVerbose);
-		std::cout << "BVH Build Finished. Root node = " << root_index
-					<< "\nTotal Nodes: " << nodes.size() << "\n";
+		int root_index = BuildRecursive(0, (int)primitives.size(), 0, logger);
+		if(logger){
+			logger->Log("=====BVH Build Finished=====\nRoot node = {}\nTotal Nodes: {}\n", 
+            	root_index, nodes.size());
+		}
+		// std::cout << "BVH Build Finished. Root node = " << root_index
+		// 			<< "\nTotal Nodes: " << nodes.size() << "\n";
 
 		return true;
 	}
@@ -58,12 +74,17 @@ bool BVHBuilder::Build(bool bVerbose) {
 }
 
 
-int BVHBuilder::BuildRecursive(int start, int count, int depth, bool bVerbose) {
+int BVHBuilder::BuildRecursive(int start, int count, int depth, LELog::ILogCore *logger) {
 	if (count <= 0) return -1;
 
-	if(bVerbose) std::cout << std::string(depth * 2, ' ')
-				<< "[Depth " << depth << "] BuildRecursive start=" << start
-				<< " count=" << count << "\n";
+	if(logger) {
+		std::string space = "";
+		for(int i = 0; i < depth*LOGSPACE; i++) space+=" ";
+		logger->Log(space+"[Depth {}] BuildRecursive start={} count={}", depth, start, count);
+	}
+	// std::cout << std::string(depth * 2, ' ')
+	// 			<< "[Depth " << depth << "] BuildRecursive start=" << start
+	// 			<< " count=" << count << "\n";
 
 	// compute node bbox
 	AABB box;
@@ -88,9 +109,14 @@ int BVHBuilder::BuildRecursive(int start, int count, int depth, bool bVerbose) {
 		leaf.tri_start = start;
 		leaf.tri_count = count;
 
-		if(bVerbose) std::cout << std::string(depth * 2, ' ')
-					<< "Leaf created: tri_start=" << start
-					<< " tri_count=" << count << "\n";
+		if(logger){
+			std::string space = "";
+			for(int i = 0; i < depth*LOGSPACE; i++) space+=" ";
+			logger->Log(space+"Leaf created: tri_start={} tri_count={}", start, count);
+		}
+		// std::cout << std::string(depth * 2, ' ')
+		// 			<< "Leaf created: tri_start=" << start
+		// 			<< " tri_count=" << count << "\n";
 		return parent_node_index;
 	}
 
@@ -99,8 +125,13 @@ int BVHBuilder::BuildRecursive(int start, int count, int depth, bool bVerbose) {
 	int axis = (extent.x >= extent.y && extent.x >= extent.z) ? 0 :
 				(extent.y >= extent.z) ? 1 : 2;
 
-	if(bVerbose) std::cout << std::string(depth * 2, ' ')
-				<< "Split axis = " << axis << " (extent=" << extent.x << "," << extent.y << "," << extent.z << ")\n";
+	if(logger){
+		std::string space = "";
+		for(int i = 0; i < depth*LOGSPACE; i++) space+=" ";
+		logger->Log(space+"Split axis = {} (extent=[{}, {}, {}])", axis, extent.x, extent.y, extent.z);
+	} 
+	// std::cout << std::string(depth * 2, ' ')
+	// 			<< "Split axis = " << axis << " (extent=" << extent.x << "," << extent.y << "," << extent.z << ")\n";
 
 	auto begin = primitives.begin() + start;
 	auto end = begin + count;
@@ -109,16 +140,30 @@ int BVHBuilder::BuildRecursive(int start, int count, int depth, bool bVerbose) {
 		return a.centroid[axis] < b.centroid[axis];
 	});
 
-	if(bVerbose) std::cout << std::string(depth * 2, ' ')
-				<< "Centroids after sorting:";
-	for (int i = start; i < start + count; i++)
-		if(bVerbose) std::cout << " " << primitives[i].centroid[axis];
-	if(bVerbose) std::cout << "\n";
+	
+	if(logger){
+		std::string space = "";
+		for(int i = 0; i < depth*LOGSPACE; i++) space+=" ";
+		logger->Log(space+"Centroids after sorting:");
+	// std::cout << std::string(depth * 2, ' ')
+	// 			<< "Centroids after sorting:";
+
+		std::string s = "";
+		for (int i = start; i < start + count; i++) {
+			s += std::to_string(primitives[i].centroid[axis]);
+			s += " ";
+			//logger->Log(" {}", primitives[i].centroid[axis]);
+		}
+		logger->Log(space + s);
+	}
+	// for (int i = start; i < start + count; i++)
+	// 	if(bVerbose) std::cout << " " << primitives[i].centroid[axis];
+	// if(bVerbose) std::cout << "\n";
 
 	int mid = start + count / 2;
 
-	int left_child_node_index = BuildRecursive(start, mid - start, depth + 1, bVerbose);
-	int right_child_node_index = BuildRecursive(mid, start + count - mid, depth + 1, bVerbose);
+	int left_child_node_index = BuildRecursive(start, mid - start, depth + 1, logger);
+	int right_child_node_index = BuildRecursive(mid, start + count - mid, depth + 1, logger);
 
 	// compute final bbox from children
 	AABB fbox;
@@ -133,17 +178,24 @@ int BVHBuilder::BuildRecursive(int start, int count, int depth, bool bVerbose) {
 	node.left = left_child_node_index;
 	node.right = right_child_node_index;
 
-	if(bVerbose) std::cout << std::string(depth * 2, ' ')
-				<< "Internal node created: left=" << left_child_node_index << " right=" << right_child_node_index << "\n";
+	if(logger){
+		std::string space = "";
+		for(int i = 0; i < depth*LOGSPACE; i++) space+=" ";
+		logger->Log(space+"Internal node created: left={} right={}", left_child_node_index, right_child_node_index);
+	} 
+	//std::cout << std::string(depth * 2, ' ')
+	//			<< "Internal node created: left=" << left_child_node_index << " right=" << right_child_node_index << "\n";
 	return parent_node_index;
 }
 
 
-void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, bool bVerbose) {
-    std::cout << "\n== BVH Validation ==\n";
+void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, LELog::ILogCore *logger) {
+    //std::cout << "\n== BVH Validation ==\n";
+	if(logger) logger->Log("=====BVH Validation=====");
 
     if (nodes.empty()) {
-        std::cout << "ERROR: empty BVH\n";
+        //std::cout << "ERROR: empty BVH\n";
+		if(logger) logger->Log("empty BVH\n");
         return;
     }
 
@@ -153,14 +205,22 @@ void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, bool bVerbose
     for (int i = 0; i < nodes.size(); i++) {
         const BVHNode& n = nodes[i];
 
-        if(bVerbose) std::cout << "Node " << i << ": bbox("
-                  << n.bbox_min.x << "," << n.bbox_min.y << "," << n.bbox_min.z << ") - ("
-                  << n.bbox_max.x << "," << n.bbox_max.y << "," << n.bbox_max.z << ")";
+        if(logger){
+			logger->Log("Node {}: bbox=({}, {}, {}) - ({}, {}, {})",
+				i,
+				n.bbox_min.x, n.bbox_min.y, n.bbox_min.z,
+				n.bbox_max.x, n.bbox_max.y, n.bbox_max.z);
+		} 
+		// std::cout << "Node " << i << ": bbox("
+        //           << n.bbox_min.x << "," << n.bbox_min.y << "," << n.bbox_min.z << ") - ("
+        //           << n.bbox_max.x << "," << n.bbox_max.y << "," << n.bbox_max.z << ")";
 
         if (n.tri_count > 0)
-            if(bVerbose) std::cout << "  [Leaf: start=" << n.tri_start << " count=" << n.tri_count << "]";
+            if(logger) logger->Log("  [Leaf: start={} count={}]", n.tri_start, n.tri_count);
+			//std::cout << "  [Leaf: start=" << n.tri_start << " count=" << n.tri_count << "]";
 
-        if(bVerbose) std::cout << "\n";
+        //if(logger) logger->Log("\n");
+		//std::cout << "\n";
 
         if (n.tri_count > 0) {
             sum_leaf_tris += n.tri_count;
@@ -173,13 +233,16 @@ void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, bool bVerbose
     bool ok = true;
     for (int i = 0; i < tri_count; i++) {
         if (!covered[i]) {
-            std::cout << "Missing tri " << i << "\n";
+            //std::cout << "Missing tri " << i << "\n";
+			if(logger) logger->Log("Missing tri {}\n", i);
             ok = false;
         }
     }
 
-    if (ok) std::cout << "All triangles covered.\n";
-    std::cout << "Sum of triangles in leaves = " << sum_leaf_tris << "\n";
+    if (ok) if(logger) logger->Log("All triangles covered.");
+	//std::cout << "All triangles covered.\n";
+    if(logger) logger->Log("Sum of triangles in leaves = {}", sum_leaf_tris);
+	//std::cout << "Sum of triangles in leaves = " << sum_leaf_tris << "\n";
 
     // bbox hierarchy check
     for (int i = 0; i < nodes.size(); i++) {
@@ -191,7 +254,8 @@ void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, bool bVerbose
                     for (int ax = 0; ax < 3; ax++) {
                         if (ch.bbox_min[ax] < n.bbox_min[ax] - 1e-4f ||
                             ch.bbox_max[ax] > n.bbox_max[ax] + 1e-4f) {
-                            std::cout << "BBox error at node " << i << " child " << c << "\n";
+							if(logger) logger->Log("BBox error at node {} child {}\n", i, c);
+                            //std::cout << "BBox error at node " << i << " child " << c << "\n";
                             ok = false;
                         }
                     }
@@ -200,8 +264,10 @@ void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, bool bVerbose
         }
     }
 
-    if (ok) std::cout << "Hierarchy bbox OK.\n";
-    std::cout << "== End BVH Validation ==\n";
+    if (ok) if(logger) logger->Log("Hierarchy bbox OK.");
+	//std::cout << "Hierarchy bbox OK.\n";
+    if(logger) logger->Log("=====BVH Validation Finished=====\n");
+	//std::cout << "== End BVH Validation ==\n";
 }
 
 // =========================
@@ -261,15 +327,15 @@ void CreateTestCase2(std::vector<Triangle>& tris, bool bVerbose) {
 	}
 }
 
-int main() {
-    std::vector<Triangle> tris;
-	CreateTestCase2(tris, false);
+// int main() {
+//     std::vector<Triangle> tris;
+// 	CreateTestCase2(tris, false);
 
-    std::vector<BVHNode> nodes;
-    BVHBuilder builder(tris, nodes, 1);
+//     std::vector<BVHNode> nodes;
+//     BVHBuilder builder(tris, nodes, 1);
 
-    builder.Build(false);
-    ValidateBVH(nodes, tris.size(), false);
+//     builder.Build(false);
+//     ValidateBVH(nodes, tris.size(), false);
 
-    return 0;
-}
+//     return 0;
+// }

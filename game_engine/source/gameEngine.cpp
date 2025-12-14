@@ -224,17 +224,25 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
                 //std::cout<<"Filling index "<<indexCount<<": "<<storageBufferObject_TriangleIndex.indices[indexCount]<<std::endl;
                 indexCount++;
             }
-            std::cout<<vertexCount<<" vertices and "<<indexCount<<" indices filled so far."<<std::endl;
+            logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
+            //std::cout<<vertexCount<<" vertices and "<<indexCount<<" indices filled so far."<<std::endl;
         }
     }
 
-    //Ray Tracing Setup 4.5: create BVH for triangle data
+    //Ray Tracing Setup 5: create BVH for triangle data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index && appInfo->Uniform.b_storage_compute_bvhnode){
-        std::cout<<"Create BVH for triangle data: "<<std::endl;
-        std::cout<<"Number of vertices: "<<modelVertices3D.size()* objects.size()<<std::endl;
-        std::cout<<"Each object has "<<modelVertices3D.size()<<" vertices."<<std::endl;
-        std::cout<<"Each object has "<<modelIndices3D.size()/3<<" triangles."<<std::endl;
-        std::cout<<"Number of triangles: "<<modelIndices3D.size()/3 * objects.size()<<std::endl;
+        logger->Log("BVH: creation for triangle: total vertices=modelVertexSize*objectSize={}, modelVertexSize={}, modelIndexSize={}, modelTriangleSize=modelIndexSize/3={}, total triangles=modelTriangleSize*objectSize={}", 
+            modelVertices3D.size()* objects.size(),
+            modelVertices3D.size(),
+            modelIndices3D.size(),
+            modelIndices3D.size()/3,
+            modelIndices3D.size()/3 * objects.size());
+
+        // std::cout<<"Create BVH for triangle data: "<<std::endl;
+        // std::cout<<"Number of vertices: "<<modelVertices3D.size()* objects.size()<<std::endl;
+        // std::cout<<"Each object has "<<modelVertices3D.size()<<" vertices."<<std::endl;
+        // std::cout<<"Each object has "<<modelIndices3D.size()/3<<" triangles."<<std::endl;
+        // std::cout<<"Number of triangles: "<<modelIndices3D.size()/3 * objects.size()<<std::endl;
 
         std::vector<Triangle> tris;
         //CreateTestCase2(tris, false);
@@ -244,13 +252,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             glm::vec3 v2 = modelVertices3D[modelIndices3D[i+2]].pos;
             tris.emplace_back(v0, v1, v2);
         }
-        std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
+        logger->Log("BVH: tris created {}  triangles from model data.\n", tris.size());
+        //std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
 
         std::vector<BVHNode> nodes;
         BVHBuilder builder(tris, nodes, 3);
 
-        builder.Build(true);
-        ValidateBVH(nodes, tris.size(), true);
+        builder.Build(logger);
+        ValidateBVH(nodes, tris.size(), logger);
 
         for (int i = 0; i < nodes.size(); i++){
             //nodes[i].left = 1;//test
@@ -258,7 +267,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         }
     }
     
-    //Ray Tracing Setup 5: upload triangle vertex and index and bvh storage buffer data
+    //Ray Tracing Setup 6: upload triangle vertex and index and bvh storage buffer data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex){
         //Vertex Data for a quad(two triangles)
         //Vulkan use right-hand coordinate system, glm use right-hand too
