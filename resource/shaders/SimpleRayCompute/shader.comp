@@ -298,8 +298,8 @@ bool RayAABBHit(
 }
 void RayTraceWithBVH(Ray ray, inout HitInfo best)
 {
-    int stack[128];
-    float tstack[128];
+    int stack[256];
+    float tstack[256];
     int sp = 0;
 
     stack[sp] = 0;
@@ -375,14 +375,14 @@ HitInfo RayHitCheck(Ray ray){
     hitInfo_closest.didHit = false;
     hitInfo_closest.dst = -1.0;
 
-    for(int i = 0; i < NUM_SPHERES; i++){
-        HitInfo hitInfo_current = RaySphereHitCheck(ray, i);
-        if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
-            if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
-        }else if(hitInfo_current.didHit){ //current hit and no previous hit
-            hitInfo_closest = hitInfo_current;
-        }
-    }
+    // for(int i = 0; i < NUM_SPHERES; i++){
+    //     HitInfo hitInfo_current = RaySphereHitCheck(ray, i);
+    //     if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
+    //         if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
+    //     }else if(hitInfo_current.didHit){ //current hit and no previous hit
+    //         hitInfo_closest = hitInfo_current;
+    //     }
+    // }
 
 
     // for(int i = 0; i < NUM_TRIANGLES; i++){
@@ -394,8 +394,9 @@ HitInfo RayHitCheck(Ray ray){
     //     }
     // }
 
-    // for(int i = 0; i < 228; i++){ //low_poly_tree
-    // for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
+    //for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
+
+    // for(int i = 0; i < 2; i++){ //low_poly_tree, this code can draw the tree ok (228, 68, 20, 4, 2)
     //     Triangle tri;
     //     tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
     //     tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
@@ -412,7 +413,8 @@ HitInfo RayHitCheck(Ray ray){
     //         hitInfo_closest = hitInfo_current;
     //     }
     // }
-    RayTraceWithBVH(ray, hitInfo_closest);
+
+    RayTraceWithBVH(ray, hitInfo_closest); //draw cube ok, but draw tree incorrectly
 
     return hitInfo_closest;
 }

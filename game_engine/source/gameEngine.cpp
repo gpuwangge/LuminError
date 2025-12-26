@@ -252,7 +252,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             glm::vec3 v2 = modelVertices3D[modelIndices3D[i+2]].pos;
             tris.emplace_back(v0, v1, v2);
         }
-        logger->Log("BVH: tris created {}  triangles from model data.\n", tris.size());
+        logger->Log("BVH: tris created {} triangles from model data.\n", tris.size());
         //std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
 
         std::vector<BVHNode> nodes;
