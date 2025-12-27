@@ -25,11 +25,15 @@ Before building this project on Windows 10/11, please ensure the following tools
 1. CMake  
 Used for generating the build system.  
 Recommended version: CMake ≥ 3.x  
-Download: https://cmake.org/download/  
+Download: https://cmake.org/download/
+Instruction(Chinese): https://github.com/gpuwangge/Wiki/blob/main/documents/CMake.md  
 
-2. Git  
-Required for cloning the repository and version control on Windows.  
-Download: https://git-scm.com/download/win  
+2. MinGW-w64 (Windows Toolchain)
+Required for compiling the project on Windows using the MinGW toolchain.  
+Make sure the following tools are available in your system PATH:  
+gcc, g++, gdb, make  
+Download: https://www.mingw-w64.org/  
+Instruction(Chinese): https://github.com/gpuwangge/Wiki/blob/main/documents/VSCode.md  
 
 3. Visual Studio Code (VS Code)  
 Recommended code editor.  
@@ -38,11 +42,9 @@ Suggested extensions:
 CMake Tools  
 C/C++  
 
-4. MinGW-w64 (Windows Toolchain)
-Required for compiling the project on Windows using the MinGW toolchain.  
-Make sure the following tools are available in your system PATH:  
-gcc, g++, gdb, make  
-Download: https://www.mingw-w64.org/  
+4. Git  
+Required for cloning the repository and version control on Windows.  
+Download: https://git-scm.com/download/win  
 
 Once all prerequisites are installed, you can proceed to configuring and building the project using CMake.  
 
