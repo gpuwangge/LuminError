@@ -96,20 +96,20 @@ std::string LogCore::CreateDateFolder(const std::string& basePath) {
     std::string fullPath = basePath.empty() ? "/" + folderName : basePath + folderName;
 
     // 尝试创建文件夹
-    #ifdef _WIN32
-        if (_mkdir(fullPath.c_str()) == 0) {
-    #else
-        if (mkdir(fullPath.c_str(), 0755) == 0) {
-    #endif
-            //std::cout << "Folder created successfully: " << fullPath << std::endl;
+#ifdef _WIN32
+    if (_mkdir(fullPath.c_str()) == 0) {
+#else
+    if (mkdir(fullPath.c_str(), 0755) == 0) {
+#endif
+        //std::cout << "Folder created successfully: " << fullPath << std::endl;
+    } else {
+        // 检查错误类型
+        if (errno == EEXIST) {
+            //std::cout << "Folder already exists: " << fullPath << std::endl;
         } else {
-            // 检查错误类型
-            if (errno == EEXIST) {
-                //std::cout << "Folder already exists: " << fullPath << std::endl;
-            } else {
-                std::cout << "Folder creation failed (error code: " << errno << "): " << fullPath << std::endl;
-            }
+            std::cout << "Folder creation failed (error code: " << errno << "): " << fullPath << std::endl;
         }
+    }
 
     return fullPath;
 

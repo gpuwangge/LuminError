@@ -1,8 +1,8 @@
 build/
 bin/
-logs/
 .cxx/
 .gradle/
 .idea/
+*.log
 *.pdb
 local.properties
