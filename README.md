@@ -94,6 +94,7 @@ All components are bundled inside the repository under external/, and the CMake 
 4. 	选择 应用和浏览器控制  
 5. 	点击 Smart App Control 设置  
 6. 	将其设置为 关闭（Off）  
+
 重要提示：关闭后无法直接重新开启  
 Smart App Control 的设计要求它只能在“干净系统”中启用。  
 因此：  
@@ -121,6 +122,7 @@ If you prefer not to experience this delay, you can disable SAC:
 4. 	Select App & browser control  
 5. 	Click Smart App Control settings  
 6. 	Set it to Off  
+
 Important Note: You cannot re‑enable SAC without reinstalling Windows  
 Smart App Control can only be enabled on a “clean” Windows installation.  
 Therefore:  
