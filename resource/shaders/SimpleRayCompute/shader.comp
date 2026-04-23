@@ -375,16 +375,17 @@ HitInfo RayHitCheck(Ray ray){
     hitInfo_closest.didHit = false;
     hitInfo_closest.dst = -1.0;
 
-    // for(int i = 0; i < NUM_SPHERES; i++){
-    //     HitInfo hitInfo_current = RaySphereHitCheck(ray, i);
-    //     if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
-    //         if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
-    //     }else if(hitInfo_current.didHit){ //current hit and no previous hit
-    //         hitInfo_closest = hitInfo_current;
-    //     }
-    // }
+    //these code can draw the sphere okay, no bvh involved
+    for(int i = 0; i < NUM_SPHERES; i++){
+        HitInfo hitInfo_current = RaySphereHitCheck(ray, i);
+        if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
+            if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
+        }else if(hitInfo_current.didHit){ //current hit and no previous hit
+            hitInfo_closest = hitInfo_current;
+        }
+    }
 
-
+    //these code has no use？
     // for(int i = 0; i < NUM_TRIANGLES; i++){
     //     HitInfo hitInfo_current = RayTriangleHitCheck(ray, triangles[i]);
     //     if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
@@ -394,27 +395,40 @@ HitInfo RayHitCheck(Ray ray){
     //     }
     // }
 
+    //this line of code is used if you want to draw a cube object, otherwise no use
     //for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
 
-    // for(int i = 0; i < 2; i++){ //low_poly_tree, this code can draw the tree ok (228, 68, 20, 4, 2)
-    //     Triangle tri;
-    //     tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
-    //     tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
-    //     tri.c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].position;
-    //     //tri.normal_a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].normal;
-    //     //tri.normal_b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].normal;
-    //     //tri.normal_c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].normal;
-    //     tri.material_id = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].material_id;
+    //////////////////////////////////////////////////
+    //This is BVH test code area
 
-    //     HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
-    //     if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
-    //         if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
-    //     }else if(hitInfo_current.didHit){ //current hit and no previous hit
-    //         hitInfo_closest = hitInfo_current;
-    //     }
-    // }
+    //Method 1: traditional non-BVH, this code works okay
+    
+    /*
+    int totalNumTriangles = 4; //(228, 68, 20, 4, 2) //use 228 to draw full tree of low_poly_tree， 68 to draw low_poly_tree2，20 for low_poly_tree3, 4 for low_poly_tree4, 2 for low_poly_tree5
+    for(int i = 0; i < totalNumTriangles; i++){
+        Triangle tri;
+        tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
+        tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
+        tri.c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].position;
+        //tri.normal_a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].normal;
+        //tri.normal_b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].normal;
+        //tri.normal_c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].normal;
+        tri.material_id = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].material_id;
 
+        HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
+        if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
+            if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
+        }else if(hitInfo_current.didHit){ //current hit and no previous hit
+            hitInfo_closest = hitInfo_current;
+        }
+    }
+    */
+
+    //Method 2: BVH
+    //Draw low_poly_tree5(2 triangles) no problem， the triangle is located in the correct place
+    //Draw low_poly_tree4(4 triangles) the location is wrong(need move views left/right to see them), need debug this
     RayTraceWithBVH(ray, hitInfo_closest); //draw cube ok, but draw tree incorrectly
+    //////////////////////////////////////////////////////
 
     return hitInfo_closest;
 }
