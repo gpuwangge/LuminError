@@ -68,6 +68,10 @@ layout(set = 0, binding = 5, std430) readonly buffer SBOTriangleIndex {
    uint indices[];
 } sboTriangleIndex;
 
+layout(set = 0, binding = 6, std430) readonly buffer SBOTriangleReorderIndex {
+   uint indices[];
+} sboTriangleReorderIndex;
+
 struct BVHNode {
     vec3 bbox_min; //16 bytes
     //float _padding0;
@@ -81,7 +85,7 @@ struct BVHNode {
     //total size: 16+16+4*4+16=64 bytes
 };
 
-layout(set = 0, binding = 6, std430) readonly buffer SBOBVHNode {
+layout(set = 0, binding = 7, std430) readonly buffer SBOBVHNode {
    BVHNode nodes[];
 } sboBVHNode;
 
@@ -95,11 +99,11 @@ struct Sphere{
 const int NUM_SPHERES = 5;
 //Sphere spheres[NUM_SPHERES];
 
-layout(set = 0, binding = 7, std430) readonly buffer SBOSphere {
+layout(set = 0, binding = 8, std430) readonly buffer SBOSphere {
    Sphere spheres[];
 } sboSphere;
 
-layout(set = 0, binding = 8) uniform CustomBufferObject {
+layout(set = 0, binding = 9) uniform CustomBufferObject {
     int frameCount;
     bool cameraInMotion;
     uint triangleCount;
@@ -114,7 +118,7 @@ layout(set = 0, binding = 8) uniform CustomBufferObject {
 
 
 
-layout(set = 0, binding = 9, rgba8) uniform writeonly image2D resultImage;
+layout(set = 0, binding = 10, rgba8) uniform writeonly image2D resultImage;
 
 /***************************
 * Constants
@@ -261,28 +265,26 @@ HitInfo RayTriangleHitCheck(Ray ray, Triangle tri){
     return hitInfo;
 }
 
-bool RayAABBHit(
-    Ray ray,
-    vec3 bmin,
-    vec3 bmax,
-    out float tmin_out
-){
-    float tmin = 0.0;
-    float tmax = 1e30;
+//to check if ray hit bbox (AABB Slab Algorithm)
+//ray formula: p(t) = o + t * d
+//t = (p(t) - o)/d
+bool RayAABBHit(Ray ray, vec3 bmin, vec3 bmax, float tMaxLimit, out float tmin_out){
+    float tmin = -1e30; //allow negative t
+    float tmax = tMaxLimit;
 
-    for (int i=0;i<3;i++){
+    for (int i = 0; i < 3; i++){
         float o = ray.origin[i];
         float d = ray.dir[i];
 
-        if (abs(d) < 1e-6){
+        if (abs(d) < 1e-8){
             if (o < bmin[i] || o > bmax[i])
                 return false;
             continue;
         }
 
-        float iD = 1.0/d;
-        float t0 = (bmin[i]-o)*iD;
-        float t1 = (bmax[i]-o)*iD;
+        float invD = 1.0/d;
+        float t0 = (bmin[i]-o)*invD;
+        float t1 = (bmax[i]-o)*invD;
         if (t0 > t1){
             float tmp = t0; t0 = t1; t1 = tmp;
         }
@@ -290,39 +292,39 @@ bool RayAABBHit(
         tmin = max(tmin, t0);
         tmax = min(tmax, t1);
 
-        if (tmax < tmin) return false;
+        if (tmin > tmax) return false;
+        //if (tmin > tMaxLimit) return false;
     }
 
-    tmin_out = tmin;
+    //if (tmax < 0.0) return false; // box 在 ray 后面
+    float tnear = max(tmin, 0.0);
+    if(tmax < tnear) return false;
+
+    tmin_out = tnear;
     return true;
 }
-void RayTraceWithBVH(Ray ray, inout HitInfo best)
-{
+void RayTraceWithBVH(Ray ray, inout HitInfo hitInfo_closest){
     int stack[256];
-    float tstack[256];
-    int sp = 0;
+    int stack_count = 0;
 
-    stack[sp] = 0;
-    tstack[sp] = 0;
-    sp++;
+    stack[stack_count] = 0; //put root node into the stack
+    stack_count = 1;
 
-    while (sp > 0)
+    while (stack_count > 0)
     {
-        sp--;
-        int idx = stack[sp];
-        BVHNode node = sboBVHNode.nodes[idx];
+        stack_count--;
+        int node_idx = stack[stack_count];
+        BVHNode node = sboBVHNode.nodes[node_idx];
+        int start = node.tri_start;
+        int count = node.tri_count;
 
-        if (node.tri_count > 0)
-        {
-            // leaf
-            for (int i=0; i<node.tri_count; i++)
-            {
-                int ti = node.tri_start + i;
+        if (count > 0){ //leaf
+            for(int i = start; i < start+count; i++){
+                uint triangleReorderIndex = sboTriangleReorderIndex.indices[i];
 
-                // 从 tri_index 取得一个三角形
-                uint idx0 = sboTriangleIndex.indices[ (ti * 3) + 0 ];
-                uint idx1 = sboTriangleIndex.indices[ (ti * 3) + 1 ];
-                uint idx2 = sboTriangleIndex.indices[ (ti * 3) + 2 ];
+                uint idx0 = sboTriangleIndex.indices[ (triangleReorderIndex * 3) + 0 ];
+                uint idx1 = sboTriangleIndex.indices[ (triangleReorderIndex * 3) + 1 ];
+                uint idx2 = sboTriangleIndex.indices[ (triangleReorderIndex * 3) + 2 ];
 
                 Triangle tri;
                 tri.a = sboTriangleVertex.vertices[idx0].position;
@@ -330,52 +332,45 @@ void RayTraceWithBVH(Ray ray, inout HitInfo best)
                 tri.c = sboTriangleVertex.vertices[idx2].position;
                 tri.material_id = sboTriangleVertex.vertices[idx0].material_id;
 
-                HitInfo h = RayTriangleHitCheck(ray, tri);
-                if (h.didHit && (!best.didHit || h.dst < best.dst))
-                    best = h;
+                HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
+                if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
+                    if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
+                }else if(hitInfo_current.didHit){ //current hit and no previous hit
+                    hitInfo_closest = hitInfo_current;
+                }
             }
-            continue;
-        }
+        }else{ //non-leaf
+            float tL, tR;
+            bool hitL = false, hitR = false;
 
-        float tL, tR;
-        bool hitL = false, hitR = false;
+            //float tLimit = hitInfo_closest.didHit ? hitInfo_closest.dst : 1e30;
+            float tLimit = hitInfo_closest.didHit ? (hitInfo_closest.dst + 1e-4) : 1e30;
 
-        if (node.left >= 0)
-            hitL = RayAABBHit(ray, sboBVHNode.nodes[node.left].bbox_min,
-                                   sboBVHNode.nodes[node.left].bbox_max,
-                                   tL);
-
-        if (node.right >= 0)
-            hitR = RayAABBHit(ray, sboBVHNode.nodes[node.right].bbox_min,
-                                    sboBVHNode.nodes[node.right].bbox_max,
-                                    tR);
-
-        if (hitL && hitR)
-        {
-            // near first
-            if (tL < tR) {
-                stack[sp] = node.right; tstack[sp] = tR; sp++;
-                stack[sp] = node.left;  tstack[sp] = tL; sp++;
-            } else {
-                stack[sp] = node.left;  tstack[sp] = tL; sp++;
-                stack[sp] = node.right; tstack[sp] = tR; sp++;
+            if (node.left >= 0)  hitL = RayAABBHit(ray, sboBVHNode.nodes[node.left].bbox_min,sboBVHNode.nodes[node.left].bbox_max,tLimit,tL);
+            if (node.right >= 0) hitR = RayAABBHit(ray, sboBVHNode.nodes[node.right].bbox_min,sboBVHNode.nodes[node.right].bbox_max,tLimit,tR);
+            
+            if (hitL && hitR){
+              if (tL < tR){
+                    stack[stack_count++] = node.right;
+                    stack[stack_count++] = node.left;
+                } else {
+                    stack[stack_count++] = node.left;
+                    stack[stack_count++] = node.right;
+                }
             }
-        }
-        else if (hitL) {
-            stack[sp] = node.left; tstack[sp] = tL; sp++;
-        }
-        else if (hitR) {
-            stack[sp] = node.right; tstack[sp] = tR; sp++;
+            else if(hitL) stack[stack_count++] = node.left;
+            else if(hitR) stack[stack_count++] = node.right;
         }
     }
+
 }
 
 HitInfo RayHitCheck(Ray ray){
     HitInfo hitInfo_closest;
     hitInfo_closest.didHit = false;
-    hitInfo_closest.dst = -1.0;
+    hitInfo_closest.dst = 1e30;
 
-    //these code can draw the sphere okay, no bvh involved
+    //these code draw the simple sphere okay, no bvh involved
     for(int i = 0; i < NUM_SPHERES; i++){
         HitInfo hitInfo_current = RaySphereHitCheck(ray, i);
         if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
@@ -385,56 +380,33 @@ HitInfo RayHitCheck(Ray ray){
         }
     }
 
-    //these code has no use？
-    // for(int i = 0; i < NUM_TRIANGLES; i++){
-    //     HitInfo hitInfo_current = RayTriangleHitCheck(ray, triangles[i]);
-    //     if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
-    //         if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
-    //     }else if(hitInfo_current.didHit){ //current hit and no previous hit
-    //         hitInfo_closest = hitInfo_current;
-    //     }
-    // }
+    bool bEnableBVH = true;
+    if(!bEnableBVH){ //30fps(5080 Laptop)
+        int totalNumTriangles = 228; //228 for low tree model (228, 68, 20, 4, 2)
+        for(int i = 0; i < totalNumTriangles; i++){
+            Triangle tri;
+            tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
+            tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
+            tri.c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].position;
+            //tri.normal_a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].normal;
+            //tri.normal_b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].normal;
+            //tri.normal_c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].normal;
+            tri.material_id = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].material_id;
 
-    //this line of code is used if you want to draw a cube object, otherwise no use
-    //for(int i = 0; i < 12; i++){ //cube, indices/3 is number of triangles
-
-    //////////////////////////////////////////////////
-    //This is BVH test code area
-
-    //Method 1: traditional non-BVH, this code works okay
-    
-    /*
-    int totalNumTriangles = 4; //(228, 68, 20, 4, 2) //use 228 to draw full tree of low_poly_tree， 68 to draw low_poly_tree2，20 for low_poly_tree3, 4 for low_poly_tree4, 2 for low_poly_tree5
-    for(int i = 0; i < totalNumTriangles; i++){
-        Triangle tri;
-        tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
-        tri.b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].position;
-        tri.c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].position;
-        //tri.normal_a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].normal;
-        //tri.normal_b = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 1]].normal;
-        //tri.normal_c = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 2]].normal;
-        tri.material_id = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].material_id;
-
-        HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
-        if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
-            if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
-        }else if(hitInfo_current.didHit){ //current hit and no previous hit
-            hitInfo_closest = hitInfo_current;
+            HitInfo hitInfo_current = RayTriangleHitCheck(ray, tri);
+            if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
+                if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
+            }else if(hitInfo_current.didHit){ //current hit and no previous hit
+                hitInfo_closest = hitInfo_current;
+            }
         }
-    }
-    */
-
-    //Method 2: BVH
-    //Draw low_poly_tree5(2 triangles) no problem， the triangle is located in the correct place
-    //Draw low_poly_tree4(4 triangles) the location is wrong(need move views left/right to see them), need debug this
-    RayTraceWithBVH(ray, hitInfo_closest); //draw cube ok, but draw tree incorrectly
-    //////////////////////////////////////////////////////
+    }else RayTraceWithBVH(ray, hitInfo_closest); //500fps(5080 Laptop)
 
     return hitInfo_closest;
 }
 
 vec3 TraceRay(Ray ray, inout uint state){
-    vec3 throughput = vec3(1.0);
+    vec3 throughput = vec3(0.8);
     vec3 result_brightness_score = vec3(0.0);
 
     for(int i = 0; i < BOUNCE_LIMIT; i++) {

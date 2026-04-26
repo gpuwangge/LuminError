@@ -64,6 +64,7 @@ struct UniformConfig {
     bool b_storage_compute_material = false;
     bool b_storage_compute_triangle_vertex = false;
     bool b_storage_compute_triangle_index = false;
+    bool b_storage_compute_triangle_reorder_index = false;
     bool b_storage_compute_bvhnode = false;
     bool b_storage_compute_sphere = false;
     bool b_uniform_compute_custom = false;
@@ -101,6 +102,7 @@ struct UniformConfig {
         b_storage_compute_material                          = getOrDefault(node, "storage_compute_material", false);
         b_storage_compute_triangle_vertex                   = getOrDefault(node, "storage_compute_triangle_vertex", false);
         b_storage_compute_triangle_index                    = getOrDefault(node, "storage_compute_triangle_index", false);
+        b_storage_compute_triangle_reorder_index            = getOrDefault(node, "storage_compute_triangle_reorder_index", false);
         b_storage_compute_bvhnode                           = getOrDefault(node, "storage_compute_bvhnode", false);
         b_storage_compute_sphere                            = getOrDefault(node, "storage_compute_sphere", false);
         b_uniform_compute_custom                            = getOrDefault(node, "uniform_compute_custom", false);

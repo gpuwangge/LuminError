@@ -1,12 +1,12 @@
 Objects:
-  - object_name: Cube
+  - object_name: Tree
     object_id: 0
     object_scale: 2 #no use
     object_position: [0,0,0]
     object_rotation: [0,0,0] #no use
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
-    resource_model_id: 1
+    resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
   # - object_name: Cube
@@ -22,7 +22,7 @@ Objects:
 
 Resources:
   - Models:
-    - resource_model_name: low_poly_tree6.obj
+    - resource_model_name: low_poly_tree.obj
     #- resource_model_name: cube.obj
   - ComputeShaders:
     - resource_computeshader_name: simpleRayCompute/shader.comp.spv
@@ -35,6 +35,7 @@ Uniforms:
     storage_compute_material: true
     storage_compute_triangle_vertex: true
     storage_compute_triangle_index: true
+    storage_compute_triangle_reorder_index: true
     storage_compute_bvhnode: true
     storage_compute_sphere: true
     uniform_compute_custom: true

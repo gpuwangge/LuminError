@@ -90,6 +90,14 @@ public:
     void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size);
 
     /************
+     * 5.5 COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX
+     ************/
+    static std::vector<CWxjBuffer> storageBuffers_triangleReorderIndex;
+    static std::vector<void*> storageBuffersMapped_triangleReorderIndex;
+    void addStorageBuffer_triangleReorderIndex();
+    void uploadStorageBuffer_triangleReorderIndex(uint32_t currentFrame, const void* data, size_t size);
+
+    /************
      * 6 COMPUTE_STORAGEBUFFER_BVHNODE
      ************/
     static std::vector<CWxjBuffer> storageBuffers_bvhNode;

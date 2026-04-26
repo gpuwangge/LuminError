@@ -88,6 +88,7 @@ namespace LEGameEngine{
         StructStorageBuffer_Material storageBufferObject_Material{};
         StructStorageBuffer_TriangleVertex storageBufferObject_TriangleVertex{};
         StructStorageBuffer_TriangleIndex storageBufferObject_TriangleIndex{};
+        StructStorageBuffer_TriangleReorderIndex storageBufferObject_TriangleReorderIndex{};
         StructStorageBuffer_BVHNode storageBufferObject_BVHNode{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
 
@@ -196,6 +197,7 @@ namespace LEGameEngine{
         void UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_TriangleVertex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_TriangleIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void UploadComputeStorageBuffer_TriangleReorderIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_BVHNode(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_Sphere(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
 

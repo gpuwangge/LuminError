@@ -188,12 +188,28 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         storageBufferObject_Sphere.spheres[4].radius = 1.15f;
         storageBufferObject_Sphere.spheres[4].material_id = 4;
     }
-            
+
+    //std::cout<<"Before Initialize(), Number of Objects: "<<objects.size()<<std::endl; //should be 0
+    //std::cout<<"Before Initialize(), modelVertices3D: "<<modelVertices3D.size()<<std::endl; //should be 0
 
     Initialize();
 
     //std::cout<<"Model Loaded, Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
-    //std::cout<<"Number of Objects: "<<objects.size()<<std::endl;
+    // std::cout<<"After Initialize(), Number of Objects: "<<objects.size()<<std::endl;
+    // for(int i = 0; i < objects.size(); i++){
+    //     std::cout<<"Object "<<i<<": position=("<<objects[i].Position.x<<","<<objects[i].Position.y<<","<<objects[i].Position.z<<")"<<std::endl;
+    // }
+    // std::cout<<"After Initialize(), modelVertices3D: "<<modelVertices3D.size()<<std::endl;
+    // for(int i = 0; i < modelVertices3D.size(); i++){
+    //     std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
+    // }
+    // for(int i = 0; i < modelIndices3D.size(); i+=3){
+    //     std::cout<<"Triangle "<<i/3<<": "<<std::endl;
+    //     for (int j = 0; j < 3; j++){
+    //         int vertexIndex = modelIndices3D[i+j];
+    //         std::cout <<"\tVertex "<<j<<": index="<<vertexIndex<<", pos=("<<modelVertices3D[vertexIndex].pos.x<<","<<modelVertices3D[vertexIndex].pos.y<<","<<modelVertices3D[vertexIndex].pos.z<<")"<<std::endl;
+    //     }   
+    // }
 
     //Ray Tracing Setup 3: upload material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){
@@ -221,7 +237,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             for(int i = 0; i < modelIndices3D.size(); i++){
                 storageBufferObject_TriangleIndex.indices[indexCount] = modelVertices3D.size()*j + modelIndices3D[i];
                 //std::cout<<"Index "<<i<<": "<<modelIndices3D[i]<<std::endl;
-                //std::cout<<"Filling index "<<indexCount<<": "<<storageBufferObject_TriangleIndex.indices[indexCount]<<std::endl;
+                //std::cout<<"Filling TriangleIndex "<<indexCount<<": "<<storageBufferObject_TriangleIndex.indices[indexCount]<<std::endl;
                 indexCount++;
             }
             logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
@@ -230,7 +246,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
 
     //Ray Tracing Setup 5: create BVH for triangle data
-    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index && appInfo->Uniform.b_storage_compute_bvhnode){
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index && appInfo->Uniform.b_storage_compute_triangle_reorder_index && appInfo->Uniform.b_storage_compute_bvhnode){
         logger->Log("BVH: creation for triangle: total vertices=modelVertexSize*objectSize={}, modelVertexSize={}, modelIndexSize={}, modelTriangleSize=modelIndexSize/3={}, total triangles=modelTriangleSize*objectSize={}", 
             modelVertices3D.size()* objects.size(),
             modelVertices3D.size(),
@@ -256,15 +272,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         //std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
 
         std::vector<BVHNode> nodes;
-        BVHBuilder builder(tris, nodes, 3);
+        std::vector<int> triangleReorderIndices; 
+        BVHBuilder builder(tris, nodes, triangleReorderIndices, 3);
 
         builder.Build(logger);
         ValidateBVH(nodes, tris.size(), logger);
 
-        for (int i = 0; i < nodes.size(); i++){
-            //nodes[i].left = 1;//test
-            storageBufferObject_BVHNode.nodes[i] = nodes[i];
-        }
+        for (int i = 0; i < nodes.size(); i++) storageBufferObject_BVHNode.nodes[i] = nodes[i];
+        for(int i = 0; i < triangleReorderIndices.size(); i++) storageBufferObject_TriangleReorderIndex.indices[i] = triangleReorderIndices[i];
     }
     
     //Ray Tracing Setup 6: upload triangle vertex and index and bvh storage buffer data
@@ -292,14 +307,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     if(appInfo->Uniform.b_storage_compute_triangle_index){
         // Index Data for a quad(two triangles)
         // storageBufferObject_TriangleIndex.indices[0] = 0;
-        // storageBufferObject_TriangleIndex.indices[1] = 1;
-        // storageBufferObject_TriangleIndex.indices[2] = 2;
-        // storageBufferObject_TriangleIndex.indices[3] = 2;
-        // storageBufferObject_TriangleIndex.indices[4] = 1;
-        // storageBufferObject_TriangleIndex.indices[5] = 3;
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
         UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
     }
+    if(appInfo->Uniform.b_storage_compute_triangle_reorder_index){
+        UploadComputeStorageBuffer_TriangleReorderIndex(GetCurrentFrame(), &storageBufferObject_TriangleReorderIndex, sizeof(StructStorageBuffer_TriangleReorderIndex));
+        UploadComputeStorageBuffer_TriangleReorderIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleReorderIndex, sizeof(StructStorageBuffer_TriangleReorderIndex));
+    }
+
     if(appInfo->Uniform.b_storage_compute_bvhnode){
         UploadComputeStorageBuffer_BVHNode(GetCurrentFrame(), &storageBufferObject_BVHNode, sizeof(StructStorageBuffer_BVHNode));
         UploadComputeStorageBuffer_BVHNode(GetCurrentFrame()+1, &storageBufferObject_BVHNode, sizeof(StructStorageBuffer_BVHNode));

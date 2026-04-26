@@ -316,6 +316,9 @@ void GameEngine::UploadComputeStorageBuffer_TriangleVertex(uint32_t currentFrame
 void GameEngine::UploadComputeStorageBuffer_TriangleIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadStorageBuffer_triangleIndex(currentFrame, storageBufferObject, dataSize);
 }
+void GameEngine::UploadComputeStorageBuffer_TriangleReorderIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadStorageBuffer_triangleReorderIndex(currentFrame, storageBufferObject, dataSize);
+}
 void GameEngine::UploadComputeStorageBuffer_BVHNode(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadStorageBuffer_bvhNode(currentFrame, storageBufferObject, dataSize);
 }

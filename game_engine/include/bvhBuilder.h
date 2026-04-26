@@ -92,8 +92,8 @@ struct SimplePrimitiveInfo {
 // =========================
 class BVHBuilder {
 public:
-    BVHBuilder(std::vector<Triangle>& tris, std::vector<BVHNode>& nodes, int leaf_size = 4)
-        : triangles(tris), nodes(nodes), max_leaf_size(leaf_size)
+    BVHBuilder(std::vector<Triangle>& tris, std::vector<BVHNode>& nodes, std::vector<int> &triangleReorderIndices, int leaf_size = 4)
+        : triangles(tris), nodes(nodes), triangleReorderIndices(triangleReorderIndices), max_leaf_size(leaf_size)
     {}
 
     bool Build(LELog::ILogCore *logger = NULL);
@@ -102,6 +102,7 @@ private:
     std::vector<Triangle>& triangles;
     std::vector<SimplePrimitiveInfo> primitives;
     std::vector<BVHNode>& nodes;
+    std::vector<int> &triangleReorderIndices; 
     int max_leaf_size;
 
     AABB ComputeTriangleAABB(const Triangle& tri);

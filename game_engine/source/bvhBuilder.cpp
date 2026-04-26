@@ -52,6 +52,8 @@ bool BVHBuilder::Build(LELog::ILogCore *logger) {
 
 		nodes.clear();
 		nodes.reserve(triangles.size() * 2);
+		triangleReorderIndices.reserve(triangles.size());
+		for(int i = 0; i < triangles.size(); i++) triangleReorderIndices.push_back(i);
 
 		int root_index = BuildRecursive(0, (int)primitives.size(), 0, logger);
 		if(logger){
@@ -60,6 +62,8 @@ bool BVHBuilder::Build(LELog::ILogCore *logger) {
 		}
 		// std::cout << "BVH Build Finished. Root node = " << root_index
 		// 			<< "\nTotal Nodes: " << nodes.size() << "\n";
+
+		for(int i = 0; i< primitives.size(); i++) triangleReorderIndices[i] = primitives[i].orig_index;
 
 		return true;
 	}
@@ -139,7 +143,6 @@ int BVHBuilder::BuildRecursive(int start, int count, int depth, LELog::ILogCore 
 	std::sort(begin, end, [&](const SimplePrimitiveInfo& a, const SimplePrimitiveInfo& b) {
 		return a.centroid[axis] < b.centroid[axis];
 	});
-
 	
 	if(logger){
 		std::string space = "";
@@ -156,6 +159,19 @@ int BVHBuilder::BuildRecursive(int start, int count, int depth, LELog::ILogCore 
 		}
 		logger->Log(space + s);
 	}
+	if(logger){
+		std::string space = "";
+		for(int i = 0; i < depth*LOGSPACE; i++) space+=" ";
+		logger->Log(space+"Original indices after sorting:");
+		std::string s = "";
+		for (int i = start; i < start + count; i++) {
+			s += std::to_string(primitives[i].orig_index);
+			s += " ";
+		}
+		logger->Log(space + s);
+	}
+
+
 	// for (int i = start; i < start + count; i++)
 	// 	if(bVerbose) std::cout << " " << primitives[i].centroid[axis];
 	// if(bVerbose) std::cout << "\n";
@@ -206,7 +222,7 @@ void ValidateBVH(const std::vector<BVHNode>& nodes, int tri_count, LELog::ILogCo
         const BVHNode& n = nodes[i];
 
         if(logger){
-			logger->Log("Node {}: bbox=({}, {}, {}) - ({}, {}, {})",
+			logger->Log("Node {}: bbox_min = ({}, {}, {}), bbox_max = ({}, {}, {})",
 				i,
 				n.bbox_min.x, n.bbox_min.y, n.bbox_min.z,
 				n.bbox_max.x, n.bbox_max.y, n.bbox_max.z);

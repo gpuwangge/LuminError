@@ -22,12 +22,13 @@ enum UniformTypes {
     COMPUTE_STORAGEBUFFER_MATERIAL =                                    0x00000800,
     COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX =                              0x00001000,
     COMPUTE_STORAGEBUFFER_TRIANGLEINDEX =                               0x00002000,
-    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00004000,
-    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00008000,
-    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00010000,
-    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00020000,
-    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00040000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00080000
+    COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00004000,
+    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00008000,
+    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00010000,
+    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00020000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00040000,
+    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00080000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00100000
 };
 
 struct alignas(16) BVHNode {
@@ -66,9 +67,14 @@ struct StructStorageBuffer_TriangleVertex{
     TriangleVertexInfo vertices[TriangleVertex_SIZE];
 };
 
-static constexpr size_t TriangleIndex_SIZE = 800;
+static constexpr size_t TriangleIndex_SIZE = 800; //this is the maximum vertex index count for all triangles
 struct StructStorageBuffer_TriangleIndex{
     unsigned int indices[TriangleIndex_SIZE]; //each triangle has 3 indices
+};
+
+static constexpr size_t TriangleReorderIndex_SIZE = 500; //this is the maximum triangle count
+struct StructStorageBuffer_TriangleReorderIndex{
+    unsigned int indices[TriangleReorderIndex_SIZE]; //each triangle has 3 indices
 };
 
 struct alignas(16) SphereInfo{

@@ -221,6 +221,8 @@ namespace LERenderer{
         virtual void uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_triangleIndex() = 0;
         virtual void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addStorageBuffer_triangleReorderIndex() = 0;
+        virtual void uploadStorageBuffer_triangleReorderIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_bvhNode() = 0;
         virtual void uploadStorageBuffer_bvhNode(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_sphere() = 0;
