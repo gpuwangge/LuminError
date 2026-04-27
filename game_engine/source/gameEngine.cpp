@@ -168,11 +168,11 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
     //Ray Tracing Setup 2: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
-        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -13.0f, 0.0f);
+        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
         storageBufferObject_Sphere.spheres[0].radius = 8.0;
         storageBufferObject_Sphere.spheres[0].material_id = 0;
 
-        storageBufferObject_Sphere.spheres[1].position = glm::vec3(3, -5, 0);
+        storageBufferObject_Sphere.spheres[1].position = glm::vec3(3, -0, 0);
         storageBufferObject_Sphere.spheres[1].radius = 0.75f;
         storageBufferObject_Sphere.spheres[1].material_id = 1;
 
