@@ -1,0 +1,74 @@
+Objects:
+  - object_name: Tree
+    object_id: 0
+    object_scale: 2 #no use
+    object_position: [0,0,0]
+    object_rotation: [0,0,0] #no use
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Cube
+  #   object_id: 1
+  #   object_scale: 2 #no use
+  #   object_position: [3,3,0]
+  #   object_rotation: [0,0,0] #no use
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   resource_model_id: 0
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+
+Resources:
+  - Models:
+    - resource_model_name: low_poly_tree.obj
+    #- resource_model_name: cube.obj
+  - ComputeShaders:
+    - resource_computeshader_name: simpleRayComputePlus/shader.comp.spv
+
+Uniforms:
+  Compute:
+    uniform_compute_name: Compute
+    uniform_compute_global: true
+    storage_compute_windowswap: true
+    storage_compute_material: true
+    storage_compute_triangle_vertex_attribute: true
+    storage_compute_triangle_vertex_index: true
+    storage_compute_triangle_reorder_index: true
+    storage_compute_bvhnode: true
+    storage_compute_sphere: true
+    uniform_compute_custom: true
+    storage_compute_customswap: false
+    uniform_compute_texture_storage: false
+    uniform_compute_swapchain_storage: true
+  
+Features:
+  feature_rendermode: 2 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_global_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_show_performance_control: false
+  feature_graphics_show_all_metric_controls: false
+
+Attachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: false
+  mainsceneRenderpass_attachment_color_resovle: false
+  mainsceneRenderpass_attachment_color_present: false
+
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,0,-3.0]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 90
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 20
