@@ -220,24 +220,24 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
 
     //Ray Tracing Setup 4: prepare triangle vertex and index storage buffer data
-    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index){
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute && appInfo->Uniform.b_storage_compute_triangle_vertex_index){
         int vertexCount = 0;
         int indexCount = 0;
         for(int j = 0; j < objects.size(); j++){ //Assume each object uses one model for now
             //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
             // Vertex Data for a 3d model
             for(int i = 0; i < modelVertices3D.size(); i++){
-                storageBufferObject_TriangleVertex.vertices[vertexCount].position = modelVertices3D[i].pos + objects[j].Position;
-                storageBufferObject_TriangleVertex.vertices[vertexCount].normal = modelVertices3D[i].normal;
-                storageBufferObject_TriangleVertex.vertices[vertexCount].material_id = 2;
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].position = modelVertices3D[i].pos + objects[j].Position;
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].normal = modelVertices3D[i].normal;
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].material_id = 2;
                 //std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
                 vertexCount++;
             }
             // Index Data for a 3d model
             for(int i = 0; i < modelIndices3D.size(); i++){
-                storageBufferObject_TriangleIndex.indices[indexCount] = modelVertices3D.size()*j + modelIndices3D[i];
+                storageBufferObject_TriangleVertexIndex.indices[indexCount] = modelVertices3D.size()*j + modelIndices3D[i];
                 //std::cout<<"Index "<<i<<": "<<modelIndices3D[i]<<std::endl;
-                //std::cout<<"Filling TriangleIndex "<<indexCount<<": "<<storageBufferObject_TriangleIndex.indices[indexCount]<<std::endl;
+                //std::cout<<"Filling TriangleIndex "<<indexCount<<": "<<storageBufferObject_TriangleVertexIndex.indices[indexCount]<<std::endl;
                 indexCount++;
             }
             logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
@@ -246,7 +246,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
 
     //Ray Tracing Setup 5: create BVH for triangle data
-    if(appInfo->Uniform.b_storage_compute_triangle_vertex && appInfo->Uniform.b_storage_compute_triangle_index && appInfo->Uniform.b_storage_compute_triangle_reorder_index && appInfo->Uniform.b_storage_compute_bvhnode){
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute && appInfo->Uniform.b_storage_compute_triangle_vertex_index && appInfo->Uniform.b_storage_compute_triangle_reorder_index && appInfo->Uniform.b_storage_compute_bvhnode){
         logger->Log("BVH: creation for triangle: total vertices=modelVertexSize*objectSize={}, modelVertexSize={}, modelIndexSize={}, modelTriangleSize=modelIndexSize/3={}, total triangles=modelTriangleSize*objectSize={}", 
             modelVertices3D.size()* objects.size(),
             modelVertices3D.size(),
@@ -283,7 +283,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
     
     //Ray Tracing Setup 6: upload triangle vertex and index and bvh storage buffer data
-    if(appInfo->Uniform.b_storage_compute_triangle_vertex){
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute){
         //Vertex Data for a quad(two triangles)
         //Vulkan use right-hand coordinate system, glm use right-hand too
         //Vulkan NDC: +X right, +Y down, +Z forward
@@ -301,14 +301,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         // storageBufferObject_TriangleVertex.vertices[1].material_id = 0;
         // storageBufferObject_TriangleVertex.vertices[2].material_id = 1;
         // storageBufferObject_TriangleVertex.vertices[3].material_id = 0;
-        UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame(), &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
-        UploadComputeStorageBuffer_TriangleVertex(GetCurrentFrame()+1, &storageBufferObject_TriangleVertex, sizeof(StructStorageBuffer_TriangleVertex));
+        UploadComputeStorageBuffer_TriangleVertexAttribute(GetCurrentFrame(), &storageBufferObject_TriangleVertexAttribute, sizeof(StructStorageBuffer_TriangleVertexAttribute));
+        UploadComputeStorageBuffer_TriangleVertexAttribute(GetCurrentFrame()+1, &storageBufferObject_TriangleVertexAttribute, sizeof(StructStorageBuffer_TriangleVertexAttribute));
     }
-    if(appInfo->Uniform.b_storage_compute_triangle_index){
+    if(appInfo->Uniform.b_storage_compute_triangle_vertex_index){
         // Index Data for a quad(two triangles)
         // storageBufferObject_TriangleIndex.indices[0] = 0;
-        UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame(), &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
-        UploadComputeStorageBuffer_TriangleIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleIndex, sizeof(StructStorageBuffer_TriangleIndex));
+        UploadComputeStorageBuffer_TriangleVertexIndex(GetCurrentFrame(), &storageBufferObject_TriangleVertexIndex, sizeof(StructStorageBuffer_TriangleVertexIndex));
+        UploadComputeStorageBuffer_TriangleVertexIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleVertexIndex, sizeof(StructStorageBuffer_TriangleVertexIndex));
     }
     if(appInfo->Uniform.b_storage_compute_triangle_reorder_index){
         UploadComputeStorageBuffer_TriangleReorderIndex(GetCurrentFrame(), &storageBufferObject_TriangleReorderIndex, sizeof(StructStorageBuffer_TriangleReorderIndex));

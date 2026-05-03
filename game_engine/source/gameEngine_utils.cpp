@@ -310,11 +310,11 @@ void GameEngine::DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, 
 void GameEngine::UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadStorageBuffer_material(currentFrame, storageBufferObject, dataSize);
 }
-void GameEngine::UploadComputeStorageBuffer_TriangleVertex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
-    renderer->uploadStorageBuffer_triangleVertex(currentFrame, storageBufferObject, dataSize);
+void GameEngine::UploadComputeStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadStorageBuffer_triangleVertexAttribute(currentFrame, storageBufferObject, dataSize);
 }
-void GameEngine::UploadComputeStorageBuffer_TriangleIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
-    renderer->uploadStorageBuffer_triangleIndex(currentFrame, storageBufferObject, dataSize);
+void GameEngine::UploadComputeStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadStorageBuffer_triangleVertexIndex(currentFrame, storageBufferObject, dataSize);
 }
 void GameEngine::UploadComputeStorageBuffer_TriangleReorderIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadStorageBuffer_triangleReorderIndex(currentFrame, storageBufferObject, dataSize);

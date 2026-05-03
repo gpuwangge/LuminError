@@ -217,10 +217,10 @@ namespace LERenderer{
         virtual void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) = 0;
         virtual void addStorageBuffer_material() = 0;
         virtual void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void addStorageBuffer_triangleVertex() = 0;
-        virtual void uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void addStorageBuffer_triangleIndex() = 0;
-        virtual void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addStorageBuffer_triangleVertexAttribute() = 0;
+        virtual void uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addStorageBuffer_triangleVertexIndex() = 0;
+        virtual void uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_triangleReorderIndex() = 0;
         virtual void uploadStorageBuffer_triangleReorderIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_bvhNode() = 0;

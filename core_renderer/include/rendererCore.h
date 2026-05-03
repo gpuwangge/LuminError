@@ -308,10 +308,10 @@ namespace LERenderer{
         
         void addStorageBuffer_material() override { computeDescriptorManager.addStorageBuffer_material(); }
         void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_material(currentFrame, data, size); }
-        void addStorageBuffer_triangleVertex() override { computeDescriptorManager.addStorageBuffer_triangleVertex(); }
-        void uploadStorageBuffer_triangleVertex(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleVertex(currentFrame, data, size); }
-        void addStorageBuffer_triangleIndex() override { computeDescriptorManager.addStorageBuffer_triangleIndex(); }
-        void uploadStorageBuffer_triangleIndex(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleIndex(currentFrame, data, size); }
+        void addStorageBuffer_triangleVertexAttribute() override { computeDescriptorManager.addStorageBuffer_triangleVertexAttribute(); }
+        void uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleVertexAttribute(currentFrame, data, size); }
+        void addStorageBuffer_triangleVertexIndex() override { computeDescriptorManager.addStorageBuffer_triangleVertexIndex(); }
+        void uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleVertexIndex(currentFrame, data, size); }
         void addStorageBuffer_triangleReorderIndex() override { computeDescriptorManager.addStorageBuffer_triangleReorderIndex(); }
         void uploadStorageBuffer_triangleReorderIndex(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleReorderIndex(currentFrame, data, size); }
         void addStorageBuffer_bvhNode() override { computeDescriptorManager.addStorageBuffer_bvhNode(); }

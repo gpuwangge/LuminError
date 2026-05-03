@@ -20,8 +20,8 @@ enum UniformTypes {
     COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000200,
     COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00000400,
     COMPUTE_STORAGEBUFFER_MATERIAL =                                    0x00000800,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX =                              0x00001000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEINDEX =                               0x00002000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                      0x00001000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX =                         0x00002000,
     COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00004000,
     COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00008000,
     COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00010000,
@@ -63,12 +63,12 @@ struct alignas(16) TriangleVertexInfo{
     //total size: 16*4+4+60=128 bytes
 };
 static constexpr size_t TriangleVertex_SIZE = 500;
-struct StructStorageBuffer_TriangleVertex{
+struct StructStorageBuffer_TriangleVertexAttribute{
     TriangleVertexInfo vertices[TriangleVertex_SIZE];
 };
 
 static constexpr size_t TriangleIndex_SIZE = 800; //this is the maximum vertex index count for all triangles
-struct StructStorageBuffer_TriangleIndex{
+struct StructStorageBuffer_TriangleVertexIndex{
     unsigned int indices[TriangleIndex_SIZE]; //each triangle has 3 indices
 };
 

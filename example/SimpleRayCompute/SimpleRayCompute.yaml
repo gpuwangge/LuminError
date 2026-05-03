@@ -33,8 +33,8 @@ Uniforms:
     uniform_compute_global: true
     storage_compute_windowswap: true
     storage_compute_material: true
-    storage_compute_triangle_vertex: true
-    storage_compute_triangle_index: true
+    storage_compute_triangle_vertex_attribute: true
+    storage_compute_triangle_vertex_index: true
     storage_compute_triangle_reorder_index: true
     storage_compute_bvhnode: true
     storage_compute_sphere: true
