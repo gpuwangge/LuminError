@@ -12,13 +12,17 @@ cmake -E time make -j
 ## Run
 
 ```script
-cd build/bin  
+cd build/bin
+```
 ```script
 Run SimpleTriangle:  
+```
 ```script
 .\SimpleTriangle.exe
+```
 ```script
 Run all tests:
+```
 ```script
 .\autotest.bat
 ```
