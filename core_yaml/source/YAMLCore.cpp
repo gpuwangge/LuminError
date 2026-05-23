@@ -94,6 +94,26 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
         }
     }
 
+    int max_computeSpheres_id = -1;
+    if (yamlNode["ComputeSpheres"]) {
+        for (const auto& sphere : yamlNode["ComputeSpheres"]) {
+            int computeSphere_id = sphere["compute_sphere_id"] ? sphere["compute_sphere_id"].as<int>() : 0;
+            max_computeSpheres_id = (computeSphere_id > max_computeSpheres_id) ? computeSphere_id : max_computeSpheres_id;
+        }
+    }
+    //std::cout<<"Max computeSphere_id detected: "<<max_computeSpheres_id<<std::endl;
+    int customComputeSpheresCount = ((max_computeSpheres_id+1) < yamlNode["ComputeSpheres"].size()) ? (max_computeSpheres_id+1) : yamlNode["ComputeSpheres"].size();
+    //std::cout<<"Detected "<<customComputeSpheresCount<<" custom compute spheres in the YAML file."<<std::endl;
+    appInfo.ComputeSpheres.resize(customComputeSpheresCount);
+    if (yamlNode["ComputeSpheres"]) {
+        for (const auto& sphere : yamlNode["ComputeSpheres"]) {
+            int computeSphere_id = sphere["compute_sphere_id"] ? sphere["compute_sphere_id"].as<int>() : 0;
+            //std::cout<<"Loading compute sphere with ID "<<computeSphere_id<<std::endl;
+            appInfo.ComputeSpheres[computeSphere_id].loadFromYaml(sphere);
+            //std::cout<<"Finished loading compute sphere with ID "<<computeSphere_id<<std::endl;
+        }
+    }
+
     int max_textbox_id = -1;
     if (yamlNode["Textboxes"]) {
         for (const auto& tb : yamlNode["Textboxes"]) {

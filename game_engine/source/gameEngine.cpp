@@ -168,48 +168,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
     //Ray Tracing Setup 2: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
-        storageBufferObject_Sphere.spheres[0].position = glm::vec3(0.0f, -8.0f, 0.0f);
-        storageBufferObject_Sphere.spheres[0].radius = 8.0;
-        storageBufferObject_Sphere.spheres[0].material_id = 0;
-
-        storageBufferObject_Sphere.spheres[1].position = glm::vec3(3, -0, 0);
-        storageBufferObject_Sphere.spheres[1].radius = 0.75f;
-        storageBufferObject_Sphere.spheres[1].material_id = 1;
-
-        storageBufferObject_Sphere.spheres[2].position = glm::vec3(-0.95, 0.2, -1.75);
-        storageBufferObject_Sphere.spheres[2].radius = 0.35f;
-        storageBufferObject_Sphere.spheres[2].material_id = 2;
-
-        storageBufferObject_Sphere.spheres[3].position = glm::vec3(0.5, 0.6, -1.8);
-        storageBufferObject_Sphere.spheres[3].radius = 0.35f;
-        storageBufferObject_Sphere.spheres[3].material_id = 3;
-
-        storageBufferObject_Sphere.spheres[4].position = glm::vec3(0, 3, -1);
-        storageBufferObject_Sphere.spheres[4].radius = 1.15f;
-        storageBufferObject_Sphere.spheres[4].material_id = 4;
+        for(int i = 0; i < appInfo->ComputeSpheres.size() && i < SPHERE_SIZE; i++){
+            storageBufferObject_Sphere.spheres[i].position = glm::vec3(appInfo->ComputeSpheres[i].compute_sphere_position[0], appInfo->ComputeSpheres[i].compute_sphere_position[1], appInfo->ComputeSpheres[i].compute_sphere_position[2]);
+            storageBufferObject_Sphere.spheres[i].radius = appInfo->ComputeSpheres[i].compute_sphere_radius;
+            storageBufferObject_Sphere.spheres[i].material_id = appInfo->ComputeSpheres[i].compute_sphere_material_id;
+        }
     }
 
-    //std::cout<<"Before Initialize(), Number of Objects: "<<objects.size()<<std::endl; //should be 0
-    //std::cout<<"Before Initialize(), modelVertices3D: "<<modelVertices3D.size()<<std::endl; //should be 0
-
     Initialize();
-
-    //std::cout<<"Model Loaded, Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
-    // std::cout<<"After Initialize(), Number of Objects: "<<objects.size()<<std::endl;
-    // for(int i = 0; i < objects.size(); i++){
-    //     std::cout<<"Object "<<i<<": position=("<<objects[i].Position.x<<","<<objects[i].Position.y<<","<<objects[i].Position.z<<")"<<std::endl;
-    // }
-    // std::cout<<"After Initialize(), modelVertices3D: "<<modelVertices3D.size()<<std::endl;
-    // for(int i = 0; i < modelVertices3D.size(); i++){
-    //     std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
-    // }
-    // for(int i = 0; i < modelIndices3D.size(); i+=3){
-    //     std::cout<<"Triangle "<<i/3<<": "<<std::endl;
-    //     for (int j = 0; j < 3; j++){
-    //         int vertexIndex = modelIndices3D[i+j];
-    //         std::cout <<"\tVertex "<<j<<": index="<<vertexIndex<<", pos=("<<modelVertices3D[vertexIndex].pos.x<<","<<modelVertices3D[vertexIndex].pos.y<<","<<modelVertices3D[vertexIndex].pos.z<<")"<<std::endl;
-    //     }   
-    // }
 
     //Ray Tracing Setup 3: upload material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){
@@ -319,7 +285,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         UploadComputeStorageBuffer_BVHNode(GetCurrentFrame(), &storageBufferObject_BVHNode, sizeof(StructStorageBuffer_BVHNode));
         UploadComputeStorageBuffer_BVHNode(GetCurrentFrame()+1, &storageBufferObject_BVHNode, sizeof(StructStorageBuffer_BVHNode));
     }
-    //Ray Tracing Setup 6: prepare sphere storage buffer data
+    //Ray Tracing Setup 7: Upload sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
         UploadComputeStorageBuffer_Sphere(GetCurrentFrame(), &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));
         UploadComputeStorageBuffer_Sphere(GetCurrentFrame()+1, &storageBufferObject_Sphere, sizeof(StructStorageBuffer_Sphere));

@@ -159,6 +159,20 @@ struct ObjectConfig {
     }
 };
 
+struct ComputeSphereConfig {
+    int compute_sphere_id = 0;
+    std::vector<float> compute_sphere_position = std::vector<float>(3, 0);
+    float compute_sphere_radius = 1.0f;
+    int compute_sphere_material_id = 0;
+
+    void loadFromYaml(const YAML::Node& node) {
+        compute_sphere_id                             = getOrDefault(node, "compute_sphere_id", 0);
+        compute_sphere_position                       = getOrDefault(node, "compute_sphere_position", std::vector<float>(3, 0.0f));
+        compute_sphere_radius                         = getOrDefault(node, "compute_sphere_radius", 1.0f);
+        compute_sphere_material_id                   = getOrDefault(node, "compute_sphere_material_id", 0);
+    }
+};
+
 struct TextConfig {
     int textbox_id = 0;
     std::string textbox_name = "Default";
@@ -384,6 +398,7 @@ struct MaterialConfig {
 
 struct AppInfo{
     std::vector<ObjectConfig> Objects;
+    std::vector<ComputeSphereConfig> ComputeSpheres;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
     std::vector<MaterialConfig> Materials;
