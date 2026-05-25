@@ -65,6 +65,7 @@ void main(){
     //world_coord = view_coord;//!!!
     ray.dir = normalize(world_coord.xyz);
     ray.origin = globalUBO.mainCameraPos;
+    ray.type = PRIMARY;
     //ray.origin = vec3(0,0,1);//!!!
     
     // ----------------------------

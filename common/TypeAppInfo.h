@@ -137,6 +137,7 @@ struct ObjectConfig {
     int object_resource_default_graphics_pipeline_id = 0;
     bool object_bSticker = false;
     float object_scale = 1.0f;
+    int object_material_id = 0;
     std::vector<float> object_scale_3 = std::vector<float>(3, 1);
     std::vector<float> object_position = std::vector<float>(3, 0);
     std::vector<float> object_rotation = std::vector<float>(3, 0);
@@ -152,6 +153,7 @@ struct ObjectConfig {
         object_bSticker                                 = getOrDefault(node, "object_sticker", false);
         object_scale                                    = getOrDefault(node, "object_scale", 1.0f);
         object_scale_3                                  = getOrDefault(node, "object_scale_3", std::vector<float>(3, 1.0f));
+        object_material_id                              = getOrDefault(node, "object_material_id", 0);
         object_position                                 = getOrDefault(node, "object_position", std::vector<float>(3, 0.0f));
         object_rotation                                 = getOrDefault(node, "object_rotation", std::vector<float>(3, 0.0f));
         object_velocity                                 = getOrDefault(node, "object_velocity", std::vector<float>(3, 0.0f));
@@ -164,12 +166,14 @@ struct ComputeSphereConfig {
     std::vector<float> compute_sphere_position = std::vector<float>(3, 0);
     float compute_sphere_radius = 1.0f;
     int compute_sphere_material_id = 0;
+    bool compute_sphere_visibility = true;
 
     void loadFromYaml(const YAML::Node& node) {
         compute_sphere_id                             = getOrDefault(node, "compute_sphere_id", 0);
         compute_sphere_position                       = getOrDefault(node, "compute_sphere_position", std::vector<float>(3, 0.0f));
         compute_sphere_radius                         = getOrDefault(node, "compute_sphere_radius", 1.0f);
         compute_sphere_material_id                   = getOrDefault(node, "compute_sphere_material_id", 0);
+        compute_sphere_visibility                     = getOrDefault(node, "compute_sphere_visibility", true);
     }
 };
 

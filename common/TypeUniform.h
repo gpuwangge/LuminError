@@ -81,8 +81,9 @@ struct alignas(16) SphereInfo{
     alignas(16) glm::vec3 position;
     alignas(4) float radius;
     alignas(4) int material_id;
-    alignas(4) float padding[2];
-};  //total size: 16+4+4+4*2=32 bytes
+    alignas(4) bool visibility;
+    alignas(4) float padding;
+};  //total size: 16+4+4+4+4=32 bytes
 static constexpr size_t SPHERE_SIZE = 64;//assume max 64 materials for now
 struct StructStorageBuffer_Sphere{
     SphereInfo spheres[SPHERE_SIZE];

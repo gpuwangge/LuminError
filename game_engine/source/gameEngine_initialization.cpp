@@ -509,6 +509,7 @@ void GameEngine::Initialize(){
     for(int i = 0; i < appInfo->Objects.size(); i++){
         objects[i].m_object_id = appInfo->Objects[i].object_id;
         objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
+        objects[i].m_material_id = appInfo->Objects[i].object_material_id;
         objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
         objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
         objects[i].Name = appInfo->Objects[i].object_name;

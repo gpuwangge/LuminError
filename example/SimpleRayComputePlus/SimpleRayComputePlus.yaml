@@ -1,11 +1,12 @@
 Objects:
   - object_name: Tree
     object_id: 0
-    object_scale: 1
-    object_position: [0,-1.5,0]
+    object_scale: 2
+    object_position: [0,-2.5,0]
     object_rotation: [0,0,0] #no use
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
     resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
@@ -16,6 +17,7 @@ Objects:
     object_rotation: [0,0,0] #no use
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
     resource_model_id: 1
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
@@ -26,21 +28,25 @@ ComputeSpheres:
     compute_sphere_position: [-1.5, -1.5, 0]
     compute_sphere_radius: 0.5
     compute_sphere_material_id: 4
+    compute_sphere_visibility: false
   - compute_sphere_name: Sphere
     compute_sphere_id: 1
     compute_sphere_position: [1.5, 1.5, 0]
     compute_sphere_radius: 0.5
-    compute_sphere_material_id: 4
+    compute_sphere_material_id: 5
+    compute_sphere_visibility: false
   - compute_sphere_name: Sphere
     compute_sphere_id: 2
-    compute_sphere_position: [-1.5, 1.5, 0]
+    compute_sphere_position: [-1.5, 1.5, 1.5]
     compute_sphere_radius: 0.5
-    compute_sphere_material_id: 4
+    compute_sphere_material_id: 6
+    compute_sphere_visibility: false
   - compute_sphere_name: Sphere
     compute_sphere_id: 3
-    compute_sphere_position: [1.5, -1.5, 0]
+    compute_sphere_position: [1.5, -1.5, -1.5]
     compute_sphere_radius: 0.5
-    compute_sphere_material_id: 4
+    compute_sphere_material_id: 7
+    compute_sphere_visibility: false
 
 Resources:
   - Models:
@@ -84,7 +90,7 @@ Attachments:
 
 MainCamera:
   camera_mode: 0
-  camera_position: [0,0,-6.0]
+  camera_position: [0,0,-5.0]
   camera_rotation: [0,0,0]
   object_id_target: 1
   camera_z: [0.1, 256]

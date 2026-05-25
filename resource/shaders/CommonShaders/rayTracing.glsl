@@ -4,10 +4,17 @@
 /***************************
 * Ray Tracing Data Structure
 ***************************/
-struct Ray{
+
+#define PRIMARY 0
+#define SHADOW  1
+#define BOUNCE  2
+
+struct Ray {
     vec3 origin;
     vec3 dir;
+    int type;
 };
+
 
 struct Triangle{
     vec3 a;
@@ -157,6 +164,7 @@ HitInfo RayHitCheck(Ray ray){
 
     //these code draw the simple sphere okay, no bvh involved
     for(int i = 0; i < NUM_SPHERES; i++){
+        if(ray.type == PRIMARY && !sboSphere.spheres[i].visibility) continue; //primary ray only hit visible sphere, but shadow ray and bounce ray can hit invisible sphere for shadow and indirect lighting effect
         HitInfo hitInfo_current = RaySphereHitCheck(ray, i);
         if(hitInfo_current.didHit && hitInfo_closest.didHit){ //current hit and previous hit
             if(hitInfo_current.dst < hitInfo_closest.dst) hitInfo_closest = hitInfo_current;
@@ -301,6 +309,7 @@ vec3 TraceRay(Ray ray, inout uint state){
         }
 
         ray.origin = hitInfo.hitPoint + hitInfo.normal * 0.001;
+        ray.type = BOUNCE;
     }
 
     return result_brightness_score;

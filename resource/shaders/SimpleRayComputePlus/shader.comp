@@ -6,7 +6,7 @@ layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 /***************************
 * Constants
 ***************************/
-const int BOUNCE_LIMIT = 5;
+const int BOUNCE_LIMIT = 4;
 const int RAY_PER_PIXEL = 10;
 const bool ENABLE_BVH = true;
 #include "../CommonShaders/rayTracing.glsl"
@@ -65,6 +65,7 @@ void main(){
     //world_coord = view_coord;//!!!
     ray.dir = normalize(world_coord.xyz);
     ray.origin = globalUBO.mainCameraPos;
+    ray.type = PRIMARY;
     //ray.origin = vec3(0,0,1);//!!!
     
     // ----------------------------

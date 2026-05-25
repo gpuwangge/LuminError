@@ -71,10 +71,11 @@ layout(set = 0, binding = 7, std430) readonly buffer SBOBVHNode {
 
 
 struct Sphere{
-    vec3 position;
-    float radius;
-    int material_id;
-    float padding[2];
+   vec3 position;
+   float radius;
+   int material_id;
+   bool visibility;
+   float padding;
 };
 const int NUM_SPHERES = 5;
 //Sphere spheres[NUM_SPHERES];

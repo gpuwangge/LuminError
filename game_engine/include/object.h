@@ -49,6 +49,7 @@ public:
     //int m_graphics_pipeline_id1 = 0;
     //int m_graphics_pipeline_id2 = 0;
     //int m_controlNode_id = -1;
+    int m_material_id = 0;
     CControlNode *p_controlNode = NULL;
 
     bool bSticker = false;

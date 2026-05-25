@@ -51,10 +51,49 @@ Materials:
     specular: 0.5
     ior: 1.45
     transmission: 0.0
-  - material_name: light_sphere
+  - material_name: light_sphere_white
     material_id: 4
     albedo: [1.0, 1.0, 1.0]
     emissionColor: [1.0, 0.9, 0.7]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+    alpha: 1.0
+    emissionStrength: 5.0
+    reflectance: 0.04
+    specular: 0.0
+    ior: 1.0
+    transmission: 0.0
+  - material_name: light_sphere_red
+    material_id: 5
+    albedo: [1.0, 1.0, 1.0]
+    emissionColor: [1.0, 0.1, 0.1]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+    alpha: 1.0
+    emissionStrength: 5.0
+    reflectance: 0.04
+    specular: 0.0
+    ior: 1.0
+    transmission: 0.0
+  - material_name: light_sphere_green
+    material_id: 6
+    albedo: [1.0, 1.0, 1.0]
+    emissionColor: [0.1, 1.0, 0.1]
+    transmissionColor: [1.0, 1.0, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+    alpha: 1.0
+    emissionStrength: 5.0
+    reflectance: 0.04
+    specular: 0.0
+    ior: 1.0
+    transmission: 0.0
+  - material_name: light_sphere_blue
+    material_id: 7
+    albedo: [1.0, 1.0, 1.0]
+    emissionColor: [0.1, 0.1, 1.0]
     transmissionColor: [1.0, 1.0, 1.0]
     metallic: 0.0
     roughness: 1.0

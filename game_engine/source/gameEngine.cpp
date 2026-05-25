@@ -172,6 +172,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
             storageBufferObject_Sphere.spheres[i].position = glm::vec3(appInfo->ComputeSpheres[i].compute_sphere_position[0], appInfo->ComputeSpheres[i].compute_sphere_position[1], appInfo->ComputeSpheres[i].compute_sphere_position[2]);
             storageBufferObject_Sphere.spheres[i].radius = appInfo->ComputeSpheres[i].compute_sphere_radius;
             storageBufferObject_Sphere.spheres[i].material_id = appInfo->ComputeSpheres[i].compute_sphere_material_id;
+            storageBufferObject_Sphere.spheres[i].visibility = appInfo->ComputeSpheres[i].compute_sphere_visibility;
         }
     }
 
@@ -203,7 +204,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
                 tranformedVertexPos = tranformedVertexPos + objects[j].Position;
                 storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].position = tranformedVertexPos;
                 storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].normal = modelData[modelIndex].modelVertices3D[i].normal;
-                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].material_id = 3;//todo
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].material_id = objects[j].m_material_id;
                 vertexCount++;
 
                 Vertex3D vertexForBVH;

@@ -6,19 +6,10 @@ Objects:
     object_rotation: [0,0,0] #no use
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
+    object_material_id: 2
     resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
-  # - object_name: Cube
-  #   object_id: 1
-  #   object_scale: 2 #no use
-  #   object_position: [3,3,0]
-  #   object_rotation: [0,0,0] #no use
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   resource_model_id: 0
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
 
 ComputeSpheres:
   - compute_sphere_name: Sphere
@@ -26,27 +17,32 @@ ComputeSpheres:
     compute_sphere_position: [0, -8.0, 0]
     compute_sphere_radius: 8.0
     compute_sphere_material_id: 0
+    compute_sphere_visibility: true
   - compute_sphere_name: Sphere
     compute_sphere_id: 1
     compute_sphere_position: [3, 0.0, 0]
     compute_sphere_radius: 0.75
     compute_sphere_material_id: 1
+    compute_sphere_visibility: true
   - compute_sphere_name: Sphere
     compute_sphere_id: 2
     compute_sphere_position: [-0.95, 0.2, -1.75]
     compute_sphere_radius: 0.35
     compute_sphere_material_id: 2
+    compute_sphere_visibility: true
   - compute_sphere_name: Sphere
     compute_sphere_id: 3
     compute_sphere_position: [0.5, 0.6, -1.8]
     compute_sphere_radius: 0.35
     compute_sphere_material_id: 3
+    compute_sphere_visibility: true
   - compute_sphere_name: Sphere
     compute_sphere_id: 4
     compute_sphere_position: [0, 3, -1]
     compute_sphere_radius: 1.15
     compute_sphere_material_id: 4
-
+    compute_sphere_visibility: true
+    
 Resources:
   - Models:
     - resource_model_name: low_poly_tree.obj
