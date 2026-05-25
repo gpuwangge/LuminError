@@ -186,26 +186,41 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     }
 
     //Ray Tracing Setup 4: prepare triangle vertex and index storage buffer data
+    std::vector<Vertex3D> allVertices3D_forBVH; //this is just for BVH construction, not the actual storage buffer data. The actual storage buffer data is stored in storageBufferObject_TriangleVertexAttribute and storageBufferObject_TriangleVertexIndex
+    std::vector<uint32_t> allIndices3D_forBVH;
     if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute && appInfo->Uniform.b_storage_compute_triangle_vertex_index){
         int vertexCount = 0;
         int indexCount = 0;
+        int vertexOffset = 0;
         for(int j = 0; j < objects.size(); j++){ //Assume each object uses one model for now
-            //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
+            std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
+            std::cout<<"    Object "<<j<<" has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
             // Vertex Data for a 3d model
-            for(int i = 0; i < modelVertices3D.size(); i++){
-                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].position = modelVertices3D[i].pos + objects[j].Position;
-                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].normal = modelVertices3D[i].normal;
-                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].material_id = 2;
-                //std::cout<<"Vertex "<<i<<": pos=("<<modelVertices3D[i].pos.x<<","<<modelVertices3D[i].pos.y<<","<<modelVertices3D[i].pos.z<<"), normal=("<<modelVertices3D[i].normal.x<<","<<modelVertices3D[i].normal.y<<","<<modelVertices3D[i].normal.z<<")"<<std::endl;
+            int modelIndex = objects[j].m_model_id;
+            for(int i = 0; i < modelData[modelIndex].modelVertices3D.size(); i++){
+                glm::vec3 tranformedVertexPos; //this is to do what vertex shader normally does, transform the vertex position from model space to world space by applying scale and translation (no rotation for now)
+                tranformedVertexPos = modelData[modelIndex].modelVertices3D[i].pos * objects[j].Scale;
+                tranformedVertexPos = tranformedVertexPos + objects[j].Position;
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].position = tranformedVertexPos;
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].normal = modelData[modelIndex].modelVertices3D[i].normal;
+                storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].material_id = 3;//todo
                 vertexCount++;
+
+                Vertex3D vertexForBVH;
+                vertexForBVH.pos = tranformedVertexPos;
+                allVertices3D_forBVH.push_back(vertexForBVH);
             }
             // Index Data for a 3d model
-            for(int i = 0; i < modelIndices3D.size(); i++){
-                storageBufferObject_TriangleVertexIndex.indices[indexCount] = modelVertices3D.size()*j + modelIndices3D[i];
-                //std::cout<<"Index "<<i<<": "<<modelIndices3D[i]<<std::endl;
-                //std::cout<<"Filling TriangleIndex "<<indexCount<<": "<<storageBufferObject_TriangleVertexIndex.indices[indexCount]<<std::endl;
+            for(int i = 0; i < modelData[modelIndex].modelIndices3D.size(); i++){
+                uint32_t vertexIndex = modelData[modelIndex].modelIndices3D[i] + vertexOffset;
+                storageBufferObject_TriangleVertexIndex.indices[indexCount] = vertexIndex;
                 indexCount++;
+
+                allIndices3D_forBVH.push_back(vertexIndex);
+                //std::cout<<"    Filling index "<<indexCount-1<<": "<<storageBufferObject_TriangleVertexIndex.indices[indexCount-1]<<std::endl;
             }
+            vertexOffset += modelData[modelIndex].modelVertices3D.size();
+            std::cout<<"    vertexOffset after filling object "<<j<<": "<<vertexOffset<<std::endl;
             logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
             //std::cout<<vertexCount<<" vertices and "<<indexCount<<" indices filled so far."<<std::endl;
         }
@@ -213,12 +228,12 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     //Ray Tracing Setup 5: create BVH for triangle data
     if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute && appInfo->Uniform.b_storage_compute_triangle_vertex_index && appInfo->Uniform.b_storage_compute_triangle_reorder_index && appInfo->Uniform.b_storage_compute_bvhnode){
-        logger->Log("BVH: creation for triangle: total vertices=modelVertexSize*objectSize={}, modelVertexSize={}, modelIndexSize={}, modelTriangleSize=modelIndexSize/3={}, total triangles=modelTriangleSize*objectSize={}", 
-            modelVertices3D.size()* objects.size(),
-            modelVertices3D.size(),
-            modelIndices3D.size(),
-            modelIndices3D.size()/3,
-            modelIndices3D.size()/3 * objects.size());
+        // logger->Log("BVH: creation for triangle: total vertices=modelVertexSize*objectSize={}, modelVertexSize={}, modelIndexSize={}, modelTriangleSize=modelIndexSize/3={}, total triangles=modelTriangleSize*objectSize={}", 
+        //     modelVertices3D.size()* objects.size(),
+        //     modelVertices3D.size(),
+        //     modelIndices3D.size(),
+        //     modelIndices3D.size()/3,
+        //     modelIndices3D.size()/3 * objects.size());
 
         // std::cout<<"Create BVH for triangle data: "<<std::endl;
         // std::cout<<"Number of vertices: "<<modelVertices3D.size()* objects.size()<<std::endl;
@@ -226,16 +241,26 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
         // std::cout<<"Each object has "<<modelIndices3D.size()/3<<" triangles."<<std::endl;
         // std::cout<<"Number of triangles: "<<modelIndices3D.size()/3 * objects.size()<<std::endl;
 
+        std::cout<<"allVertices3D_forBVH size: "<<allVertices3D_forBVH.size()<<std::endl;
+        std::cout<<"allIndices3D_forBVH size: "<<allIndices3D_forBVH.size()<<std::endl;
+
         std::vector<Triangle> tris;
-        //CreateTestCase2(tris, false);
-        for(int i = 0; i < modelIndices3D.size(); i+=3){
-            glm::vec3 v0 = modelVertices3D[modelIndices3D[i]].pos;
-            glm::vec3 v1 = modelVertices3D[modelIndices3D[i+1]].pos;
-            glm::vec3 v2 = modelVertices3D[modelIndices3D[i+2]].pos;
+        for(int i = 0; i < allIndices3D_forBVH.size(); i+=3){
+            glm::vec3 v0 = allVertices3D_forBVH[allIndices3D_forBVH[i]].pos;
+            glm::vec3 v1 = allVertices3D_forBVH[allIndices3D_forBVH[i+1]].pos;
+            glm::vec3 v2 = allVertices3D_forBVH[allIndices3D_forBVH[i+2]].pos;
             tris.emplace_back(v0, v1, v2);
         }
+        //CreateTestCase2(tris, false);
+        // int modelIndex = 1; //todo
+        // for(int i = 0; i < modelData[modelIndex].modelIndices3D.size(); i+=3){
+        //     glm::vec3 v0 = modelData[modelIndex].modelVertices3D[modelData[modelIndex].modelIndices3D[i]].pos;
+        //     glm::vec3 v1 = modelData[modelIndex].modelVertices3D[modelData[modelIndex].modelIndices3D[i+1]].pos;
+        //     glm::vec3 v2 = modelData[modelIndex].modelVertices3D[modelData[modelIndex].modelIndices3D[i+2]].pos;
+        //     tris.emplace_back(v0, v1, v2);
+        // }
         logger->Log("BVH: tris created {} triangles from model data.\n", tris.size());
-        //std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
+        std::cout<<"Created "<<tris.size()<<" triangles from model data."<<std::endl;
 
         std::vector<BVHNode> nodes;
         std::vector<int> triangleReorderIndices; 

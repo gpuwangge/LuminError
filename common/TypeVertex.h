@@ -89,6 +89,10 @@ struct Vertex2D {
     }
 };
 
+struct ModelStruct{
+    std::vector<Vertex3D> modelVertices3D;
+    std::vector<uint32_t> modelIndices3D;
+};
 
 namespace std {
 	//Custom hash function operator() for Vertex3D

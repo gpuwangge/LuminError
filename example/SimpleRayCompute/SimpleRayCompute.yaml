@@ -1,7 +1,7 @@
 Objects:
   - object_name: Tree
     object_id: 0
-    object_scale: 2 #no use
+    object_scale: 1
     object_position: [0,0,0]
     object_rotation: [0,0,0] #no use
     object_velocity: [0,0,0] #no use

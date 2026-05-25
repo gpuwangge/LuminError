@@ -280,9 +280,11 @@ void GameEngine::Initialize(){
                 //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
                 //std::vector<Vertex3D> modelVertices3D;
                 //std::vector<uint32_t> modelIndices3D;
-                resourcer->LoadModelObj(modelName, modelVertices3D, modelIndices3D);
-                renderer->CreateVertexBuffer(modelVertices3D.data(), sizeof(Vertex3D), modelVertices3D.size()); 
-                renderer->CreateIndexBuffer(modelIndices3D);
+                modelData.emplace_back();
+                int currentModelIndex = modelData.size() - 1;
+                resourcer->LoadModelObj(modelName,  modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
+                renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
+                renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
                 //std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
             }
         }

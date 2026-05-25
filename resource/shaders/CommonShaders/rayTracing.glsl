@@ -166,7 +166,7 @@ HitInfo RayHitCheck(Ray ray){
     }
 
     if(!ENABLE_BVH){ //30fps(5080 Laptop)
-        int totalNumTriangles = 228; //228 for low tree model (228, 68, 20, 4, 2)
+        int totalNumTriangles = 240; //228 for low tree model (228, 68, 20, 4, 2)
         for(int i = 0; i < totalNumTriangles; i++){
             Triangle tri;
             tri.a = sboTriangleVertex.vertices[sboTriangleIndex.indices[i * 3 + 0]].position;
