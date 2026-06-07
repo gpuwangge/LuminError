@@ -108,7 +108,14 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     * Select required device extensions
     *****************/
     VkQueueFlagBits requiredQueueFamilies = VK_QUEUE_GRAPHICS_BIT; //& VK_QUEUE_COMPUTE_BIT
-    const std::vector<const char*>  requireDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    //VkQueueFlags requiredQueueFamilies = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT; //？
+    const std::vector<const char*>  requireDeviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME, //ray tracing TODO
+        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME, //ray tracing TODO
+        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME, //ray tracing TODO
+        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME //ray tracing TODO
+    };
 
     // instance->findAllPhysicalDevices();
 
@@ -118,8 +125,11 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     // //App dev will fill command buffer with commands later
     // //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     // CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
-    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers);
+    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers); //also create logical device and command queues here
     
+    if (!LoadRayTracingFunctions(renderer->GetLogicalDevice())) {//ray tracing TODO, load function after logical device is created
+        logger->Log("Failed to load ray tracing functions\n");
+    }
 
     // textureManager.m_logicalDevice = renderer->GetLogicalDevice();
     // textureManager.m_physicalDevice = renderer->GetPhysicalDevice();
@@ -670,6 +680,97 @@ void GameEngine::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGro
     dsSets.push_back(renderer->GetDescriptorSets());
     renderer->BindComputeDescriptorSets(renderer->GetComputePipelineLayout(), dsSets);
     renderer->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+}
+
+bool GameEngine::LoadRayTracingFunctions(VkDevice device){
+    fpGetBufferDeviceAddressKHR =
+        reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(
+            vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressKHR"));
+
+    fpCreateAccelerationStructureKHR =
+        reinterpret_cast<PFN_vkCreateAccelerationStructureKHR>(
+            vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR"));
+
+    fpDestroyAccelerationStructureKHR = //optional
+        reinterpret_cast<PFN_vkDestroyAccelerationStructureKHR>(
+            vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR"));
+
+    fpGetAccelerationStructureBuildSizesKHR = 
+        reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(
+            vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
+
+    fpGetAccelerationStructureDeviceAddressKHR =
+        reinterpret_cast<PFN_vkGetAccelerationStructureDeviceAddressKHR>(
+            vkGetDeviceProcAddr(device, "vkGetAccelerationStructureDeviceAddressKHR"));
+
+    fpCmdBuildAccelerationStructuresKHR =
+        reinterpret_cast<PFN_vkCmdBuildAccelerationStructuresKHR>(
+            vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructuresKHR"));
+
+    fpBuildAccelerationStructuresKHR = //optional
+        reinterpret_cast<PFN_vkBuildAccelerationStructuresKHR>(
+            vkGetDeviceProcAddr(device, "vkBuildAccelerationStructuresKHR"));
+
+    fpCreateRayTracingPipelinesKHR =
+        reinterpret_cast<PFN_vkCreateRayTracingPipelinesKHR>(
+            vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR"));
+
+    fpGetRayTracingShaderGroupHandlesKHR =
+        reinterpret_cast<PFN_vkGetRayTracingShaderGroupHandlesKHR>(
+            vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesKHR"));
+
+    fpCmdTraceRaysKHR =
+        reinterpret_cast<PFN_vkCmdTraceRaysKHR>(
+            vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR"));
+
+    bool ok = true;
+
+    if (!fpGetBufferDeviceAddressKHR) {
+        logger->Log("Missing vkGetBufferDeviceAddressKHR\n");
+        ok = false;
+    }
+    if (!fpCreateAccelerationStructureKHR) {
+        logger->Log("Missing vkCreateAccelerationStructureKHR\n");
+        ok = false;
+    }
+    if (!fpDestroyAccelerationStructureKHR) {
+        logger->Log("Missing vkDestroyAccelerationStructureKHR\n");
+        ok = false;
+    }
+    if (!fpGetAccelerationStructureBuildSizesKHR) {
+        logger->Log("Missing vkGetAccelerationStructureBuildSizesKHR\n");
+        ok = false;
+    }
+    if (!fpGetAccelerationStructureDeviceAddressKHR) {
+        logger->Log("Missing vkGetAccelerationStructureDeviceAddressKHR\n");
+        ok = false;
+    }
+    if (!fpCmdBuildAccelerationStructuresKHR) {
+        logger->Log("Missing vkCmdBuildAccelerationStructuresKHR\n");
+        ok = false;
+    }
+    if (!fpBuildAccelerationStructuresKHR) {
+        logger->Log("Missing vkBuildAccelerationStructuresKHR\n");
+        ok = false;
+    }
+    if (!fpCreateRayTracingPipelinesKHR) {
+        logger->Log("Missing vkCreateRayTracingPipelinesKHR\n");
+        ok = false;
+    }
+    if (!fpGetRayTracingShaderGroupHandlesKHR) {
+        logger->Log("Missing vkGetRayTracingShaderGroupHandlesKHR\n");
+        ok = false;
+    }
+    if (!fpCmdTraceRaysKHR) {
+        logger->Log("Missing vkCmdTraceRaysKHR\n");
+        ok = false;
+    }
+
+    if (ok) {
+        logger->Log("All 10 ray tracing functions loaded successfully.\n");
+    }
+
+    return ok;
 }
 
 }

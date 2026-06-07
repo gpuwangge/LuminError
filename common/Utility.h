@@ -31,3 +31,16 @@ struct SwapChainSupportDetails {
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
 };
+
+// Ray tracing / acceleration structure function pointers
+// 这里的 extern 表示“这些变量在别处定义”。
+extern PFN_vkGetBufferDeviceAddressKHR                fpGetBufferDeviceAddressKHR;
+extern PFN_vkCreateAccelerationStructureKHR           fpCreateAccelerationStructureKHR;
+extern PFN_vkDestroyAccelerationStructureKHR          fpDestroyAccelerationStructureKHR;
+extern PFN_vkGetAccelerationStructureBuildSizesKHR    fpGetAccelerationStructureBuildSizesKHR;
+extern PFN_vkGetAccelerationStructureDeviceAddressKHR fpGetAccelerationStructureDeviceAddressKHR;
+extern PFN_vkCmdBuildAccelerationStructuresKHR        fpCmdBuildAccelerationStructuresKHR;
+extern PFN_vkBuildAccelerationStructuresKHR           fpBuildAccelerationStructuresKHR;
+extern PFN_vkCreateRayTracingPipelinesKHR             fpCreateRayTracingPipelinesKHR;
+extern PFN_vkGetRayTracingShaderGroupHandlesKHR       fpGetRayTracingShaderGroupHandlesKHR;
+extern PFN_vkCmdTraceRaysKHR                          fpCmdTraceRaysKHR;

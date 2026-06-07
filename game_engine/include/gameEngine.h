@@ -98,6 +98,19 @@ namespace LEGameEngine{
         //std::vector<Vertex3D> modelVertices3D;
         //std::vector<uint32_t> modelIndices3D;
 
+        //Ray tracing TODO
+        PFN_vkGetBufferDeviceAddressKHR                fpGetBufferDeviceAddressKHR                = nullptr;
+        PFN_vkCreateAccelerationStructureKHR           fpCreateAccelerationStructureKHR           = nullptr;
+        PFN_vkDestroyAccelerationStructureKHR          fpDestroyAccelerationStructureKHR          = nullptr;
+        PFN_vkGetAccelerationStructureBuildSizesKHR    fpGetAccelerationStructureBuildSizesKHR    = nullptr;
+        PFN_vkGetAccelerationStructureDeviceAddressKHR fpGetAccelerationStructureDeviceAddressKHR = nullptr;
+        PFN_vkCmdBuildAccelerationStructuresKHR        fpCmdBuildAccelerationStructuresKHR        = nullptr;
+        PFN_vkBuildAccelerationStructuresKHR           fpBuildAccelerationStructuresKHR           = nullptr;
+        PFN_vkCreateRayTracingPipelinesKHR             fpCreateRayTracingPipelinesKHR             = nullptr;
+        PFN_vkGetRayTracingShaderGroupHandlesKHR       fpGetRayTracingShaderGroupHandlesKHR       = nullptr;
+        PFN_vkCmdTraceRaysKHR                          fpCmdTraceRaysKHR                          = nullptr;
+        bool LoadRayTracingFunctions(VkDevice device);
+
         /******************
         * Helper Functions
         ******************/

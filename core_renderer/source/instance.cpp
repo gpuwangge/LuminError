@@ -15,7 +15,7 @@ CInstance::CInstance(const std::vector<const char*> &requiredValidationLayers, s
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.apiVersion = VK_API_VERSION_1_3; // Use Vulkan 1.3 to access ray tracing features
 
 
     //First make sure required layer(s) are available
@@ -213,6 +213,39 @@ std::unique_ptr<CPhysicalDevice>* CInstance::pickSuitablePhysicalDevice(VkSurfac
                 if(!indices.graphicsAndComputeFamily.has_value()) return nullptr;
                 //debugger->writeMSG("Picked physical device index: %d\n", indices.graphicsAndComputeFamily.value());debugger->flush();
             }
+
+            //ray tracing TODO==============
+            VkPhysicalDeviceBufferDeviceAddressFeatures bdaFeat{};
+            bdaFeat.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+
+            VkPhysicalDeviceAccelerationStructureFeaturesKHR asFeat{};
+            asFeat.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+            asFeat.pNext = &bdaFeat;
+
+            VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtFeat{};
+            rtFeat.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+            rtFeat.pNext = &asFeat;
+
+            VkPhysicalDeviceFeatures2 feats2{};
+            feats2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+            feats2.pNext = &rtFeat;
+
+            vkGetPhysicalDeviceFeatures2(phy_device->getHandle(), &feats2);
+
+            bool rtSupported =
+                (bdaFeat.bufferDeviceAddress == VK_TRUE) &&
+                (asFeat.accelerationStructure == VK_TRUE) &&
+                (rtFeat.rayTracingPipeline == VK_TRUE);
+
+            if (!rtSupported) {
+                std::cout << "Physical device does not support required ray tracing features, skipping." << std::endl;
+                continue;
+            }
+            std::cout << "Physical device supports required ray tracing features." << std::endl;
+            //=======================================
 
             //pickedPhysicalDevice = &phy_device;
             VkPhysicalDeviceProperties	PhysicalDeviceProperties;
