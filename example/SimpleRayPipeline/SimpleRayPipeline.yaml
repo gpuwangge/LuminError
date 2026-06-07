@@ -14,6 +14,8 @@ Uniforms:
     storage_compute_customswap: false
     uniform_compute_texture_storage: false
     uniform_compute_swapchain_storage: true
+  RayTracing:
+    uniform_raytracing_swapchain_storage: true
   
 Features:
   feature_rendermode: 2 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4

@@ -81,6 +81,8 @@ struct UniformConfig {
         VkBufferUsageFlags Usage = 0;
     } ComputeStorageBufferInfo_CustomSwap;
 
+    bool b_uniform_raytracing_swapchain_storage = false;
+
     void loadGraphicsFromYaml(const YAML::Node& node) {
         b_uniform_graphics_global                   = getOrDefault(node, "uniform_graphics_global", false);
         b_uniform_graphics_object_dynamic                        = getOrDefault(node, "uniform_graphics_object_dynamic", false);
@@ -110,6 +112,10 @@ struct UniformConfig {
 
         b_uniform_compute_swapchain_storage           = getOrDefault(node, "uniform_compute_swapchain_storage", false);
         b_uniform_compute_texture_storage             = getOrDefault(node, "uniform_compute_texture_storage", false);
+    }
+
+    void loadRayTracingFromYaml(const YAML::Node& node) {
+        b_uniform_raytracing_swapchain_storage        = getOrDefault(node, "uniform_raytracing_swapchain_storage", false);
     }
 };
 

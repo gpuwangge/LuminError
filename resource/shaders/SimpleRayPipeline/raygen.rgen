@@ -1,0 +1,11 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+layout (set=0, binding = 0, rgba8 ) uniform writeonly image2D resultImage;
+
+void main() {
+    ivec2 pix = ivec2(gl_LaunchIDEXT.xy);
+    ivec2 size = ivec2(gl_LaunchSizeEXT.xy);
+    vec4 blueColor = vec4(0, 0, 1.0, 1.0);
+    //First write to intermediaColor(rgba8), then copy to swapchain(bgra8) to present. so use bgra here for correct presentation
+    imageStore(resultImage, pix, blueColor.bgra);
+}

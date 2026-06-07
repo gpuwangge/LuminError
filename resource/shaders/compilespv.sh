@@ -16,7 +16,7 @@ compile_if_newer() {
     
     if [ ! -f "$output_file" ]; then
         echo "📦 Compile ${source_file} (new)"
-        ./glslc.exe "${source_file}" -o "${output_file}"
+        ./glslc.exe --target-env=vulkan1.2 --target-spv=spv1.4 "${source_file}" -o "${output_file}"
         if [ $? -ne 0 ]; then
             error=$((error+1))
         else
@@ -32,7 +32,7 @@ compile_if_newer() {
         [ "CommonShaders/objectUBO.glsl" -nt "$output_file" ] || \
         [ "CommonShaders/rayUBO.glsl" -nt "$output_file" ]; then
         echo "🔄 Compile ${source_file} (updated)"
-        ./glslc.exe "${source_file}" -o "${output_file}"
+        ./glslc.exe --target-env=vulkan1.2 --target-spv=spv1.4 "${source_file}" -o "${output_file}"
         if [ $? -ne 0 ]; then
             error=$((error+1))
         else
@@ -63,6 +63,20 @@ do
 done
 
 for entry in ${search_dir}/*.comp
+do
+    if [ -e "$entry" ]; then
+        compile_if_newer "$entry"
+    fi
+done
+
+for entry in ${search_dir}/*.rgen
+do
+    if [ -e "$entry" ]; then
+        compile_if_newer "$entry"
+    fi
+done
+
+for entry in ${search_dir}/*.rmiss
 do
     if [ -e "$entry" ]; then
         compile_if_newer "$entry"

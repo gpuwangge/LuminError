@@ -24,6 +24,9 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
     auto uniformsNode = yamlNode["Uniforms"];
     if(uniformsNode["Graphics"]) appInfo.Uniform.loadGraphicsFromYaml(uniformsNode["Graphics"]);
     if(uniformsNode["Compute"]) appInfo.Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
+    if(uniformsNode["RayTracing"]) appInfo.Uniform.loadRayTracingFromYaml(uniformsNode["RayTracing"]);
+
+    std::cout<<"RayTracing uniform_raytracing_swapchain_storage: "<<appInfo.Uniform.b_uniform_raytracing_swapchain_storage<<std::endl;
 
     if (uniformsNode["GraphicsTextureImageSamplers"]) {
         int samplerCount = 0;
