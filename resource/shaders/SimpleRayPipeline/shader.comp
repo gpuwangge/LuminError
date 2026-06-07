@@ -1,0 +1,11 @@
+#version 450
+
+layout (local_size_x = 2, local_size_y = 1, local_size_z = 1) in;
+
+layout (binding = 0, rgba8 ) uniform writeonly image2D resultImage;
+
+void main(){
+    vec4 blueColor = vec4(0, 0, 1.0, 1.0);
+     //First write to intermediaColor(rgba8), then copy to swapchain(bgra8) to present. so use bgra here for correct presentation
+    imageStore(resultImage,ivec2(gl_GlobalInvocationID.xy), blueColor.bgra);
+}

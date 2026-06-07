@@ -1,0 +1,33 @@
+Resources:
+  - ComputeShaders:
+    - resource_computeshader_name: simpleRayPipeline/shader.comp.spv
+
+Uniforms:
+  Compute:
+    uniform_compute_name: Compute
+    uniform_compute_global: false
+    storage_compute_windowswap: false
+    storage_compute_material: false
+    storage_compute_triangle: false
+    storage_compute_sphere: false
+    uniform_compute_custom: false
+    storage_compute_customswap: false
+    uniform_compute_texture_storage: false
+    uniform_compute_swapchain_storage: true
+  
+Features:
+  feature_rendermode: 2 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_global_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_show_performance_control: false
+  feature_graphics_show_all_metric_controls: false
+
+Attachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: false
+  mainsceneRenderpass_attachment_color_resovle: false
+  mainsceneRenderpass_attachment_color_present: false
