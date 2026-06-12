@@ -1,6 +1,8 @@
 Resources:
-  - ComputeShaders:
-    - resource_computeshader_name: simpleRayPipeline/shader.comp.spv
+  #- ComputeShaders:
+  #  - resource_computeshader_name: simpleRayPipeline/shader.comp.spv
+  - RayTracingShaders:
+    - resource_raytracingshader_name: simpleRayPipeline/shader.comp.spv #TODO: replace with ray tracing shader
 
 Uniforms:
   Compute:
@@ -13,12 +15,12 @@ Uniforms:
     uniform_compute_custom: false
     storage_compute_customswap: false
     uniform_compute_texture_storage: false
-    uniform_compute_swapchain_storage: true
+    uniform_compute_swapchain_storage: false
   RayTracing:
     uniform_raytracing_swapchain_storage: true
   
 Features:
-  feature_rendermode: 2 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
+  feature_rendermode: 5 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4， RAYTRACING_SWAPCHAIN=5
   feature_graphics_48pbt: false
   feature_graphics_push_constant: false
   feature_graphics_global_blend: false

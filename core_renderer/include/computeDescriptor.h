@@ -148,6 +148,7 @@ public:
      /************
      * Helper Functions
      ************/
+    bool bVerbose = false;
     static int getPoolSize();
     static int getLayoutSize();
     static int getSetSize();

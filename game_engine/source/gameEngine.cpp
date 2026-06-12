@@ -332,10 +332,12 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     //for RenderModes::COMPUTE_SWAPCHAIN, need convert intermediaColor_Image to VK_IMAGE_LAYOUT_GENERAL
     //intermediaColor_Image can only be created as VK_IMAGE_LAYOUT_UNDEFINED
     if(renderer->GetRenderMode() == RenderModes::COMPUTE_SWAPCHAIN){
+        //std::cout<<"Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode COMPUTE_SWAPCHAIN."<<std::endl;
+
         for(int i = 0; i < 2; i++){
             renderer->SetCurrentFrame(i);
 
-            vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
+            vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), 0);//VkCommandBufferResetFlagBits
 
             renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
             renderer->RecordImageBarrier(
@@ -359,6 +361,42 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
                 throw std::runtime_error("failed to submit draw command buffer!");
             }
         }
+
+        renderer->SetCurrentFrame(0);
+        vkDeviceWaitIdle(renderer->GetLogicalDevice());
+    }
+    if(renderer->GetRenderMode() == RenderModes::RAYTRACING_SWAPCHAIN){
+        //std::cout<<"Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode RAYTRACING_SWAPCHAIN."<<std::endl;
+
+        for(int i = 0; i < 2; i++){
+            renderer->SetCurrentFrame(i);
+
+            vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
+
+            renderer->StartRecordComputeCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
+            renderer->RecordImageBarrier(
+                renderer->GetRaytracingCommandBuffer(),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
+                VK_IMAGE_LAYOUT_UNDEFINED,
+                VK_IMAGE_LAYOUT_GENERAL,
+                0,
+                VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
+            );
+            renderer->EndRecordComputeCommandBuffer();
+
+            VkSubmitInfo submitInfo{};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &renderer->GetComputeCommandBuffer();
+
+            if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+                throw std::runtime_error("failed to submit draw command buffer!");
+            }
+        }
+
+
         renderer->SetCurrentFrame(0);
         vkDeviceWaitIdle(renderer->GetLogicalDevice());
     }
@@ -370,10 +408,15 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     while(sdler->IsRunning()){
         sdler->eventHandle();
         if(!NeedToPause) {
+            //std::cout<<"Frame "<<frameCount<<std::endl;
             gamer->Update();
+            //std::cout<<"After gamer->Update()"<<std::endl;
             Update();
+            //std::cout<<"After GameEngine::Update()"<<std::endl;
             Record_Present();
+            //std::cout<<"After GameEngine::Record_Present()"<<std::endl;
             gamer->PostUpdate();
+            //std::cout<<"After gamer->PostUpdate()"<<std::endl;
             renderer->Update(); //update currentFrame
         }
         if(NeedToExit) break;
@@ -523,7 +566,7 @@ void GameEngine::Record_Present(){
         break;
         case RenderModes::COMPUTE_SWAPCHAIN:
         {
-            //std::cout<<"currentFrame: "<<renderer->GetCurrentFrame()<<", initialize_stage[]: "<<initialize_stage_0<<", "<<initialize_stage_1<<std::endl;
+            //std::cout<<"COMPUTE_SWAPCHAIN: currentFrame: "<<renderer->GetCurrentFrame()<<std::endl;
 
             //must wait for fence before record
             renderer->WaitForComputeFence();
@@ -540,9 +583,13 @@ void GameEngine::Record_Present(){
             //recordComputeCommandBuffer();
             //renderer.EndRecordComputeCommandBuffer();
 
+            //std::cout<<"Application: Start recording compute command buffer for COMPUTE_SWAPCHAIN mode."<<std::endl;
+
             //!For swapchain, need convert layout before write stuff in swapchain images
             renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
             
+            //std::cout<<"Application: Record compute command buffer for COMPUTE_SWAPCHAIN mode."<<std::endl;
+
             //The following code was used to write directly into swapchain image(Vulkan 1.4 no longer recommends this)     
             // renderer->RecordImageBarrier(renderer->GetComputeCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentFrame()],
             //     VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, //before write, expect layout to be VK_IMAGE_LAYOUT_GENERAL
@@ -555,6 +602,8 @@ void GameEngine::Record_Present(){
             //     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
             gamer->RecordComputeCommandBuffer();
+
+            //std::cout<<"Application: Finished recording compute command buffer for COMPUTE_SWAPCHAIN mode."<<std::endl;
             
             VkImageCopy copy{};
             copy.dstOffset = { 0,0,0 };
@@ -610,6 +659,8 @@ void GameEngine::Record_Present(){
             vkCmdCopyImage(renderer->GetComputeCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
                 renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
 
+            //std::cout<<"Application: Recorded vkCmdCopyImage to copy from intermedia color image to swapchain image."<<std::endl;
+
             //一句话精准总结（推荐记住这一句）
             //这个 barrier 的作用是：
             //在 swapchain image 的所有 transfer 写完成之后，
@@ -641,6 +692,65 @@ void GameEngine::Record_Present(){
             renderer->EndRecordComputeCommandBuffer();
 
             renderer->SubmitCompute();
+
+            renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
+        break;
+        }
+        case RenderModes::RAYTRACING_SWAPCHAIN:
+        {
+            //td::cout<<"RAYTRACING_SWAPCHAIN: currentFrame: "<<renderer->GetCurrentFrame()<<std::endl;
+
+            //must wait for fence before record
+            renderer->WaitForRaytracingFence();
+            //must aquire swap image before record command buffer
+            renderer->AquireSwapchainImage(renderer->GetSwapchainHandle());
+            //std::cout<<"Application: renderer.imageIndex = "<<renderer.imageIndex<< std::endl;
+            //std::cout<<"Application: renderer.currentFrame = "<<renderer.currentFrame<< std::endl;
+
+            vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
+
+            //std::cout<<"Application: Start recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
+
+            //!For swapchain, need convert layout before write stuff in swapchain images
+            renderer->StartRecordRaytracingCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
+            
+            //std::cout<<"Application: Record raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
+
+            gamer->RecordRaytracingCommandBuffer();
+
+            //std::cout<<"Application: Finished recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
+            
+            VkImageCopy copy{};
+            copy.dstOffset = { 0,0,0 };
+            copy.extent = { renderer->GetSwapchainExtent().width, renderer->GetSwapchainExtent().height, 1};
+            copy.srcOffset = { 0,0,0 };
+
+            VkImageSubresourceLayers subresource{};
+            subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            subresource.baseArrayLayer = 0;
+            subresource.layerCount = 1;
+            subresource.mipLevel = 0;
+            copy.srcSubresource = subresource;
+            copy.dstSubresource = subresource;
+            
+            renderer->RecordImageBarrier(renderer->GetRaytracingCommandBuffer(),  renderer->GetSwapchain_Images()[renderer->GetCurrentImage()],
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                0, VK_ACCESS_TRANSFER_WRITE_BIT, //AccessMask
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT); //StageMask
+
+            vkCmdCopyImage(renderer->GetRaytracingCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
+                renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
+
+
+            renderer->RecordImageBarrier(renderer->GetRaytracingCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentImage()],
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                VK_ACCESS_TRANSFER_WRITE_BIT, 0, //AccessMask
+                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT); //StageMask, 
+            
+
+            renderer->EndRecordRaytracingCommandBuffer();
+
+            renderer->SubmitRaytracing();
 
             renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
         break;
@@ -677,8 +787,15 @@ void GameEngine::Record_Present(){
 
 void GameEngine::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
-    dsSets.push_back(renderer->GetDescriptorSets());
-    renderer->BindComputeDescriptorSets(renderer->GetComputePipelineLayout(), dsSets);
+    dsSets.push_back(renderer->GetComputeDescriptorSets());
+    renderer->BindComputeDescriptorSets(renderer->GetComputePipelineLayout(), dsSets); 
+    renderer->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+}
+
+void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
+    std::vector<std::vector<VkDescriptorSet>> dsSets; 
+    dsSets.push_back(renderer->GetRaytracingDescriptorSets());
+    renderer->BindComputeDescriptorSets(renderer->GetRaytracingPipelineLayout(), dsSets);
     renderer->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
 }
 

@@ -28,7 +28,8 @@ enum UniformTypes {
     COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00020000,
     COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00040000,
     COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00080000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00100000
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00100000,
+    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00200000
 };
 
 struct alignas(16) BVHNode {

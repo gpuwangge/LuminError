@@ -244,7 +244,7 @@ std::unique_ptr<CPhysicalDevice>* CInstance::pickSuitablePhysicalDevice(VkSurfac
                 std::cout << "Physical device does not support required ray tracing features, skipping." << std::endl;
                 continue;
             }
-            std::cout << "Physical device supports required ray tracing features." << std::endl;
+            //std::cout << "Physical device supports required ray tracing features." << std::endl;
             //=======================================
 
             //pickedPhysicalDevice = &phy_device;

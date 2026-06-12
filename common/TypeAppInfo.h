@@ -292,6 +292,14 @@ struct ComputePipelineConfig{
     }
 };
 
+struct RaytracingPipelineConfig{
+    std::string raytracing_pipeline_raytracingshader_name = "Default";
+
+    void loadFromYaml(const YAML::Node& node) {
+        raytracing_pipeline_raytracingshader_name      = getOrDefault(node, "resource_raytracingshader_name", std::string{"Default"});
+    }
+};
+
 struct FontConfig{
     std::string font_name = "Default";
     int font_samplerid = 0;
@@ -418,6 +426,7 @@ struct AppInfo{
     std::vector<TextureConfig> Textures;
     std::vector<GraphicsPipelineConfig> GraphicsPipelines;
     std::vector<ComputePipelineConfig> ComputePipelines;
+    std::vector<RaytracingPipelineConfig> RaytracingPipelines;
 
     FeatureConfig Feature;
     ControlUIContainerConfig ControlUIContainer;

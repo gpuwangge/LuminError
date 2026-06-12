@@ -17,7 +17,7 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
 	graphicsDescriptorPoolSizes.resize(getPoolSize());
 	int counter = 0;
     //std::cout<<"createDescriptorPool::textureSamplers.size() = " << textureSamplers.size()<<std::endl;
-    std::cout<<"Graphics Pool size = " << getPoolSize()<<std::endl;
+    if(bVerbose) std::cout<<"Graphics Pool size = " << getPoolSize()<<std::endl;
 
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_GLOBAL){
         //std::cout<<"Global1"<<std::endl;
@@ -104,7 +104,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     //Descriptor Step 2/3
     graphicsBindings.resize(getLayoutSize_General());
 	int bindingCounter = 0;
-    std::cout<<"Layout(Graphics General) size = " << graphicsBindings.size()<<std::endl;
+    if(bVerbose) std::cout<<"Layout(Graphics General) size = " << graphicsBindings.size()<<std::endl;
     //std::cout<<"graphicsUniformTypes = " << graphicsUniformTypes<<std::endl;
 
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_GLOBAL){
@@ -195,7 +195,7 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 void CGraphicsDescriptorManager::createDescriptorSetLayout_TextureImageSampler(){
     //Descriptor Step 2/3
     graphicsBindings.resize(textureImageSamplers.size());//sampleCount?
-    std::cout<<"Layout(Graphcis Sampler) size = "<<textureImageSamplers.size()<<std::endl;
+    if(bVerbose) std::cout<<"Layout(Graphcis Sampler) size = "<<textureImageSamplers.size()<<std::endl;
 	int bindingCounter = 0;
 
     if(graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE){

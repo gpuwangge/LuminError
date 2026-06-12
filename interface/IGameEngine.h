@@ -92,6 +92,7 @@ namespace LEGameEngine{
         virtual void DownloadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) = 0;
         
         virtual void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
+        virtual void RayTrace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
         virtual void DeviceWaitIdle() = 0;
         virtual void SetPause(bool value) = 0;
         virtual void LogContext(std::string s, float *n, int size) = 0;

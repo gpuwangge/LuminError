@@ -73,6 +73,10 @@ void RendererCore::CreateComputeCommandBuffer(){
     computeCmdId = commandBuffers.size();
     CreateCommandBuffers();
 }
+void RendererCore::CreateRaytracingCommandBuffer(){
+    raytracingCmdId = commandBuffers.size();
+    CreateCommandBuffers();
+}
 void RendererCore::CreateCommandBuffers() {
     //commandBuffers.resize(size); //if enable both graphics and compute pipelines, set 2 commandBuffers: 0-GRAPHCIS, 1-COMPUTE
     std::vector<VkCommandBuffer> commandBuffer;
@@ -114,6 +118,10 @@ void RendererCore::AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVe
 
 void RendererCore::WaitForComputeFence(){
     vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+}
+
+void RendererCore::WaitForRaytracingFence(){
+    vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &raytracingInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 }
 
 void RendererCore::SubmitCompute(bool bVerbose){
@@ -171,6 +179,69 @@ void RendererCore::SubmitCompute(bool bVerbose){
     vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[currentFrame]);
 
     if (vkQueueSubmit(CContext::GetHandle().GetComputeQueue(), 1, &submitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+}
+
+
+void RendererCore::SubmitRaytracing(bool bVerbose){
+    //if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+    //    vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+    //}
+    //imagesInFlight[imageIndex] = inFlightFences[currentFrame];
+    //vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[imageIndex], VK_TRUE, UINT64_MAX);
+
+    //printf("currentFrame: %d, imageIndex: %d \n", currentFrame, imageIndex);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    //this code handles compute semaphores
+    // switch(m_renderMode){
+    //     case GRAPHICS:
+    //         //Pure graphics application doesn't use compute pipeline
+    //     break;
+    //     case GRAPHICS_SHADOWMAP:
+    //     break;
+    //     case COMPUTE:
+    //         //Pure compute application doesn't need swap image or present
+    //     break;
+    //     case COMPUTE_SWAPCHAIN:
+    //     {
+
+        //RAYTRACING_SWAPCHAIN:
+        //Because this mode use swap image to present, wait swap image to be ready
+        VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; //to wait until image is ready
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+
+        //Also because this mode need present swap image, need to tell present that compute is finished
+        VkSemaphore signalSemaphores[] = { raytracingFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; 
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+
+    //     }
+    //     break;
+    //     case COMPUTE_GRAPHICS:
+    //     {
+    //         //This mode doesn't interact with swap image, this semaphore is to tell graphics that compute is finished
+    //         VkSemaphore signalSemaphores[] = { computeFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; 
+    //         submitInfo.signalSemaphoreCount = 1;
+    //         submitInfo.pSignalSemaphores = signalSemaphores;
+    //     }
+    //     break;
+    //     default:
+    //     break;
+    // }
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffers[raytracingCmdId][currentFrame];///!!!
+
+    vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &raytracingInFlightFences[currentFrame]);
+
+    if (vkQueueSubmit(CContext::GetHandle().GetComputeQueue(), 1, &submitInfo, raytracingInFlightFences[currentFrame]) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 }
@@ -284,6 +355,10 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
             //present only if render is finished
             signalSemaphores[0] = renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]; 
         break;
+        case RAYTRACING_SWAPCHAIN:
+            //present only if raytracing is finished
+            signalSemaphores[0] = raytracingFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize];
+        break;
         default:
         break;
     }
@@ -321,6 +396,7 @@ void RendererCore::CreateSyncObjects(int swapchainSize, bool bVerbose) {
     renderFinishedSemaphores.resize(swapchainSize);
     //computeFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     computeFinishedSemaphores.resize(swapchainSize);
+    raytracingFinishedSemaphores.resize(swapchainSize);
 
     //computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -333,13 +409,15 @@ void RendererCore::CreateSyncObjects(int swapchainSize, bool bVerbose) {
     for(int i = 0; i < swapchainSize; i++){
         if (vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
             vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS){
+            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(CContext::GetHandle().GetLogicalDevice(), &semaphoreInfo, nullptr, &raytracingFinishedSemaphores[i]) != VK_SUCCESS){
                 throw std::runtime_error("failed to create synchronization objects for a swapchain image!");
             }
         if(bVerbose){
             std::cout<<"Created imageAvailableSemaphores["<<i<<"]: "<<imageAvailableSemaphores[i]<<std::endl;
             std::cout<<"Created renderFinishedSemaphores["<<i<<"]: "<<renderFinishedSemaphores[i]<<std::endl;
             std::cout<<"Created computeFinishedSemaphores["<<i<<"]: "<<computeFinishedSemaphores[i]<<std::endl;
+            std::cout<<"Created raytracingFinishedSemaphores["<<i<<"]: "<<raytracingFinishedSemaphores[i]<<std::endl;
         }
     }
 
@@ -350,11 +428,13 @@ void RendererCore::CreateSyncObjects(int swapchainSize, bool bVerbose) {
 
     
     computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+    raytracingInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT, VK_NULL_HANDLE);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         if (vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS ||
-            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS) {
+            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &computeInFlightFences[i]) != VK_SUCCESS ||
+            vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &raytracingInFlightFences[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
         //if (vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &computeFinishedSemaphores[i]) != VK_SUCCESS ||
@@ -571,6 +651,16 @@ void RendererCore::StartRecordComputeCommandBuffer(VkPipeline &pipeline, VkPipel
 void RendererCore::EndRecordComputeCommandBuffer(){ EndCommandBuffer(computeCmdId); }
 
 /**************************
+ * Raytracing Shader Functions
+ * ***********************/
+void RendererCore::StartRecordRaytracingCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout){
+    BeginCommandBuffer(raytracingCmdId);
+    //BindPipeline(pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_NV, raytracingCmdId);
+    BindPipeline(pipeline, VK_PIPELINE_BIND_POINT_COMPUTE, raytracingCmdId);
+}
+void RendererCore::EndRecordRaytracingCommandBuffer(){ EndCommandBuffer(raytracingCmdId); }
+
+/**************************
  * Utility Functions
  * ***********************/
 void RendererCore::RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
@@ -622,18 +712,22 @@ void RendererCore::Destroy(){
         vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), imageAvailableSemaphores[i], nullptr);
         vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), computeFinishedSemaphores[i], nullptr);
+        vkDestroySemaphore(CContext::GetHandle().GetLogicalDevice(), raytracingFinishedSemaphores[i], nullptr);
     }
 
     //std::cout<<"Begin Destroy RenderCore(): sync objects"<<std::endl;
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), inFlightFences[i], nullptr);
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), computeInFlightFences[i], nullptr);
+        vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), raytracingInFlightFences[i], nullptr);
     }
     renderFinishedSemaphores.clear();
     imageAvailableSemaphores.clear();
     inFlightFences.clear();
     computeInFlightFences.clear();
     computeFinishedSemaphores.clear();
+    raytracingInFlightFences.clear();
+    raytracingFinishedSemaphores.clear();
 
     vkDestroyCommandPool(CContext::GetHandle().GetLogicalDevice(), commandPool, nullptr);
     commandPool = VK_NULL_HANDLE;
@@ -672,6 +766,7 @@ void RendererCore::SetApplication(LEGameEngine::IGameEngine* pApplication) {
     graphicsDescriptorManager.game = game;
     //computeDescriptorManager.game = game;
     computeDescriptorManager.p_swapchain = &swapchain;
+    raytracingDescriptorManager.p_swapchain = &swapchain;
     swapchain.game = game;
 
     void* pVoid = nullptr;

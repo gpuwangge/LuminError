@@ -16,6 +16,7 @@ public:
     std::vector<VkShaderModule> vertShaderModules;
     std::vector<VkShaderModule> fragShaderModules;
     std::vector<VkShaderModule> compShaderModules;
+    std::vector<VkShaderModule> raytShaderModules;
 
     void CreateShader(const std::string shaderName, short shaderType);
 

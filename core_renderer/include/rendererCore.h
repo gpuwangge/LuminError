@@ -8,6 +8,7 @@
 #include "renderProcess.h"
 #include "graphicsDescriptor.h"
 #include "computeDescriptor.h"
+#include "raytracingDescriptor.h"
 #include "swapchain.h"
 
 #include "instance.h"
@@ -51,6 +52,7 @@ namespace LERenderer{
         VkCommandPool& GetCommandPool() override { return commandPool; }
         VkCommandBuffer& GetGraphicsCommandBuffer() override { return commandBuffers[graphicsCmdId][currentFrame]; }
         VkCommandBuffer& GetComputeCommandBuffer() override { return commandBuffers[computeCmdId][currentFrame]; }
+        VkCommandBuffer& GetRaytracingCommandBuffer() override { return commandBuffers[raytracingCmdId][currentFrame]; }
         std::vector<VkCommandBuffer>& GetComputeCommandBuffers() override { return commandBuffers[computeCmdId]; }
 
         /**************************
@@ -64,14 +66,15 @@ namespace LERenderer{
 
         void AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) override;
         void WaitForComputeFence() override;
+        void WaitForRaytracingFence() override;
         void SubmitCompute(bool bVerbose = false) override;
+        void SubmitRaytracing(bool bVerbose = false) override;
         void WaitForGraphicsFence() override;
         void SubmitGraphics(bool bVerbose = false) override;
         void PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) override; 
 
-
         /**************************
-         * Graphics Functions
+         * Graphics Shader Functions
          * ***********************/
         //Create start() and end() to make sample command recording simple
         void StartRecordGraphicsCommandBuffer(VkRenderPass &renderPass, 
@@ -115,8 +118,13 @@ namespace LERenderer{
         void StartRecordComputeCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout) override;
         void EndRecordComputeCommandBuffer() override;
 
-        void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
+        /**************************
+         * Raytracing Shader Functions
+         * ***********************/
+        void StartRecordRaytracingCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout) override;
+        void EndRecordRaytracingCommandBuffer() override;
 
+        void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
         /**************************
          * Utility Functions
@@ -133,9 +141,11 @@ namespace LERenderer{
 
         int graphicsCmdId = 0;
         int computeCmdId = 0;
+        int raytracingCmdId = 0;
         void CreateCommandPool(VkSurfaceKHR &surface) override;
         void CreateGraphicsCommandBuffer() override;
         void CreateComputeCommandBuffer() override;
+        void CreateRaytracingCommandBuffer() override;
         void CreateCommandBuffers();
 
         void CreateSyncObjects(int swapchainSize, bool bVerbose = false) override;
@@ -163,6 +173,9 @@ namespace LERenderer{
 
         std::vector<VkSemaphore> computeFinishedSemaphores;
         std::vector<VkFence> computeInFlightFences;
+
+        std::vector<VkSemaphore> raytracingFinishedSemaphores;
+        std::vector<VkFence> raytracingInFlightFences;
 
         void SetApplication(LEGameEngine::IGameEngine* pApplication) override;
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
@@ -215,11 +228,13 @@ namespace LERenderer{
         VkRenderPass& GetRenderpass_mainscene() override { return renderProcess.renderPass_mainscene; }
 
         void CreateComputePipelineLayout(VkDescriptorSetLayout &descriptorSetLayout) override { renderProcess.createComputePipelineLayout(descriptorSetLayout); }
+        void CreateRaytracingPipelineLayout(VkDescriptorSetLayout &descriptorSetLayout) override { renderProcess.createRaytracingPipelineLayout(descriptorSetLayout); }
         void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id) override { renderProcess.createGraphicsPipelineLayout(descriptorSetLayouts, graphicsPipelineLayout_id); }
         void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id) override {
             renderProcess.createGraphicsPipelineLayout(descriptorSetLayouts, pushConstantRange, bUsePushConstant, graphicsPipelineLayout_id);
         }
         void CreateComputePipeline(VkShaderModule &computeShaderModule) override { renderProcess.createComputePipeline(computeShaderModule); }
+        void CreateRaytracingPipeline(VkShaderModule &raytracingShaderModule) override { renderProcess.createRaytracingPipeline(raytracingShaderModule); }
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
@@ -236,6 +251,8 @@ namespace LERenderer{
 
         VkPipelineLayout& GetComputePipelineLayout() override { return renderProcess.computePipelineLayout; }
         VkPipeline& GetComputePipeline() override { return renderProcess.computePipeline; }
+        VkPipelineLayout& GetRaytracingPipelineLayout() override { return renderProcess.raytracingPipelineLayout; }
+        VkPipeline& GetRaytracingPipeline() override { return renderProcess.raytracingPipeline; }
         
         VkPipelineLayout& GetGraphicsPipelineLayout(int pipelineId) override { return renderProcess.graphicsPipelineLayouts[pipelineId]; }
         VkPipeline& GetGraphicsPipeline(int pipelineId) override { return renderProcess.graphicsPipelines[pipelineId]; }
@@ -284,18 +301,29 @@ namespace LERenderer{
         virtual void GraphicsDescriptorManagerDestroyAndFree() override { graphicsDescriptorManager.DestroyAndFree(); }
 
         /**************************
-         * Compute Descriptor
+         * Compute/Raytracing Descriptor
          * ***********************/
         CComputeDescriptorManager computeDescriptorManager;
+        CRaytracingDescriptorManager raytracingDescriptorManager;
 
         int GetComputeUniformTypes() override { return computeDescriptorManager.computeUniformTypes; }
         VkDescriptorSetLayout& GetComputeDescriptorSetLayout() override { return computeDescriptorManager.descriptorSetLayout; }
+        VkDescriptorSetLayout& GetRaytracingDescriptorSetLayout() override { return raytracingDescriptorManager.descriptorSetLayout; }
         std::vector<CWxjBuffer>& GetStorageBuffers() override { return computeDescriptorManager.storageBuffers_customswap; }
-        std::vector<VkDescriptorSet>& GetDescriptorSets() override { return computeDescriptorManager.descriptorSets; }
+        std::vector<VkDescriptorSet>& GetComputeDescriptorSets() override { 
+            return computeDescriptorManager.descriptorSets;
+        }
+        std::vector<VkDescriptorSet>& GetRaytracingDescriptorSets() override { 
+            return raytracingDescriptorManager.descriptorSets;
+        }
 
         void createComputeDescriptorPool() override { computeDescriptorManager.createDescriptorPool(); }
         void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { computeDescriptorManager.createDescriptorSetLayout(customBinding); }
         void createComputeDescriptorSets(VkImageView textureImageView = NULL) override { computeDescriptorManager.createDescriptorSets(textureImageView); }
+
+        void createRaytracingDescriptorPool() override { raytracingDescriptorManager.createDescriptorPool(); }
+        void createRaytracingDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { raytracingDescriptorManager.createDescriptorSetLayout(customBinding); }
+        void createRaytracingDescriptorSets(VkImageView textureImageView = NULL) override { raytracingDescriptorManager.createDescriptorSets(textureImageView); }
 
         void addComputeGlobalUniformBuffer() { computeDescriptorManager.addGlobalUniformBuffer(); }
         void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) { computeDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
@@ -323,9 +351,22 @@ namespace LERenderer{
         void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_customswap(currentFrame, data, size); }
         void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer_customswap(currentFrame, data, size); }
         
-        void addStorageImage(VkBufferUsageFlags usage) override { computeDescriptorManager.addStorageImage(usage); }
+        void addStorageImage(VkBufferUsageFlags usage) override {
+            if(usage == COMPUTE_STORAGEIMAGE_SWAPCHAIN){
+                computeDescriptorManager.addStorageImage(usage);
+                //std::cout<<"Added Compute Storage Image for Swapchain"<<std::endl;
+            }else if(usage == COMPUTE_STORAGEIMAGE_TEXTURE){
+                computeDescriptorManager.addStorageImage(usage);
+                //std::cout<<"Added Compute Storage Image for Texture"<<std::endl;
+            }   
+            else if(usage == RAYTRACING_STORAGEIMAGE_SWAPCHAIN){
+                raytracingDescriptorManager.addStorageImage(usage);
+                //std::cout<<"Added Raytracing Storage Image for Swapchain"<<std::endl;
+            }
+        }
 
 	    void ComputeDescriptorManagerDestroyAndFree() override { computeDescriptorManager.DestroyAndFree(); }
+        void RaytracingDescriptorManagerDestroyAndFree() override { raytracingDescriptorManager.DestroyAndFree(); }
 
         /**************************
          * Swapchain

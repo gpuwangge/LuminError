@@ -421,6 +421,34 @@ void CRenderProcess::createComputePipeline(VkShaderModule &computeShaderModule){
 	}
 }
 
+void CRenderProcess::createRaytracingPipelineLayout(VkDescriptorSetLayout &descriptorSetLayout){
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = 1;
+	pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+
+	if (vkCreatePipelineLayout(CContext::GetHandle().GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &raytracingPipelineLayout) != VK_SUCCESS) 
+		throw std::runtime_error("failed to create raytracing pipeline layout!");
+}
+void CRenderProcess::createRaytracingPipeline(VkShaderModule &raytracingShaderModule){
+	bCreateRaytracingPipeline = true;
+	
+	VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+	computeShaderStageInfo.module = raytracingShaderModule;
+	computeShaderStageInfo.pName = "main";
+
+	VkComputePipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	pipelineInfo.layout = raytracingPipelineLayout;
+	pipelineInfo.stage = computeShaderStageInfo;
+
+	if (vkCreateComputePipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &raytracingPipeline) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create raytracing pipeline!");
+	}
+}
+
 void CRenderProcess::createGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id){
 	VkPushConstantRange dummyPushConstantRange;
 	createGraphicsPipelineLayout(descriptorSetLayouts, dummyPushConstantRange, false, graphicsPipelineLayout_id);
@@ -681,6 +709,11 @@ void CRenderProcess::Cleanup(){
 	if(bCreateComputePipeline){
 		vkDestroyPipeline(CContext::GetHandle().GetLogicalDevice(), computePipeline, nullptr);
     	vkDestroyPipelineLayout(CContext::GetHandle().GetLogicalDevice(), computePipelineLayout, nullptr);
+	}
+
+	if(bCreateRaytracingPipeline){
+		vkDestroyPipeline(CContext::GetHandle().GetLogicalDevice(), raytracingPipeline, nullptr);
+		vkDestroyPipelineLayout(CContext::GetHandle().GetLogicalDevice(), raytracingPipelineLayout, nullptr);
 	}
 	
 }

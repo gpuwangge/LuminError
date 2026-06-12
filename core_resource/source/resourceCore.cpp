@@ -34,6 +34,7 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
 VkShaderModule& ResourceCore::GetVertexShaderModule(int index) { return shaderManager.vertShaderModules[index]; }
 VkShaderModule& ResourceCore::GetFragmentShaderModule(int index) { return shaderManager.fragShaderModules[index]; }
 VkShaderModule& ResourceCore::GetComputeShaderModule(int index) { return shaderManager.compShaderModules[index]; }
+VkShaderModule& ResourceCore::GetRaytracingShaderModule(int index) { return shaderManager.raytShaderModules[index]; }
 void ResourceCore::CreateShaderPushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset, uint32_t size) { shaderManager.CreatePushConstantRange(shaderStageFlagBits, offset, size); }
 bool ResourceCore::GetShaderEnablePushConstant() { return shaderManager.bEnablePushConstant; }
 VkPushConstantRange& ResourceCore::GetShaderPushConstantRange() { return shaderManager.pushConstantRange; }

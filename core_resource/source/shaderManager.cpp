@@ -11,20 +11,26 @@ void CShaderManager::CreateShader(const std::string shaderName, short shaderType
             VkShaderModule newShaderModule;
             vertShaderModules.push_back(newShaderModule);
             pShaderModule = &vertShaderModules[vertShaderModules.size()-1];
-        break;
+            break;
         }
         case FRAG:{
             VkShaderModule newShaderModule;
             fragShaderModules.push_back(newShaderModule);
             pShaderModule = &fragShaderModules[fragShaderModules.size()-1];
-        break;
+            break;
         }
         case COMP:{
             //pShaderModule = &compShaderModule;
             VkShaderModule newShaderModule;
             compShaderModules.push_back(newShaderModule);
             pShaderModule = &compShaderModules[compShaderModules.size()-1];
-        break;
+            break;
+        }
+        case RAYT:{
+            VkShaderModule newShaderModule;
+            raytShaderModules.push_back(newShaderModule);
+            pShaderModule = &raytShaderModules[raytShaderModules.size()-1];
+            break;
         }
         default:
             throw std::runtime_error("Invalid shader type!");
@@ -86,6 +92,7 @@ void CShaderManager::Destroy(){
     for(int i = 0; i < vertShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, vertShaderModules[i], nullptr);
     for(int i = 0; i < fragShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, fragShaderModules[i], nullptr);
     for(int i = 0; i < compShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, compShaderModules[i], nullptr);
+    for(int i = 0; i < raytShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, raytShaderModules[i], nullptr);
 }
 
 }//namespace

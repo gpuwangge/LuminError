@@ -6,9 +6,10 @@ enum RenderModes {
     COMPUTE,
     COMPUTE_SWAPCHAIN,
     COMPUTE_GRAPHICS,
-    GRAPHICS_SHADOWMAP
+    GRAPHICS_SHADOWMAP,
+    RAYTRACING_SWAPCHAIN
 };
 
-enum ShaderTypes{VERT, FRAG, COMP};
+enum ShaderTypes{VERT, FRAG, COMP, RAYT};
 
 

@@ -18,7 +18,7 @@ void CComputeDescriptorManager::createDescriptorPool(){
 	computeDescriptorPoolSizes.resize(getPoolSize());
 	int counter = 0;
     //std::cout<<"createDescriptorPool::textureSamplers.size() = " << textureSamplers.size()<<std::endl;
-    std::cout<<"Compute Pool size = " << getPoolSize()<<std::endl;
+    if(bVerbose) std::cout<<"Compute Pool size = " << getPoolSize()<<std::endl;
 
     if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL){
         computeDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -119,7 +119,7 @@ void CComputeDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutB
 
     computeBindings.resize(getLayoutSize());
 	int counter = 0;
-    std::cout<<"Layout(Compute) size = " << getLayoutSize()<<std::endl;
+    if(bVerbose) std::cout<<"Layout(Compute) size = " << getLayoutSize()<<std::endl;
     //std::cout.flush();
     if(computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL){
         VkDescriptorSetLayoutBinding binding = StructComputeGlobalUniformBuffer::GetBinding();

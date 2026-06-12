@@ -32,6 +32,7 @@ namespace LERenderer{
         virtual VkCommandPool& GetCommandPool() = 0;
         virtual VkCommandBuffer& GetGraphicsCommandBuffer() = 0;
         virtual VkCommandBuffer& GetComputeCommandBuffer() = 0;
+        virtual VkCommandBuffer& GetRaytracingCommandBuffer() = 0;
         virtual void CreateCommandPool(VkSurfaceKHR &surface) = 0;
         virtual std::vector<VkCommandBuffer>& GetComputeCommandBuffers() = 0;
 
@@ -39,12 +40,15 @@ namespace LERenderer{
         virtual void CreateIndexBuffer (std::vector<uint32_t> &indices3D) = 0;
         virtual void CreateGraphicsCommandBuffer() = 0;
         virtual void CreateComputeCommandBuffer() = 0;
+        virtual void CreateRaytracingCommandBuffer() = 0;
 
         virtual void CreateSyncObjects(int swapchainSize, bool bVerbose = false) = 0;
 
         virtual void AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) = 0;
         virtual void WaitForComputeFence() = 0;
+        virtual void WaitForRaytracingFence() = 0;
         virtual void SubmitCompute(bool bVerbose = false) = 0;
+        virtual void SubmitRaytracing(bool bVerbose = false) = 0;
         virtual void WaitForGraphicsFence() = 0;
         virtual void SubmitGraphics(bool bVerbose = false) = 0;
         virtual void PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) = 0;
@@ -72,6 +76,9 @@ namespace LERenderer{
 
         virtual void StartRecordComputeCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout) = 0;
         virtual void EndRecordComputeCommandBuffer() = 0;
+        virtual void StartRecordRaytracingCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout) = 0;
+        virtual void EndRecordRaytracingCommandBuffer() = 0;
+
         virtual void RecordImageBarrier(VkCommandBuffer buffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
                 VkAccessFlags scrAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask) = 0;
 
@@ -137,9 +144,11 @@ namespace LERenderer{
         virtual VkRenderPass& GetRenderpass_mainscene() = 0;
 
         virtual void CreateComputePipelineLayout(VkDescriptorSetLayout &descriptorSetLayout) = 0;
+        virtual void CreateRaytracingPipelineLayout(VkDescriptorSetLayout &descriptorSetLayout) = 0;
         virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id) = 0;
         virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id) = 0;
         virtual void CreateComputePipeline(VkShaderModule &computeShaderModule) = 0;
+        virtual void CreateRaytracingPipeline(VkShaderModule &raytracingShaderModule) = 0;
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
@@ -151,6 +160,8 @@ namespace LERenderer{
 
         virtual VkPipelineLayout& GetComputePipelineLayout() = 0;
         virtual VkPipeline& GetComputePipeline() = 0;
+        virtual VkPipelineLayout& GetRaytracingPipelineLayout() = 0;
+        virtual VkPipeline& GetRaytracingPipeline() = 0;
 
         virtual VkPipelineLayout& GetGraphicsPipelineLayout(int pipelineId) = 0;
         virtual VkPipeline& GetGraphicsPipeline(int pipelineId) = 0;
@@ -196,16 +207,22 @@ namespace LERenderer{
         virtual void GraphicsDescriptorManagerDestroyAndFree() = 0;
 
         /**************************
-         * Compute Descriptor
+         * Compute/Raytracing Descriptor
          * ***********************/
         virtual int GetComputeUniformTypes() = 0;
         virtual VkDescriptorSetLayout& GetComputeDescriptorSetLayout() = 0;
+        virtual VkDescriptorSetLayout& GetRaytracingDescriptorSetLayout() = 0;
         virtual std::vector<CWxjBuffer>& GetStorageBuffers() = 0;
-        virtual std::vector<VkDescriptorSet>& GetDescriptorSets() = 0;
+        virtual std::vector<VkDescriptorSet>& GetComputeDescriptorSets() = 0;
+        virtual std::vector<VkDescriptorSet>& GetRaytracingDescriptorSets() = 0;
 
         virtual void createComputeDescriptorPool() = 0;
         virtual void createComputeDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
         virtual void createComputeDescriptorSets(VkImageView textureImageView = NULL) = 0;
+
+        virtual void createRaytracingDescriptorPool() = 0;
+        virtual void createRaytracingDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
+        virtual void createRaytracingDescriptorSets(VkImageView textureImageView = NULL) = 0;
 
         virtual void addComputeGlobalUniformBuffer() = 0;
         virtual void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
@@ -234,6 +251,7 @@ namespace LERenderer{
         virtual void addStorageImage(VkBufferUsageFlags usage) = 0;
 
 	    virtual void ComputeDescriptorManagerDestroyAndFree() = 0;
+        virtual void RaytracingDescriptorManagerDestroyAndFree() = 0;
 
         /**************************
          * Swapchain

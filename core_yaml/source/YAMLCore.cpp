@@ -26,7 +26,9 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
     if(uniformsNode["Compute"]) appInfo.Uniform.loadComputeFromYaml(uniformsNode["Compute"]);
     if(uniformsNode["RayTracing"]) appInfo.Uniform.loadRayTracingFromYaml(uniformsNode["RayTracing"]);
 
-    std::cout<<"RayTracing uniform_raytracing_swapchain_storage: "<<appInfo.Uniform.b_uniform_raytracing_swapchain_storage<<std::endl;
+    //std::cout<<"Compute b_uniform_compute_swapchain_storage: "<<appInfo.Uniform.b_uniform_compute_swapchain_storage<<std::endl;
+    //std::cout<<"Compute b_uniform_compute_texture_storage: "<<appInfo.Uniform.b_uniform_compute_texture_storage<<std::endl;
+    //std::cout<<"RayTracing b_uniform_raytracing_swapchain_storage: "<<appInfo.Uniform.b_uniform_raytracing_swapchain_storage<<std::endl;
 
     if (uniformsNode["GraphicsTextureImageSamplers"]) {
         int samplerCount = 0;
@@ -73,6 +75,14 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
             appInfo.ComputePipelines.resize(computePipelineCount);
             computePipelineCount = 0;
             for (const auto& computeShader : resource["ComputeShaders"]) appInfo.ComputePipelines[computePipelineCount++].loadFromYaml(computeShader);
+        }
+
+        if(resource["RayTracingShaders"]) {
+            int raytracingPipelineCount = 0;
+            for (const auto& pipeline : resource["RayTracingShaders"]) raytracingPipelineCount++;
+            appInfo.RaytracingPipelines.resize(raytracingPipelineCount);
+            raytracingPipelineCount = 0;
+            for (const auto& raytracingShader : resource["RayTracingShaders"]) appInfo.RaytracingPipelines[raytracingPipelineCount++].loadFromYaml(raytracingShader);
         }
     }
 

@@ -140,6 +140,7 @@ void GameEngine::CleanUp(){
     ********************/
     renderer->GraphicsDescriptorManagerDestroyAndFree();
     renderer->ComputeDescriptorManagerDestroyAndFree();
+    renderer->RaytracingDescriptorManagerDestroyAndFree();
 
     /*********************
     *1.4 Command Pool
@@ -288,6 +289,11 @@ void GameEngine::DrawParticlesFromStorageBuffer(int objectId, uint32_t particleC
 void GameEngine::ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
     Dispatch(numWorkGroupsX,numWorkGroupsY,numWorkGroupsZ);
 }
+
+void GameEngine::RayTrace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
+    Trace(numWorkGroupsX,numWorkGroupsY,numWorkGroupsZ);
+}
+
 
 void GameEngine::SetComputeCustomSize(int size) { appInfo->Uniform.ComputeCustom.Size = size; }
 void GameEngine::SetComputeCustomBinding(void* binding) {

@@ -122,25 +122,34 @@ public:
     /*******************************
     * Pipeline Layouts and Pipelines
     ********************************/
-    void createComputePipelineLayout(VkDescriptorSetLayout &descriptorSetLayout);
-
+    /*Layouts*/
     void createGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id);
     void createGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id);
+    void createComputePipelineLayout(VkDescriptorSetLayout &descriptorSetLayout);
+    void createRaytracingPipelineLayout(VkDescriptorSetLayout &descriptorSetLayout);
+
+    /*Pipeline variables*/
+    bool bCreateGraphicsPipeline = false;
+    std::vector<VkPipelineLayout> graphicsPipelineLayouts;
+    std::vector<VkPipeline> graphicsPipelines;  
 
     bool bCreateComputePipeline = false;
     VkPipelineLayout computePipelineLayout;
 	VkPipeline computePipeline;
 
-    bool bCreateGraphicsPipeline = false;
-    std::vector<VkPipelineLayout> graphicsPipelineLayouts;
-    std::vector<VkPipeline> graphicsPipelines;  
+    bool bCreateRaytracingPipeline = false;
+    VkPipelineLayout raytracingPipelineLayout;
+    VkPipeline raytracingPipeline;
     
-    void createComputePipeline(VkShaderModule &computeShaderModule);
+    /*Pipeline create functions*/
+    
     using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
     using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
     void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
         VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
         VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo);
+    void createComputePipeline(VkShaderModule &computeShaderModule);
+    void createRaytracingPipeline(VkShaderModule &raytracingShaderModule);
 
 };
 

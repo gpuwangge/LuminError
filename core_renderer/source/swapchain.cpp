@@ -208,7 +208,7 @@ void CSwapchain::createSwapchainViews(VkImageAspectFlags aspectFlags){
 
 //Resource#5.intermediaColor_images and IntermediaColor_views
 void CSwapchain::createIntermediaColor(int width, int height){
-    //std::cout<<"width = "<<width<<", height = "<<height<<std::endl;
+    //std::cout<<"Create Intermedia Color: width = "<<width<<", height = "<<height<<", swapchainImageSize = "<<swapchainImageSize<<std::endl;
     VkImageUsageFlags usage = VK_IMAGE_LAYOUT_GENERAL | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     //VkFormat format = VK_FORMAT_R32G32B32A32_SFLOAT;
     VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;

@@ -26,6 +26,7 @@ namespace LEResource{
         virtual VkShaderModule& GetVertexShaderModule(int index) = 0;
         virtual VkShaderModule& GetFragmentShaderModule(int index) = 0;
         virtual VkShaderModule& GetComputeShaderModule(int index) = 0;
+        virtual VkShaderModule& GetRaytracingShaderModule(int index) = 0;
         virtual bool GetShaderEnablePushConstant() = 0;
         virtual void CreateShaderPushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset, uint32_t size) = 0;
         virtual VkPushConstantRange& GetShaderPushConstantRange() = 0;

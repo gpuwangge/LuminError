@@ -50,17 +50,17 @@ void GameEngine::Initialize(){
     * 3 Precompute size for object/textbox/light
     ****************************/
     objects.resize(appInfo->Objects.size() + objectCountControl);
-    std::cout<<"Object Size: "<<objects.size()<<std::endl;
+    //std::cout<<"Object Size: "<<objects.size()<<std::endl;
     
     textManager.m_textBoxes.resize(appInfo->Textboxes.size() + textboxCountControl);
     for(int i = 0; i < textManager.m_textBoxes.size(); i++)
         textManager.m_textBoxes[i].p_textManager = &textManager;
-    std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
+    //std::cout<<"Textbox Size: "<<textManager.m_textBoxes.size()<<std::endl;
     
     lights.resize(appInfo->Lights.size() + lightCountControl);
     renderer->ResizeSwapchain_buffer_depthlight(lights.size());
     renderer->ResizeSwapchain_framebuffers_shadowmap(lights.size());
-    std::cout<<"Light Size: "<<lights.size()<<std::endl;
+    //std::cout<<"Light Size: "<<lights.size()<<std::endl;
 
     CLightManager::m_lightingUBO.lightNum = lights.size(); //update light number to ubo
 
@@ -108,6 +108,7 @@ void GameEngine::Initialize(){
 
     if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
     if(appInfo->Uniform.b_uniform_compute_swapchain_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
+    if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
 
     if(appInfo->Samplers.size() > 0){
         //CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE;
@@ -335,10 +336,12 @@ void GameEngine::Initialize(){
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_global || appInfo->Uniform.b_storage_compute_windowswap || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_storage_compute_material || appInfo->Uniform.b_storage_compute_triangle_vertex_attribute || appInfo->Uniform.b_storage_compute_triangle_vertex_index || appInfo->Uniform.b_storage_compute_triangle_reorder_index || appInfo->Uniform.b_storage_compute_bvhnode || appInfo->Uniform.b_storage_compute_sphere;
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap;
+    bool b_uniform_raytracing = appInfo->Uniform.b_uniform_raytracing_swapchain_storage;
 
     //UNIFORM STEP 1/3 (Pool)
     renderer->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
     renderer->createComputeDescriptorPool();
+    renderer->createRaytracingDescriptorPool();
 
     //UNIFORM STEP 2/3 (Layer)
     if(b_uniform_graphics){
@@ -352,11 +355,14 @@ void GameEngine::Initialize(){
     }
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_custom) {
+            //std::cout<<"Application: Create Compute Descriptor Set Layout with custom uniform buffer, binding = "<<std::endl;//<<appInfo->Uniform.ComputeCustom.Binding<<std::endl;
             renderer->createComputeDescriptorSetLayout(&appInfo->Uniform.ComputeCustom.Binding);
         }else {
+            //std::cout<<"Application: Create Compute Descriptor Set Layout without custom uniform buffer"<<std::endl;
             renderer->createComputeDescriptorSetLayout();
         }
     }
+    if(b_uniform_raytracing) renderer->createRaytracingDescriptorSetLayout();
 
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
@@ -367,6 +373,11 @@ void GameEngine::Initialize(){
             if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->createComputeDescriptorSets(resourcer->GetTextureImageView(0));//this must be called after texture resource is loaded
             else renderer->createComputeDescriptorSets(NULL);
         }else renderer->createComputeDescriptorSets();
+    }
+    if(b_uniform_raytracing) {
+        //if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->createRaytracingDescriptorSets(NULL);
+        //else renderer->createRaytracingDescriptorSets();
+        renderer->createRaytracingDescriptorSets();
     }
 
     TimePoint T7 = now();
@@ -384,6 +395,7 @@ void GameEngine::Initialize(){
     if(appInfo->GraphicsPipelines.size() > 0) renderer->CreateGraphicsCommandBuffer();
     //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
     if(appInfo->ComputePipelines.size() > 0) renderer->CreateComputeCommandBuffer();
+    if(appInfo->RaytracingPipelines.size() > 0) renderer->CreateRaytracingCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
     
     /****************************
@@ -397,9 +409,18 @@ void GameEngine::Initialize(){
             resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_fragmentshader_name, FRAG);
         }
     }
-    if(appInfo->ComputePipelines.size() > 0)
-        for(int i = 0; i < appInfo->ComputePipelines.size(); i++)
+    if(appInfo->ComputePipelines.size() > 0){
+        for(int i = 0; i < appInfo->ComputePipelines.size(); i++){
             resourcer->CreateShader(appInfo->ComputePipelines[i].compute_pipeline_computeshader_name, COMP);
+        }
+    }
+    //std::cout<<"RaytracingPipelines size: "<<appInfo->RaytracingPipelines.size()<<std::endl;
+    if(appInfo->RaytracingPipelines.size() > 0){
+        for(int i = 0; i < appInfo->RaytracingPipelines.size(); i++){ 
+            //std::cout<<"CreatePipeline: Done Create Shader for pipeline: "<<appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name<<std::endl;
+            resourcer->CreateShader(appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name, RAYT);
+        }
+    }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
 
     /****************************
@@ -497,6 +518,17 @@ void GameEngine::Initialize(){
         renderer->CreateComputePipelineLayout(renderer->GetComputeDescriptorSetLayout());
         if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute pipeline"<<std::endl;
         renderer->CreateComputePipeline(resourcer->GetComputeShaderModule(0));
+        if(bPipelineVerbose) std::cout<<"Done create one compute pipeline"<<std::endl;
+    }
+    if(appInfo->RaytracingPipelines.size() > 0){ //for now assume only one raytracing pipeline
+        //renderer->CreateComputePipelineLayout(renderer->GetRaytracingDescriptorSetLayout());
+        //renderer->CreateComputePipeline(resourcer->GetRaytracingShaderModule(0));
+
+        //! only support one raytracing pipeline
+        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing layout"<<std::endl;
+        renderer->CreateRaytracingPipelineLayout(renderer->GetRaytracingDescriptorSetLayout());
+        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing pipeline"<<std::endl;
+        renderer->CreateRaytracingPipeline(resourcer->GetRaytracingShaderModule(0));
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 

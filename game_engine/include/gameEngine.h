@@ -115,6 +115,7 @@ namespace LEGameEngine{
         * Helper Functions
         ******************/
         void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);
+        void Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);
         std::string GetPureName(const std::string& path);
 
         /******************
@@ -199,6 +200,7 @@ namespace LEGameEngine{
         void DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) override;
 
         void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
+        void RayTrace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
         void SetComputeCustomSize(int size) override;
         void SetComputeCustomBinding(void* binding) override;

@@ -8,11 +8,14 @@
 #include "IGame.h"
 #include "Enum.h"
 #include "Config.h"
+//#include <iostream>
 namespace LuminError{
     class Game : public IGame {
-        void RecordComputeCommandBuffer() override{
+        void RecordRaytracingCommandBuffer() override{
             //Option 2: record command buffer every frame
-            GameEngine->ComputeDispatch(200, 300, 1);
+            //std::cout<<"Game: Start recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
+            GameEngine->RayTrace(200, 300, 1);
+            //std::cout<<"Game: Finished recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
             
             //Option 3: another test function
             //GameEngine->CreateComputeCommandBuffers_DispatchForSwapchainImage_(200, 300, 1); 
