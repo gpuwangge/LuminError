@@ -293,10 +293,20 @@ struct ComputePipelineConfig{
 };
 
 struct RaytracingPipelineConfig{
-    std::string raytracing_pipeline_raytracingshader_name = "Default";
+    std::string resource_raytracing_pipeline_raygeneration_shader_name = "Default";
+    std::string resource_raytracing_pipeline_miss_shader_name = "Default";
+    std::string resource_raytracing_pipeline_closesthit_shader_name = "Default";
+    std::string resource_raytracing_pipeline_anyhit_shader_name = "Default";
+    std::string resource_raytracing_pipeline_intersection_shader_name = "Default";
+    std::string resource_raytracing_pipeline_callable_shader_name = "Default";
 
     void loadFromYaml(const YAML::Node& node) {
-        raytracing_pipeline_raytracingshader_name      = getOrDefault(node, "resource_raytracingshader_name", std::string{"Default"});
+        resource_raytracing_pipeline_raygeneration_shader_name  = getOrDefault(node, "resource_raytracing_pipeline_raygeneration_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_miss_shader_name           = getOrDefault(node, "resource_raytracing_pipeline_miss_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_closesthit_shader_name     = getOrDefault(node, "resource_raytracing_pipeline_closesthit_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_anyhit_shader_name         = getOrDefault(node, "resource_raytracing_pipeline_anyhit_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_intersection_shader_name   = getOrDefault(node, "resource_raytracing_pipeline_intersection_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_callable_shader_name       = getOrDefault(node, "resource_raytracing_pipeline_callable_shader_name", std::string{"Default"});
     }
 };
 

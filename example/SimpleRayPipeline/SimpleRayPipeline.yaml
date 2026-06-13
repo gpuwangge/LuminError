@@ -2,7 +2,12 @@ Resources:
   #- ComputeShaders:
   #  - resource_computeshader_name: simpleRayPipeline/shader.comp.spv
   - RayTracingShaders:
-    - resource_raytracingshader_name: simpleRayPipeline/shader.comp.spv #TODO: replace with ray tracing shader
+      resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/shader.comp.spv #TODO: replace with ray tracing shader
+      resource_raytracing_pipeline_miss_shader_name: simpleRayPipeline/miss.rmiss
+      resource_raytracing_pipeline_closesthit_shader_name: none
+      resource_raytracing_pipeline_anyhit_shader_name: none
+      resource_raytracing_pipeline_intersection_shader_name: none
+      resource_raytracing_pipeline_callable_shader_name: none
 
 Uniforms:
   Compute:

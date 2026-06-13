@@ -77,13 +77,17 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
             for (const auto& computeShader : resource["ComputeShaders"]) appInfo.ComputePipelines[computePipelineCount++].loadFromYaml(computeShader);
         }
 
-        if(resource["RayTracingShaders"]) {
-            int raytracingPipelineCount = 0;
-            for (const auto& pipeline : resource["RayTracingShaders"]) raytracingPipelineCount++;
-            appInfo.RaytracingPipelines.resize(raytracingPipelineCount);
-            raytracingPipelineCount = 0;
-            for (const auto& raytracingShader : resource["RayTracingShaders"]) appInfo.RaytracingPipelines[raytracingPipelineCount++].loadFromYaml(raytracingShader);
+        if (resource["RayTracingShaders"]){
+            appInfo.RaytracingPipelines.emplace_back();
+            appInfo.RaytracingPipelines.back().loadFromYaml(resource["RayTracingShaders"]);
         }
+        // std::cout<<appInfo.RaytracingPipelines.size()<<" ray tracing pipelines loaded from YAML."<<std::endl;   
+        // std::cout<<"First ray tracing pipeline's ray generation shader: "<<appInfo.RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name<<std::endl;
+        // std::cout<<"First ray tracing pipeline's miss shader: "<<appInfo.RaytracingPipelines[0].resource_raytracing_pipeline_miss_shader_name<<std::endl;
+        // std::cout<<"First ray tracing pipeline's closest hit shader: "<<appInfo.RaytracingPipelines[0].resource_raytracing_pipeline_closesthit_shader_name<<std::endl;
+        // std::cout<<"First ray tracing pipeline's any hit shader: "<<appInfo.RaytracingPipelines[0].resource_raytracing_pipeline_anyhit_shader_name<<std::endl;
+        // std::cout<<"First ray tracing pipeline's intersection shader: "<<appInfo.RaytracingPipelines[0].resource_raytracing_pipeline_intersection_shader_name<<std::endl;
+        // std::cout<<"First ray tracing pipeline's callable shader: "<<appInfo.RaytracingPipelines[0].resource_raytracing_pipeline_callable_shader_name<<std::endl;   
     }
 
     if(yamlNode["Attachments"]) appInfo.Attachment.loadFromYaml(yamlNode["Attachments"]);
