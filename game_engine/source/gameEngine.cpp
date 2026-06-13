@@ -70,6 +70,13 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
 
     gamer->PreInitialize();
 
+    yamler->ReadExampleYAMLFile(exampleName);
+    //bool bEnableGraphicsPipleine_raytarcing;
+    bool bEnableComputePipeline_raytracing = appInfo->Uniform.b_storage_compute_bvhnode ? true : false;
+    bool bEnableRaytracingPipeline_raytracing = appInfo->Uniform.b_uniform_raytracing_swapchain_storage ? true : false;
+    std::cout<<"bEnableComputePipeline_raytracing: "<<bEnableComputePipeline_raytracing<<std::endl;
+    std::cout<<"bEnableRaytracingPipeline_raytracing: "<<bEnableRaytracingPipeline_raytracing<<std::endl;
+
     /**************** 
     * Five steps with third-party(GLFW or SDL) initialization
     * Step 1: Create Window
@@ -125,7 +132,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     // //App dev will fill command buffer with commands later
     // //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     // CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
-    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers); //also create logical device and command queues here
+    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers, bEnableRaytracingPipeline_raytracing); //also create logical device and command queues here
     
     if (!LoadRayTracingFunctions(renderer->GetLogicalDevice())) {//ray tracing TODO, load function after logical device is created
         logger->Log("Failed to load ray tracing functions\n");
@@ -156,7 +163,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     TimePoint T0 = now();
     gamer->Initialize();
 
-    yamler->ReadExampleYAMLFile(exampleName);
+    
     //SetRenderMode(appInfo->Feature.feature_rendermode);
 
     //Ray Tracing Setup 1: prepare material storage buffer data

@@ -431,7 +431,7 @@ namespace LERenderer{
         }
         VkInstance GetInstance() override { return instance.get()->getHandle(); }
 
-        void CreatePhysicalDevice(const std::vector<const char*> requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers) override {
+        void CreatePhysicalDevice(const std::vector<const char*> requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers, const bool enableRaytracingPipeline) override {
             instance->findAllPhysicalDevices();
 
             CContext::GetHandle().physicalDevice = instance->pickSuitablePhysicalDevice(surface, requireDeviceExtensions, requiredQueueFamilies);
@@ -439,7 +439,7 @@ namespace LERenderer{
             //App dev operates logical device, can logical device communicate with physical device by command queues
             //App dev will fill command buffer with commands later
             //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
-            CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
+            CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions, enableRaytracingPipeline);
         }
 
         VkDebugUtilsMessengerEXT GetDebugMessenger() override {

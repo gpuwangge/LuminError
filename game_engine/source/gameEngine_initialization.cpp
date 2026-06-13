@@ -425,6 +425,7 @@ void GameEngine::Initialize(){
         //for(int i = 0; i < appInfo->RaytracingPipelines.size(); i++){ 
             //std::cout<<"CreatePipeline: Done Create Shader for pipeline: "<<appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name<<std::endl;
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_miss_shader_name, RAYT);
         //}
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;

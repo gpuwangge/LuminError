@@ -118,7 +118,7 @@ SwapChainSupportDetails CPhysicalDevice::querySwapChainSupport(VkSurfaceKHR surf
     return details;
 }
 
-void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions){
+void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions, const bool enableRaytracingPipeline){
     //HERE_I_AM("createLogicalDevices");
     
     //physicalDevices.push_back(std::make_unique<CPhysicalDevice>(physical_device));
@@ -150,7 +150,32 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    if(enableRaytracingPipeline){
+    /////////////////Ray Tracing Related/////////////
+        VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
+        bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+        bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
+
+        VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
+        accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+        accelerationStructureFeatures.accelerationStructure = VK_TRUE;
+        accelerationStructureFeatures.pNext = &bufferDeviceAddressFeatures;
+
+        VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
+        rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+        rayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
+        rayTracingPipelineFeatures.pNext = &accelerationStructureFeatures;
+
+        VkPhysicalDeviceFeatures2 deviceFeatures2{};
+        deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        deviceFeatures2.pNext = &rayTracingPipelineFeatures; //ray tracing related features can be added here
+
+        createInfo.pNext = &deviceFeatures2; //ray tracing related features can be added here
+        ////////////////////////////////////////////
+    }else{
+        //The Vulkan spec states: If the pNext chain includes a VkPhysicalDeviceFeatures2 structure, then pEnabledFeatures must be NULL
+        createInfo.pEnabledFeatures = &deviceFeatures; 
+    }
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(requireDeviceExtensions.size());
     createInfo.ppEnabledExtensionNames = requireDeviceExtensions.data();

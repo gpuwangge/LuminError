@@ -309,7 +309,7 @@ namespace LERenderer{
         virtual void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions) = 0;
         virtual VkInstance GetInstance() = 0;
 
-        virtual void CreatePhysicalDevice(const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers) = 0;
+        virtual void CreatePhysicalDevice(const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers, const bool enableRaytracingPipeline) = 0;
         
         virtual VkDebugUtilsMessengerEXT GetDebugMessenger() = 0;
         virtual void ContextQuit() = 0;
