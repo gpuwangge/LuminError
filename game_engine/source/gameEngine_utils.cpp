@@ -397,6 +397,81 @@ void GameEngine::CmdSetDepthBias(float depthBiasConstantFactor, float depthBiasC
     vkCmdSetDepthBias(renderer->GetGraphicsCommandBuffer(), depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 }
 
+void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout){
+    //for RenderModes::COMPUTE_SWAPCHAIN, need convert intermediaColor_Image to VK_IMAGE_LAYOUT_GENERAL
+    //intermediaColor_Image can only be created as VK_IMAGE_LAYOUT_UNDEFINED
+    if(renderer->GetRenderMode() == RenderModes::COMPUTE_SWAPCHAIN){
+        //std::cout<<"Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode COMPUTE_SWAPCHAIN."<<std::endl;
+
+        for(int i = 0; i < 2; i++){
+            renderer->SetCurrentFrame(i);
+
+            vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), 0);//VkCommandBufferResetFlagBits
+
+            renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
+            renderer->RecordImageBarrier(
+                renderer->GetComputeCommandBuffer(),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
+                oldLayout,
+                newLayout,
+                0,
+                VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
+            );
+            renderer->EndRecordComputeCommandBuffer();
+
+            VkSubmitInfo submitInfo{};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &renderer->GetComputeCommandBuffer();
+
+            if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+                throw std::runtime_error("failed to submit draw command buffer!");
+            }
+        }
+
+        renderer->SetCurrentFrame(0);
+        vkDeviceWaitIdle(renderer->GetLogicalDevice());
+    }
+
+    if(renderer->GetRenderMode() == RenderModes::RAYTRACING_SWAPCHAIN){
+        //std::cout<<"Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode RAYTRACING_SWAPCHAIN."<<std::endl;
+
+        for(int i = 0; i < 2; i++){
+            renderer->SetCurrentFrame(i);
+
+            vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
+
+            renderer->StartRecordComputeCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
+            renderer->RecordImageBarrier(
+                renderer->GetRaytracingCommandBuffer(),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
+                oldLayout,
+                newLayout,
+                0,
+                VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
+            );
+            renderer->EndRecordComputeCommandBuffer();
+
+            VkSubmitInfo submitInfo{};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &renderer->GetComputeCommandBuffer();
+
+            if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+                throw std::runtime_error("failed to submit draw command buffer!");
+            }
+        }
+
+
+        renderer->SetCurrentFrame(0);
+        vkDeviceWaitIdle(renderer->GetLogicalDevice());
+    }
+}
+
 /*
 void GameEngine::CreateComputeCommandBuffers_DispatchForSwapchainImage(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) {
     std::vector<VkCommandBuffer> &commandBuffers = renderer->GetComputeCommandBuffers();// renderer.commandBuffers[renderer.computeCmdId];

@@ -117,6 +117,7 @@ namespace LEGameEngine{
         void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);
         void Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ);
         std::string GetPureName(const std::string& path);
+        void ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
 
         /******************
         * Core Functions
@@ -127,6 +128,10 @@ namespace LEGameEngine{
         void Initialize(); //use this to call sample initialization
         void Update(); //base: update time, frame id, camera and ubo
         void RecordGraphicsCommandBuffer_RenderpassMainscene(){ gamer->RecordGraphicsCommandBuffer_RenderpassMainscene(); } //todo: Optimize here
+
+        //Compute Ray Tracing
+        void InitializeComputeRayTracing();
+        void SetupComputeRayTracing();
 
         //Module Related
         HMODULE handle_module_yamlcore;
