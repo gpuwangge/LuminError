@@ -614,6 +614,9 @@ void RendererCore::BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, 
 void RendererCore::BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets){
     BindDescriptorSets(pipelineLayout, descriptorSets, VK_PIPELINE_BIND_POINT_COMPUTE, computeCmdId);
 }
+void RendererCore::BindRaytracingDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets){
+    BindDescriptorSets(pipelineLayout, descriptorSets, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingCmdId);
+}
 
 void RendererCore::PushConstantToCommand(void* pcData, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange) {
     vkCmdPushConstants(commandBuffers[graphicsCmdId][currentFrame], graphicsPipelineLayout, 
@@ -655,8 +658,7 @@ void RendererCore::EndRecordComputeCommandBuffer(){ EndCommandBuffer(computeCmdI
  * ***********************/
 void RendererCore::StartRecordRaytracingCommandBuffer(VkPipeline &pipeline, VkPipelineLayout &pipelineLayout){
     BeginCommandBuffer(raytracingCmdId);
-    //BindPipeline(pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_NV, raytracingCmdId);
-    BindPipeline(pipeline, VK_PIPELINE_BIND_POINT_COMPUTE, raytracingCmdId);
+    BindPipeline(pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, raytracingCmdId);
 }
 void RendererCore::EndRecordRaytracingCommandBuffer(){ EndCommandBuffer(raytracingCmdId); }
 
@@ -691,6 +693,204 @@ void RendererCore::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
     vkCmdDispatch(commandBuffers[computeCmdId][currentFrame], numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ); 
 }
 
+void RendererCore::InitialRaytracing(){
+    if (!LoadRayTracingFunctions_core()) {
+		std::cout<<"failed to load ray tracing functions!"<<std::endl;
+		throw std::runtime_error("failed to load ray tracing functions!");
+	}
+    CreateSbt_OnlyRayGen();
+}
+
+void RendererCore::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
+    //std::cout<<"Ray Trace..."<<std::endl;
+
+    //VkStridedDeviceAddressRegionKHR rgen{};
+    VkStridedDeviceAddressRegionKHR miss{};
+    VkStridedDeviceAddressRegionKHR hit{};
+    VkStridedDeviceAddressRegionKHR call{};
+
+    fpCmdTraceRaysKHR(commandBuffers[raytracingCmdId][currentFrame],
+        &rgenRegion,
+        &miss,
+        &hit,
+        &call,
+        numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ
+    );
+}
+
+bool RendererCore::LoadRayTracingFunctions_core(){
+    fpGetRayTracingShaderGroupHandlesKHR =
+        reinterpret_cast<PFN_vkGetRayTracingShaderGroupHandlesKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetRayTracingShaderGroupHandlesKHR"));
+
+    fpGetBufferDeviceAddressKHR =
+        reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
+
+	fpCmdTraceRaysKHR =
+        reinterpret_cast<PFN_vkCmdTraceRaysKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdTraceRaysKHR"));
+
+    fpCreateAccelerationStructureKHR =
+        reinterpret_cast<PFN_vkCreateAccelerationStructureKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCreateAccelerationStructureKHR"));
+
+    fpDestroyAccelerationStructureKHR = //optional
+        reinterpret_cast<PFN_vkDestroyAccelerationStructureKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkDestroyAccelerationStructureKHR"));
+
+    fpGetAccelerationStructureBuildSizesKHR = 
+        reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetAccelerationStructureBuildSizesKHR"));
+
+    fpGetAccelerationStructureDeviceAddressKHR =
+        reinterpret_cast<PFN_vkGetAccelerationStructureDeviceAddressKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetAccelerationStructureDeviceAddressKHR"));
+
+    fpCmdBuildAccelerationStructuresKHR =
+        reinterpret_cast<PFN_vkCmdBuildAccelerationStructuresKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdBuildAccelerationStructuresKHR"));
+
+    fpBuildAccelerationStructuresKHR = //optional
+        reinterpret_cast<PFN_vkBuildAccelerationStructuresKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkBuildAccelerationStructuresKHR"));
+
+	bool ok = true;
+
+    if (!fpGetRayTracingShaderGroupHandlesKHR) {
+        logger->Log("Missing vkGetRayTracingShaderGroupHandlesKHR\n");
+        ok = false;
+    }
+
+    if (!fpGetBufferDeviceAddressKHR) {
+        logger->Log("Missing vkGetBufferDeviceAddressKHR\n");
+        ok = false;
+    }
+
+	if (!fpCmdTraceRaysKHR) {
+        logger->Log("Missing vkCmdTraceRaysKHR\n");
+        ok = false;
+    }
+
+    if (!fpCreateAccelerationStructureKHR) {
+        logger->Log("Missing vkCreateAccelerationStructureKHR\n");
+        ok = false;
+    }
+    if (!fpDestroyAccelerationStructureKHR) {
+        logger->Log("Missing vkDestroyAccelerationStructureKHR\n");
+        ok = false;
+    }
+    if (!fpGetAccelerationStructureBuildSizesKHR) {
+        logger->Log("Missing vkGetAccelerationStructureBuildSizesKHR\n");
+        ok = false;
+    }
+    if (!fpGetAccelerationStructureDeviceAddressKHR) {
+        logger->Log("Missing vkGetAccelerationStructureDeviceAddressKHR\n");
+        ok = false;
+    }
+    if (!fpCmdBuildAccelerationStructuresKHR) {
+        logger->Log("Missing vkCmdBuildAccelerationStructuresKHR\n");
+        ok = false;
+    }
+    if (!fpBuildAccelerationStructuresKHR) {
+        logger->Log("Missing vkBuildAccelerationStructuresKHR\n");
+        ok = false;
+    }
+
+	return ok;
+}
+
+
+
+VkDeviceAddress  RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer) {
+    VkBufferDeviceAddressInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_KHR;
+    info.buffer = buffer;
+    return fpGetBufferDeviceAddressKHR(device, &info);
+}
+
+void RendererCore::CreateSbt_OnlyRayGen(){
+    //std::cout<<"Raytraycing Pipeline: Creating shader binding table..."<<std::endl;
+
+    QueryRayTracingProperties();
+    const uint32_t handleSize = rayTracingPipelineProperties.shaderGroupHandleSize;
+    const uint32_t handleAlign = rayTracingPipelineProperties.shaderGroupHandleAlignment;
+    const uint32_t baseAlign = rayTracingPipelineProperties.shaderGroupBaseAlignment;
+
+    uint32_t handleSizeAligned = AlignUp(handleSize, handleAlign);
+    uint32_t rgenStride = AlignUp(handleSizeAligned, baseAlign);
+    VkDeviceSize sbtSize = rgenStride;
+
+    std::vector<uint8_t> handle(handleSize);
+    //VK_CHECK(vkGetRayTracingShaderGroupHandlesKHR(c.dev, c.pipeline, 0, 1, handle.size(), handle.data()));
+    fpGetRayTracingShaderGroupHandlesKHR(GetLogicalDevice(), GetRaytracingPipeline(), 0, 1, handle.size(), handle.data());
+
+    //printf("handle[0] = %02X\n", handle[0]);
+    
+    VkResult result = sbt_buffer.init(
+        sbtSize, 
+        //VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
+        VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        //VkMemoryPropertyFlags?
+        GetLogicalDevice(), 
+        GetPhysicalDevice(),
+        true
+    );
+    sbt_buffer.fill(handle.data(), GetLogicalDevice());
+
+    /*
+    c.sbtBuf = CreateBuffer(
+        c.phy, c.dev, sbtSize,
+        VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        true
+    );
+
+    void* mapped = nullptr;
+    //VK_CHECK(vkMapMemory(c.dev, c.sbtBuf.mem, 0, sbtSize, 0, &mapped));
+    std::memset(mapped, 0, (size_t)sbtSize);
+    std::memcpy(mapped, handle.data(), handleSize);
+    vkUnmapMemory(c.dev, c.sbtBuf.mem);
+    */
+
+    VkDeviceAddress addr = GetBufferAddress(GetLogicalDevice(), sbt_buffer.buffer);
+
+    rgenRegion.deviceAddress = addr;
+    rgenRegion.stride = rgenStride;
+    rgenRegion.size = rgenStride;
+
+    std::cout<<"Shader Binding Table created. Device Address: "<<addr<<std::endl;
+}
+
+void RendererCore::QueryRayTracingProperties(){
+    //std::cout<<"Raytraycing Pipeline: Querying ray tracing properties..."<<std::endl;
+    rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+
+    VkPhysicalDeviceProperties2 deviceProperties2{};
+    deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    deviceProperties2.pNext = &rayTracingPipelineProperties;
+    vkGetPhysicalDeviceProperties2(GetPhysicalDevice(), &deviceProperties2);
+
+    // std::cout<<"Ray Tracing Pipeline Properties:"<<std::endl;
+    // std::cout<<"    shaderGroupHandleSize: "<<rayTracingPipelineProperties.shaderGroupHandleSize<<std::endl;
+    // std::cout<<"    maxRayRecursionDepth: "<<rayTracingPipelineProperties.maxRayRecursionDepth<<std::endl;
+    // std::cout<<"    maxShaderGroupStride: "<<rayTracingPipelineProperties.maxShaderGroupStride<<std::endl;
+    // std::cout<<"    shaderGroupBaseAlignment: "<<rayTracingPipelineProperties.shaderGroupBaseAlignment<<std::endl;
+    // std::cout<<"    shaderGroupHandleCaptureReplaySize: "<<rayTracingPipelineProperties.shaderGroupHandleCaptureReplaySize<<std::endl;
+    // std::cout<<"    maxRayDispatchInvocationCount: "<<rayTracingPipelineProperties.maxRayDispatchInvocationCount<<std::endl;
+    // std::cout<<"    shaderGroupHandleAlignment: "<<rayTracingPipelineProperties.shaderGroupHandleAlignment<<std::endl;
+    // std::cout<<"    maxRayHitAttributeSize: "<<rayTracingPipelineProperties.maxRayHitAttributeSize<<std::endl;
+
+    logger->Log("Ray Tracing Pipeline Properties:");
+    logger->Log("    shaderGroupHandleSize: {}", rayTracingPipelineProperties.shaderGroupHandleSize);
+    logger->Log("    maxRayRecursionDepth: {}", rayTracingPipelineProperties.maxRayRecursionDepth);
+    logger->Log("    maxShaderGroupStride: {}", rayTracingPipelineProperties.maxShaderGroupStride);
+    logger->Log("    shaderGroupBaseAlignment: {}", rayTracingPipelineProperties.shaderGroupBaseAlignment);
+    logger->Log("    shaderGroupHandleCaptureReplaySize: {}", rayTracingPipelineProperties.shaderGroupHandleCaptureReplaySize);
+    logger->Log("    maxRayDispatchInvocationCount: {}", rayTracingPipelineProperties.maxRayDispatchInvocationCount);
+    logger->Log("    shaderGroupHandleAlignment: {}", rayTracingPipelineProperties.shaderGroupHandleAlignment);
+    logger->Log("    maxRayHitAttributeSize: {}\n", rayTracingPipelineProperties.maxRayHitAttributeSize);
+}
 
 /**************************
  * Clean up Function
@@ -740,6 +940,9 @@ void RendererCore::Destroy(){
         FreeLibrary(handle_module_logcore);
         handle_module_logcore = nullptr;
     }
+
+    //std::cout<<"----Now free the SBT buffer----"<<std::endl;
+    sbt_buffer.DestroyAndFree(GetLogicalDevice());
 }
 
 void RendererCore::DestroyInstance(HMODULE handle, void* instance){

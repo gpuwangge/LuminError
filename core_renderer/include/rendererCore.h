@@ -99,6 +99,7 @@ namespace LERenderer{
         void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) override;
         void BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) override;
         void BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) override;
+        void BindRaytracingDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) override;
 
         //Draw
         void PushConstantToCommand(void* pcData, VkPipelineLayout graphicsPipelineLayout, VkPushConstantRange &pushConstantRange) override;
@@ -125,6 +126,7 @@ namespace LERenderer{
         void EndRecordRaytracingCommandBuffer() override;
 
         void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
+        void Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) override;
 
         /**************************
          * Utility Functions
@@ -179,6 +181,37 @@ namespace LERenderer{
 
         void SetApplication(LEGameEngine::IGameEngine* pApplication) override;
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
+
+
+        /*********
+        * Ray Tracing Related
+        *********/
+        void InitialRaytracing() override;
+
+        VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
+        void QueryRayTracingProperties();
+
+        PFN_vkGetRayTracingShaderGroupHandlesKHR       fpGetRayTracingShaderGroupHandlesKHR       = nullptr;
+        PFN_vkGetBufferDeviceAddressKHR                fpGetBufferDeviceAddressKHR                = nullptr;
+        PFN_vkCmdTraceRaysKHR                          fpCmdTraceRaysKHR                          = nullptr;
+
+        //not used yet
+        PFN_vkCreateAccelerationStructureKHR           fpCreateAccelerationStructureKHR           = nullptr;
+        PFN_vkDestroyAccelerationStructureKHR          fpDestroyAccelerationStructureKHR          = nullptr;
+        PFN_vkGetAccelerationStructureBuildSizesKHR    fpGetAccelerationStructureBuildSizesKHR    = nullptr;
+        PFN_vkGetAccelerationStructureDeviceAddressKHR fpGetAccelerationStructureDeviceAddressKHR = nullptr;
+        PFN_vkCmdBuildAccelerationStructuresKHR        fpCmdBuildAccelerationStructuresKHR        = nullptr;
+        PFN_vkBuildAccelerationStructuresKHR           fpBuildAccelerationStructuresKHR           = nullptr;
+
+        bool LoadRayTracingFunctions_core();
+
+        CWxjBuffer sbt_buffer;
+        VkStridedDeviceAddressRegionKHR rgenRegion{};
+        void CreateSbt_OnlyRayGen();
+        static uint32_t AlignUp(uint32_t value, uint32_t alignment) {
+            return (value + alignment - 1) & ~(alignment - 1);
+        }
+        VkDeviceAddress GetBufferAddress(VkDevice device, VkBuffer buffer);
 
         /**************************
          * RenderProcess

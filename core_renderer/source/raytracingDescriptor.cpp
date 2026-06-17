@@ -231,7 +231,7 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].descriptorCount = 1;
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
-        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;//VK_SHADER_STAGE_COMPUTE_BIT;
         counter++;
     }
 

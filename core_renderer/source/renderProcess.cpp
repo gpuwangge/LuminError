@@ -430,23 +430,96 @@ void CRenderProcess::createRaytracingPipelineLayout(VkDescriptorSetLayout &descr
 	if (vkCreatePipelineLayout(CContext::GetHandle().GetLogicalDevice(), &pipelineLayoutInfo, nullptr, &raytracingPipelineLayout) != VK_SUCCESS) 
 		throw std::runtime_error("failed to create raytracing pipeline layout!");
 }
-void CRenderProcess::createRaytracingPipeline(VkShaderModule &raytracingShaderModule){
-	bCreateRaytracingPipeline = true;
+// void CRenderProcess::createRaytracingPipeline(VkShaderModule &raytracingShaderModule){
+// 	bCreateRaytracingPipeline = true;
 	
-	VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
-	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-	computeShaderStageInfo.module = raytracingShaderModule;
-	computeShaderStageInfo.pName = "main";
+// 	VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+// 	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+// 	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+// 	computeShaderStageInfo.module = raytracingShaderModule;
+// 	computeShaderStageInfo.pName = "main";
 
-	VkComputePipelineCreateInfo pipelineInfo{};
-	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-	pipelineInfo.layout = raytracingPipelineLayout;
-	pipelineInfo.stage = computeShaderStageInfo;
+// 	VkComputePipelineCreateInfo pipelineInfo{};
+// 	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+// 	pipelineInfo.layout = raytracingPipelineLayout;
+// 	pipelineInfo.stage = computeShaderStageInfo;
 
-	if (vkCreateComputePipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &raytracingPipeline) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create raytracing pipeline!");
+// 	if (vkCreateComputePipelines(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &raytracingPipeline) != VK_SUCCESS) {
+// 		throw std::runtime_error("failed to create raytracing pipeline!");
+// 	}
+// }
+
+bool CRenderProcess::LoadRayTracingFunctions_process(){
+	fpCreateRayTracingPipelinesKHR =
+        reinterpret_cast<PFN_vkCreateRayTracingPipelinesKHR>(
+            vkGetDeviceProcAddr(CContext::GetHandle().GetLogicalDevice(), "vkCreateRayTracingPipelinesKHR"));
+
+	// fpCmdTraceRaysKHR =
+    //     reinterpret_cast<PFN_vkCmdTraceRaysKHR>(
+    //         vkGetDeviceProcAddr(CContext::GetHandle().GetLogicalDevice(), "vkCmdTraceRaysKHR"));
+
+	bool ok = true;
+
+    if (!fpCreateRayTracingPipelinesKHR) {
+        //logger->Log("Missing vkCreateRayTracingPipelinesKHR\n");
+        ok = false;
+    }
+	// if (!fpCmdTraceRaysKHR) {
+    //     //logger->Log("Missing vkCmdTraceRaysKHR\n");
+    //     ok = false;
+    // }
+
+	return ok;
+}
+
+void CRenderProcess::createRaytracingPipeline(VkShaderModule &raytracingShaderModule){
+    std::cout<<"Raytraycing Pipeline: Creating ray tracing pipeline..."<<std::endl;
+	bCreateRaytracingPipeline = true;
+
+    //auto spv = ReadSpv(rgenSpvPath);
+    //VkShaderModule rgen = CreateShaderModule(c.dev, spv);
+
+    VkPipelineShaderStageCreateInfo stage{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stage.stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+    stage.module = raytracingShaderModule;
+    stage.pName = "main";
+
+    VkRayTracingShaderGroupCreateInfoKHR group{ VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
+    group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+    group.generalShader = 0; // index into stages[]
+    group.closestHitShader = VK_SHADER_UNUSED_KHR;
+    group.anyHitShader = VK_SHADER_UNUSED_KHR;
+    group.intersectionShader = VK_SHADER_UNUSED_KHR;
+
+    VkRayTracingPipelineCreateInfoKHR pipelineInfo{ VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR };
+    pipelineInfo.stageCount = 1;
+    pipelineInfo.pStages = &stage;
+    pipelineInfo.groupCount = 1;
+    pipelineInfo.pGroups = &group;
+    pipelineInfo.maxPipelineRayRecursionDepth = 1;
+    pipelineInfo.layout = raytracingPipelineLayout;
+
+    //VK_CHECK(vkCreateRayTracingPipelinesKHR(c.dev, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &c.pipeline));
+    //vkDestroyShaderModule(CContext::GetHandle().GetLogicalDevice(), raytracingShaderModule, nullptr);
+
+	// if (vkCreateRayTracingPipelinesKHR(CContext::GetHandle().GetLogicalDevice(), VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &raytracingPipeline) != VK_SUCCESS) {
+ 	// 	throw std::runtime_error("failed to create raytracing pipeline!");
+ 	// }
+
+	if (!LoadRayTracingFunctions_process()) {
+		std::cout<<"failed to load ray tracing functions!"<<std::endl;
+		throw std::runtime_error("failed to load ray tracing functions!");
 	}
+
+	VkResult result =
+		fpCreateRayTracingPipelinesKHR(
+			CContext::GetHandle().GetLogicalDevice(),
+			VK_NULL_HANDLE,
+			VK_NULL_HANDLE,
+			1,
+			&pipelineInfo,
+			nullptr,
+			&raytracingPipeline);
 }
 
 void CRenderProcess::createGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id){

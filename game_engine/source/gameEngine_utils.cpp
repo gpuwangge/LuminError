@@ -178,6 +178,8 @@ void GameEngine::CleanUp(){
     *6 Context
     ********************/
     renderer->ContextQuit();
+
+    
 }
 
 GameEngine::~GameEngine(){
@@ -443,7 +445,8 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
 
             vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
-            renderer->StartRecordComputeCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
+            //renderer->StartRecordComputeCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
+            renderer->StartRecordRaytracingCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
             renderer->RecordImageBarrier(
                 renderer->GetRaytracingCommandBuffer(),
                 renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
@@ -454,12 +457,13 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                 VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
             );
-            renderer->EndRecordComputeCommandBuffer();
+            //renderer->EndRecordComputeCommandBuffer();
+            renderer->EndRecordRaytracingCommandBuffer();
 
             VkSubmitInfo submitInfo{};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = &renderer->GetComputeCommandBuffer();
+            submitInfo.pCommandBuffers = &renderer->GetRaytracingCommandBuffer();
 
             if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
                 throw std::runtime_error("failed to submit draw command buffer!");
@@ -469,6 +473,7 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
 
         renderer->SetCurrentFrame(0);
         vkDeviceWaitIdle(renderer->GetLogicalDevice());
+        //std::cout<<"Finish Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode RAYTRACING_SWAPCHAIN."<<std::endl;
     }
 }
 

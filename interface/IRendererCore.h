@@ -69,6 +69,7 @@ namespace LERenderer{
         virtual void BindDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, VkPipelineBindPoint pipelineBindPoint, uint32_t commandBufferIndex, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) = 0;
         virtual void BindGraphicsDescriptorSets(VkPipelineLayout &pipelineLayout, std::vector<std::vector<VkDescriptorSet>> &descriptorSets, uint32_t dynamicObjectOffset = -1, uint32_t dynamicTextOffset = -1) = 0;
         virtual void BindComputeDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) = 0;
+        virtual void BindRaytracingDescriptorSets(VkPipelineLayout &pipelineLayout,  std::vector<std::vector<VkDescriptorSet>> &descriptorSets) = 0;
 
         virtual void EndGraphicsCommandBuffer() = 0;
         virtual void EndComputeCommandBuffer() = 0;
@@ -95,6 +96,9 @@ namespace LERenderer{
         virtual void Update() = 0;
 
         virtual void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
+        virtual void Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
+
+        virtual void InitialRaytracing() = 0;
 
         virtual void Destroy() = 0;
         //AppInfo& GetAppInfo() { return appInfo; }

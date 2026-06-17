@@ -180,99 +180,14 @@ void GameEngine::SetupComputeRayTracing(){
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
     std::vector<std::vector<VkDescriptorSet>> dsSets; 
     dsSets.push_back(renderer->GetRaytracingDescriptorSets());
-    renderer->BindComputeDescriptorSets(renderer->GetRaytracingPipelineLayout(), dsSets);
-    renderer->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+
+    //renderer->BindComputeDescriptorSets(renderer->GetRaytracingPipelineLayout(), dsSets);
+    renderer->BindRaytracingDescriptorSets(renderer->GetRaytracingPipelineLayout(), dsSets);
+
+    //renderer->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+    renderer->Trace(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
+
 }
 
-bool GameEngine::LoadRayTracingFunctions(VkDevice device){
-    fpGetBufferDeviceAddressKHR =
-        reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(
-            vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressKHR"));
-
-    fpCreateAccelerationStructureKHR =
-        reinterpret_cast<PFN_vkCreateAccelerationStructureKHR>(
-            vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR"));
-
-    fpDestroyAccelerationStructureKHR = //optional
-        reinterpret_cast<PFN_vkDestroyAccelerationStructureKHR>(
-            vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR"));
-
-    fpGetAccelerationStructureBuildSizesKHR = 
-        reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(
-            vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR"));
-
-    fpGetAccelerationStructureDeviceAddressKHR =
-        reinterpret_cast<PFN_vkGetAccelerationStructureDeviceAddressKHR>(
-            vkGetDeviceProcAddr(device, "vkGetAccelerationStructureDeviceAddressKHR"));
-
-    fpCmdBuildAccelerationStructuresKHR =
-        reinterpret_cast<PFN_vkCmdBuildAccelerationStructuresKHR>(
-            vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructuresKHR"));
-
-    fpBuildAccelerationStructuresKHR = //optional
-        reinterpret_cast<PFN_vkBuildAccelerationStructuresKHR>(
-            vkGetDeviceProcAddr(device, "vkBuildAccelerationStructuresKHR"));
-
-    fpCreateRayTracingPipelinesKHR =
-        reinterpret_cast<PFN_vkCreateRayTracingPipelinesKHR>(
-            vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR"));
-
-    fpGetRayTracingShaderGroupHandlesKHR =
-        reinterpret_cast<PFN_vkGetRayTracingShaderGroupHandlesKHR>(
-            vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesKHR"));
-
-    fpCmdTraceRaysKHR =
-        reinterpret_cast<PFN_vkCmdTraceRaysKHR>(
-            vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR"));
-
-    bool ok = true;
-
-    if (!fpGetBufferDeviceAddressKHR) {
-        logger->Log("Missing vkGetBufferDeviceAddressKHR\n");
-        ok = false;
-    }
-    if (!fpCreateAccelerationStructureKHR) {
-        logger->Log("Missing vkCreateAccelerationStructureKHR\n");
-        ok = false;
-    }
-    if (!fpDestroyAccelerationStructureKHR) {
-        logger->Log("Missing vkDestroyAccelerationStructureKHR\n");
-        ok = false;
-    }
-    if (!fpGetAccelerationStructureBuildSizesKHR) {
-        logger->Log("Missing vkGetAccelerationStructureBuildSizesKHR\n");
-        ok = false;
-    }
-    if (!fpGetAccelerationStructureDeviceAddressKHR) {
-        logger->Log("Missing vkGetAccelerationStructureDeviceAddressKHR\n");
-        ok = false;
-    }
-    if (!fpCmdBuildAccelerationStructuresKHR) {
-        logger->Log("Missing vkCmdBuildAccelerationStructuresKHR\n");
-        ok = false;
-    }
-    if (!fpBuildAccelerationStructuresKHR) {
-        logger->Log("Missing vkBuildAccelerationStructuresKHR\n");
-        ok = false;
-    }
-    if (!fpCreateRayTracingPipelinesKHR) {
-        logger->Log("Missing vkCreateRayTracingPipelinesKHR\n");
-        ok = false;
-    }
-    if (!fpGetRayTracingShaderGroupHandlesKHR) {
-        logger->Log("Missing vkGetRayTracingShaderGroupHandlesKHR\n");
-        ok = false;
-    }
-    if (!fpCmdTraceRaysKHR) {
-        logger->Log("Missing vkCmdTraceRaysKHR\n");
-        ok = false;
-    }
-
-    if (ok) {
-        logger->Log("All 10 ray tracing functions loaded successfully.\n");
-    }
-
-    return ok;
-}
 
 }

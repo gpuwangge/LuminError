@@ -134,9 +134,10 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     // CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers, bEnableRaytracingPipeline_raytracing); //also create logical device and command queues here
     
-    if (!LoadRayTracingFunctions(renderer->GetLogicalDevice())) {//ray tracing TODO, load function after logical device is created
-        logger->Log("Failed to load ray tracing functions\n");
-    }
+    // if (!LoadRayTracingFunctions(renderer->GetLogicalDevice())) {//ray tracing TODO, load function after logical device is created
+    //     logger->Log("Failed to load ray tracing functions\n");
+    // }
+    //QueryRayTracingProperties();
 
     // textureManager.m_logicalDevice = renderer->GetLogicalDevice();
     // textureManager.m_physicalDevice = renderer->GetPhysicalDevice();
@@ -463,7 +464,7 @@ void GameEngine::Record_Present(){
         }
         case RenderModes::RAYTRACING_SWAPCHAIN:
         {
-            //td::cout<<"RAYTRACING_SWAPCHAIN: currentFrame: "<<renderer->GetCurrentFrame()<<std::endl;
+            //std::cout<<"RAYTRACING_SWAPCHAIN: currentFrame: "<<renderer->GetCurrentFrame()<<std::endl;
 
             //must wait for fence before record
             renderer->WaitForRaytracingFence();
@@ -518,6 +519,7 @@ void GameEngine::Record_Present(){
             renderer->SubmitRaytracing();
 
             renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
+            //std::cout<<"Finished Presenting swapchain image for RAYTRACING_SWAPCHAIN mode."<<std::endl;
         break;
         }
         case RenderModes::COMPUTE_GRAPHICS:

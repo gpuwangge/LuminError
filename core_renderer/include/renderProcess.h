@@ -151,6 +151,9 @@ public:
     void createComputePipeline(VkShaderModule &computeShaderModule);
     void createRaytracingPipeline(VkShaderModule &raytracingShaderModule);
 
+    PFN_vkCreateRayTracingPipelinesKHR             fpCreateRayTracingPipelinesKHR             = nullptr;
+    bool LoadRayTracingFunctions_process();
+
 };
 
 

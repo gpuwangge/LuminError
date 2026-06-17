@@ -14,7 +14,8 @@ namespace LuminError{
         void RecordRaytracingCommandBuffer() override{
             //Option 2: record command buffer every frame
             //std::cout<<"Game: Start recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
-            GameEngine->RayTrace(200, 300, 1);
+            GameEngine->RayTrace(800, 800, 1);
+            //GameEngine->RayTrace(1, 1, 1);
             //std::cout<<"Game: Finished recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
             
             //Option 3: another test function

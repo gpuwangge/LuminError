@@ -8,7 +8,7 @@ public:
     CWxjBuffer(): m_size(0){}
     ~CWxjBuffer(){}
 
-    VkResult init(IN VkDeviceSize requiredSize, VkBufferUsageFlags usage, VkDevice logicalDevice, VkPhysicalDevice physicalDevice) {
+    VkResult init(IN VkDeviceSize requiredSize, VkBufferUsageFlags usage, VkDevice logicalDevice, VkPhysicalDevice physicalDevice, bool needDeviceAddress = false) {
         //HERE_I_AM("Init05DataBuffer");
         //Step1:Create Buffer(create buffer)
         VkResult result = VK_SUCCESS;
@@ -34,11 +34,16 @@ public:
         //fprintf(debugger->FpDebug, "Buffer vmr.memoryTypeBits = 0x%08x\n", vmr.memoryTypeBits);
         //fflush(debugger->FpDebug);
         //}
-         m_size = vmr.size;//vmr.size is different than the input requiredSize, because of alignment reason, vmr.size can be larger
+        m_size = vmr.size;//vmr.size is different than the input requiredSize, because of alignment reason, vmr.size can be larger
+
+        //add for ray tracing pipeline
+        VkMemoryAllocateFlagsInfo flagsInfo{};
+        flagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+        flagsInfo.flags = needDeviceAddress ? VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT : 0;
 
         VkMemoryAllocateInfo			vmai;
         vmai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        vmai.pNext = nullptr;
+        vmai.pNext = needDeviceAddress ? &flagsInfo : nullptr; //change for ray tracing pipeline
         vmai.allocationSize = vmr.size; 
         vmai.memoryTypeIndex = FindMemoryThatIsHostVisible(vmr.memoryTypeBits, physicalDevice);
         //VkDeviceMemory				vdm;
