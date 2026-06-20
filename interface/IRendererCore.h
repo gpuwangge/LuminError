@@ -99,6 +99,7 @@ namespace LERenderer{
         virtual void Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
 
         virtual void InitialRaytracing() = 0;
+        virtual void CreateSBS() = 0;
 
         virtual void Destroy() = 0;
         //AppInfo& GetAppInfo() { return appInfo; }
@@ -152,7 +153,7 @@ namespace LERenderer{
         virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id) = 0;
         virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id) = 0;
         virtual void CreateComputePipeline(VkShaderModule &computeShaderModule) = 0;
-        virtual void CreateRaytracingPipeline(VkShaderModule &raytracingShaderModule) = 0;
+        virtual void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &rmissModule, VkShaderModule &rchitModule) = 0;
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
@@ -226,7 +227,7 @@ namespace LERenderer{
 
         virtual void createRaytracingDescriptorPool() = 0;
         virtual void createRaytracingDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
-        virtual void createRaytracingDescriptorSets(VkImageView textureImageView = NULL) = 0;
+        virtual void createRaytracingDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas) = 0;
 
         virtual void addComputeGlobalUniformBuffer() = 0;
         virtual void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
@@ -256,6 +257,8 @@ namespace LERenderer{
 
 	    virtual void ComputeDescriptorManagerDestroyAndFree() = 0;
         virtual void RaytracingDescriptorManagerDestroyAndFree() = 0;
+
+        virtual VkAccelerationStructureKHR GetTlas() = 0;
 
         /**************************
          * Swapchain

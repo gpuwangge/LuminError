@@ -698,6 +698,13 @@ void RendererCore::InitialRaytracing(){
 		std::cout<<"failed to load ray tracing functions!"<<std::endl;
 		throw std::runtime_error("failed to load ray tracing functions!");
 	}
+    CreateTriangleVertexBuffer();
+    CreateBlas_OnlyOneTriangle();
+    CreateInstanceBuffer_OnlyOneTriangle();
+    CreateTlas_OnlyOneTriangle();
+}
+
+void RendererCore::CreateSBS(){
     CreateSbt_OnlyRayGen();
 }
 
@@ -705,15 +712,15 @@ void RendererCore::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGrou
     //std::cout<<"Ray Trace..."<<std::endl;
 
     //VkStridedDeviceAddressRegionKHR rgen{};
-    VkStridedDeviceAddressRegionKHR miss{};
-    VkStridedDeviceAddressRegionKHR hit{};
-    VkStridedDeviceAddressRegionKHR call{};
+    // VkStridedDeviceAddressRegionKHR miss{};
+    // VkStridedDeviceAddressRegionKHR hit{};
+    // VkStridedDeviceAddressRegionKHR call{};
 
     fpCmdTraceRaysKHR(commandBuffers[raytracingCmdId][currentFrame],
         &rgenRegion,
-        &miss,
-        &hit,
-        &call,
+        &missRegion,
+        &hitRegion,
+        &callRegion,
         numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ
     );
 }
@@ -810,7 +817,7 @@ VkDeviceAddress  RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer
 }
 
 void RendererCore::CreateSbt_OnlyRayGen(){
-    //std::cout<<"Raytraycing Pipeline: Creating shader binding table..."<<std::endl;
+    //std::cout<<"Creating shader binding table(SBT)..."<<std::endl;
 
     QueryRayTracingProperties();
     const uint32_t handleSize = rayTracingPipelineProperties.shaderGroupHandleSize;
@@ -818,12 +825,42 @@ void RendererCore::CreateSbt_OnlyRayGen(){
     const uint32_t baseAlign = rayTracingPipelineProperties.shaderGroupBaseAlignment;
 
     uint32_t handleSizeAligned = AlignUp(handleSize, handleAlign);
-    uint32_t rgenStride = AlignUp(handleSizeAligned, baseAlign);
-    VkDeviceSize sbtSize = rgenStride;
 
-    std::vector<uint8_t> handle(handleSize);
-    //VK_CHECK(vkGetRayTracingShaderGroupHandlesKHR(c.dev, c.pipeline, 0, 1, handle.size(), handle.data()));
-    fpGetRayTracingShaderGroupHandlesKHR(GetLogicalDevice(), GetRaytracingPipeline(), 0, 1, handle.size(), handle.data());
+    // 现在有 3 个 group: rgen, miss, hit
+    const uint32_t groupCount = 3;
+    const uint32_t rgenCount  = 1;
+    const uint32_t missCount  = 1;
+    const uint32_t hitCount   = 1;
+
+    // 每个 section 自己的 stride
+    const uint32_t rgenStride = AlignUp(handleSizeAligned, baseAlign);
+    const uint32_t missStride = AlignUp(handleSizeAligned, baseAlign);
+    const uint32_t hitStride  = AlignUp(handleSizeAligned, baseAlign);
+
+    const VkDeviceSize rgenSize = rgenStride * rgenCount;
+    const VkDeviceSize missSize = missStride * missCount;
+    const VkDeviceSize hitSize  = hitStride  * hitCount;
+
+    const VkDeviceSize rgenOffset = 0;
+    const VkDeviceSize missOffset = AlignUp((uint32_t)(rgenOffset + rgenSize), (uint32_t)baseAlign);
+    const VkDeviceSize hitOffset  = AlignUp((uint32_t)(missOffset + missSize), (uint32_t)baseAlign);
+
+    //VkDeviceSize sbtSize = rgenStride;
+    const VkDeviceSize sbtSize = hitOffset + hitSize;
+
+    //std::vector<uint8_t> handle(handleSize);
+    //fpGetRayTracingShaderGroupHandlesKHR(GetLogicalDevice(), GetRaytracingPipeline(), 0, 1, handle.size(), handle.data());
+
+    // 一次性取回 3 个 group handle
+    std::vector<uint8_t> handles(groupCount * handleSize);
+    fpGetRayTracingShaderGroupHandlesKHR(
+        GetLogicalDevice(),
+        GetRaytracingPipeline(),
+        0,
+        groupCount,
+        handles.size(),
+        handles.data()
+    );
 
     //printf("handle[0] = %02X\n", handle[0]);
     
@@ -834,9 +871,29 @@ void RendererCore::CreateSbt_OnlyRayGen(){
         //VkMemoryPropertyFlags?
         GetLogicalDevice(), 
         GetPhysicalDevice(),
-        true
+        true //need Device address
     );
-    sbt_buffer.fill(handle.data(), GetLogicalDevice());
+
+    // 先清零整个 SBT，没写到的 padding 保持 0
+    std::vector<uint8_t> sbtData((size_t)sbtSize, 0);
+    auto copyHandle = [&](uint32_t groupIndex, VkDeviceSize dstOffset){
+        memcpy(
+            sbtData.data() + dstOffset,
+            handles.data() + groupIndex * handleSize,
+            handleSize
+        );
+    };
+
+    // group 0 = rgen
+    copyHandle(0, rgenOffset);
+
+    // group 1 = miss
+    copyHandle(1, missOffset);
+
+    // group 2 = hit
+    copyHandle(2, hitOffset);
+
+    sbt_buffer.fill(sbtData.data(), GetLogicalDevice());
 
     /*
     c.sbtBuf = CreateBuffer(
@@ -855,12 +912,491 @@ void RendererCore::CreateSbt_OnlyRayGen(){
 
     VkDeviceAddress addr = GetBufferAddress(GetLogicalDevice(), sbt_buffer.buffer);
 
-    rgenRegion.deviceAddress = addr;
-    rgenRegion.stride = rgenStride;
-    rgenRegion.size = rgenStride;
+    rgenRegion.deviceAddress = addr + rgenOffset;
+    rgenRegion.stride        = rgenStride;
+    rgenRegion.size          = rgenSize;
 
-    std::cout<<"Shader Binding Table created. Device Address: "<<addr<<std::endl;
+    missRegion.deviceAddress = addr + missOffset;
+    missRegion.stride        = missStride;
+    missRegion.size          = missSize;
+
+    hitRegion.deviceAddress  = addr + hitOffset;
+    hitRegion.stride         = hitStride;
+    hitRegion.size           = hitSize;
+
+    callRegion.deviceAddress = 0;
+    callRegion.stride        = 0;
+    callRegion.size          = 0;
+
+    // rgenRegion.deviceAddress = addr;
+    // rgenRegion.stride = rgenStride;
+    // rgenRegion.size = rgenStride;
+
+    //std::cout<<"Shader Binding Table created. Device Address: "<<addr<<std::endl;
 }
+
+void RendererCore::CreateTriangleVertexBuffer(){
+    //std::cout << "Creating ray tracing triangle vertex/index buffers..." << std::endl;
+
+    struct Vertex
+    {
+        float x, y, z;
+    };
+
+    std::vector<Vertex> vertexData =
+    {
+        { -0.5f, -0.5f, 0.0f },
+        {  0.5f, -0.5f, 0.0f },
+        {  0.0f,  0.5f, 0.0f }
+    };
+
+    std::vector<uint32_t> indexData =
+    {
+        0, 1, 2
+    };
+
+    VkDeviceSize vertexBufferSize = sizeof(Vertex) * vertexData.size();
+    VkDeviceSize indexBufferSize  = sizeof(uint32_t) * indexData.size();
+
+    VkBufferUsageFlags rtGeometryUsage =
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+
+    VkResult result = rt_vertex_buffer.init(
+        vertexBufferSize,
+        rtGeometryUsage,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true // need Device address
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create ray tracing vertex buffer!");
+    }
+
+    result = rt_index_buffer.init(
+        indexBufferSize,
+        rtGeometryUsage,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true // need Device address
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create ray tracing index buffer!");
+    }
+
+    rt_vertex_buffer.fill(vertexData.data(), GetLogicalDevice());
+    rt_index_buffer.fill(indexData.data(), GetLogicalDevice());
+
+    rt_vertex_buffer_address = GetBufferAddress(GetLogicalDevice(), rt_vertex_buffer.buffer);
+    rt_index_buffer_address  = GetBufferAddress(GetLogicalDevice(), rt_index_buffer.buffer);
+
+    triangleVertexCount = static_cast<uint32_t>(vertexData.size());
+    triangleIndexCount  = static_cast<uint32_t>(indexData.size());
+    triangleVertexStride = sizeof(Vertex);
+
+    //std::cout << "Triangle vertex buffer created. Device Address: " << rt_vertex_buffer_address << std::endl;
+    //std::cout << "Triangle index buffer created. Device Address: " << rt_index_buffer_address << std::endl;
+    std::cout << "triangleVertexCount = " << triangleVertexCount <<std::endl;
+    std::cout << "triangleIndexCount = " << triangleIndexCount <<std::endl;
+    std::cout << "triangleVertexStride = " << triangleVertexStride <<std::endl;
+}
+
+void RendererCore::BeginCommandBuffer_Raytracing(int commandBufferIndex)
+{
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    if (vkBeginCommandBuffer(commandBuffers[commandBufferIndex][currentFrame], &beginInfo) != VK_SUCCESS) {
+        std::cout << "failed to begin recording command buffer!" << std::endl;
+        throw std::runtime_error("failed to begin recording command buffer!");
+    }
+}
+
+void RendererCore::EndCommandBuffer_Raytracing(int commandBufferIndex)
+{
+    if (vkEndCommandBuffer(commandBuffers[commandBufferIndex][currentFrame]) != VK_SUCCESS) {
+        throw std::runtime_error("failed to record command buffer!");
+    }
+}
+
+void RendererCore::SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex, VkQueue queue)
+{
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffers[commandBufferIndex][currentFrame];
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    VkFence fence;
+    if (vkCreateFence(GetLogicalDevice(), &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create fence!");
+    }
+
+    if (vkQueueSubmit(queue, 1, &submitInfo, fence) != VK_SUCCESS) {
+        vkDestroyFence(GetLogicalDevice(), fence, nullptr);
+        throw std::runtime_error("failed to submit command buffer!");
+    }
+
+    vkWaitForFences(GetLogicalDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
+    vkDestroyFence(GetLogicalDevice(), fence, nullptr);
+}
+
+void RendererCore::CreateBlas_OnlyOneTriangle(){
+    //std::cout << "Creating BLAS for one triangle..." << std::endl;
+
+    // 一个 indexed triangle => 1 primitive
+    const uint32_t primitiveCount = 1;
+
+    // 1) triangles data
+    VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
+    triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+    triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+    triangles.vertexData.deviceAddress = rt_vertex_buffer_address;
+    triangles.vertexStride = triangleVertexStride;
+    triangles.maxVertex = triangleVertexCount - 1;
+    triangles.indexType = VK_INDEX_TYPE_UINT32;
+    triangles.indexData.deviceAddress = rt_index_buffer_address;
+    triangles.transformData.deviceAddress = 0;
+
+    // 2) geometry
+    VkAccelerationStructureGeometryKHR geometry{};
+    geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+    geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+    geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
+    geometry.geometry.triangles = triangles;
+
+    // 3) build info (for size query first)
+    VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+    buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+    buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+    buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+    buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+    buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+    buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
+    buildInfo.geometryCount = 1;
+    buildInfo.pGeometries = &geometry;
+
+    // 4) query build sizes
+    VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
+    sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+
+    fpGetAccelerationStructureBuildSizesKHR(
+        GetLogicalDevice(),
+        VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+        &buildInfo,
+        &primitiveCount,
+        &sizeInfo
+    );
+
+    // 5) create BLAS storage buffer
+    VkResult result = blas_buffer.init(
+        sizeInfo.accelerationStructureSize,
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create BLAS storage buffer!");
+    }
+
+    // 6) create BLAS object
+    VkAccelerationStructureCreateInfoKHR asCreateInfo{};
+    asCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+    asCreateInfo.buffer = blas_buffer.buffer;
+    asCreateInfo.offset = 0;
+    asCreateInfo.size = sizeInfo.accelerationStructureSize;
+    asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+    asCreateInfo.deviceAddress = 0;
+
+    result = fpCreateAccelerationStructureKHR(
+        GetLogicalDevice(),
+        &asCreateInfo,
+        nullptr,
+        &blas
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create BLAS object!");
+    }
+
+    // 7) create scratch buffer
+    result = blas_scratch_buffer.init(
+        sizeInfo.buildScratchSize,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create BLAS scratch buffer!");
+    }
+
+    VkDeviceAddress scratchAddress =
+        GetBufferAddress(GetLogicalDevice(), blas_scratch_buffer.buffer);
+
+    // 8) final build info
+    buildInfo.dstAccelerationStructure = blas;
+    buildInfo.scratchData.deviceAddress = scratchAddress;
+
+    // 9) build range
+    VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
+    rangeInfo.primitiveCount = primitiveCount;
+    rangeInfo.primitiveOffset = 0;
+    rangeInfo.firstVertex = 0;
+    rangeInfo.transformOffset = 0;
+
+    const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
+
+    // 10) record command buffer
+    BeginCommandBuffer_Raytracing(raytracingCmdId);
+
+    fpCmdBuildAccelerationStructuresKHR(
+        commandBuffers[raytracingCmdId][currentFrame],
+        1,
+        &buildInfo,
+        &pRangeInfo
+    );
+
+    VkMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    barrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+    barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+
+    vkCmdPipelineBarrier(
+        commandBuffers[raytracingCmdId][currentFrame],
+        VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+        VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+        0,
+        1, &barrier,
+        0, nullptr,
+        0, nullptr
+    );
+
+    EndCommandBuffer_Raytracing(raytracingCmdId);
+
+    // 11) submit and wait
+    SubmitCommandBufferAndWait_Raytracing(raytracingCmdId, CContext::GetHandle().GetComputeQueue());
+
+    // 12) query BLAS device address for TLAS instance
+    VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};
+    addressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+    addressInfo.accelerationStructure = blas;
+
+    blasDeviceAddress = fpGetAccelerationStructureDeviceAddressKHR(GetLogicalDevice(), &addressInfo);
+
+    //std::cout << "BLAS created. Device Address: " << blasDeviceAddress << std::endl;
+}
+
+void RendererCore::CreateInstanceBuffer_OnlyOneTriangle(){
+    //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
+
+    VkAccelerationStructureInstanceKHR instance{};
+    
+    // identity transform
+    instance.transform.matrix[0][0] = 1.0f;
+    instance.transform.matrix[0][1] = 0.0f;
+    instance.transform.matrix[0][2] = 0.0f;
+    instance.transform.matrix[0][3] = 0.0f;
+
+    instance.transform.matrix[1][0] = 0.0f;
+    instance.transform.matrix[1][1] = 1.0f;
+    instance.transform.matrix[1][2] = 0.0f;
+    instance.transform.matrix[1][3] = 0.0f;
+
+    instance.transform.matrix[2][0] = 0.0f;
+    instance.transform.matrix[2][1] = 0.0f;
+    instance.transform.matrix[2][2] = 1.0f;
+    instance.transform.matrix[2][3] = 0.0f;
+
+    instance.instanceCustomIndex = 0;
+    instance.mask = 0xFF;
+    instance.instanceShaderBindingTableRecordOffset = 0;
+    instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+    instance.accelerationStructureReference = blasDeviceAddress;
+
+    std::vector<VkAccelerationStructureInstanceKHR> instances = { instance };
+
+    VkDeviceSize instanceBufferSize =
+        sizeof(VkAccelerationStructureInstanceKHR) * instances.size();
+
+    VkResult result = instance_buffer.init(
+        instanceBufferSize,
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create TLAS instance buffer!");
+    }
+
+    instance_buffer.fill(instances.data(), GetLogicalDevice());
+
+    instanceBufferAddress =
+        GetBufferAddress(GetLogicalDevice(), instance_buffer.buffer);
+
+    instanceCount = static_cast<uint32_t>(instances.size());
+
+    //std::cout << "TLAS instance buffer created. Device Address: " << instanceBufferAddress << std::endl;
+}
+
+void RendererCore::CreateTlas_OnlyOneTriangle(){
+    //std::cout << "Creating TLAS for one triangle instance..." << std::endl;
+
+    const uint32_t primitiveCount = instanceCount;   // 现在应当是 1
+
+    // 1) instance data
+    VkAccelerationStructureGeometryInstancesDataKHR instancesData{};
+    instancesData.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
+    instancesData.arrayOfPointers = VK_FALSE;
+    instancesData.data.deviceAddress = instanceBufferAddress;
+
+    // 2) geometry
+    VkAccelerationStructureGeometryKHR geometry{};
+    geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+    geometry.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+    geometry.geometry.instances = instancesData;
+
+    // 3) build info for size query
+    VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+    buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+    buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+    buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+    buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+    buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+    buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
+    buildInfo.geometryCount = 1;
+    buildInfo.pGeometries = &geometry;
+
+    // 4) query build sizes
+    VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
+    sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+
+    fpGetAccelerationStructureBuildSizesKHR(
+        GetLogicalDevice(),
+        VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+        &buildInfo,
+        &primitiveCount,
+        &sizeInfo
+    );
+
+    // 5) create TLAS storage buffer
+    VkResult result = tlas_buffer.init(
+        sizeInfo.accelerationStructureSize,
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create TLAS storage buffer!");
+    }
+
+    // 6) create TLAS object
+    VkAccelerationStructureCreateInfoKHR asCreateInfo{};
+    asCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+    asCreateInfo.buffer = tlas_buffer.buffer;
+    asCreateInfo.offset = 0;
+    asCreateInfo.size = sizeInfo.accelerationStructureSize;
+    asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+    asCreateInfo.deviceAddress = 0;
+
+    result = fpCreateAccelerationStructureKHR(
+        GetLogicalDevice(),
+        &asCreateInfo,
+        nullptr,
+        &tlas
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create TLAS object!");
+    }
+
+    // 7) create scratch buffer
+    result = tlas_scratch_buffer.init(
+        sizeInfo.buildScratchSize,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        GetLogicalDevice(),
+        GetPhysicalDevice(),
+        true
+    );
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create TLAS scratch buffer!");
+    }
+
+    VkDeviceAddress scratchAddress =
+        GetBufferAddress(GetLogicalDevice(), tlas_scratch_buffer.buffer);
+
+    // 8) final build info
+    buildInfo.dstAccelerationStructure = tlas;
+    buildInfo.scratchData.deviceAddress = scratchAddress;
+
+    // 9) build range
+    VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
+    rangeInfo.primitiveCount = primitiveCount;
+    rangeInfo.primitiveOffset = 0;
+    rangeInfo.firstVertex = 0;
+    rangeInfo.transformOffset = 0;
+
+    const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
+
+    // 10) record command buffer
+    int cmdId = raytracingCmdId;
+    BeginCommandBuffer_Raytracing(cmdId);
+
+    fpCmdBuildAccelerationStructuresKHR(
+        commandBuffers[cmdId][currentFrame],
+        1,
+        &buildInfo,
+        &pRangeInfo
+    );
+
+    VkMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    barrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+    barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+
+    vkCmdPipelineBarrier(
+        commandBuffers[cmdId][currentFrame],
+        VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+        VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+        0,
+        1, &barrier,
+        0, nullptr,
+        0, nullptr
+    );
+
+    EndCommandBuffer_Raytracing(cmdId);
+
+    // 11) submit and wait
+    SubmitCommandBufferAndWait_Raytracing(cmdId, CContext::GetHandle().GetComputeQueue());
+
+    // 12) query TLAS device address (optional but useful)
+    VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};
+    addressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+    addressInfo.accelerationStructure = tlas;
+
+    tlasDeviceAddress = fpGetAccelerationStructureDeviceAddressKHR(GetLogicalDevice(), &addressInfo);
+
+    //std::cout << "TLAS created. Device Address: " << tlasDeviceAddress << std::endl;
+}
+
 
 void RendererCore::QueryRayTracingProperties(){
     //std::cout<<"Raytraycing Pipeline: Querying ray tracing properties..."<<std::endl;
@@ -941,8 +1477,29 @@ void RendererCore::Destroy(){
         handle_module_logcore = nullptr;
     }
 
+    if (tlas != VK_NULL_HANDLE) {
+        fpDestroyAccelerationStructureKHR(GetLogicalDevice(), tlas, nullptr);
+        tlas = VK_NULL_HANDLE;
+    }
+
+    if (blas != VK_NULL_HANDLE) {
+        fpDestroyAccelerationStructureKHR(GetLogicalDevice(), blas, nullptr);
+        blas = VK_NULL_HANDLE;
+    }
+
     //std::cout<<"----Now free the SBT buffer----"<<std::endl;
     sbt_buffer.DestroyAndFree(GetLogicalDevice());
+
+    rt_vertex_buffer.DestroyAndFree(GetLogicalDevice());
+    rt_index_buffer.DestroyAndFree(GetLogicalDevice());
+
+    blas_buffer.DestroyAndFree(GetLogicalDevice());
+    blas_scratch_buffer.DestroyAndFree(GetLogicalDevice());
+
+    instance_buffer.DestroyAndFree(GetLogicalDevice());
+
+    tlas_buffer.DestroyAndFree(GetLogicalDevice());
+    tlas_scratch_buffer.DestroyAndFree(GetLogicalDevice());
 }
 
 void RendererCore::DestroyInstance(HMODULE handle, void* instance){

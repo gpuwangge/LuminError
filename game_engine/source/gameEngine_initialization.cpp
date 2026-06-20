@@ -329,6 +329,17 @@ void GameEngine::Initialize(){
     TimePoint T6 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for resources", T5, T6);
 
+
+    /****************************
+    * 7.5 Command Buffer (move from 9.1)
+    ****************************/
+    //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
+    if(appInfo->GraphicsPipelines.size() > 0) renderer->CreateGraphicsCommandBuffer();
+    //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
+    if(appInfo->ComputePipelines.size() > 0) renderer->CreateComputeCommandBuffer();
+    if(appInfo->RaytracingPipelines.size() > 0) renderer->CreateRaytracingCommandBuffer();
+    //if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
+
     /****************************
     * 8 Create Uniform Descriptors
     ****************************/
@@ -362,7 +373,10 @@ void GameEngine::Initialize(){
             renderer->createComputeDescriptorSetLayout();
         }
     }
-    if(b_uniform_raytracing) renderer->createRaytracingDescriptorSetLayout();
+    if(b_uniform_raytracing) {
+        renderer->InitialRaytracing(); //TODO: initial ray tracing before description?
+        renderer->createRaytracingDescriptorSetLayout();
+    }
 
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
@@ -377,7 +391,7 @@ void GameEngine::Initialize(){
     if(b_uniform_raytracing) {
         //if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->createRaytracingDescriptorSets(NULL);
         //else renderer->createRaytracingDescriptorSets();
-        renderer->createRaytracingDescriptorSets();
+        renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas());
     }
 
     TimePoint T7 = now();
@@ -391,13 +405,15 @@ void GameEngine::Initialize(){
     /****************************
     * 9.1 Command Buffer
     ****************************/
+    /*
     //if(appInfo->VertexShader && appInfo->VertexShader->size() > 0) renderer.CreateGraphicsCommandBuffer();
     if(appInfo->GraphicsPipelines.size() > 0) renderer->CreateGraphicsCommandBuffer();
     //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
     if(appInfo->ComputePipelines.size() > 0) renderer->CreateComputeCommandBuffer();
     if(appInfo->RaytracingPipelines.size() > 0) renderer->CreateRaytracingCommandBuffer();
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
-    
+    */
+
     /****************************
     * 9.2 Create Shaders
     ****************************/
@@ -426,7 +442,8 @@ void GameEngine::Initialize(){
         //for(int i = 0; i < appInfo->RaytracingPipelines.size(); i++){ 
             //std::cout<<"CreatePipeline: Done Create Shader for pipeline: "<<appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name<<std::endl;
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name, RAYT);
-            //resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_miss_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_miss_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_closesthit_shader_name, RAYT);
         //}
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
@@ -536,11 +553,9 @@ void GameEngine::Initialize(){
         if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing layout"<<std::endl;
         renderer->CreateRaytracingPipelineLayout(renderer->GetRaytracingDescriptorSetLayout());
         if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing pipeline"<<std::endl;
-        renderer->CreateRaytracingPipeline(resourcer->GetRaytracingShaderModule(0));
+        renderer->CreateRaytracingPipeline(resourcer->GetRaytracingShaderModule(0), resourcer->GetRaytracingShaderModule(1), resourcer->GetRaytracingShaderModule(2));
 
-        //CreateRayTracingPipeline_OnlyRayGen();
-        //CreateSbt_OnlyRayGen();
-        renderer->InitialRaytracing();
+        renderer->CreateSBS();
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 

@@ -39,7 +39,7 @@ public:
      * Set
      ************/
     std::vector<VkDescriptorSet> descriptorSets; //one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
-    void createDescriptorSets(VkImageView textureImageView = NULL);
+    void createDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas);
 
 
     /************

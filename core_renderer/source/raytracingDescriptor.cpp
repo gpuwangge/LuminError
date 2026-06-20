@@ -94,6 +94,11 @@ void CRaytracingDescriptorManager::createDescriptorPool(){
         raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT); ///!!!
         counter++;
+
+        //TODO: add a new uniform type?
+        raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT); ///!!!
+        counter++;
     }
     //std::cout<<std::endl;
 
@@ -233,6 +238,13 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].pImmutableSamplers = nullptr;
         raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;//VK_SHADER_STAGE_COMPUTE_BIT;
         counter++;
+
+        raytracingBindings[counter].binding = 1;
+        raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        raytracingBindings[counter].descriptorCount = 1;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        raytracingBindings[counter].pImmutableSamplers = nullptr;
+        counter++;
     }
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -248,7 +260,7 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
 /************
  * Set
  ************/
-void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImageView){
+void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas){
     //Descriptor Step 3/3
     //HERE_I_AM("wxjCreateDescriptorSets");
 
@@ -489,6 +501,7 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
 
         //std::cout<<"UNIFORM_IMAGE_STORAGE_SWAPCHAIN_BIT"<<std::endl;
         if(raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN){
+            //binding 0: storage image
             VkDescriptorImageInfo storageImageInfo{};
             storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
             //storageImageInfo.imageView = (*swapchainImageViews)[i];
@@ -503,6 +516,25 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             descriptorWrites[counter].descriptorCount = 1;
             descriptorWrites[counter].pImageInfo = &storageImageInfo;
             counter++;
+
+            //binding 1: TLAS
+            VkWriteDescriptorSetAccelerationStructureKHR asInfo{};
+            asInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+            asInfo.pNext = nullptr;
+            asInfo.accelerationStructureCount = 1;
+            asInfo.pAccelerationStructures = &tlas;
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].pNext = &asInfo;
+            descriptorWrites[counter].dstSet = descriptorSets[i];//raytracingDescriptorSet;
+            descriptorWrites[counter].dstBinding = 1;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+            descriptorWrites[counter].pImageInfo = nullptr;
+            descriptorWrites[counter].pBufferInfo = nullptr;
+            descriptorWrites[counter].pTexelBufferView = nullptr;
+
         }
         
         //Step 4
@@ -808,7 +840,7 @@ int CRaytracingDescriptorManager::getPoolSize(){
     // descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
-    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 1:0;
+    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 2:0; //TODO: currently combine image and tlas
 	return descriptorPoolSize;
 }
 int CRaytracingDescriptorManager::getLayoutSize(){

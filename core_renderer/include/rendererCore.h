@@ -187,6 +187,7 @@ namespace LERenderer{
         * Ray Tracing Related
         *********/
         void InitialRaytracing() override;
+        void CreateSBS() override;
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
         void QueryRayTracingProperties();
@@ -194,24 +195,66 @@ namespace LERenderer{
         PFN_vkGetRayTracingShaderGroupHandlesKHR       fpGetRayTracingShaderGroupHandlesKHR       = nullptr;
         PFN_vkGetBufferDeviceAddressKHR                fpGetBufferDeviceAddressKHR                = nullptr;
         PFN_vkCmdTraceRaysKHR                          fpCmdTraceRaysKHR                          = nullptr;
+        
+        PFN_vkGetAccelerationStructureBuildSizesKHR    fpGetAccelerationStructureBuildSizesKHR    = nullptr; //used in create blas
+        PFN_vkCreateAccelerationStructureKHR           fpCreateAccelerationStructureKHR           = nullptr; //used in create blas
+        PFN_vkCmdBuildAccelerationStructuresKHR        fpCmdBuildAccelerationStructuresKHR        = nullptr; //used in create blas
+        PFN_vkGetAccelerationStructureDeviceAddressKHR fpGetAccelerationStructureDeviceAddressKHR = nullptr; //used in create blas
+        PFN_vkDestroyAccelerationStructureKHR          fpDestroyAccelerationStructureKHR          = nullptr; //used in create blas
 
-        //not used yet
-        PFN_vkCreateAccelerationStructureKHR           fpCreateAccelerationStructureKHR           = nullptr;
-        PFN_vkDestroyAccelerationStructureKHR          fpDestroyAccelerationStructureKHR          = nullptr;
-        PFN_vkGetAccelerationStructureBuildSizesKHR    fpGetAccelerationStructureBuildSizesKHR    = nullptr;
-        PFN_vkGetAccelerationStructureDeviceAddressKHR fpGetAccelerationStructureDeviceAddressKHR = nullptr;
-        PFN_vkCmdBuildAccelerationStructuresKHR        fpCmdBuildAccelerationStructuresKHR        = nullptr;
-        PFN_vkBuildAccelerationStructuresKHR           fpBuildAccelerationStructuresKHR           = nullptr;
+        PFN_vkBuildAccelerationStructuresKHR           fpBuildAccelerationStructuresKHR           = nullptr; //not used yet, this is optional?
 
         bool LoadRayTracingFunctions_core();
 
+        VkDeviceAddress GetBufferAddress(VkDevice device, VkBuffer buffer);
+
         CWxjBuffer sbt_buffer;
         VkStridedDeviceAddressRegionKHR rgenRegion{};
+        VkStridedDeviceAddressRegionKHR missRegion{};
+        VkStridedDeviceAddressRegionKHR hitRegion{};
+        VkStridedDeviceAddressRegionKHR callRegion{};
         void CreateSbt_OnlyRayGen();
         static uint32_t AlignUp(uint32_t value, uint32_t alignment) {
             return (value + alignment - 1) & ~(alignment - 1);
         }
-        VkDeviceAddress GetBufferAddress(VkDevice device, VkBuffer buffer);
+        
+
+        //Vertex/Index Buffer related
+        // struct RTVertex{
+        //     float x, y, z;
+        // };
+        CWxjBuffer rt_vertex_buffer;
+        CWxjBuffer rt_index_buffer;
+        VkDeviceAddress rt_vertex_buffer_address = 0;
+        VkDeviceAddress rt_index_buffer_address = 0;
+        uint32_t triangleVertexCount = 0;
+        uint32_t triangleIndexCount = 0;
+        uint32_t triangleVertexStride = 0;
+        void CreateTriangleVertexBuffer();
+
+        //Blas related
+        void BeginCommandBuffer_Raytracing(int commandBufferIndex);
+        void EndCommandBuffer_Raytracing(int commandBufferIndex);
+        void SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex, VkQueue queue);
+        CWxjBuffer blas_buffer;
+        CWxjBuffer blas_scratch_buffer;
+        VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
+        VkDeviceAddress blasDeviceAddress = 0;
+        void CreateBlas_OnlyOneTriangle();
+
+        //Instance buffer related
+        CWxjBuffer instance_buffer;
+        VkDeviceAddress instanceBufferAddress = 0;
+        uint32_t instanceCount = 0;
+        void CreateInstanceBuffer_OnlyOneTriangle();
+
+        //Tlas related
+        CWxjBuffer tlas_buffer;
+        CWxjBuffer tlas_scratch_buffer;
+        VkDeviceAddress tlasDeviceAddress = 0;
+        VkAccelerationStructureKHR tlas = VK_NULL_HANDLE;
+        VkAccelerationStructureKHR GetTlas() override { return tlas; }
+        void CreateTlas_OnlyOneTriangle();
 
         /**************************
          * RenderProcess
@@ -267,7 +310,9 @@ namespace LERenderer{
             renderProcess.createGraphicsPipelineLayout(descriptorSetLayouts, pushConstantRange, bUsePushConstant, graphicsPipelineLayout_id);
         }
         void CreateComputePipeline(VkShaderModule &computeShaderModule) override { renderProcess.createComputePipeline(computeShaderModule); }
-        void CreateRaytracingPipeline(VkShaderModule &raytracingShaderModule) override { renderProcess.createRaytracingPipeline(raytracingShaderModule); }
+        void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &rmissModule, VkShaderModule &rchitModule) override { 
+            renderProcess.createRaytracingPipeline(rgenModule, rmissModule, rchitModule); 
+        }
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
@@ -356,7 +401,7 @@ namespace LERenderer{
 
         void createRaytracingDescriptorPool() override { raytracingDescriptorManager.createDescriptorPool(); }
         void createRaytracingDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { raytracingDescriptorManager.createDescriptorSetLayout(customBinding); }
-        void createRaytracingDescriptorSets(VkImageView textureImageView = NULL) override { raytracingDescriptorManager.createDescriptorSets(textureImageView); }
+        void createRaytracingDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas) override { raytracingDescriptorManager.createDescriptorSets(textureImageView, tlas); }
 
         void addComputeGlobalUniformBuffer() { computeDescriptorManager.addGlobalUniformBuffer(); }
         void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) { computeDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }
