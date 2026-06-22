@@ -14,7 +14,7 @@ Objects:
 
 Resources:
   - Models:
-    #- resource_model_name: low_poly_tree.obj
+    - resource_model_name: low_poly_tree.obj
     - resource_model_name: cube_10facet.obj
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
