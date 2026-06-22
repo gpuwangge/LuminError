@@ -1,4 +1,21 @@
+Objects:
+  - object_name: Cube
+    object_id: 0
+    object_scale: 1.0
+    object_position: [0,0,0]
+    object_rotation: [0,0,0] #no use
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+
+
 Resources:
+  - Models:
+    #- resource_model_name: low_poly_tree.obj
+    - resource_model_name: cube_10facet.obj
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
       resource_raytracing_pipeline_miss_shader_name: simpleRayPipeline/miss.rmiss.spv

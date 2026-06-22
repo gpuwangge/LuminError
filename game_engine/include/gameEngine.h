@@ -121,6 +121,24 @@ namespace LEGameEngine{
         void InitializeComputeRayTracing(); //for compute ray tracing, not ray tracing pipeline
         void SetupComputeRayTracing(); //for compute ray tracing, not ray tracing pipeline
 
+        //Ray Tracing Pipeline
+        void SetupRayTracing(); //for ray tracing pipeline
+        //CWxjBuffer& GetRaytracingVertexBuffer() override { return allvertex};
+        CWxjBuffer raytracing_vertex_buffer; //use this to get buffer address
+        CWxjBuffer raytracing_index_buffer; //use this to get buffer address
+        PFN_vkGetBufferDeviceAddressKHR                fpGetBufferDeviceAddressKHR                = nullptr;
+        VkDeviceAddress GetBufferAddress(VkDevice device, VkBuffer buffer);
+        VkDeviceAddress raytracing_vertex_buffer_address = 0;
+        VkDeviceAddress raytracing_index_buffer_address = 0;
+        VkDeviceAddress GetRaytracingVertexBufferAddress() override { return raytracing_vertex_buffer_address; }
+        VkDeviceAddress GetRaytracingIndexBufferAddress() override { return raytracing_index_buffer_address; }
+        uint32_t triangleVertexCount = 0;
+        uint32_t triangleIndexCount = 0;
+        uint32_t triangleVertexStride = 0;
+        uint32_t GetTriangleVertexCount() override { return triangleVertexCount; }
+        uint32_t GetTriangleIndexCount() override { return triangleIndexCount; }
+        uint32_t GetTriangleVertexStride() override { return triangleVertexStride; }
+
         //Module Related
         HMODULE handle_module_yamlcore;
         LEYAML::IYAMLCore *yamler = NULL;
@@ -210,6 +228,9 @@ namespace LEGameEngine{
         void UploadComputeStorageBuffer_TriangleReorderIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_BVHNode(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_Sphere(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+
+        void UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
 
         void SetComputeStorageBufferSize_CustomSwap(int size) override;
         void SetComputeStorageBufferUsage_CustomSwap(int usage) override;

@@ -698,7 +698,7 @@ void RendererCore::InitialRaytracing(){
 		std::cout<<"failed to load ray tracing functions!"<<std::endl;
 		throw std::runtime_error("failed to load ray tracing functions!");
 	}
-    CreateTriangleVertexBuffer();
+    //CreateTriangleVertexBuffer();
     CreateBlas_OnlyOneTriangle();
     CreateInstanceBuffer_OnlyOneTriangle();
     CreateTlas_OnlyOneTriangle();
@@ -809,7 +809,7 @@ bool RendererCore::LoadRayTracingFunctions_core(){
 
 
 
-VkDeviceAddress  RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer) {
+VkDeviceAddress RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer) {
     VkBufferDeviceAddressInfo info{};
     info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_KHR;
     info.buffer = buffer;
@@ -935,6 +935,7 @@ void RendererCore::CreateSbt_OnlyRayGen(){
     //std::cout<<"Shader Binding Table created. Device Address: "<<addr<<std::endl;
 }
 
+/*
 void RendererCore::CreateTriangleVertexBuffer(){
     //std::cout << "Creating ray tracing triangle vertex/index buffers..." << std::endl;
 
@@ -1001,7 +1002,7 @@ void RendererCore::CreateTriangleVertexBuffer(){
     std::cout << "triangleVertexCount = " << triangleVertexCount <<std::endl;
     std::cout << "triangleIndexCount = " << triangleIndexCount <<std::endl;
     std::cout << "triangleVertexStride = " << triangleVertexStride <<std::endl;
-}
+}*/
 
 void RendererCore::BeginCommandBuffer_Raytracing(int commandBufferIndex)
 {
@@ -1050,17 +1051,17 @@ void RendererCore::CreateBlas_OnlyOneTriangle(){
     //std::cout << "Creating BLAS for one triangle..." << std::endl;
 
     // 一个 indexed triangle => 1 primitive
-    const uint32_t primitiveCount = 1;
+    const uint32_t primitiveCount = game->GetTriangleIndexCount() / 3 ;//1;
 
     // 1) triangles data
     VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
     triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
     triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
-    triangles.vertexData.deviceAddress = rt_vertex_buffer_address;
-    triangles.vertexStride = triangleVertexStride;
-    triangles.maxVertex = triangleVertexCount - 1;
+    triangles.vertexData.deviceAddress = game->GetRaytracingVertexBufferAddress(); // rt_vertex_buffer_address;
+    triangles.vertexStride = game->GetTriangleVertexStride(); // triangleVertexStride;
+    triangles.maxVertex = game->GetTriangleVertexCount() - 1; // triangleVertexCount - 1;
     triangles.indexType = VK_INDEX_TYPE_UINT32;
-    triangles.indexData.deviceAddress = rt_index_buffer_address;
+    triangles.indexData.deviceAddress = game->GetRaytracingIndexBufferAddress();// rt_index_buffer_address;
     triangles.transformData.deviceAddress = 0;
 
     // 2) geometry
@@ -1490,8 +1491,8 @@ void RendererCore::Destroy(){
     //std::cout<<"----Now free the SBT buffer----"<<std::endl;
     sbt_buffer.DestroyAndFree(GetLogicalDevice());
 
-    rt_vertex_buffer.DestroyAndFree(GetLogicalDevice());
-    rt_index_buffer.DestroyAndFree(GetLogicalDevice());
+    //rt_vertex_buffer.DestroyAndFree(GetLogicalDevice());
+    //rt_index_buffer.DestroyAndFree(GetLogicalDevice());
 
     blas_buffer.DestroyAndFree(GetLogicalDevice());
     blas_scratch_buffer.DestroyAndFree(GetLogicalDevice());

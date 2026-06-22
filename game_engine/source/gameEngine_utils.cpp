@@ -87,6 +87,9 @@ void GameEngine::DestroyInstance(HMODULE handle, void* instance){
 void GameEngine::CleanUp(){
     logger->CloseLogFile();
 
+    raytracing_vertex_buffer.DestroyAndFree(renderer->GetLogicalDevice());
+    raytracing_index_buffer.DestroyAndFree(renderer->GetLogicalDevice());
+
     /*********************
     *1 VkDevice Resources
     ********************/
@@ -179,7 +182,7 @@ void GameEngine::CleanUp(){
     ********************/
     renderer->ContextQuit();
 
-    
+
 }
 
 GameEngine::~GameEngine(){
@@ -333,6 +336,14 @@ void GameEngine::UploadComputeStorageBuffer_BVHNode(uint32_t currentFrame, const
 void GameEngine::UploadComputeStorageBuffer_Sphere(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadStorageBuffer_sphere(currentFrame, storageBufferObject, dataSize);
 }
+
+void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadRaytracingStorageBuffer_triangleVertexAttribute(currentFrame, storageBufferObject, dataSize);
+}
+void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadRaytracingStorageBuffer_triangleVertexIndex(currentFrame, storageBufferObject, dataSize);
+}
+
 
 void GameEngine::SetComputeStorageBufferSize_CustomSwap(int size) { appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size = size; }
 void GameEngine::SetComputeStorageBufferUsage_CustomSwap(int usage) {appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Usage = usage; }

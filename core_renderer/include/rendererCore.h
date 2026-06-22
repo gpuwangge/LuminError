@@ -223,6 +223,8 @@ namespace LERenderer{
         // struct RTVertex{
         //     float x, y, z;
         // };
+
+        /*
         CWxjBuffer rt_vertex_buffer;
         CWxjBuffer rt_index_buffer;
         VkDeviceAddress rt_vertex_buffer_address = 0;
@@ -231,7 +233,8 @@ namespace LERenderer{
         uint32_t triangleIndexCount = 0;
         uint32_t triangleVertexStride = 0;
         void CreateTriangleVertexBuffer();
-
+        */
+       
         //Blas related
         void BeginCommandBuffer_Raytracing(int commandBufferIndex);
         void EndCommandBuffer_Raytracing(int commandBufferIndex);
@@ -424,6 +427,11 @@ namespace LERenderer{
         void uploadStorageBuffer_bvhNode(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_bvhNode(currentFrame, data, size); }
         void addStorageBuffer_sphere() override { computeDescriptorManager.addStorageBuffer_sphere(); }
         void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_sphere(currentFrame, data, size); }
+
+        virtual void addRaytracingStorageBuffer_triangleVertexAttribute() override { raytracingDescriptorManager.addStorageBuffer_triangleVertexAttribute(); }
+        virtual void uploadRaytracingStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexAttribute(currentFrame, data, size); }
+        virtual void addRaytracingStorageBuffer_triangleVertexIndex() override { raytracingDescriptorManager.addStorageBuffer_triangleVertexIndex(); }
+        virtual void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexIndex(currentFrame, data, size); }
 
         void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer_customswap(storageBufferSize, usage); }
         void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_customswap(currentFrame, data, size); }

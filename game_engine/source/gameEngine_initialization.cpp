@@ -105,6 +105,8 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
     if(appInfo->Uniform.b_storage_compute_customswap) renderer->addStorageBuffer_customswap(appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size, appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Usage);
 
+    renderer->addRaytracingStorageBuffer_triangleVertexAttribute();//TODO
+    renderer->addRaytracingStorageBuffer_triangleVertexIndex();//TODO
 
     if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
     if(appInfo->Uniform.b_uniform_compute_swapchain_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
@@ -374,6 +376,7 @@ void GameEngine::Initialize(){
         }
     }
     if(b_uniform_raytracing) {
+        SetupRayTracing(); //must load models before this is called
         renderer->InitialRaytracing(); //TODO: initial ray tracing before description?
         renderer->createRaytracingDescriptorSetLayout();
     }

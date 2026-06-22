@@ -99,6 +99,14 @@ void CRaytracingDescriptorManager::createDescriptorPool(){
         raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT); ///!!!
         counter++;
+
+        raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //storage buffer for vertex attributes
+	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
+
+        raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //storage buffer for index
+	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
     }
     //std::cout<<std::endl;
 
@@ -245,6 +253,23 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
         counter++;
+
+        //if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE){
+        raytracingBindings[counter].binding = counter;
+        raytracingBindings[counter].descriptorCount = 1;
+        raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        raytracingBindings[counter].pImmutableSamplers = nullptr;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        counter++;
+        //}
+        //if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX){
+        raytracingBindings[counter].binding = counter;
+        raytracingBindings[counter].descriptorCount = 1;
+        raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        raytracingBindings[counter].pImmutableSamplers = nullptr;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        counter++;
+        //}
     }
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -534,7 +559,39 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             descriptorWrites[counter].pImageInfo = nullptr;
             descriptorWrites[counter].pBufferInfo = nullptr;
             descriptorWrites[counter].pTexelBufferView = nullptr;
+            counter++;
 
+            //if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE){
+            VkDescriptorBufferInfo storageBufferInfo{};
+            storageBufferInfo.buffer = storageBuffers_triangleVertexAttribute[i].buffer;
+            storageBufferInfo.offset = 0;
+            storageBufferInfo.range = sizeof(StructStorageBuffer_TriangleVertexAttribute);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
+            counter++;
+            //}
+
+            //if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX){
+            VkDescriptorBufferInfo storageBufferInfo2{};
+            storageBufferInfo2.buffer = storageBuffers_triangleVertexIndex[i].buffer;
+            storageBufferInfo2.offset = 0;
+            storageBufferInfo2.range = sizeof(StructStorageBuffer_TriangleVertexIndex);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo2;
+            counter++;
+            //}
         }
         
         //Step 4
@@ -634,50 +691,50 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
 /************
  * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX
  ************/
-// std::vector<CWxjBuffer> CRaytracingDescriptorManager::storageBuffers_triangleVertexAttribute;
-// std::vector<void*> CRaytracingDescriptorManager::storageBuffersMapped_triangleVertexAttribute;
-// void CRaytracingDescriptorManager::addStorageBuffer_triangleVertexAttribute(){
-//     computeUniformTypes |= COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE;
+std::vector<CWxjBuffer> CRaytracingDescriptorManager::storageBuffers_triangleVertexAttribute;
+std::vector<void*> CRaytracingDescriptorManager::storageBuffersMapped_triangleVertexAttribute;
+void CRaytracingDescriptorManager::addStorageBuffer_triangleVertexAttribute(){
+   //computeUniformTypes |= COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE;
 
-//     storageBuffers_triangleVertexAttribute.resize(MAX_FRAMES_IN_FLIGHT);
-//     storageBuffersMapped_triangleVertexAttribute.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffers_triangleVertexAttribute.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_triangleVertexAttribute.resize(MAX_FRAMES_IN_FLIGHT);
 
-//     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-//         storageBuffers_triangleVertexAttribute[i].init(sizeof(StructStorageBuffer_TriangleVertexAttribute), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-//         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_triangleVertexAttribute[i].deviceMemory, 0, sizeof(StructStorageBuffer_TriangleVertexAttribute), 0, &storageBuffersMapped_triangleVertexAttribute[i]);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_triangleVertexAttribute[i].init(sizeof(StructStorageBuffer_TriangleVertexAttribute), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_triangleVertexAttribute[i].deviceMemory, 0, sizeof(StructStorageBuffer_TriangleVertexAttribute), 0, &storageBuffersMapped_triangleVertexAttribute[i]);
  
-//     }
-// }
-// void CRaytracingDescriptorManager::uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size){
-//     if (data && size > 0) {
-//         //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
-//         memcpy(storageBuffersMapped_triangleVertexAttribute[currentFrame], data, size);
-//     }
-// }
+    }
+}
+void CRaytracingDescriptorManager::uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size){
+    if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_triangleVertexAttribute[currentFrame], data, size);
+    }
+}
 
 /************
  * 5 COMPUTE_STORAGEBUFFER_TRIANGLEINDEX
  ************/
-// std::vector<CWxjBuffer> CRaytracingDescriptorManager::storageBuffers_triangleVertexIndex;
-// std::vector<void*> CRaytracingDescriptorManager::storageBuffersMapped_triangleVertexIndex;
-// void CRaytracingDescriptorManager::addStorageBuffer_triangleVertexIndex(){
-//     computeUniformTypes |= COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX;
+std::vector<CWxjBuffer> CRaytracingDescriptorManager::storageBuffers_triangleVertexIndex;
+std::vector<void*> CRaytracingDescriptorManager::storageBuffersMapped_triangleVertexIndex;
+void CRaytracingDescriptorManager::addStorageBuffer_triangleVertexIndex(){
+    //computeUniformTypes |= COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX;
 
-//     storageBuffers_triangleVertexIndex.resize(MAX_FRAMES_IN_FLIGHT);
-//     storageBuffersMapped_triangleVertexIndex.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffers_triangleVertexIndex.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_triangleVertexIndex.resize(MAX_FRAMES_IN_FLIGHT);
 
-//     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-//         storageBuffers_triangleVertexIndex[i].init(sizeof(StructStorageBuffer_TriangleVertexIndex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-//         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_triangleVertexIndex[i].deviceMemory, 0, sizeof(StructStorageBuffer_TriangleVertexIndex), 0, &storageBuffersMapped_triangleVertexIndex[i]);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_triangleVertexIndex[i].init(sizeof(StructStorageBuffer_TriangleVertexIndex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_triangleVertexIndex[i].deviceMemory, 0, sizeof(StructStorageBuffer_TriangleVertexIndex), 0, &storageBuffersMapped_triangleVertexIndex[i]);
  
-//     }
-// }
-// void CRaytracingDescriptorManager::uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size){
-//     if (data && size > 0) {
-//         //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
-//         memcpy(storageBuffersMapped_triangleVertexIndex[currentFrame], data, size);
-//     }
-// }
+    }
+}
+void CRaytracingDescriptorManager::uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size){
+    if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_triangleVertexIndex[currentFrame], data, size);
+    }
+}
 
 /************
  * 5.5 COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX
@@ -840,7 +897,7 @@ int CRaytracingDescriptorManager::getPoolSize(){
     // descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
-    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 2:0; //TODO: currently combine image and tlas
+    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 4:0; //TODO: currently combine image and tlas, vertex attributes and index
 	return descriptorPoolSize;
 }
 int CRaytracingDescriptorManager::getLayoutSize(){
@@ -860,12 +917,12 @@ void CRaytracingDescriptorManager::DestroyAndFree(){
     // for (size_t i = 0; i < storageBuffers_material.size(); i++) {
     //     storageBuffers_material[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     // }
-    // for (size_t i = 0; i < storageBuffers_triangleVertexAttribute.size(); i++) {
-    //     storageBuffers_triangleVertexAttribute[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
-    // }
-    // for (size_t i = 0; i < storageBuffers_triangleVertexIndex.size(); i++) {
-    //     storageBuffers_triangleVertexIndex[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
-    // }
+    for (size_t i = 0; i < storageBuffers_triangleVertexAttribute.size(); i++) {
+        storageBuffers_triangleVertexAttribute[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
+    for (size_t i = 0; i < storageBuffers_triangleVertexIndex.size(); i++) {
+        storageBuffers_triangleVertexIndex[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
     // for (size_t i = 0; i < storageBuffers_triangleReorderIndex.size(); i++) {
     //     storageBuffers_triangleReorderIndex[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     // }

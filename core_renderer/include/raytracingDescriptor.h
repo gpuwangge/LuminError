@@ -76,18 +76,18 @@ public:
     /************
      * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE
      ************/
-    // static std::vector<CWxjBuffer> storageBuffers_triangleVertexAttribute;
-    // static std::vector<void*> storageBuffersMapped_triangleVertexAttribute;
-    // void addStorageBuffer_triangleVertexAttribute();
-    // void uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size);
+    static std::vector<CWxjBuffer> storageBuffers_triangleVertexAttribute;
+    static std::vector<void*> storageBuffersMapped_triangleVertexAttribute;
+    void addStorageBuffer_triangleVertexAttribute();
+    void uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 5 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX
      ************/
-    // static std::vector<CWxjBuffer> storageBuffers_triangleVertexIndex;
-    // static std::vector<void*> storageBuffersMapped_triangleVertexIndex;
-    // void addStorageBuffer_triangleVertexIndex();
-    // void uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size);
+    static std::vector<CWxjBuffer> storageBuffers_triangleVertexIndex;
+    static std::vector<void*> storageBuffersMapped_triangleVertexIndex;
+    void addStorageBuffer_triangleVertexIndex();
+    void uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 5.5 COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX
