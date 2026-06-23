@@ -239,16 +239,24 @@ namespace LERenderer{
         void BeginCommandBuffer_Raytracing(int commandBufferIndex);
         void EndCommandBuffer_Raytracing(int commandBufferIndex);
         void SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex, VkQueue queue);
-        CWxjBuffer blas_buffer;
+        //CWxjBuffer blas_buffer;
         CWxjBuffer blas_scratch_buffer;
-        VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
-        VkDeviceAddress blasDeviceAddress = 0;
+        //VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
+        //VkDeviceAddress blasDeviceAddress = 0;
         void CreateBlas_OnlyOneTriangle();
 
         //Instance buffer related
-        CWxjBuffer instance_buffer;
+        // struct RtObjectInstance{
+        //     int meshId;
+        //     glm::vec3 position;
+        //     glm::vec3 rotation;
+        //     glm::vec3 scale;
+        // };
+        std::vector<VkAccelerationStructureInstanceKHR> instances;
+
+        CWxjBuffer instance_buffer; //only need one instance buffer, with all instances inside
         VkDeviceAddress instanceBufferAddress = 0;
-        uint32_t instanceCount = 0;
+        //uint32_t instanceCount = 0;
         void CreateInstanceBuffer_OnlyOneTriangle();
 
         //Tlas related

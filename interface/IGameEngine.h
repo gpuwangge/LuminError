@@ -3,6 +3,7 @@
 #include <vector>
 #include "Utility.h"
 #include <vulkan/vulkan.h> //todo: replace with forward declaration
+#include "TypeRaytracing.h"
 
 class CControlNode;
 class CObject;
@@ -95,12 +96,13 @@ namespace LEGameEngine{
         virtual void UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
 
         //virtual CWxjBuffer& GetRaytracingVertexBuffer() = 0;
-        virtual VkDeviceAddress GetRaytracingVertexBufferAddress() = 0;
-        virtual VkDeviceAddress GetRaytracingIndexBufferAddress() = 0;
-        virtual uint32_t GetTriangleVertexCount() = 0;
-        virtual uint32_t GetTriangleIndexCount() = 0;
-        virtual uint32_t GetTriangleVertexStride() = 0;
-        
+        // virtual VkDeviceAddress GetRaytracingVertexBufferAddress() = 0;
+        // virtual VkDeviceAddress GetRaytracingIndexBufferAddress() = 0;
+        // virtual uint32_t GetTriangleVertexCount() = 0;
+        // virtual uint32_t GetTriangleIndexCount() = 0;
+        // virtual uint32_t GetTriangleVertexStride() = 0;
+        virtual RtMesh& GetRtMesh(int index) = 0;
+        virtual int GetRtMeshSize() = 0;
 
         virtual void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
         virtual void RayTrace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;

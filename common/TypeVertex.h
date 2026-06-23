@@ -176,4 +176,3 @@ struct Particle {
         return attributeDescriptions;
     }
 };
-

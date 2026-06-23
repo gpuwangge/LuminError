@@ -194,9 +194,11 @@ void GameEngine::SetupRayTracing(){
     int vertexCount = 0;
     int indexCount = 0;
     int vertexOffset = 0;
+    std::cout<<"SetupRayTracing(): Found "<<objects.size()<<" objects."<<std::endl;
+    std::cout<<"SetupRayTracing(): Found "<<modelData.size()<<" models."<<std::endl;
     for(int j = 0; j < objects.size(); j++){
         std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
-        std::cout<<"    Object "<<j<<" has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
+        std::cout<<"    Object "<<j<<" uses model_id="<<objects[j].m_model_id<<", and has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
         // Vertex Data for a 3d model
         int modelIndex = objects[j].m_model_id;
         for(int i = 0; i < modelData[modelIndex].modelVertices3D.size(); i++){
@@ -247,50 +249,127 @@ void GameEngine::SetupRayTracing(){
     /****************
     * Create buffer address so BLAS(in renderer core) can use
     **************/
-    triangleVertexCount = static_cast<uint32_t>(allVertices3D.size());
-    triangleIndexCount  = static_cast<uint32_t>(allIndices3D.size());
-    triangleVertexStride = sizeof(Vertex3D);
+    rtMeshes.resize(modelData.size());
+    
+    for(int i = 0; i < modelData.size(); i++){
+        rtMeshes[i].modelId = i;
+        rtMeshes[i].vertexCount = static_cast<uint32_t>(modelData[i].modelVertices3D.size());
+        rtMeshes[i].indexCount = static_cast<uint32_t>(modelData[i].modelIndices3D.size());
+        rtMeshes[i].vertexStride = sizeof(Vertex3D);
+
+        rtMeshes[i].vertexBuffer.init(
+            sizeof(Vertex3D) * rtMeshes[i].vertexCount,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            renderer->GetLogicalDevice(),
+            renderer->GetPhysicalDevice(),
+            true
+        );
+        rtMeshes[i].vertexBuffer.fill(modelData[i].modelVertices3D.data(), renderer->GetLogicalDevice());
+        rtMeshes[i].indexBuffer.init(
+            sizeof(uint32_t) * rtMeshes[i].indexCount,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            renderer->GetLogicalDevice(),
+            renderer->GetPhysicalDevice(),
+            true
+        );
+        rtMeshes[i].indexBuffer.fill(modelData[i].modelIndices3D.data(), renderer->GetLogicalDevice());
+
+        fpGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(vkGetDeviceProcAddr(renderer->GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
+
+        rtMeshes[i].vertexAddress = GetBufferAddress(renderer->GetLogicalDevice(), rtMeshes[i].vertexBuffer.buffer);
+        rtMeshes[i].indexAddress = GetBufferAddress(renderer->GetLogicalDevice(), rtMeshes[i].indexBuffer.buffer);
+
+        std::cout<<"rtMeshes["<<i<<"].vertexAddress = "<<rtMeshes[i].vertexAddress<<std::endl;
+        std::cout<<"rtMeshes["<<i<<"].indexAddress = "<<rtMeshes[i].indexAddress<<std::endl;
+        std::cout<<"rtMeshes["<<i<<"].vertexCount = "<<rtMeshes[i].vertexCount<<std::endl;
+        std::cout<<"rtMeshes["<<i<<"].indexCount = "<<rtMeshes[i].indexCount<<std::endl;
+        std::cout<<"rtMeshes["<<i<<"].vertexStride = "<<rtMeshes[i].vertexStride<<std::endl;
+    }
+
+
+    // rtMeshes[0].modelId = 0;
+    // rtMeshes[0].vertexCount = static_cast<uint32_t>(allVertices3D.size());
+    // rtMeshes[0].indexCount = static_cast<uint32_t>(allIndices3D.size());
+    // rtMeshes[0].vertexStride = sizeof(Vertex3D);
+
+    // rtMeshes[0].vertexBuffer.init(
+    //     sizeof(Vertex3D) * allVertices3D.size(),
+    //     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+    //     VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+    //     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+    //     renderer->GetLogicalDevice(),
+    //     renderer->GetPhysicalDevice(),
+    //     true
+    // );
+    // rtMeshes[0].vertexBuffer.fill(allVertices3D.data(), renderer->GetLogicalDevice());
+    // rtMeshes[0].indexBuffer.init(
+    //     sizeof(uint32_t) * allIndices3D.size(),
+    //     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+    //     VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+    //     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+    //     renderer->GetLogicalDevice(),
+    //     renderer->GetPhysicalDevice(),
+    //     true
+    // );
+    // rtMeshes[0].indexBuffer.fill(allIndices3D.data(), renderer->GetLogicalDevice());
+
+    // fpGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(vkGetDeviceProcAddr(renderer->GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
+
+    // rtMeshes[0].vertexAddress = GetBufferAddress(renderer->GetLogicalDevice(), rtMeshes[0].vertexBuffer.buffer);
+    // rtMeshes[0].indexAddress = GetBufferAddress(renderer->GetLogicalDevice(), rtMeshes[0].indexBuffer.buffer);
+
+    // std::cout<<"rtMeshes[0].vertexAddress = "<<rtMeshes[0].vertexAddress<<std::endl;
+    // std::cout<<"rtMeshes[0].indexAddress = "<<rtMeshes[0].indexAddress<<std::endl;
+    // std::cout<<"rtMeshes[0].vertexCount = "<<rtMeshes[0].vertexCount<<std::endl;
+    // std::cout<<"rtMeshes[0].indexCount = "<<rtMeshes[0].indexCount<<std::endl;
+    // std::cout<<"rtMeshes[0].vertexStride = "<<rtMeshes[0].vertexStride<<std::endl;
+
+    // triangleVertexCount = static_cast<uint32_t>(allVertices3D.size());
+    // triangleIndexCount  = static_cast<uint32_t>(allIndices3D.size());
+    // triangleVertexStride = sizeof(Vertex3D);
 
     // create + upload vertex buffer
-    raytracing_vertex_buffer.init(
-        sizeof(Vertex3D) * allVertices3D.size(),
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
-        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-        renderer->GetLogicalDevice(),
-        renderer->GetPhysicalDevice(),
-        true
-    );
+    // raytracing_vertex_buffer.init(
+    //     sizeof(Vertex3D) * allVertices3D.size(),
+    //     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+    //     VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+    //     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+    //     renderer->GetLogicalDevice(),
+    //     renderer->GetPhysicalDevice(),
+    //     true
+    // );
 
-    raytracing_vertex_buffer.fill(allVertices3D.data(), renderer->GetLogicalDevice());
+    //raytracing_vertex_buffer.fill(allVertices3D.data(), renderer->GetLogicalDevice());
 
     // create + upload index buffer
-    raytracing_index_buffer.init(
-        sizeof(uint32_t) * allIndices3D.size(),
-        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
-        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-        renderer->GetLogicalDevice(),
-        renderer->GetPhysicalDevice(),
-        true
-    );
+    // raytracing_index_buffer.init(
+    //     sizeof(uint32_t) * allIndices3D.size(),
+    //     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+    //     VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+    //     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+    //     renderer->GetLogicalDevice(),
+    //     renderer->GetPhysicalDevice(),
+    //     true
+    // );
 
-    raytracing_index_buffer.fill(allIndices3D.data(), renderer->GetLogicalDevice());
+    //raytracing_index_buffer.fill(allIndices3D.data(), renderer->GetLogicalDevice());
 
 
-    fpGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(vkGetDeviceProcAddr(renderer->GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
+    //fpGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(vkGetDeviceProcAddr(renderer->GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
 
     // get device addresses
-    raytracing_vertex_buffer_address = GetBufferAddress(renderer->GetLogicalDevice(), raytracing_vertex_buffer.buffer);
-    raytracing_index_buffer_address = GetBufferAddress(renderer->GetLogicalDevice(), raytracing_index_buffer.buffer);
+    //raytracing_vertex_buffer_address = GetBufferAddress(renderer->GetLogicalDevice(), raytracing_vertex_buffer.buffer);
+   //raytracing_index_buffer_address = GetBufferAddress(renderer->GetLogicalDevice(), raytracing_index_buffer.buffer);
 
-    std::cout<<"raytracing_vertex_buffer_address = "<<raytracing_vertex_buffer_address<<std::endl;
-    std::cout<<"raytracing_index_buffer_address = "<<raytracing_index_buffer_address<<std::endl;
-    std::cout<<"triangleVertexCount = "<<triangleVertexCount<<std::endl;
-    std::cout<<"triangleIndexCount = "<<triangleIndexCount<<std::endl;
-    std::cout<<"triangleVertexStride = "<<triangleVertexStride<<std::endl;
-
-
+    // std::cout<<"raytracing_vertex_buffer_address = "<<raytracing_vertex_buffer_address<<std::endl;
+    // std::cout<<"raytracing_index_buffer_address = "<<raytracing_index_buffer_address<<std::endl;
+    // std::cout<<"triangleVertexCount = "<<triangleVertexCount<<std::endl;
+    // std::cout<<"triangleIndexCount = "<<triangleIndexCount<<std::endl;
+    // std::cout<<"triangleVertexStride = "<<triangleVertexStride<<std::endl;
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

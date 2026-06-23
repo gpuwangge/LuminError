@@ -18,6 +18,8 @@
 #include "Enum.h"
 #include "timer.h"
 
+#include "TypeRaytracing.h"
+
 //Macro to convert the macro value to a string
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -124,20 +126,26 @@ namespace LEGameEngine{
         //Ray Tracing Pipeline
         void SetupRayTracing(); //for ray tracing pipeline
         //CWxjBuffer& GetRaytracingVertexBuffer() override { return allvertex};
-        CWxjBuffer raytracing_vertex_buffer; //use this to get buffer address
-        CWxjBuffer raytracing_index_buffer; //use this to get buffer address
+        //CWxjBuffer raytracing_vertex_buffer; //use this to get buffer address
+        //CWxjBuffer raytracing_index_buffer; //use this to get buffer address
         PFN_vkGetBufferDeviceAddressKHR                fpGetBufferDeviceAddressKHR                = nullptr;
         VkDeviceAddress GetBufferAddress(VkDevice device, VkBuffer buffer);
-        VkDeviceAddress raytracing_vertex_buffer_address = 0;
-        VkDeviceAddress raytracing_index_buffer_address = 0;
-        VkDeviceAddress GetRaytracingVertexBufferAddress() override { return raytracing_vertex_buffer_address; }
-        VkDeviceAddress GetRaytracingIndexBufferAddress() override { return raytracing_index_buffer_address; }
-        uint32_t triangleVertexCount = 0;
-        uint32_t triangleIndexCount = 0;
-        uint32_t triangleVertexStride = 0;
-        uint32_t GetTriangleVertexCount() override { return triangleVertexCount; }
-        uint32_t GetTriangleIndexCount() override { return triangleIndexCount; }
-        uint32_t GetTriangleVertexStride() override { return triangleVertexStride; }
+        //VkDeviceAddress raytracing_vertex_buffer_address = 0;
+        //VkDeviceAddress raytracing_index_buffer_address = 0;
+        //VkDeviceAddress GetRaytracingVertexBufferAddress() override { return raytracing_vertex_buffer_address; }
+        //VkDeviceAddress GetRaytracingIndexBufferAddress() override { return raytracing_index_buffer_address; }
+
+        
+        std::vector<RtMesh> rtMeshes;
+        RtMesh& GetRtMesh(int index) override { return rtMeshes[index]; }
+        int GetRtMeshSize() override { return rtMeshes.size(); }
+
+        // uint32_t triangleVertexCount = 0;
+        // uint32_t triangleIndexCount = 0;
+        // uint32_t triangleVertexStride = 0;
+        // uint32_t GetTriangleVertexCount() override { return triangleVertexCount; }
+        // uint32_t GetTriangleIndexCount() override { return triangleIndexCount; }
+        // uint32_t GetTriangleVertexStride() override { return triangleVertexStride; }
 
         //Module Related
         HMODULE handle_module_yamlcore;

@@ -87,8 +87,13 @@ void GameEngine::DestroyInstance(HMODULE handle, void* instance){
 void GameEngine::CleanUp(){
     logger->CloseLogFile();
 
-    raytracing_vertex_buffer.DestroyAndFree(renderer->GetLogicalDevice());
-    raytracing_index_buffer.DestroyAndFree(renderer->GetLogicalDevice());
+    for(int i = 0; i < rtMeshes.size(); i++){
+        rtMeshes[i].vertexBuffer.DestroyAndFree(renderer->GetLogicalDevice());
+        rtMeshes[i].indexBuffer.DestroyAndFree(renderer->GetLogicalDevice());
+        rtMeshes[i].blasBuffer.DestroyAndFree(renderer->GetLogicalDevice());
+    }
+    //raytracing_vertex_buffer.DestroyAndFree(renderer->GetLogicalDevice());
+    //raytracing_index_buffer.DestroyAndFree(renderer->GetLogicalDevice());
 
     /*********************
     *1 VkDevice Resources

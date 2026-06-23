@@ -376,9 +376,66 @@ void GameEngine::Initialize(){
             renderer->createComputeDescriptorSetLayout();
         }
     }
+
+    /****************************
+    * 8.5 Register Objects
+    * Register object after descriptor layout (texture)
+    * But before raytracing descriptor layout (because rt pipeline needs to know object model_id, scale...)
+    ****************************/
+    for(int i = 0; i < appInfo->Objects.size(); i++){
+        objects[i].m_object_id = appInfo->Objects[i].object_id;
+        objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
+        objects[i].m_material_id = appInfo->Objects[i].object_material_id;
+        objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
+        objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
+        objects[i].Name = appInfo->Objects[i].object_name;
+        objects[i].bSticker = appInfo->Objects[i].object_bSticker;
+        objects[i].SetPosition(appInfo->Objects[i].object_position[0], appInfo->Objects[i].object_position[1], appInfo->Objects[i].object_position[2]);
+        objects[i].SetRotation(appInfo->Objects[i].object_rotation[0], appInfo->Objects[i].object_rotation[1], appInfo->Objects[i].object_rotation[2]);
+        objects[i].SetVelocity(appInfo->Objects[i].object_velocity[0], appInfo->Objects[i].object_velocity[1], appInfo->Objects[i].object_velocity[2]);
+        objects[i].SetAngularVelocity(appInfo->Objects[i].object_angular_velocity[0], appInfo->Objects[i].object_angular_velocity[1], appInfo->Objects[i].object_angular_velocity[2]);
+
+        //must load resources before object register
+        if(objects[i].bRegistered) {
+            std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+            continue;
+        }
+        objects[i].Register((GameEngine*)this);
+        if(appInfo->Objects[i].object_scale != 1.0f){
+            objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
+        }else{
+            auto object_scale_3 = appInfo->Objects[i].object_scale_3;
+            objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
+        }
+    }
+
+    //register objects for controls
+    if(appInfo->Feature.feature_graphics_enable_controls){
+        int indexOffset = appInfo->Objects.size();
+        for(int i = 0; i < controlNodes.size(); i++){
+            controlNodes[i]->RegisterObject(indexOffset);
+            indexOffset += controlNodes[i]->m_object_count;
+        }
+    }
+
+    for(int i = 0; i < objects.size(); i++){
+        if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
+        logger->Log("Object ID: {}", i);
+        logger->Log("\tName: {}", objects[i].Name.c_str());
+        logger->LogVec3("\tPosition", objects[i].Position);
+        logger->LogVec3("\tLength_original", objects[i].Length_original);
+        logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
+        logger->LogVec3("\tLengthMax_original", objects[i].LengthMax_original);
+        logger->LogVec3("\tScale", objects[i].Scale);
+        logger->LogVec3("\tLength", objects[i].Length);
+        logger->Log("");
+    }
+
+
+
     if(b_uniform_raytracing) {
-        SetupRayTracing(); //must load models before this is called
-        renderer->InitialRaytracing(); //TODO: initial ray tracing before description?
+        SetupRayTracing(); //must load models and register objects, before this is called； create multi-object, multi-mesh
+        renderer->InitialRaytracing(); //Create BLAS, instance and TLAS, TODO: initial ray tracing before description?
         renderer->createRaytracingDescriptorSetLayout();
     }
 
@@ -566,60 +623,9 @@ void GameEngine::Initialize(){
     TimePoint T8 = now();
     if(bVerboseInitialization) printElapsed("Application: Initialize time for creating pipelines", T7, T8);
 
-    /****************************
-    * 10 Register Objects
-    ****************************/
-    for(int i = 0; i < appInfo->Objects.size(); i++){
-        objects[i].m_object_id = appInfo->Objects[i].object_id;
-        objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
-        objects[i].m_material_id = appInfo->Objects[i].object_material_id;
-        objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
-        objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
-        objects[i].Name = appInfo->Objects[i].object_name;
-        objects[i].bSticker = appInfo->Objects[i].object_bSticker;
-        objects[i].SetPosition(appInfo->Objects[i].object_position[0], appInfo->Objects[i].object_position[1], appInfo->Objects[i].object_position[2]);
-        objects[i].SetRotation(appInfo->Objects[i].object_rotation[0], appInfo->Objects[i].object_rotation[1], appInfo->Objects[i].object_rotation[2]);
-        objects[i].SetVelocity(appInfo->Objects[i].object_velocity[0], appInfo->Objects[i].object_velocity[1], appInfo->Objects[i].object_velocity[2]);
-        objects[i].SetAngularVelocity(appInfo->Objects[i].object_angular_velocity[0], appInfo->Objects[i].object_angular_velocity[1], appInfo->Objects[i].object_angular_velocity[2]);
-
-        //must load resources before object register
-        if(objects[i].bRegistered) {
-            std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
-            continue;
-        }
-        objects[i].Register((GameEngine*)this);
-        if(appInfo->Objects[i].object_scale != 1.0f){
-            objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
-        }else{
-            auto object_scale_3 = appInfo->Objects[i].object_scale_3;
-            objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
-        }
-    }
-
-    //register objects for controls
-    if(appInfo->Feature.feature_graphics_enable_controls){
-        int indexOffset = appInfo->Objects.size();
-        for(int i = 0; i < controlNodes.size(); i++){
-            controlNodes[i]->RegisterObject(indexOffset);
-            indexOffset += controlNodes[i]->m_object_count;
-        }
-    }
-
-    for(int i = 0; i < objects.size(); i++){
-        if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
-        logger->Log("Object ID: {}", i);
-        logger->Log("\tName: {}", objects[i].Name.c_str());
-        logger->LogVec3("\tPosition", objects[i].Position);
-        logger->LogVec3("\tLength_original", objects[i].Length_original);
-        logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
-        logger->LogVec3("\tLengthMax_original", objects[i].LengthMax_original);
-        logger->LogVec3("\tScale", objects[i].Scale);
-        logger->LogVec3("\tLength", objects[i].Length);
-        logger->Log("");
-    }
 
     TimePoint T9 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for register objects", T8, T9);
+    if(bVerboseInitialization) printElapsed("Application: Initialize time for ?", T8, T9);
 
     /****************************
     * 11 Register Textboxes
