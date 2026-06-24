@@ -145,6 +145,10 @@ namespace LEGameEngine{
         virtual glm::vec3 GetObjectPosition(int objectId) = 0;
         virtual glm::vec3 GetMainCameraPosition() = 0;
 
+        virtual glm::vec3 GetObjectScale(int objectId) = 0;
+        virtual int GetObjectModelID(int objectId) = 0;
+        virtual glm::vec3 GetObjectRotation(int objectId) = 0;
+
         //Expose functions for Example(SimpleParticles) to use
         virtual double GetDeltaTime() = 0;
         virtual void DrawParticlesFromStorageBuffer(int objectId, uint32_t particleCount) = 0;

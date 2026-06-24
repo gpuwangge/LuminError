@@ -274,6 +274,10 @@ void GameEngine::SetObjectPosition(int objectId, glm::vec3 p) { objects[objectId
 void GameEngine::SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) { objects[objectId].SetScaleRectangleXY(x0, y0, x1, y1); }
 glm::vec3 GameEngine::GetObjectPosition(int objectId) { return objects[objectId].Position; }
 
+glm::vec3 GameEngine::GetObjectScale(int objectId) { return objects[objectId].Scale; }
+int GameEngine::GetObjectModelID(int objectId) { return objects[objectId].m_model_id; }
+glm::vec3 GameEngine::GetObjectRotation(int objectId) { return objects[objectId].Rotation; }
+
 int GameEngine::GetLightSize() { return lights.size(); }
 glm::vec3 GameEngine::GetLightPosition(int lightId) { return lights[lightId].GetLightPosition(); }
 void GameEngine::SetLightPosition(int lightId, float px, float py, float pz) { lights[lightId].SetLightPosition(glm::vec3(px, py, pz)); }

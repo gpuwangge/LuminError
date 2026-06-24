@@ -11,6 +11,10 @@
 
 namespace LuminError{
     class Game : public IGame {
+        void Update() override {
+            GameEngine->PrintFPS(1.0f);
+        }
+
         void RecordRaytracingCommandBuffer() override{
             GameEngine->RayTrace(800, 800, 1);
         }

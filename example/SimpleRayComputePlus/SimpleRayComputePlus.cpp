@@ -46,7 +46,7 @@ namespace LuminError{
             GameEngine->UploadComputeStorageBuffer_WindowSwap(GameEngine->GetCurrentFrame(), &storageBufferObject_WindowSwap, sizeof(StructStorageBuffer_WindowSwap)); //initialize to zeros
         }
         void Update() override {
-            double et = GameEngine->GetElapseTime();
+            //double et = GameEngine->GetElapseTime();
 
             //std::cout<<"in motion: "<<(GameEngine->GetCameraInMotion() ? "true" : "false")<<std::endl;
             customUniformBufferObject.frameCount = GameEngine->GetFrameCount();

@@ -187,7 +187,7 @@ namespace LERenderer{
         * Ray Tracing Related
         *********/
         void InitialRaytracing() override;
-        void CreateSBS() override;
+        void CreateSBT() override;
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
         void QueryRayTracingProperties();
@@ -213,27 +213,9 @@ namespace LERenderer{
         VkStridedDeviceAddressRegionKHR missRegion{};
         VkStridedDeviceAddressRegionKHR hitRegion{};
         VkStridedDeviceAddressRegionKHR callRegion{};
-        void CreateSbt_OnlyRayGen();
         static uint32_t AlignUp(uint32_t value, uint32_t alignment) {
             return (value + alignment - 1) & ~(alignment - 1);
         }
-        
-
-        //Vertex/Index Buffer related
-        // struct RTVertex{
-        //     float x, y, z;
-        // };
-
-        /*
-        CWxjBuffer rt_vertex_buffer;
-        CWxjBuffer rt_index_buffer;
-        VkDeviceAddress rt_vertex_buffer_address = 0;
-        VkDeviceAddress rt_index_buffer_address = 0;
-        uint32_t triangleVertexCount = 0;
-        uint32_t triangleIndexCount = 0;
-        uint32_t triangleVertexStride = 0;
-        void CreateTriangleVertexBuffer();
-        */
        
         //Blas related
         void BeginCommandBuffer_Raytracing(int commandBufferIndex);
@@ -243,21 +225,15 @@ namespace LERenderer{
         CWxjBuffer blas_scratch_buffer;
         //VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
         //VkDeviceAddress blasDeviceAddress = 0;
-        void CreateBlas_OnlyOneTriangle();
+        void CreateBlas();
 
         //Instance buffer related
-        // struct RtObjectInstance{
-        //     int meshId;
-        //     glm::vec3 position;
-        //     glm::vec3 rotation;
-        //     glm::vec3 scale;
-        // };
         std::vector<VkAccelerationStructureInstanceKHR> instances;
 
         CWxjBuffer instance_buffer; //only need one instance buffer, with all instances inside
         VkDeviceAddress instanceBufferAddress = 0;
         //uint32_t instanceCount = 0;
-        void CreateInstanceBuffer_OnlyOneTriangle();
+        void CreateInstanceBuffer();
 
         //Tlas related
         CWxjBuffer tlas_buffer;
@@ -265,7 +241,7 @@ namespace LERenderer{
         VkDeviceAddress tlasDeviceAddress = 0;
         VkAccelerationStructureKHR tlas = VK_NULL_HANDLE;
         VkAccelerationStructureKHR GetTlas() override { return tlas; }
-        void CreateTlas_OnlyOneTriangle();
+        void CreateTlas();
 
         /**************************
          * RenderProcess

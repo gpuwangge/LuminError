@@ -140,12 +140,6 @@ namespace LEGameEngine{
         RtMesh& GetRtMesh(int index) override { return rtMeshes[index]; }
         int GetRtMeshSize() override { return rtMeshes.size(); }
 
-        // uint32_t triangleVertexCount = 0;
-        // uint32_t triangleIndexCount = 0;
-        // uint32_t triangleVertexStride = 0;
-        // uint32_t GetTriangleVertexCount() override { return triangleVertexCount; }
-        // uint32_t GetTriangleIndexCount() override { return triangleIndexCount; }
-        // uint32_t GetTriangleVertexStride() override { return triangleVertexStride; }
 
         //Module Related
         HMODULE handle_module_yamlcore;
@@ -201,6 +195,10 @@ namespace LEGameEngine{
         void SetObjectPosition(int objectId, glm::vec3 p) override;
         void SetObjectScaleRectangleXY(int objectId, float x0, float y0, float x1, float y1) override;
         glm::vec3 GetObjectPosition(int objectId) override;
+
+        glm::vec3 GetObjectScale(int objectId) override;
+        int GetObjectModelID(int objectId) override;
+        glm::vec3 GetObjectRotation(int objectId) override;
 
         int GetLightSize() override;
         glm::vec3 GetLightPosition(int lightId) override;

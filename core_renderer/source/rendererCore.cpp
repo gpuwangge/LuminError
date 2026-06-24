@@ -4,6 +4,7 @@
 #include <windows.h>
 #include "Foundation.h"
 #include "context.h"
+#include <glm/gtx/euler_angles.hpp>
 
 namespace LERenderer{
 
@@ -698,125 +699,12 @@ void RendererCore::InitialRaytracing(){
 		std::cout<<"failed to load ray tracing functions!"<<std::endl;
 		throw std::runtime_error("failed to load ray tracing functions!");
 	}
-    //CreateTriangleVertexBuffer();
-    CreateBlas_OnlyOneTriangle();
-    CreateInstanceBuffer_OnlyOneTriangle();
-    CreateTlas_OnlyOneTriangle();
+    CreateBlas();
+    CreateInstanceBuffer();
+    CreateTlas();
 }
 
-void RendererCore::CreateSBS(){
-    CreateSbt_OnlyRayGen();
-}
-
-void RendererCore::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
-    //std::cout<<"Ray Trace..."<<std::endl;
-
-    //VkStridedDeviceAddressRegionKHR rgen{};
-    // VkStridedDeviceAddressRegionKHR miss{};
-    // VkStridedDeviceAddressRegionKHR hit{};
-    // VkStridedDeviceAddressRegionKHR call{};
-
-    fpCmdTraceRaysKHR(commandBuffers[raytracingCmdId][currentFrame],
-        &rgenRegion,
-        &missRegion,
-        &hitRegion,
-        &callRegion,
-        numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ
-    );
-}
-
-bool RendererCore::LoadRayTracingFunctions_core(){
-    fpGetRayTracingShaderGroupHandlesKHR =
-        reinterpret_cast<PFN_vkGetRayTracingShaderGroupHandlesKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetRayTracingShaderGroupHandlesKHR"));
-
-    fpGetBufferDeviceAddressKHR =
-        reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
-
-	fpCmdTraceRaysKHR =
-        reinterpret_cast<PFN_vkCmdTraceRaysKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdTraceRaysKHR"));
-
-    fpCreateAccelerationStructureKHR =
-        reinterpret_cast<PFN_vkCreateAccelerationStructureKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCreateAccelerationStructureKHR"));
-
-    fpDestroyAccelerationStructureKHR = //optional
-        reinterpret_cast<PFN_vkDestroyAccelerationStructureKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkDestroyAccelerationStructureKHR"));
-
-    fpGetAccelerationStructureBuildSizesKHR = 
-        reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetAccelerationStructureBuildSizesKHR"));
-
-    fpGetAccelerationStructureDeviceAddressKHR =
-        reinterpret_cast<PFN_vkGetAccelerationStructureDeviceAddressKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetAccelerationStructureDeviceAddressKHR"));
-
-    fpCmdBuildAccelerationStructuresKHR =
-        reinterpret_cast<PFN_vkCmdBuildAccelerationStructuresKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdBuildAccelerationStructuresKHR"));
-
-    fpBuildAccelerationStructuresKHR = //optional
-        reinterpret_cast<PFN_vkBuildAccelerationStructuresKHR>(
-            vkGetDeviceProcAddr(GetLogicalDevice(), "vkBuildAccelerationStructuresKHR"));
-
-	bool ok = true;
-
-    if (!fpGetRayTracingShaderGroupHandlesKHR) {
-        logger->Log("Missing vkGetRayTracingShaderGroupHandlesKHR\n");
-        ok = false;
-    }
-
-    if (!fpGetBufferDeviceAddressKHR) {
-        logger->Log("Missing vkGetBufferDeviceAddressKHR\n");
-        ok = false;
-    }
-
-	if (!fpCmdTraceRaysKHR) {
-        logger->Log("Missing vkCmdTraceRaysKHR\n");
-        ok = false;
-    }
-
-    if (!fpCreateAccelerationStructureKHR) {
-        logger->Log("Missing vkCreateAccelerationStructureKHR\n");
-        ok = false;
-    }
-    if (!fpDestroyAccelerationStructureKHR) {
-        logger->Log("Missing vkDestroyAccelerationStructureKHR\n");
-        ok = false;
-    }
-    if (!fpGetAccelerationStructureBuildSizesKHR) {
-        logger->Log("Missing vkGetAccelerationStructureBuildSizesKHR\n");
-        ok = false;
-    }
-    if (!fpGetAccelerationStructureDeviceAddressKHR) {
-        logger->Log("Missing vkGetAccelerationStructureDeviceAddressKHR\n");
-        ok = false;
-    }
-    if (!fpCmdBuildAccelerationStructuresKHR) {
-        logger->Log("Missing vkCmdBuildAccelerationStructuresKHR\n");
-        ok = false;
-    }
-    if (!fpBuildAccelerationStructuresKHR) {
-        logger->Log("Missing vkBuildAccelerationStructuresKHR\n");
-        ok = false;
-    }
-
-	return ok;
-}
-
-
-
-VkDeviceAddress RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer) {
-    VkBufferDeviceAddressInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_KHR;
-    info.buffer = buffer;
-    return fpGetBufferDeviceAddressKHR(device, &info);
-}
-
-void RendererCore::CreateSbt_OnlyRayGen(){
+void RendererCore::CreateSBT(){
     //std::cout<<"Creating shader binding table(SBT)..."<<std::endl;
 
     QueryRayTracingProperties();
@@ -935,6 +823,108 @@ void RendererCore::CreateSbt_OnlyRayGen(){
     //std::cout<<"Shader Binding Table created. Device Address: "<<addr<<std::endl;
 }
 
+void RendererCore::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
+    //std::cout<<"Ray Trace..."<<std::endl;
+    fpCmdTraceRaysKHR(commandBuffers[raytracingCmdId][currentFrame],
+        &rgenRegion,
+        &missRegion,
+        &hitRegion,
+        &callRegion,
+        numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ
+    );
+}
+
+bool RendererCore::LoadRayTracingFunctions_core(){
+    fpGetRayTracingShaderGroupHandlesKHR =
+        reinterpret_cast<PFN_vkGetRayTracingShaderGroupHandlesKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetRayTracingShaderGroupHandlesKHR"));
+
+    fpGetBufferDeviceAddressKHR =
+        reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
+
+	fpCmdTraceRaysKHR =
+        reinterpret_cast<PFN_vkCmdTraceRaysKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdTraceRaysKHR"));
+
+    fpCreateAccelerationStructureKHR =
+        reinterpret_cast<PFN_vkCreateAccelerationStructureKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCreateAccelerationStructureKHR"));
+
+    fpDestroyAccelerationStructureKHR = //optional
+        reinterpret_cast<PFN_vkDestroyAccelerationStructureKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkDestroyAccelerationStructureKHR"));
+
+    fpGetAccelerationStructureBuildSizesKHR = 
+        reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetAccelerationStructureBuildSizesKHR"));
+
+    fpGetAccelerationStructureDeviceAddressKHR =
+        reinterpret_cast<PFN_vkGetAccelerationStructureDeviceAddressKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkGetAccelerationStructureDeviceAddressKHR"));
+
+    fpCmdBuildAccelerationStructuresKHR =
+        reinterpret_cast<PFN_vkCmdBuildAccelerationStructuresKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdBuildAccelerationStructuresKHR"));
+
+    fpBuildAccelerationStructuresKHR = //optional
+        reinterpret_cast<PFN_vkBuildAccelerationStructuresKHR>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkBuildAccelerationStructuresKHR"));
+
+	bool ok = true;
+
+    if (!fpGetRayTracingShaderGroupHandlesKHR) {
+        logger->Log("Missing vkGetRayTracingShaderGroupHandlesKHR\n");
+        ok = false;
+    }
+
+    if (!fpGetBufferDeviceAddressKHR) {
+        logger->Log("Missing vkGetBufferDeviceAddressKHR\n");
+        ok = false;
+    }
+
+	if (!fpCmdTraceRaysKHR) {
+        logger->Log("Missing vkCmdTraceRaysKHR\n");
+        ok = false;
+    }
+
+    if (!fpCreateAccelerationStructureKHR) {
+        logger->Log("Missing vkCreateAccelerationStructureKHR\n");
+        ok = false;
+    }
+    if (!fpDestroyAccelerationStructureKHR) {
+        logger->Log("Missing vkDestroyAccelerationStructureKHR\n");
+        ok = false;
+    }
+    if (!fpGetAccelerationStructureBuildSizesKHR) {
+        logger->Log("Missing vkGetAccelerationStructureBuildSizesKHR\n");
+        ok = false;
+    }
+    if (!fpGetAccelerationStructureDeviceAddressKHR) {
+        logger->Log("Missing vkGetAccelerationStructureDeviceAddressKHR\n");
+        ok = false;
+    }
+    if (!fpCmdBuildAccelerationStructuresKHR) {
+        logger->Log("Missing vkCmdBuildAccelerationStructuresKHR\n");
+        ok = false;
+    }
+    if (!fpBuildAccelerationStructuresKHR) {
+        logger->Log("Missing vkBuildAccelerationStructuresKHR\n");
+        ok = false;
+    }
+
+	return ok;
+}
+
+
+
+VkDeviceAddress RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer) {
+    VkBufferDeviceAddressInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_KHR;
+    info.buffer = buffer;
+    return fpGetBufferDeviceAddressKHR(device, &info);
+}
+
 /*
 void RendererCore::CreateTriangleVertexBuffer(){
     //std::cout << "Creating ray tracing triangle vertex/index buffers..." << std::endl;
@@ -1047,7 +1037,7 @@ void RendererCore::SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex,
     vkDestroyFence(GetLogicalDevice(), fence, nullptr);
 }
 
-void RendererCore::CreateBlas_OnlyOneTriangle(){
+void RendererCore::CreateBlas(){
     //std::cout << "Creating BLAS for one triangle..." << std::endl;
 
     for(int i = 0; i < game->GetRtMeshSize(); i++){
@@ -1205,34 +1195,51 @@ void RendererCore::CreateBlas_OnlyOneTriangle(){
     }
 }
 
-void RendererCore::CreateInstanceBuffer_OnlyOneTriangle(){
+void RendererCore::CreateInstanceBuffer(){
     //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
 
     instances.resize(game->GetObjectSize());
     for(int i = 0; i < game->GetObjectSize(); i++){
         //VkAccelerationStructureInstanceKHR instance{};
         
-        // identity transform
-        instances[i].transform.matrix[0][0] = 1.0f;
-        instances[i].transform.matrix[0][1] = 0.0f;
-        instances[i].transform.matrix[0][2] = 0.0f;
-        instances[i].transform.matrix[0][3] = 0.0f;
+        glm::vec3 scale = game->GetObjectScale(i);
+        glm::vec3 position = game->GetObjectPosition(i);
+        int model_id = game->GetObjectModelID(i);
+        glm::vec3 rotation = game->GetObjectRotation(i); //Pitch, Yaw, Roll
 
-        instances[i].transform.matrix[1][0] = 0.0f;
-        instances[i].transform.matrix[1][1] = 1.0f;
-        instances[i].transform.matrix[1][2] = 0.0f;
-        instances[i].transform.matrix[1][3] = 0.0f;
+        // 如果 rotation 是角度，要先转弧度
+        float pitch = glm::radians(rotation.x);
+        float yaw   = glm::radians(rotation.y);
+        float roll  = glm::radians(rotation.z);
 
-        instances[i].transform.matrix[2][0] = 0.0f;
-        instances[i].transform.matrix[2][1] = 0.0f;
-        instances[i].transform.matrix[2][2] = 1.0f;
-        instances[i].transform.matrix[2][3] = 0.0f;
+        glm::mat4 T = glm::translate(glm::mat4(1.0f), position);
+        glm::mat4 R = glm::yawPitchRoll(yaw, pitch, roll); // 注意参数顺序是 yaw, pitch, roll
+        glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
+
+        // 常见模型矩阵：先 scale，再 rotate，再 translate
+        glm::mat4 M = T * R * S;
+
+        // 拷贝到 VkTransformMatrixKHR 的 3x4
+        instances[i].transform.matrix[0][0] = M[0][0];
+        instances[i].transform.matrix[0][1] = M[1][0];
+        instances[i].transform.matrix[0][2] = M[2][0];
+        instances[i].transform.matrix[0][3] = M[3][0];
+
+        instances[i].transform.matrix[1][0] = M[0][1];
+        instances[i].transform.matrix[1][1] = M[1][1];
+        instances[i].transform.matrix[1][2] = M[2][1];
+        instances[i].transform.matrix[1][3] = M[3][1];
+
+        instances[i].transform.matrix[2][0] = M[0][2];
+        instances[i].transform.matrix[2][1] = M[1][2];
+        instances[i].transform.matrix[2][2] = M[2][2];
+        instances[i].transform.matrix[2][3] = M[3][2];
 
         instances[i].instanceCustomIndex = 0;
         instances[i].mask = 0xFF;
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-        instances[i].accelerationStructureReference = game->GetRtMesh(i).blasAddress;// TODO:now assume object i use meshdata i blasDeviceAddress;
+        instances[i].accelerationStructureReference = game->GetRtMesh(model_id).blasAddress;
     }
 
     //std::vector<VkAccelerationStructureInstanceKHR> instances = { instance };
@@ -1262,7 +1269,7 @@ void RendererCore::CreateInstanceBuffer_OnlyOneTriangle(){
     
 }
 
-void RendererCore::CreateTlas_OnlyOneTriangle(){
+void RendererCore::CreateTlas(){
     //std::cout << "Creating TLAS for one triangle instance..." << std::endl;
 
     const uint32_t primitiveCount = instances.size();

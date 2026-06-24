@@ -616,7 +616,7 @@ void GameEngine::Initialize(){
         if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing pipeline"<<std::endl;
         renderer->CreateRaytracingPipeline(resourcer->GetRaytracingShaderModule(0), resourcer->GetRaytracingShaderModule(1), resourcer->GetRaytracingShaderModule(2));
 
-        renderer->CreateSBS();
+        renderer->CreateSBT();
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 

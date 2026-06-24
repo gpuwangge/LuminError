@@ -3,7 +3,7 @@ Objects:
     object_id: 0
     object_scale: 2
     object_position: [0,-2.5,0]
-    object_rotation: [0,0,0] #no use
+    object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
     object_material_id: 0
@@ -14,7 +14,7 @@ Objects:
     object_id: 1
     object_scale: 2.5
     object_position: [0,0,0]
-    object_rotation: [0,0,0] #no use
+    object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
     object_material_id: 0
