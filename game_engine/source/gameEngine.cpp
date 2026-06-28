@@ -74,8 +74,8 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     //bool bEnableGraphicsPipleine_raytarcing;
     bool bEnableComputePipeline_raytracing = appInfo->Uniform.b_storage_compute_bvhnode ? true : false;
     bool bEnableRaytracingPipeline_raytracing = appInfo->Uniform.b_uniform_raytracing_swapchain_storage ? true : false;
-    std::cout<<"bEnableComputePipeline_raytracing: "<<bEnableComputePipeline_raytracing<<std::endl;
-    std::cout<<"bEnableRaytracingPipeline_raytracing: "<<bEnableRaytracingPipeline_raytracing<<std::endl;
+    //std::cout<<"bEnableComputePipeline_raytracing: "<<bEnableComputePipeline_raytracing<<std::endl;
+    //std::cout<<"bEnableRaytracingPipeline_raytracing: "<<bEnableRaytracingPipeline_raytracing<<std::endl;
 
     /**************** 
     * Five steps with third-party(GLFW or SDL) initialization

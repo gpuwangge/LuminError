@@ -1,8 +1,8 @@
 Objects:
-  - object_name: Tree
+  - object_name: Cube0
     object_id: 0
-    object_scale: 2
-    object_position: [0,-2.5,0]
+    object_scale: 1
+    object_position: [-2.0, -2.0, 0] #Bottom Left
     object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
@@ -10,10 +10,10 @@ Objects:
     resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Cube
+  - object_name: Cube1
     object_id: 1
-    object_scale: 2.5
-    object_position: [0,0,0]
+    object_scale: 1
+    object_position: [-2.0, 2.0, 0] #Up Left
     object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
@@ -21,11 +21,45 @@ Objects:
     resource_model_id: 1
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Cube2
+    object_id: 2
+    object_scale: 1
+    object_position: [2.0, 2.0, 0] #Up Right
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Cube3
+    object_id: 3
+    object_scale: 1
+    object_position: [2.0, -2.0, 0] #Bottom Right
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
+    resource_model_id: 1
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Tree
+    object_id: 4
+    object_scale: 1.5
+    object_position: [0.0, -2.0, 0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
+    resource_model_id: 2
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
 
 Resources:
   - Models:
-    - resource_model_name: low_poly_tree.obj
+    - resource_model_name: cube.obj
     - resource_model_name: cube_10facet.obj
+    - resource_model_name: low_poly_tree.obj
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
       resource_raytracing_pipeline_miss_shader_name: simpleRayPipeline/miss.rmiss.spv

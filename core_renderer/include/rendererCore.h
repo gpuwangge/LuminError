@@ -412,11 +412,13 @@ namespace LERenderer{
         void addStorageBuffer_sphere() override { computeDescriptorManager.addStorageBuffer_sphere(); }
         void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_sphere(currentFrame, data, size); }
 
-        virtual void addRaytracingStorageBuffer_triangleVertexAttribute() override { raytracingDescriptorManager.addStorageBuffer_triangleVertexAttribute(); }
-        virtual void uploadRaytracingStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexAttribute(currentFrame, data, size); }
-        virtual void addRaytracingStorageBuffer_triangleVertexIndex() override { raytracingDescriptorManager.addStorageBuffer_triangleVertexIndex(); }
-        virtual void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexIndex(currentFrame, data, size); }
-
+        void addRaytracingStorageBuffer_triangleVertexAttribute() override { raytracingDescriptorManager.addStorageBuffer_triangleVertexAttribute(); }
+        void uploadRaytracingStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexAttribute(currentFrame, data, size); }
+        void addRaytracingStorageBuffer_triangleVertexIndex() override { raytracingDescriptorManager.addStorageBuffer_triangleVertexIndex(); }
+        void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexIndex(currentFrame, data, size); }
+        void addRaytracingStorageBuffer_geometryInfo() override { raytracingDescriptorManager.addStorageBuffer_geometryInfo(); }
+        void uploadRaytracingStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_geometryInfo(currentFrame, data, size); }
+        
         void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer_customswap(storageBufferSize, usage); }
         void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_customswap(currentFrame, data, size); }
         void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer_customswap(currentFrame, data, size); }

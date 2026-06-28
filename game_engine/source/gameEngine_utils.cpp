@@ -352,6 +352,9 @@ void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t 
 void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadRaytracingStorageBuffer_triangleVertexIndex(currentFrame, storageBufferObject, dataSize);
 }
+void GameEngine::UploadRaytracingStorageBuffer_GeometryInfo(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadRaytracingStorageBuffer_geometryInfo(currentFrame, storageBufferObject, dataSize);
+}
 
 
 void GameEngine::SetComputeStorageBufferSize_CustomSwap(int size) { appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size = size; }
@@ -449,7 +452,7 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
             submitInfo.pCommandBuffers = &renderer->GetComputeCommandBuffer();
 
             if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
-                throw std::runtime_error("failed to submit draw command buffer!");
+                throw std::runtime_error("failed to submit compute queue (convert)!");
             }
         }
 
@@ -486,7 +489,7 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
             submitInfo.pCommandBuffers = &renderer->GetRaytracingCommandBuffer();
 
             if (vkQueueSubmit(renderer->GetComputeQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
-                throw std::runtime_error("failed to submit draw command buffer!");
+                throw std::runtime_error("failed to submit compute queue (convert for ray tracing)!");
             }
         }
 

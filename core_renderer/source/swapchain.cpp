@@ -211,7 +211,8 @@ void CSwapchain::createIntermediaColor(int width, int height){
     //std::cout<<"Create Intermedia Color: width = "<<width<<", height = "<<height<<", swapchainImageSize = "<<swapchainImageSize<<std::endl;
     VkImageUsageFlags usage = VK_IMAGE_LAYOUT_GENERAL | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     //VkFormat format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+    VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;//right now storage image use different format as swapchain, so there is RB swap, it doesnt matter. (06252026)
+    //VkFormat format = VK_FORMAT_B8G8R8A8_SRGB;
 
     intermediaColor.resize(swapchainImageSize);
     for(int i = 0; i < swapchainImageSize; i++){

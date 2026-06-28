@@ -94,6 +94,7 @@ namespace LEGameEngine{
         
         virtual void UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
         virtual void UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
+        virtual void UploadRaytracingStorageBuffer_GeometryInfo(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) = 0;
 
         //virtual CWxjBuffer& GetRaytracingVertexBuffer() = 0;
         // virtual VkDeviceAddress GetRaytracingVertexBufferAddress() = 0;

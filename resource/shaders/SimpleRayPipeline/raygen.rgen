@@ -30,12 +30,7 @@ void main() {
         0    // payload location
     );
 
-    imageStore(resultImage, pix, vec4(payload, 1.0).bgra);
+    //imageStore(resultImage, pix, vec4(payload, 1.0).bgra);
+    imageStore(resultImage, pix, vec4(payload, 1.0));
 
-    /*
-    ivec2 pix = ivec2(gl_LaunchIDEXT.xy);
-    ivec2 size = ivec2(gl_LaunchSizeEXT.xy);
-    vec4 blueColor = vec4(0.0, 0.0, 1.0, 1.0);//First write to intermediaColor(rgba8), then copy to swapchain(bgra8) to present. so use bgra here for correct presentation
-    imageStore(resultImage, pix, blueColor.bgra);
-    */
 }

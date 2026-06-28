@@ -180,7 +180,7 @@ void RendererCore::SubmitCompute(bool bVerbose){
     vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[currentFrame]);
 
     if (vkQueueSubmit(CContext::GetHandle().GetComputeQueue(), 1, &submitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
-        throw std::runtime_error("failed to submit draw command buffer!");
+        throw std::runtime_error("failed to submit compute queue!");
     }
 }
 
@@ -242,8 +242,16 @@ void RendererCore::SubmitRaytracing(bool bVerbose){
 
     vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &raytracingInFlightFences[currentFrame]);
 
-    if (vkQueueSubmit(CContext::GetHandle().GetComputeQueue(), 1, &submitInfo, raytracingInFlightFences[currentFrame]) != VK_SUCCESS) {
-        throw std::runtime_error("failed to submit draw command buffer!");
+    VkResult res = vkQueueSubmit(
+        CContext::GetHandle().GetComputeQueue(),
+        1,
+        &submitInfo,
+        raytracingInFlightFences[currentFrame]);
+
+    if (res != VK_SUCCESS) {
+        throw std::runtime_error(
+            "failed to submit compute queue (raytracing pipeline)! VkResult = " +
+            std::to_string(static_cast<int>(res)));
     }
 }
 
@@ -1198,13 +1206,14 @@ void RendererCore::CreateBlas(){
 void RendererCore::CreateInstanceBuffer(){
     //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
 
-    instances.resize(game->GetObjectSize());
+    instances.resize(game->GetObjectSize());//每个instance就是一个object
     for(int i = 0; i < game->GetObjectSize(); i++){
         //VkAccelerationStructureInstanceKHR instance{};
         
         glm::vec3 scale = game->GetObjectScale(i);
         glm::vec3 position = game->GetObjectPosition(i);
         int model_id = game->GetObjectModelID(i);
+        //std::cout<<"CreateInstanceBuffer(): model_id = "<<model_id<<std::endl;
         glm::vec3 rotation = game->GetObjectRotation(i); //Pitch, Yaw, Roll
 
         // 如果 rotation 是角度，要先转弧度
@@ -1235,12 +1244,16 @@ void RendererCore::CreateInstanceBuffer(){
         instances[i].transform.matrix[2][2] = M[2][2];
         instances[i].transform.matrix[2][3] = M[3][2];
 
-        instances[i].instanceCustomIndex = 0;
+        instances[i].instanceCustomIndex = model_id;
         instances[i].mask = 0xFF;
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
         instances[i].accelerationStructureReference = game->GetRtMesh(model_id).blasAddress;
+        //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
+
     }
+
+    
 
     //std::vector<VkAccelerationStructureInstanceKHR> instances = { instance };
 

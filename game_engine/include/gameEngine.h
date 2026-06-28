@@ -93,6 +93,7 @@ namespace LEGameEngine{
         StructStorageBuffer_TriangleReorderIndex storageBufferObject_TriangleReorderIndex{};
         StructStorageBuffer_BVHNode storageBufferObject_BVHNode{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
+        StructStorageBuffer_GeometryInfo storageBufferObject_GeometryInfo{};
 
         //make these global so compute shader can access. TODO: support multiple models
 
@@ -139,6 +140,7 @@ namespace LEGameEngine{
         std::vector<RtMesh> rtMeshes;
         RtMesh& GetRtMesh(int index) override { return rtMeshes[index]; }
         int GetRtMeshSize() override { return rtMeshes.size(); }
+        //std::vector<GeometryInfoGPU> geometryInfos;
 
 
         //Module Related
@@ -237,6 +239,7 @@ namespace LEGameEngine{
 
         void UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void UploadRaytracingStorageBuffer_GeometryInfo(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
 
         void SetComputeStorageBufferSize_CustomSwap(int size) override;
         void SetComputeStorageBufferUsage_CustomSwap(int usage) override;

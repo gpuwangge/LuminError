@@ -90,6 +90,14 @@ public:
     void uploadStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size);
 
     /************
+     * 5.2 geometry info
+     ************/
+    static std::vector<CWxjBuffer> storageBuffers_geometryInfo;
+    static std::vector<void*> storageBuffersMapped_geometryInfo;
+    void addStorageBuffer_geometryInfo();
+    void uploadStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size);
+
+    /************
      * 5.5 COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX
      ************/
     // static std::vector<CWxjBuffer> storageBuffers_triangleReorderIndex;

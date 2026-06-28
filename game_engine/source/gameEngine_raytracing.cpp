@@ -53,8 +53,8 @@ void GameEngine::SetupComputeRayTracing(){
         int indexCount = 0;
         int vertexOffset = 0;
         for(int j = 0; j < objects.size(); j++){ //Assume each object uses one model for now
-            std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
-            std::cout<<"    Object "<<j<<" has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
+            //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
+            //std::cout<<"    Object "<<j<<" has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
             // Vertex Data for a 3d model
             int modelIndex = objects[j].m_model_id;
             for(int i = 0; i < modelData[modelIndex].modelVertices3D.size(); i++){
@@ -80,7 +80,7 @@ void GameEngine::SetupComputeRayTracing(){
                 //std::cout<<"    Filling index "<<indexCount-1<<": "<<storageBufferObject_TriangleVertexIndex.indices[indexCount-1]<<std::endl;
             }
             vertexOffset += modelData[modelIndex].modelVertices3D.size();
-            std::cout<<"    vertexOffset after filling object "<<j<<": "<<vertexOffset<<std::endl;
+            //std::cout<<"    vertexOffset after filling object "<<j<<": "<<vertexOffset<<std::endl;
             logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
             //std::cout<<vertexCount<<" vertices and "<<indexCount<<" indices filled so far."<<std::endl;
         }
@@ -194,11 +194,11 @@ void GameEngine::SetupRayTracing(){
     int vertexCount = 0;
     int indexCount = 0;
     int vertexOffset = 0;
-    std::cout<<"SetupRayTracing(): Found "<<objects.size()<<" objects."<<std::endl;
-    std::cout<<"SetupRayTracing(): Found "<<modelData.size()<<" models."<<std::endl;
+    //std::cout<<"SetupRayTracing(): Found "<<objects.size()<<" objects."<<std::endl;
+    //std::cout<<"SetupRayTracing(): Found "<<modelData.size()<<" models."<<std::endl;
     for(int j = 0; j < objects.size(); j++){
-        std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
-        std::cout<<"    Object "<<j<<" uses model_id="<<objects[j].m_model_id<<", and has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
+        //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
+        //std::cout<<"    Object "<<j<<" uses model_id="<<objects[j].m_model_id<<", and has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
         // Vertex Data for a 3d model
         int modelIndex = objects[j].m_model_id;
         for(int i = 0; i < modelData[modelIndex].modelVertices3D.size(); i++){
@@ -225,7 +225,7 @@ void GameEngine::SetupRayTracing(){
             //std::cout<<"    Filling index "<<indexCount-1<<": "<<storageBufferObject_TriangleVertexIndex.indices[indexCount-1]<<std::endl;
         }
         vertexOffset += modelData[modelIndex].modelVertices3D.size();
-        std::cout<<"    vertexOffset after filling object "<<j<<": "<<vertexOffset<<std::endl;
+        //std::cout<<"    vertexOffset after filling object "<<j<<": "<<vertexOffset<<std::endl;
         logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
     }
     //std::cout<<"allVertices3D.size = "<<allVertices3D.size()<<std::endl;
@@ -248,6 +248,9 @@ void GameEngine::SetupRayTracing(){
 
     /****************
     * Create buffer address so BLAS(in renderer core) can use
+    * 建立BLAS就是建立Geometry,也就是model的信心。只需要建立一次就可以了。
+    * 以前(上面的code)是通过storageBufferObject_TriangleVertexAttribute(本质是个TriangleVertexInfo的数组)建立的，这里使用storageBufferObject_GeometryInfo
+    * storageBufferObject_GeometryInfo里面有一个vertex buffer地址，这个地址也应该指向一个TriangleVertexInfo的数组
     **************/
     rtMeshes.resize(modelData.size());
     
@@ -255,10 +258,17 @@ void GameEngine::SetupRayTracing(){
         rtMeshes[i].modelId = i;
         rtMeshes[i].vertexCount = static_cast<uint32_t>(modelData[i].modelVertices3D.size());
         rtMeshes[i].indexCount = static_cast<uint32_t>(modelData[i].modelIndices3D.size());
-        rtMeshes[i].vertexStride = sizeof(Vertex3D);
 
+        std::vector<TriangleVertexInfo> modelVertexAttribute;
+        rtMeshes[i].vertexStride = sizeof(TriangleVertexInfo);
+        modelVertexAttribute.resize(rtMeshes[i].vertexCount);
+        for(int j = 0; j < rtMeshes[i].vertexCount; j++){
+            modelVertexAttribute[j].normal = modelData[i].modelVertices3D[j].normal;
+            modelVertexAttribute[j].position = modelData[i].modelVertices3D[j].pos;
+            modelVertexAttribute[j].color = modelData[i].modelVertices3D[j].color;
+        }
         rtMeshes[i].vertexBuffer.init(
-            sizeof(Vertex3D) * rtMeshes[i].vertexCount,
+            sizeof(TriangleVertexInfo) * rtMeshes[i].vertexCount,
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
             VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
             VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
@@ -266,7 +276,8 @@ void GameEngine::SetupRayTracing(){
             renderer->GetPhysicalDevice(),
             true
         );
-        rtMeshes[i].vertexBuffer.fill(modelData[i].modelVertices3D.data(), renderer->GetLogicalDevice());
+        rtMeshes[i].vertexBuffer.fill(modelVertexAttribute.data(), renderer->GetLogicalDevice());
+
         rtMeshes[i].indexBuffer.init(
             sizeof(uint32_t) * rtMeshes[i].indexCount,
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
@@ -283,12 +294,32 @@ void GameEngine::SetupRayTracing(){
         rtMeshes[i].vertexAddress = GetBufferAddress(renderer->GetLogicalDevice(), rtMeshes[i].vertexBuffer.buffer);
         rtMeshes[i].indexAddress = GetBufferAddress(renderer->GetLogicalDevice(), rtMeshes[i].indexBuffer.buffer);
 
-        std::cout<<"rtMeshes["<<i<<"].vertexAddress = "<<rtMeshes[i].vertexAddress<<std::endl;
-        std::cout<<"rtMeshes["<<i<<"].indexAddress = "<<rtMeshes[i].indexAddress<<std::endl;
-        std::cout<<"rtMeshes["<<i<<"].vertexCount = "<<rtMeshes[i].vertexCount<<std::endl;
-        std::cout<<"rtMeshes["<<i<<"].indexCount = "<<rtMeshes[i].indexCount<<std::endl;
-        std::cout<<"rtMeshes["<<i<<"].vertexStride = "<<rtMeshes[i].vertexStride<<std::endl;
+        storageBufferObject_GeometryInfo.geometryInfos[i].vertexBuf = rtMeshes[i].vertexAddress;
+        storageBufferObject_GeometryInfo.geometryInfos[i].indexBuf = rtMeshes[i].indexAddress;
+
+        // std::cout<<"rtMeshes["<<i<<"].vertexAddress = "<<rtMeshes[i].vertexAddress<<std::endl;
+        // std::cout<<"rtMeshes["<<i<<"].indexAddress = "<<rtMeshes[i].indexAddress<<std::endl;
+        // std::cout<<"rtMeshes["<<i<<"].vertexCount = "<<rtMeshes[i].vertexCount<<std::endl;
+        // std::cout<<"rtMeshes["<<i<<"].indexCount = "<<rtMeshes[i].indexCount<<std::endl;
+        // std::cout<<"rtMeshes["<<i<<"].vertexStride = "<<rtMeshes[i].vertexStride<<std::endl;
+
+        //以下是送到rchit shader的内容
+        // logger->Log("i = {}", i);
+        // logger->Log("rtMeshes[{}].indexAddress = {}", i, rtMeshes[i].indexAddress);
+        // for(int j = 0; j < modelData[i].modelIndices3D.size(); j++) 
+        //     logger->Log("modelData[{}].modelIndices3D[{}] = {}", i, j, modelData[i].modelIndices3D[j]);
+        // logger->Log("rtMeshes[{}].vertexAddress = {}", i, rtMeshes[i].vertexAddress);
+        // for(int j = 0; j < modelVertexAttribute.size(); j++){
+        //     logger->Log("modelVertexAttribute[{}].position = {}, {}, {}", j, modelVertexAttribute[j].position.x, modelVertexAttribute[j].position.y, modelVertexAttribute[j].position.z);
+        //     logger->Log("modelVertexAttribute[{}].normal = {}, {}, {}", j, modelVertexAttribute[j].normal.x, modelVertexAttribute[j].normal.y, modelVertexAttribute[j].normal.z);
+        // }
     }
+
+    //static_assert(sizeof(GeometryInfoGPU) == 16);
+    //static_assert(alignof(GeometryInfoGPU) >= 8);
+
+    UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame(), &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
+    UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame()+1, &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

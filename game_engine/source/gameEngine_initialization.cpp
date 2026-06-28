@@ -110,6 +110,7 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) {
         renderer->addRaytracingStorageBuffer_triangleVertexAttribute();
         renderer->addRaytracingStorageBuffer_triangleVertexIndex();
+        renderer->addRaytracingStorageBuffer_geometryInfo();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
     }
 
