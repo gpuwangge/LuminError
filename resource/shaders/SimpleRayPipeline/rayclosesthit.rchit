@@ -5,7 +5,9 @@
 #extension GL_EXT_scalar_block_layout : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-layout(location = 0) rayPayloadInEXT vec3 payload;
+#include "../CommonShaders/rayPipelineCommon.glsl"
+
+layout(location = 0) rayPayloadInEXT Payload payload;
 hitAttributeEXT vec2 bary;
 
 struct TriangleVertexInfo{
@@ -45,13 +47,13 @@ struct GeometryInfo {
     IndexBufferRef  indexBuf;
 };
 
-layout(set = 0, binding = 4, scalar) readonly buffer GeometryInfoBuffer {
+layout(set = 0, binding = 4, scalar) readonly buffer SBOGeometryInfoBuffer {
     GeometryInfo infos[];
-} geometryInfos;
+} sboGeometryInfos;
 
 void main(){
     uint modelId = gl_InstanceCustomIndexEXT; //gl_InstanceCustomIndexEXT是一个可以自定义的量，我用它来代表用第几个模型。
-    GeometryInfo geo = geometryInfos.infos[modelId];
+    GeometryInfo geo = sboGeometryInfos.infos[modelId];
 
     uint prim = gl_PrimitiveID * 3u; //gl_PrimitiveID 是当前命中 primitive 的本地 ID，不是全场景统一 primitive ID。
 
@@ -102,7 +104,7 @@ void main(){
     float lightIntensity[LIGHT_COUNT] = float[](10.0, 10.0, 10.0, 0.0);
 
     vec3 baseColor = vec3(0.8, 0.7, 0.6);
-    vec3 result = baseColor * 0.25;   // ambient
+    vec3 localLighting = baseColor * 0.25;   // ambient
 
     for (int i = 0; i < LIGHT_COUNT; ++i){
         vec3 toLight = lightPos[i] - P;
@@ -113,9 +115,23 @@ void main(){
 
         float attenuation = 1.0 / max(dist * dist, 1e-4);
 
-        result += baseColor * lightColor[i] * lightIntensity[i] * diff * attenuation;
+        localLighting += baseColor * lightColor[i] * lightIntensity[i] * diff * attenuation;
     }
 
-    payload = result;
+    vec3 hitPos = gl_WorldRayOriginEXT + gl_HitTEXT * gl_WorldRayDirectionEXT;
+    //vec3 reflDir = reflect(payload.nextDir, N); // 实际上建议单独存当前入射方向
+    vec3 reflDir = reflect(gl_WorldRayDirectionEXT, N);
+    payload.nextOrigin = hitPos + N * 0.001;
+    payload.nextDir    = normalize(reflDir);
+
+    //payload = localLighting;
+    //payload.radiance = localLighting;
+    payload.radiance += payload.throughput * localLighting;
+    float reflectance = 0.75f; //TODO: change this later
+    payload.throughput *= reflectance;
+
+    //payload.done = 1u;
+    if (reflectance < 0.01) payload.done = 1u;
+    else payload.done = 0u;
 
 }

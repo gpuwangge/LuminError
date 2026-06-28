@@ -30,6 +30,7 @@ compile_if_newer() {
         [ "CommonShaders/graphicsGlobalUBO.glsl" -nt "$output_file" ] || \
         [ "CommonShaders/lightsUBO.glsl" -nt "$output_file" ] || \
         [ "CommonShaders/objectUBO.glsl" -nt "$output_file" ] || \
+        [ "CommonShaders/rayPipelineCommon.glsl" -nt "$output_file" ] || \
         [ "CommonShaders/rayUBO.glsl" -nt "$output_file" ]; then
         echo "🔄 Compile ${source_file} (updated)"
         ./glslc.exe --target-env=vulkan1.2 --target-spv=spv1.4 "${source_file}" -o "${output_file}"
