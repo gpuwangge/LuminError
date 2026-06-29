@@ -297,8 +297,10 @@ namespace LERenderer{
             renderProcess.createGraphicsPipelineLayout(descriptorSetLayouts, pushConstantRange, bUsePushConstant, graphicsPipelineLayout_id);
         }
         void CreateComputePipeline(VkShaderModule &computeShaderModule) override { renderProcess.createComputePipeline(computeShaderModule); }
-        void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &primaryMissModule, VkShaderModule &shadowMissModule, VkShaderModule &primaryRchitModule, VkShaderModule &shadowRchitModule) override { 
-            renderProcess.createRaytracingPipeline(rgenModule, primaryMissModule, shadowMissModule, primaryRchitModule, shadowRchitModule); 
+        void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &primaryMissModule, VkShaderModule &shadowMissModule, 
+            VkShaderModule &primaryRchitModule, VkShaderModule &shadowRchitModule,
+            VkShaderModule &primaryRahitModule, VkShaderModule &shadowRahitModule) override { 
+            renderProcess.createRaytracingPipeline(rgenModule, primaryMissModule, shadowMissModule, primaryRchitModule, shadowRchitModule, primaryRahitModule, shadowRahitModule); 
         }
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();

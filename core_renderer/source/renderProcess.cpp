@@ -471,10 +471,12 @@ bool CRenderProcess::LoadRayTracingFunctions_process(){
 
 	return ok;
 }
-void CRenderProcess::createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, VkShaderModule& primaryRchitModule, VkShaderModule& shadowRchitModule){
+void CRenderProcess::createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, 
+	VkShaderModule& primaryRchitModule, VkShaderModule& shadowRchitModule,
+	VkShaderModule& primaryRahitModule, VkShaderModule& shadowRahitModule){
     bCreateRaytracingPipeline = true;
 
-    std::array<VkPipelineShaderStageCreateInfo, 5> stages{};
+    std::array<VkPipelineShaderStageCreateInfo, 7> stages{};
 
     // stage 0 : raygen
     stages[0] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
@@ -506,6 +508,18 @@ void CRenderProcess::createRaytracingPipeline(VkShaderModule& rgenModule, VkShad
     stages[4].module = shadowRchitModule;
     stages[4].pName  = "main";
 
+	// stage 5 : primary any-hit
+    stages[5] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stages[5].stage  = VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+    stages[5].module = primaryRahitModule;
+    stages[5].pName  = "main";
+
+    // stage 6 : shadow any-hit
+    stages[6] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stages[6].stage  = VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+    stages[6].module = shadowRahitModule;
+    stages[6].pName  = "main";
+
     std::array<VkRayTracingShaderGroupCreateInfoKHR, 5> groups{};
 
     // group 0 : raygen
@@ -532,20 +546,20 @@ void CRenderProcess::createRaytracingPipeline(VkShaderModule& rgenModule, VkShad
     groups[2].anyHitShader       = VK_SHADER_UNUSED_KHR;
     groups[2].intersectionShader = VK_SHADER_UNUSED_KHR;
 
-    // group 3 : triangles hit group
+    // group 3 : primary hit group (rchit and rahit)
     groups[3] = { VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
     groups[3].type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
     groups[3].generalShader      = VK_SHADER_UNUSED_KHR;
     groups[3].closestHitShader   = 3;
-    groups[3].anyHitShader       = VK_SHADER_UNUSED_KHR;
+	groups[3].anyHitShader       = 5;
     groups[3].intersectionShader = VK_SHADER_UNUSED_KHR;
 
-	// group 4: shadow hit group
+	// group 4: shadow hit group (rchit and rahit)
 	groups[4] = { VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
 	groups[4].type 					= VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
 	groups[4].generalShader 		= VK_SHADER_UNUSED_KHR;
 	groups[4].closestHitShader 		= 4;
-	groups[4].anyHitShader 			= VK_SHADER_UNUSED_KHR;
+	groups[4].anyHitShader       	= 6;
 	groups[4].intersectionShader 	= VK_SHADER_UNUSED_KHR;
 
     VkRayTracingPipelineCreateInfoKHR pipelineInfo{

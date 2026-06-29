@@ -45,7 +45,7 @@ void main() {
                 gl_RayFlagsOpaqueEXT,
                 0xff,
                 0,   // sbtRecordOffset
-                0,   // sbtRecordStride
+                2,   // sbtRecordStride
                 0,   // missIndex
                 rayOrigin,
                 0.001,
@@ -53,6 +53,10 @@ void main() {
                 10000.0,
                 0    // primary payload location
             );
+            //Notes:
+            //SBTRecordStride 的意思是：同一次 trace 里，SBT hit record 之间按“几组一跳”来索引。
+            //它不是字节步长，而是“记录编号的步长”概念 。
+            //SBT hit 区是按 primary / shadow 两个 record 成对排的，所以一条 ray 要跨过另一条 ray type 的 record，索引步长自然就是 2。
 
             lightColor += primaryPayload.throughput * primaryPayload.radiance;
             if(primaryPayload.done != 0u) break; //当当前这条路径已经不需要继续往下追踪时，直接退出 bounce 循环

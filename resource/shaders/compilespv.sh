@@ -91,6 +91,13 @@ do
     fi
 done
 
+for entry in ${search_dir}/*.rahit
+do
+    if [ -e "$entry" ]; then
+        compile_if_newer "$entry"
+    fi
+done
+
 total=$((pass+error+skipped))
 
 echo ""

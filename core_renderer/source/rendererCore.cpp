@@ -779,8 +779,8 @@ void RendererCore::CreateSBT(){
     copyHandle(2, missRegionOffset + 1 * missStride); // group 2 = shadow miss
 
     // hit region
-    copyHandle(3, hitRegionOffset + 0 * hitStride); // group 3 = primary hit
-    copyHandle(4, hitRegionOffset + 1 * hitStride); // group 4 = primary hit
+    copyHandle(3, hitRegionOffset + 0 * hitStride); // group 3 = primary hit (rchit and rahit)
+    copyHandle(4, hitRegionOffset + 1 * hitStride); // group 4 = shadow hit (rchit and rahit)
 
     sbt_buffer.fill(sbtData.data(), GetLogicalDevice());
 

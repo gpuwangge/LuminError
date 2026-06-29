@@ -3,5 +3,5 @@
 #include "../CommonShaders/rayPipelineCommon.glsl"
 layout(location = 1) rayPayloadInEXT ShadowPayload shadowPayload;
 void main(){
-    shadowPayload.visibility = 0u;
+    //shadowPayload.visibility = 0u; //use rahit instead, so leave this empty
 }

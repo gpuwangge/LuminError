@@ -131,11 +131,11 @@ void main(){
         traceRayEXT( //shadow ray
             topLevelAS,
             gl_RayFlagsTerminateOnFirstHitEXT |
-            gl_RayFlagsOpaqueEXT,
-            //gl_RayFlagsSkipClosestHitShaderEXT,
+            //gl_RayFlagsOpaqueEXT,
+            gl_RayFlagsSkipClosestHitShaderEXT,
             0xFF,
             1,   // sbtRecordOffset -> shadow hit group
-            0,   // sbtRecordStride
+            2,   // sbtRecordStride
             1,   // missIndex -> shadow miss
             shadowOrigin,
             EPS,
