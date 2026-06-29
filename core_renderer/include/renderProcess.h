@@ -149,7 +149,7 @@ public:
         VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
         VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo);
     void createComputePipeline(VkShaderModule &computeShaderModule);
-    void createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, VkShaderModule& rchitModule);
+    void createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, VkShaderModule& primaryRchitModule, VkShaderModule& shadowRchitModule);
 
     PFN_vkCreateRayTracingPipelinesKHR             fpCreateRayTracingPipelinesKHR             = nullptr;
     bool LoadRayTracingFunctions_process();

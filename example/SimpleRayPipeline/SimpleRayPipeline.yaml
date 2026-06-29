@@ -64,7 +64,8 @@ Resources:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
       resource_raytracing_pipeline_primary_miss_shader_name: simpleRayPipeline/primary.rmiss.spv
       resource_raytracing_pipeline_shadow_miss_shader_name: simpleRayPipeline/shadow.rmiss.spv
-      resource_raytracing_pipeline_closesthit_shader_name: simpleRayPipeline/rayclosesthit.rchit.spv
+      resource_raytracing_pipeline_primary_closesthit_shader_name: simpleRayPipeline/primary.rchit.spv
+      resource_raytracing_pipeline_shadow_closesthit_shader_name: simpleRayPipeline/shadow.rchit.spv
       resource_raytracing_pipeline_anyhit_shader_name: none
       resource_raytracing_pipeline_intersection_shader_name: none
       resource_raytracing_pipeline_callable_shader_name: none

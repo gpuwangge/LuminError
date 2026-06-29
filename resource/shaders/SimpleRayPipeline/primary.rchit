@@ -128,15 +128,15 @@ void main(){
 
         shadowed = true;
 
-        traceRayEXT(
+        traceRayEXT( //shadow ray
             topLevelAS,
             gl_RayFlagsTerminateOnFirstHitEXT |
-            gl_RayFlagsOpaqueEXT |
-            gl_RayFlagsSkipClosestHitShaderEXT,
+            gl_RayFlagsOpaqueEXT,
+            //gl_RayFlagsSkipClosestHitShaderEXT,
             0xFF,
-            0,   // sbtRecordOffset
+            1,   // sbtRecordOffset -> shadow hit group
             0,   // sbtRecordStride
-            1,   // missIndex = shadow.rmiss
+            1,   // missIndex -> shadow miss
             shadowOrigin,
             EPS,
             L,

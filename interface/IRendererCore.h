@@ -153,7 +153,7 @@ namespace LERenderer{
         virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, int graphicsPipelineLayout_id) = 0;
         virtual void CreateGraphicsPipelineLayout(std::vector<VkDescriptorSetLayout> &descriptorSetLayouts, VkPushConstantRange &pushConstantRange, bool bUsePushConstant, int graphicsPipelineLayout_id) = 0;
         virtual void CreateComputePipeline(VkShaderModule &computeShaderModule) = 0;
-        virtual void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &primaryMissModule, VkShaderModule &shadowMissModule, VkShaderModule &rchitModule) = 0;
+        virtual void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &primaryMissModule, VkShaderModule &shadowMissModule, VkShaderModule &primaryRchitModule, VkShaderModule &shadowRchitModule) = 0;
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,

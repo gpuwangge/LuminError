@@ -721,11 +721,11 @@ void RendererCore::CreateSBT(){
 
     const uint32_t handleSizeAligned = AlignUp(handleSize, handleAlign);
 
-    // 4 个 group: rgen, primary miss, shadow miss, hit
-    const uint32_t groupCount = 4;
+    // 5 个 group: rgen, primary miss, shadow miss, primary hit, shadow hit
+    const uint32_t groupCount = 5;
     const uint32_t rgenCount  = 1;
     const uint32_t missCount  = 2;
-    const uint32_t hitCount   = 1;
+    const uint32_t hitCount   = 2;
 
     const uint32_t rgenStride = AlignUp(handleSizeAligned, baseAlign);
     const uint32_t missStride = AlignUp(handleSizeAligned, baseAlign);
@@ -735,11 +735,11 @@ void RendererCore::CreateSBT(){
     const VkDeviceSize missSize = missStride * missCount;
     const VkDeviceSize hitSize  = hitStride  * hitCount;
 
-    const VkDeviceSize rgenOffset = 0;
-    const VkDeviceSize missOffset = AlignUp((uint32_t)(rgenOffset + rgenSize), (uint32_t)baseAlign);
-    const VkDeviceSize hitOffset  = AlignUp((uint32_t)(missOffset + missSize), (uint32_t)baseAlign);
+    const VkDeviceSize rgenRegionOffset = 0;
+    const VkDeviceSize missRegionOffset = AlignUp((uint32_t)(rgenRegionOffset + rgenSize), (uint32_t)baseAlign);
+    const VkDeviceSize hitRegionOffset  = AlignUp((uint32_t)(missRegionOffset + missSize), (uint32_t)baseAlign);
 
-    const VkDeviceSize sbtSize = hitOffset + hitSize;
+    const VkDeviceSize sbtSize = hitRegionOffset + hitSize;
 
     std::vector<uint8_t> handles(groupCount * handleSize);
     fpGetRayTracingShaderGroupHandlesKHR(
@@ -772,32 +772,29 @@ void RendererCore::CreateSBT(){
     };
 
     // group 0 = rgen
-    copyHandle(0, rgenOffset + 0 * rgenStride);
+    copyHandle(0, rgenRegionOffset + 0 * rgenStride);
 
     // miss region
-    // group 1 = primary miss
-    copyHandle(1, missOffset + 0 * missStride);
-
-    // group 2 = shadow miss
-    copyHandle(2, missOffset + 1 * missStride);
+    copyHandle(1, missRegionOffset + 0 * missStride); // group 1 = primary miss
+    copyHandle(2, missRegionOffset + 1 * missStride); // group 2 = shadow miss
 
     // hit region
-    // group 3 = hit
-    copyHandle(3, hitOffset + 0 * hitStride);
+    copyHandle(3, hitRegionOffset + 0 * hitStride); // group 3 = primary hit
+    copyHandle(4, hitRegionOffset + 1 * hitStride); // group 4 = primary hit
 
     sbt_buffer.fill(sbtData.data(), GetLogicalDevice());
 
     VkDeviceAddress addr = GetBufferAddress(GetLogicalDevice(), sbt_buffer.buffer);
 
-    rgenRegion.deviceAddress = addr + rgenOffset;
+    rgenRegion.deviceAddress = addr + rgenRegionOffset;
     rgenRegion.stride        = rgenStride;
     rgenRegion.size          = rgenSize;
 
-    missRegion.deviceAddress = addr + missOffset;
+    missRegion.deviceAddress = addr + missRegionOffset;
     missRegion.stride        = missStride;
     missRegion.size          = missSize;
 
-    hitRegion.deviceAddress  = addr + hitOffset;
+    hitRegion.deviceAddress  = addr + hitRegionOffset;
     hitRegion.stride         = hitStride;
     hitRegion.size           = hitSize;
 

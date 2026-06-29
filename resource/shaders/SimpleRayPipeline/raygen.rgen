@@ -40,7 +40,7 @@ void main() {
             payload.nextOrigin = rayOrigin;
             payload.nextDir    = rayDir;
 
-            traceRayEXT(
+            traceRayEXT( //primary ray
                 topLevelAS,
                 gl_RayFlagsOpaqueEXT,
                 0xff,
