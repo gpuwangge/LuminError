@@ -713,22 +713,20 @@ void RendererCore::InitialRaytracing(){
 }
 
 void RendererCore::CreateSBT(){
-    //std::cout<<"Creating shader binding table(SBT)..."<<std::endl;
-
     QueryRayTracingProperties();
-    const uint32_t handleSize = rayTracingPipelineProperties.shaderGroupHandleSize;
+
+    const uint32_t handleSize  = rayTracingPipelineProperties.shaderGroupHandleSize;
     const uint32_t handleAlign = rayTracingPipelineProperties.shaderGroupHandleAlignment;
-    const uint32_t baseAlign = rayTracingPipelineProperties.shaderGroupBaseAlignment;
+    const uint32_t baseAlign   = rayTracingPipelineProperties.shaderGroupBaseAlignment;
 
-    uint32_t handleSizeAligned = AlignUp(handleSize, handleAlign);
+    const uint32_t handleSizeAligned = AlignUp(handleSize, handleAlign);
 
-    // 现在有 3 个 group: rgen, miss, hit
-    const uint32_t groupCount = 3;
+    // 4 个 group: rgen, primary miss, shadow miss, hit
+    const uint32_t groupCount = 4;
     const uint32_t rgenCount  = 1;
-    const uint32_t missCount  = 1;
+    const uint32_t missCount  = 2;
     const uint32_t hitCount   = 1;
 
-    // 每个 section 自己的 stride
     const uint32_t rgenStride = AlignUp(handleSizeAligned, baseAlign);
     const uint32_t missStride = AlignUp(handleSizeAligned, baseAlign);
     const uint32_t hitStride  = AlignUp(handleSizeAligned, baseAlign);
@@ -741,13 +739,8 @@ void RendererCore::CreateSBT(){
     const VkDeviceSize missOffset = AlignUp((uint32_t)(rgenOffset + rgenSize), (uint32_t)baseAlign);
     const VkDeviceSize hitOffset  = AlignUp((uint32_t)(missOffset + missSize), (uint32_t)baseAlign);
 
-    //VkDeviceSize sbtSize = rgenStride;
     const VkDeviceSize sbtSize = hitOffset + hitSize;
 
-    //std::vector<uint8_t> handle(handleSize);
-    //fpGetRayTracingShaderGroupHandlesKHR(GetLogicalDevice(), GetRaytracingPipeline(), 0, 1, handle.size(), handle.data());
-
-    // 一次性取回 3 个 group handle
     std::vector<uint8_t> handles(groupCount * handleSize);
     fpGetRayTracingShaderGroupHandlesKHR(
         GetLogicalDevice(),
@@ -758,20 +751,18 @@ void RendererCore::CreateSBT(){
         handles.data()
     );
 
-    //printf("handle[0] = %02X\n", handle[0]);
-    
     VkResult result = sbt_buffer.init(
-        sbtSize, 
-        //VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
-        VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-        //VkMemoryPropertyFlags?
-        GetLogicalDevice(), 
+        sbtSize,
+        VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        GetLogicalDevice(),
         GetPhysicalDevice(),
-        true //need Device address
+        true
     );
 
-    // 先清零整个 SBT，没写到的 padding 保持 0
     std::vector<uint8_t> sbtData((size_t)sbtSize, 0);
+
     auto copyHandle = [&](uint32_t groupIndex, VkDeviceSize dstOffset){
         memcpy(
             sbtData.data() + dstOffset,
@@ -781,30 +772,20 @@ void RendererCore::CreateSBT(){
     };
 
     // group 0 = rgen
-    copyHandle(0, rgenOffset);
+    copyHandle(0, rgenOffset + 0 * rgenStride);
 
-    // group 1 = miss
-    copyHandle(1, missOffset);
+    // miss region
+    // group 1 = primary miss
+    copyHandle(1, missOffset + 0 * missStride);
 
-    // group 2 = hit
-    copyHandle(2, hitOffset);
+    // group 2 = shadow miss
+    copyHandle(2, missOffset + 1 * missStride);
+
+    // hit region
+    // group 3 = hit
+    copyHandle(3, hitOffset + 0 * hitStride);
 
     sbt_buffer.fill(sbtData.data(), GetLogicalDevice());
-
-    /*
-    c.sbtBuf = CreateBuffer(
-        c.phy, c.dev, sbtSize,
-        VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        true
-    );
-
-    void* mapped = nullptr;
-    //VK_CHECK(vkMapMemory(c.dev, c.sbtBuf.mem, 0, sbtSize, 0, &mapped));
-    std::memset(mapped, 0, (size_t)sbtSize);
-    std::memcpy(mapped, handle.data(), handleSize);
-    vkUnmapMemory(c.dev, c.sbtBuf.mem);
-    */
 
     VkDeviceAddress addr = GetBufferAddress(GetLogicalDevice(), sbt_buffer.buffer);
 
@@ -823,12 +804,6 @@ void RendererCore::CreateSBT(){
     callRegion.deviceAddress = 0;
     callRegion.stride        = 0;
     callRegion.size          = 0;
-
-    // rgenRegion.deviceAddress = addr;
-    // rgenRegion.stride = rgenStride;
-    // rgenRegion.size = rgenStride;
-
-    //std::cout<<"Shader Binding Table created. Device Address: "<<addr<<std::endl;
 }
 
 void RendererCore::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

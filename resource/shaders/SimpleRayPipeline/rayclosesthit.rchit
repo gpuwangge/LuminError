@@ -7,7 +7,9 @@
 
 #include "../CommonShaders/rayPipelineCommon.glsl"
 
+layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 layout(location = 0) rayPayloadInEXT Payload payload;
+layout(location = 1) rayPayloadEXT bool shadowed;
 hitAttributeEXT vec2 bary;
 
 struct TriangleVertexInfo{
@@ -81,41 +83,76 @@ void main(){
     vec3 P = vec3(gl_ObjectToWorldEXT * vec4(Pobj, 1.0));
     //vec3 N = normalize(Nobj * mat3(gl_WorldToObjectEXT));
     vec3 N = normalize(transpose(mat3(gl_WorldToObjectEXT)) * Nobj);
-    N = -N;
-    vec3 Nshading = N;
-    if (dot(gl_WorldRayDirectionEXT, Nshading) < 0.0) Nshading = -Nshading; //do this so both sides of a triangle will have light color
+
+    vec3 V = normalize(-gl_WorldRayDirectionEXT);
+    if (dot(N, V) < 0.0) N = -N;
+
+    //vec3 Nshading = N;
+    //if (dot(gl_WorldRayDirectionEXT, Nshading) < 0.0) Nshading = -Nshading; //do this so both sides of a triangle will have light color
     
     const int LIGHT_COUNT = 4; //TODO: Lights should be input, not hard-code
 
     vec3 lightPos[LIGHT_COUNT] = vec3[](
-        vec3(-0.5, -0.0, -2.5), //red
-        vec3(0.0, -0.5, -2.5),  //green
-        vec3(-2.0, -2.0, -2.5),  //blue
-        vec3(0.0, 0.0, 0.0)
+        vec3(-0.6, -0.6, -2.0), //purple
+        vec3(0.6,  0.6, -2.0), //green
+        vec3(-2.0, 2.0, 0.0), //blue
+        vec3(2.0, -2.0, 0.0) //red
     );
 
     vec3 lightColor[LIGHT_COUNT] = vec3[](
-        vec3(0.0, 0.0, 1.0), //red
-        vec3(0.0, 1.0, 0.0),  //green
-        vec3(1.0, 0.0, 0.0),  //blue
-        vec3(1.0, 0.0, 0.0)
+        vec3(1.0, 0.0, 1.0), //purple
+        vec3(0.0, 1.0, 0.0), //green
+        vec3(1.0, 0.0, 0.0), //blue
+        vec3(0.0, 0.0, 1.0) //red
     );
 
-    float lightIntensity[LIGHT_COUNT] = float[](10.0, 10.0, 10.0, 0.0);
+    float lightIntensity[LIGHT_COUNT] = float[](5.0, 5.0, 2.0, 2.0);
 
     vec3 baseColor = vec3(0.8, 0.7, 0.6);
     vec3 localLighting = baseColor * 0.25;   // ambient
 
+    const float EPS = 0.001;
+
     for (int i = 0; i < LIGHT_COUNT; ++i){
+        if (lightIntensity[i] <= 0.0) continue;
+
         vec3 toLight = lightPos[i] - P;
         float dist = length(toLight);
         vec3 L = toLight / max(dist, 1e-4);
 
-        float diff = max(dot(Nshading, -L), 0.0);
+        //float diff = max(dot(Nshading, -L), 0.0);
+        float NdotL = max(dot(N, L), 0.0);
+        if (NdotL <= 0.0) continue;
 
-        float attenuation = 1.0 / max(dist * dist, 1e-4);
+        vec3 shadowOrigin = P + N * EPS;
 
-        localLighting += baseColor * lightColor[i] * lightIntensity[i] * diff * attenuation;
+        shadowed = true;
+
+        traceRayEXT(
+            topLevelAS,
+            gl_RayFlagsTerminateOnFirstHitEXT |
+            gl_RayFlagsOpaqueEXT |
+            gl_RayFlagsSkipClosestHitShaderEXT,
+            0xFF,
+            0,   // sbtRecordOffset
+            0,   // sbtRecordStride
+            1,   // missIndex = shadow.rmiss
+            shadowOrigin,
+            EPS,
+            L,
+            max(dist - EPS, EPS),
+            1    // payload location = 1
+        );
+
+        if (!shadowed) {
+            float attenuation = 1.0 / max(dist * dist, 1e-4);
+            localLighting += baseColor * lightColor[i] * lightIntensity[i] * NdotL * attenuation;
+        }
+    
+
+        //float attenuation = 1.0 / max(dist * dist, 1e-4);
+
+        //localLighting += baseColor * lightColor[i] * lightIntensity[i] * diff * attenuation;
     }
 
     vec3 hitPos = gl_WorldRayOriginEXT + gl_HitTEXT * gl_WorldRayDirectionEXT;

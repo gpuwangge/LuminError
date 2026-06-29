@@ -7,7 +7,7 @@ const int RAY_PER_PIXEL = 4; //SPP, Sample per Pixel, TODO: add to uniform
 const int BOUNCE_LIMIT = 1; //TODO: add to uniform
 const int FRAME_INDEX = 1; //TODO: add to uniform
 
-layout(set=0, binding = 0, rgba8 ) uniform writeonly image2D resultImage;
+layout(set = 0, binding = 0, rgba8 ) uniform writeonly image2D resultImage;
 layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 layout(location = 0) rayPayloadEXT Payload payload;
 

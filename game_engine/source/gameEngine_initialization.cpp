@@ -496,7 +496,8 @@ void GameEngine::Initialize(){
     if(appInfo->RaytracingPipelines.size() > 0){
         std::cout<<"Create ray tracing shader module:"<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_miss_shader_name<<std::endl;
+        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_miss_shader_name<<std::endl;
+        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_miss_shader_name<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_closesthit_shader_name<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_anyhit_shader_name<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_intersection_shader_name<<std::endl;
@@ -504,7 +505,8 @@ void GameEngine::Initialize(){
         //for(int i = 0; i < appInfo->RaytracingPipelines.size(); i++){ 
             //std::cout<<"CreatePipeline: Done Create Shader for pipeline: "<<appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name<<std::endl;
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name, RAYT);
-            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_miss_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_miss_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_miss_shader_name, RAYT);
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_closesthit_shader_name, RAYT);
         //}
     }
@@ -615,7 +617,7 @@ void GameEngine::Initialize(){
         if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing layout"<<std::endl;
         renderer->CreateRaytracingPipelineLayout(renderer->GetRaytracingDescriptorSetLayout());
         if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing pipeline"<<std::endl;
-        renderer->CreateRaytracingPipeline(resourcer->GetRaytracingShaderModule(0), resourcer->GetRaytracingShaderModule(1), resourcer->GetRaytracingShaderModule(2));
+        renderer->CreateRaytracingPipeline(resourcer->GetRaytracingShaderModule(0), resourcer->GetRaytracingShaderModule(1), resourcer->GetRaytracingShaderModule(2), resourcer->GetRaytracingShaderModule(3));
 
         renderer->CreateSBT();
     }

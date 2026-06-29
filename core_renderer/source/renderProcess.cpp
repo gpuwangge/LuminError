@@ -471,97 +471,94 @@ bool CRenderProcess::LoadRayTracingFunctions_process(){
 
 	return ok;
 }
+void CRenderProcess::createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, VkShaderModule& rchitModule){
+    bCreateRaytracingPipeline = true;
 
-void CRenderProcess::createRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &rmissModule, VkShaderModule &rchitModule){
-    //std::cout<<"Raytraycing Pipeline: Creating ray tracing pipeline..."<<std::endl;
-	bCreateRaytracingPipeline = true;
+    std::array<VkPipelineShaderStageCreateInfo, 4> stages{};
 
+    // stage 0 : raygen
+    stages[0] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stages[0].stage  = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+    stages[0].module = rgenModule;
+    stages[0].pName  = "main";
 
-    //VkPipelineShaderStageCreateInfo stage{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-    //stage.stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-    //stage.module = raytracingShaderModule;
-    //stage.pName = "main";
+    // stage 1 : primary miss
+    stages[1] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stages[1].stage  = VK_SHADER_STAGE_MISS_BIT_KHR;
+    stages[1].module = primaryMissModule;
+    stages[1].pName  = "main";
 
-	std::array<VkPipelineShaderStageCreateInfo, 3> stages{};
-	stages[0] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-	stages[0].stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-	stages[0].module = rgenModule;
-	stages[0].pName = "main";
+    // stage 2 : shadow miss
+    stages[2] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stages[2].stage  = VK_SHADER_STAGE_MISS_BIT_KHR;
+    stages[2].module = shadowMissModule;
+    stages[2].pName  = "main";
 
-	stages[1] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-	stages[1].stage = VK_SHADER_STAGE_MISS_BIT_KHR;
-	stages[1].module = rmissModule;
-	stages[1].pName = "main";
+    // stage 3 : closest hit
+    stages[3] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+    stages[3].stage  = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+    stages[3].module = rchitModule;
+    stages[3].pName  = "main";
 
-	stages[2] = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-	stages[2].stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-	stages[2].module = rchitModule;
-	stages[2].pName = "main";
+    std::array<VkRayTracingShaderGroupCreateInfoKHR, 4> groups{};
 
-
-    // VkRayTracingShaderGroupCreateInfoKHR group{ VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
-    // group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-    // group.generalShader = 0; // index into stages[]
-    // group.closestHitShader = VK_SHADER_UNUSED_KHR;
-    // group.anyHitShader = VK_SHADER_UNUSED_KHR;
-    // group.intersectionShader = VK_SHADER_UNUSED_KHR;
-
-	std::array<VkRayTracingShaderGroupCreateInfoKHR, 3> groups{};
-	// group 0 : raygen
+    // group 0 : raygen
     groups[0] = { VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
-    groups[0].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-    groups[0].generalShader = 0;
-    groups[0].closestHitShader = VK_SHADER_UNUSED_KHR;
-    groups[0].anyHitShader = VK_SHADER_UNUSED_KHR;
+    groups[0].type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+    groups[0].generalShader      = 0;
+    groups[0].closestHitShader   = VK_SHADER_UNUSED_KHR;
+    groups[0].anyHitShader       = VK_SHADER_UNUSED_KHR;
     groups[0].intersectionShader = VK_SHADER_UNUSED_KHR;
 
-    // group 1 : miss
+    // group 1 : primary miss
     groups[1] = { VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
-    groups[1].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-    groups[1].generalShader = 1;
-    groups[1].closestHitShader = VK_SHADER_UNUSED_KHR;
-    groups[1].anyHitShader = VK_SHADER_UNUSED_KHR;
+    groups[1].type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+    groups[1].generalShader      = 1;
+    groups[1].closestHitShader   = VK_SHADER_UNUSED_KHR;
+    groups[1].anyHitShader       = VK_SHADER_UNUSED_KHR;
     groups[1].intersectionShader = VK_SHADER_UNUSED_KHR;
 
-    // group 2 : triangles hit group
+    // group 2 : shadow miss
     groups[2] = { VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
-    groups[2].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
-    groups[2].generalShader = VK_SHADER_UNUSED_KHR;
-    groups[2].closestHitShader = 2;
-    groups[2].anyHitShader = VK_SHADER_UNUSED_KHR;
+    groups[2].type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+    groups[2].generalShader      = 2;
+    groups[2].closestHitShader   = VK_SHADER_UNUSED_KHR;
+    groups[2].anyHitShader       = VK_SHADER_UNUSED_KHR;
     groups[2].intersectionShader = VK_SHADER_UNUSED_KHR;
 
-    // VkRayTracingPipelineCreateInfoKHR pipelineInfo{ VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR };
-    // pipelineInfo.stageCount = 1;
-    // pipelineInfo.pStages = &stage;
-    // pipelineInfo.groupCount = 1;
-    // pipelineInfo.pGroups = &group;
-    // pipelineInfo.maxPipelineRayRecursionDepth = 1;
-    // pipelineInfo.layout = raytracingPipelineLayout;
+    // group 3 : triangles hit group
+    groups[3] = { VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
+    groups[3].type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+    groups[3].generalShader      = VK_SHADER_UNUSED_KHR;
+    groups[3].closestHitShader   = 3;
+    groups[3].anyHitShader       = VK_SHADER_UNUSED_KHR;
+    groups[3].intersectionShader = VK_SHADER_UNUSED_KHR;
 
-	VkRayTracingPipelineCreateInfoKHR pipelineInfo{ VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR };
+    VkRayTracingPipelineCreateInfoKHR pipelineInfo{
+        VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR
+    };
     pipelineInfo.stageCount = static_cast<uint32_t>(stages.size());
-    pipelineInfo.pStages = stages.data();
+    pipelineInfo.pStages    = stages.data();
     pipelineInfo.groupCount = static_cast<uint32_t>(groups.size());
-    pipelineInfo.pGroups = groups.data();
-    pipelineInfo.maxPipelineRayRecursionDepth = 1;
+    pipelineInfo.pGroups    = groups.data();
+    pipelineInfo.maxPipelineRayRecursionDepth = 2;
     pipelineInfo.layout = raytracingPipelineLayout;
 
-	if (!LoadRayTracingFunctions_process()) {
-		std::cout<<"failed to load ray tracing functions!"<<std::endl;
-		throw std::runtime_error("failed to load ray tracing functions!");
-	}
+    if (!LoadRayTracingFunctions_process()) {
+        std::cout << "failed to load ray tracing functions!" << std::endl;
+        throw std::runtime_error("failed to load ray tracing functions!");
+    }
 
-	VkResult result = fpCreateRayTracingPipelinesKHR(
-			CContext::GetHandle().GetLogicalDevice(),
-			VK_NULL_HANDLE,
-			VK_NULL_HANDLE,
-			1,
-			&pipelineInfo,
-			nullptr,
-			&raytracingPipeline);
-	
-	if (result != VK_SUCCESS) {
+    VkResult result = fpCreateRayTracingPipelinesKHR(
+        CContext::GetHandle().GetLogicalDevice(),
+        VK_NULL_HANDLE,
+        VK_NULL_HANDLE,
+        1,
+        &pipelineInfo,
+        nullptr,
+        &raytracingPipeline);
+
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create ray tracing pipeline!");
     }
 }

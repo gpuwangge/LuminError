@@ -520,6 +520,8 @@ void GameEngine::Record_Present(){
 
             renderer->PresentSwapchainImage(renderer->GetSwapchainHandle());
             //std::cout<<"Finished Presenting swapchain image for RAYTRACING_SWAPCHAIN mode."<<std::endl;
+
+            //vkDeviceWaitIdle(renderer->GetLogicalDevice());//TODO: this line is only for debug
         break;
         }
         case RenderModes::COMPUTE_GRAPHICS:

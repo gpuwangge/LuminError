@@ -331,7 +331,6 @@ void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroups
 
     //renderer->Dispatch(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
     renderer->Trace(numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ);
-
 }
 
 

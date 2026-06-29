@@ -254,7 +254,7 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].binding = 1;
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
         raytracingBindings[counter].descriptorCount = 1;
-        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
         counter++;
 
