@@ -3,7 +3,7 @@
 
 #include "../CommonShaders/rayPipelineCommon.glsl"
 
-layout(location = 0) rayPayloadInEXT Payload payload;
+layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
 void main() {
     vec3 dir = normalize(gl_WorldRayDirectionEXT);
 
@@ -18,6 +18,6 @@ void main() {
     vec3 c2 = mix(skyMid, skyTop, t);
     vec3 skyColor = mix(c1, c2, t);
 
-    payload.radiance += payload.throughput * skyColor;
-    payload.done = 1u;
+    primaryPayload.radiance += primaryPayload.throughput * skyColor;
+    primaryPayload.done = 1u;
 }

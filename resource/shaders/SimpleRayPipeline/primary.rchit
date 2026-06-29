@@ -8,8 +8,8 @@
 #include "../CommonShaders/rayPipelineCommon.glsl"
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
-layout(location = 0) rayPayloadInEXT Payload payload;
-layout(location = 1) rayPayloadEXT bool shadowed;
+layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
+layout(location = 1) rayPayloadEXT ShadowPayload shadowPayload;
 hitAttributeEXT vec2 bary;
 
 struct TriangleVertexInfo{
@@ -126,7 +126,7 @@ void main(){
 
         vec3 shadowOrigin = P + N * EPS;
 
-        shadowed = true;
+        shadowPayload.visibility = 0u;
 
         traceRayEXT( //shadow ray
             topLevelAS,
@@ -141,10 +141,10 @@ void main(){
             EPS,
             L,
             max(dist - EPS, EPS),
-            1    // payload location = 1
+            1    // shadow payload location = 1
         );
 
-        if (!shadowed) {
+        if (shadowPayload.visibility == 1u) {
             float attenuation = 1.0 / max(dist * dist, 1e-4);
             localLighting += baseColor * lightColor[i] * lightIntensity[i] * NdotL * attenuation;
         }
@@ -156,19 +156,16 @@ void main(){
     }
 
     vec3 hitPos = gl_WorldRayOriginEXT + gl_HitTEXT * gl_WorldRayDirectionEXT;
-    //vec3 reflDir = reflect(payload.nextDir, N); // 实际上建议单独存当前入射方向
+    //vec3 reflDir = reflect(primaryPayload.nextDir, N); // 实际上建议单独存当前入射方向
     vec3 reflDir = reflect(gl_WorldRayDirectionEXT, N);
-    payload.nextOrigin = hitPos + N * 0.001;
-    payload.nextDir    = normalize(reflDir);
+    primaryPayload.nextOrigin = hitPos + N * 0.001;
+    primaryPayload.nextDir    = normalize(reflDir);
 
-    //payload = localLighting;
-    //payload.radiance = localLighting;
-    payload.radiance += payload.throughput * localLighting;
+    primaryPayload.radiance += primaryPayload.throughput * localLighting;
     float reflectance = 0.75f; //TODO: change this later
-    payload.throughput *= reflectance;
+    primaryPayload.throughput *= reflectance;
 
-    //payload.done = 1u;
-    if (reflectance < 0.01) payload.done = 1u;
-    else payload.done = 0u;
+    if (reflectance < 0.01) primaryPayload.done = 1u;
+    else primaryPayload.done = 0u;
 
 }

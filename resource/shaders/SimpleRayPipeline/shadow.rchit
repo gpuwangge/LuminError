@@ -1,6 +1,7 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
-layout(location = 1) rayPayloadInEXT bool occluded;
+#include "../CommonShaders/rayPipelineCommon.glsl"
+layout(location = 1) rayPayloadInEXT ShadowPayload shadowPayload;
 void main(){
-    occluded = true;
+    shadowPayload.visibility = 0u;
 }

@@ -1,12 +1,16 @@
 #ifndef RAY_COMMON_GLSL
 #define RAY_COMMON_GLSL
 
-struct Payload {
+struct PrimaryPayload {
     vec3 radiance;    // 当前这次 trace 返回的光照贡献
     vec3 throughput;  // 路径权重，给 rgen 累积用
     vec3 nextOrigin;  // 下一跳光线起点
     vec3 nextDir;     // 下一跳光线方向
     uint done;        // 1 = 终止，0 = 继续
+};
+
+struct ShadowPayload{
+    uint visibility;
 };
 
 
