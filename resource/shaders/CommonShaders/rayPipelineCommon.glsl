@@ -38,4 +38,40 @@ vec2 rnd2(vec2 pix, int sampleIndex, int frameIndex)
     );
 }
 
+
+/**************
+以下是为了做软阴影的utility函数
+**************/
+uint hash_u32(uint x) {
+    x ^= x >> 16;
+    x *= 0x7feb352du;
+    x ^= x >> 15;
+    x *= 0x846ca68bu;
+    x ^= x >> 16;
+    return x;
+}
+
+//随机数
+float rand01(inout uint state) {
+    state = hash_u32(state);
+    return float(state) / 4294967296.0;
+}
+//在灯周围构造局部基
+//对圆盘灯，需要给灯的法线方向构造切线空间。你当前是点光源，没有方向，所以最省事的近似是“圆盘始终面向 shading point”，这相当于 billboarded disk，先做效果很方便。
+void buildOrthonormalBasis(vec3 n, out vec3 t, out vec3 b) {
+    vec3 up = abs(n.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+    t = normalize(cross(up, n));
+    b = cross(n, t);
+}
+//圆盘均匀采样
+vec2 sampleDisk(inout uint rng) {
+    float u1 = rand01(rng);
+    float u2 = rand01(rng);
+
+    float r = sqrt(u1);
+    float phi = 6.28318530718 * u2;
+
+    return vec2(r * cos(phi), r * sin(phi));
+}
+
 #endif

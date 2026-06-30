@@ -53,6 +53,54 @@ layout(set = 0, binding = 4, scalar) readonly buffer SBOGeometryInfoBuffer {
     GeometryInfo infos[];
 } sboGeometryInfos;
 
+float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius, int sampleCount, uint baseSeed) {
+    const float EPS = 0.001;
+    vec3 shadowOrigin = P + N * EPS;
+
+    float visible = 0.0;
+
+    for (int s = 0; s < sampleCount; ++s) {
+        uint rng = baseSeed ^ uint(s) * 1664525u + 1013904223u;
+
+        vec3 lightNormal = normalize(P - lightCenter); // disk faces shading point
+        vec3 T, B;
+        buildOrthonormalBasis(lightNormal, T, B);
+
+        vec2 d = sampleDisk(rng) * radius;
+        vec3 samplePos = lightCenter + T * d.x + B * d.y;
+
+        vec3 toLight = samplePos - P;
+        float dist = length(toLight);
+        vec3 L = toLight / max(dist, 1e-4);
+
+        float NdotL = dot(N, L);
+        if (NdotL <= 0.0) {
+            continue;
+        }
+
+        shadowPayload.visibility = 0u;
+
+        traceRayEXT(
+            topLevelAS,
+            gl_RayFlagsTerminateOnFirstHitEXT |
+            gl_RayFlagsSkipClosestHitShaderEXT,
+            0xFF,
+            1,
+            2,
+            1,
+            shadowOrigin,
+            EPS,
+            L,
+            max(dist - EPS, EPS),
+            1
+        );
+
+        visible += (shadowPayload.visibility == 1u) ? 1.0 : 0.0;
+    }
+
+    return visible / float(sampleCount);
+}
+
 void main(){
     uint modelId = gl_InstanceCustomIndexEXT; //gl_InstanceCustomIndexEXT是一个可以自定义的量，我用它来代表用第几个模型。
     GeometryInfo geo = sboGeometryInfos.infos[modelId];
@@ -108,6 +156,8 @@ void main(){
 
     float lightIntensity[LIGHT_COUNT] = float[](5.0, 5.0, 2.0, 2.0);
 
+    float lightRadius[LIGHT_COUNT] = float[](0.08, 0.08, 0.08, 0.08);
+
     vec3 baseColor = vec3(0.8, 0.7, 0.6);
     vec3 localLighting = baseColor * 0.25;   // ambient
 
@@ -116,6 +166,7 @@ void main(){
     for (int i = 0; i < LIGHT_COUNT; ++i){
         if (lightIntensity[i] <= 0.0) continue;
 
+        /*Legacy - hard shadow
         vec3 toLight = lightPos[i] - P;
         float dist = length(toLight);
         vec3 L = toLight / max(dist, 1e-4);
@@ -148,7 +199,35 @@ void main(){
             float attenuation = 1.0 / max(dist * dist, 1e-4);
             localLighting += baseColor * lightColor[i] * lightIntensity[i] * NdotL * attenuation;
         }
-    
+        */
+
+        const int SHADOW_SAMPLES = 4; // 先从 4 / 8 / 16 试
+        uint seed =
+            gl_LaunchIDEXT.x * 1973u +
+            gl_LaunchIDEXT.y * 9277u +
+            gl_PrimitiveID * 26699u +
+            gl_InstanceCustomIndexEXT * 31847u +
+            uint(i) * 101u;
+
+        vec3 toLightCenter = lightPos[i] - P;
+        float centerDist = length(toLightCenter);
+        vec3 Lc = toLightCenter / max(centerDist, 1e-4);
+
+        float NdotL_center = max(dot(N, Lc), 0.0);
+        if (NdotL_center <= 0.0) continue;
+
+        float visibility = computeSoftShadowVisibility(
+            P, N,
+            lightPos[i],
+            lightRadius[i],
+            SHADOW_SAMPLES,
+            seed
+        );
+
+        float attenuation = 1.0 / max(centerDist * centerDist, 1e-4);
+        localLighting += baseColor * lightColor[i] * lightIntensity[i]
+                    * NdotL_center * attenuation * visibility;
+
 
         //float attenuation = 1.0 / max(dist * dist, 1e-4);
 
