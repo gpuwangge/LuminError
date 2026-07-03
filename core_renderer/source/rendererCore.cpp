@@ -122,7 +122,11 @@ void RendererCore::WaitForComputeFence(){
 }
 
 void RendererCore::WaitForRaytracingFence(){
-    vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &raytracingInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    VkResult r = vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &raytracingInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+
+    //std::cout << "Wait fence result = " << r << ", currentFrame = " << currentFrame << std::endl;
+    VkResult s = vkGetFenceStatus(CContext::GetHandle().GetLogicalDevice(), raytracingInFlightFences[currentFrame]);
+    //std::cout << "Fence status = " << s << ", currentFrame = " << currentFrame << std::endl;
 }
 
 void RendererCore::SubmitCompute(bool bVerbose){
@@ -186,67 +190,34 @@ void RendererCore::SubmitCompute(bool bVerbose){
 
 
 void RendererCore::SubmitRaytracing(bool bVerbose){
-    //if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-    //    vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-    //}
-    //imagesInFlight[imageIndex] = inFlightFences[currentFrame];
-    //vkWaitForFences(CContext::GetHandle().GetLogicalDevice(), 1, &computeInFlightFences[imageIndex], VK_TRUE, UINT64_MAX);
+    VkCommandBuffer cmd = commandBuffers[raytracingCmdId][currentFrame];
+    VkFence fence = raytracingInFlightFences[currentFrame];
 
-    //printf("currentFrame: %d, imageIndex: %d \n", currentFrame, imageIndex);
+    vkWaitForFences(GetLogicalDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
+    vkResetFences(GetLogicalDevice(), 1, &fence);
+
+    //std::cout<<"SubmitRaytracing: semaphoreIndex = "<<semaphoreIndex%swapchain.swapchainImageSize<<", currentFrame = "<<currentFrame<<std::endl;
+    VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; //currentFrame?
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+    VkSemaphore signalSemaphores[] = { raytracingFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] };
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-    //this code handles compute semaphores
-    // switch(m_renderMode){
-    //     case GRAPHICS:
-    //         //Pure graphics application doesn't use compute pipeline
-    //     break;
-    //     case GRAPHICS_SHADOWMAP:
-    //     break;
-    //     case COMPUTE:
-    //         //Pure compute application doesn't need swap image or present
-    //     break;
-    //     case COMPUTE_SWAPCHAIN:
-    //     {
-
-        //RAYTRACING_SWAPCHAIN:
-        //Because this mode use swap image to present, wait swap image to be ready
-        VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; //to wait until image is ready
-        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
-
-        //Also because this mode need present swap image, need to tell present that compute is finished
-        VkSemaphore signalSemaphores[] = { raytracingFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; 
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = signalSemaphores;
-
-    //     }
-    //     break;
-    //     case COMPUTE_GRAPHICS:
-    //     {
-    //         //This mode doesn't interact with swap image, this semaphore is to tell graphics that compute is finished
-    //         VkSemaphore signalSemaphores[] = { computeFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize] }; 
-    //         submitInfo.signalSemaphoreCount = 1;
-    //         submitInfo.pSignalSemaphores = signalSemaphores;
-    //     }
-    //     break;
-    //     default:
-    //     break;
-    // }
-
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffers[raytracingCmdId][currentFrame];///!!!
+    submitInfo.pCommandBuffers = &cmd;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
 
-    vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &raytracingInFlightFences[currentFrame]);
 
     VkResult res = vkQueueSubmit(
         CContext::GetHandle().GetComputeQueue(),
         1,
         &submitInfo,
-        raytracingInFlightFences[currentFrame]);
+        fence);
 
     if (res != VK_SUCCESS) {
         throw std::runtime_error(
@@ -269,7 +240,7 @@ void RendererCore::SubmitGraphics(bool bVerbose){
         case GRAPHICS:
         {
             //pure graphics pipeline, need wait swap image is ready
-            if(bVerbose) std::cout<<"WaitSemaphore: imageAvailableSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<<std::endl;
+            if(bVerbose) std::cout<<"WaitSemaphore: imageAvailableSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<<", currentFrame = "<<currentFrame<<std::endl;
             VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[semaphoreIndex%swapchain.swapchainImageSize] };
             
             VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -367,6 +338,7 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
         case RAYTRACING_SWAPCHAIN:
             //present only if raytracing is finished
             signalSemaphores[0] = raytracingFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize];
+            //signalSemaphores[0] = raytracingFinishedSemaphores[currentFrame];
         break;
         default:
         break;
@@ -390,6 +362,38 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
 /**************************
  * Graphics Functions
  * ***********************/
+void RendererCore::CreateInitSyncObjects(){
+    //Init Command Related
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    QueueFamilyIndices queueFamilyIndices = CContext::GetHandle().physicalDevice->get()->findQueueFamilies(surface, "Find Queue Families when creating command pool");
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsAndComputeFamily.value();;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+    if (vkCreateCommandPool(GetLogicalDevice(), &poolInfo, nullptr, &initCommandPool) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create rt init command pool!");
+    }
+
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = initCommandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    if (vkAllocateCommandBuffers(GetLogicalDevice(), &allocInfo, &initCommandBuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate rt init command buffer!");
+    }
+
+
+    //Int Fence Related
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    if (vkCreateFence(CContext::GetHandle().GetLogicalDevice(), &fenceInfo, nullptr, &rtInitFence) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create rtInitFence!");
+    }
+}
 void RendererCore::CreateSyncObjects(int swapchainSize, bool bVerbose) {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -451,6 +455,7 @@ void RendererCore::CreateSyncObjects(int swapchainSize, bool bVerbose) {
             //throw std::runtime_error("failed to create compute synchronization objects for a frame!");
         //}
     }
+
 }
 
 
@@ -707,9 +712,16 @@ void RendererCore::InitialRaytracing(){
 		std::cout<<"failed to load ray tracing functions!"<<std::endl;
 		throw std::runtime_error("failed to load ray tracing functions!");
 	}
-    CreateBlas();
+    std::cout<<"Load ray tracing functions successfully!"<<std::endl;
+    std::cout<<"Create Triangle Acceleration Structure..."<<std::endl;
+    CreateTriangleBlas();
+    std::cout<<"Create Sphere Acceleration Structure..."<<std::endl;
+    CreateSphereBlas();
+    std::cout<<"Create Instance Acceleration Structure..."<<std::endl;
     CreateInstanceBuffer();
+    std::cout<<"Create Top Level Acceleration Structure..."<<std::endl;
     CreateTlas();
+    std::cout<<"Done create TLAS."<<std::endl;
 }
 
 void RendererCore::CreateSBT(){
@@ -722,10 +734,10 @@ void RendererCore::CreateSBT(){
     const uint32_t handleSizeAligned = AlignUp(handleSize, handleAlign);
 
     // 5 个 group: rgen, primary miss, shadow miss, primary hit, shadow hit
-    const uint32_t groupCount = 5;
+    const uint32_t groupCount = 7;
     const uint32_t rgenCount  = 1;
     const uint32_t missCount  = 2;
-    const uint32_t hitCount   = 2;
+    const uint32_t hitCount   = 4;
 
     const uint32_t rgenStride = AlignUp(handleSizeAligned, baseAlign);
     const uint32_t missStride = AlignUp(handleSizeAligned, baseAlign);
@@ -779,8 +791,10 @@ void RendererCore::CreateSBT(){
     copyHandle(2, missRegionOffset + 1 * missStride); // group 2 = shadow miss
 
     // hit region
-    copyHandle(3, hitRegionOffset + 0 * hitStride); // group 3 = primary hit (rchit and rahit)
-    copyHandle(4, hitRegionOffset + 1 * hitStride); // group 4 = shadow hit (rchit and rahit)
+    copyHandle(3, hitRegionOffset + 0 * hitStride); // triangle primary, primary hit (rchit and rahit)
+    copyHandle(4, hitRegionOffset + 1 * hitStride); // triangle shadow, shadow hit (rchit and rahit)
+    copyHandle(5, hitRegionOffset + 2 * hitStride); // sphere procedural primary, (rchit and intersection)
+    copyHandle(6, hitRegionOffset + 3 * hitStride); // sphere procedural shadow, (rchit and intersection)
 
     sbt_buffer.fill(sbtData.data(), GetLogicalDevice());
 
@@ -974,51 +988,56 @@ void RendererCore::CreateTriangleVertexBuffer(){
     std::cout << "triangleVertexStride = " << triangleVertexStride <<std::endl;
 }*/
 
-void RendererCore::BeginCommandBuffer_Raytracing(int commandBufferIndex)
-{
+void RendererCore::BeginCommandBuffer_Raytracing(int commandBufferIndex){
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    if (vkBeginCommandBuffer(commandBuffers[commandBufferIndex][currentFrame], &beginInfo) != VK_SUCCESS) {
+    //if (vkBeginCommandBuffer(commandBuffers[commandBufferIndex][currentFrame], &beginInfo) != VK_SUCCESS) {
+    if (vkBeginCommandBuffer(initCommandBuffer, &beginInfo) != VK_SUCCESS) {
         std::cout << "failed to begin recording command buffer!" << std::endl;
         throw std::runtime_error("failed to begin recording command buffer!");
     }
 }
 
-void RendererCore::EndCommandBuffer_Raytracing(int commandBufferIndex)
-{
-    if (vkEndCommandBuffer(commandBuffers[commandBufferIndex][currentFrame]) != VK_SUCCESS) {
+void RendererCore::EndCommandBuffer_Raytracing(int commandBufferIndex){
+    // if (vkEndCommandBuffer(commandBuffers[commandBufferIndex][currentFrame]) != VK_SUCCESS) {
+    //     throw std::runtime_error("failed to record command buffer!");
+    // }
+    if (vkEndCommandBuffer(initCommandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
     }
 }
 
-void RendererCore::SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex, VkQueue queue)
-{
+void RendererCore::SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex, VkQueue queue){
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffers[commandBufferIndex][currentFrame];
+    //submitInfo.pCommandBuffers = &commandBuffers[commandBufferIndex][currentFrame];
+    submitInfo.pCommandBuffers = &initCommandBuffer; // Use the dedicated command buffer for ray tracing initialization
 
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    // 1) 先确保上一次使用这把 fence 的提交已经结束
+    vkWaitForFences(GetLogicalDevice(), 1, &rtInitFence, VK_TRUE, UINT64_MAX);
 
-    VkFence fence;
-    if (vkCreateFence(GetLogicalDevice(), &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create fence!");
-    }
+    // 2) submit 前 reset，保证 fence 处于 unsignaled
+    vkResetFences(GetLogicalDevice(), 1, &rtInitFence);
 
-    if (vkQueueSubmit(queue, 1, &submitInfo, fence) != VK_SUCCESS) {
-        vkDestroyFence(GetLogicalDevice(), fence, nullptr);
+    // 3) 提交
+    if (vkQueueSubmit(queue, 1, &submitInfo, rtInitFence) != VK_SUCCESS) {
+        //vkDestroyFence(GetLogicalDevice(), rtInitFence, nullptr);
         throw std::runtime_error("failed to submit command buffer!");
     }
 
-    vkWaitForFences(GetLogicalDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
-    vkDestroyFence(GetLogicalDevice(), fence, nullptr);
+    // 4) 如果你这个函数语义就是 “submit and wait”，那就在这里等这次完成
+    std::cout << "  Waiting for ray tracing command buffer to finish..." << std::endl;
+    vkWaitForFences(GetLogicalDevice(), 1, &rtInitFence, VK_TRUE, UINT64_MAX);
+    //vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &rtInitFence);
+    std::cout << "  Ray tracing command buffer finished." << std::endl;
+    // vkDestroyFence(GetLogicalDevice(), rtInitFence, nullptr);
 }
 
-void RendererCore::CreateBlas(){
-    //std::cout << "Creating BLAS for one triangle..." << std::endl;
+void RendererCore::CreateTriangleBlas(){
+    //std::cout << "Creating BLAS for triangles..." << std::endl;
 
     for(int i = 0; i < game->GetRtMeshSize(); i++){
         RtMesh &rtMesh = game->GetRtMesh(i);
@@ -1136,7 +1155,8 @@ void RendererCore::CreateBlas(){
         BeginCommandBuffer_Raytracing(raytracingCmdId);
 
         fpCmdBuildAccelerationStructuresKHR(
-            commandBuffers[raytracingCmdId][currentFrame],
+            //commandBuffers[raytracingCmdId][currentFrame],
+            initCommandBuffer,
             1,
             &buildInfo,
             &pRangeInfo
@@ -1148,7 +1168,8 @@ void RendererCore::CreateBlas(){
         barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
 
         vkCmdPipelineBarrier(
-            commandBuffers[raytracingCmdId][currentFrame],
+            //commandBuffers[raytracingCmdId][currentFrame],
+            initCommandBuffer,
             VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
             VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
             0,
@@ -1175,10 +1196,260 @@ void RendererCore::CreateBlas(){
     }
 }
 
+void RendererCore::CreateSphereBlas(){
+    //std::cout << "Creating BLAS for Spheres..." << std::endl;
+
+    const uint32_t sphereSize = game->GetRtSphereSize();
+    if (sphereSize == 0) return;
+
+    // 1) CPU build AABB array
+    //std::vector<VkAabbPositionsKHR> aabbs(sphereSize);
+    for (uint32_t i = 0; i < sphereSize; ++i) {
+        uint32_t primitiveCount = 1; //aabb has one primitive, the sphere itself
+
+        VkAabbPositionsKHR aabb{};
+        //int i = 0;
+        RtSphere& s = game->GetRtSphere(i);
+
+        aabb.minX = s.center.x - s.radius;
+        aabb.minY = s.center.y - s.radius;
+        aabb.minZ = s.center.z - s.radius;
+        aabb.maxX = s.center.x + s.radius;
+        aabb.maxY = s.center.y + s.radius;
+        aabb.maxZ = s.center.z + s.radius;
+        //}
+
+        // 2) upload AABB buffer (device local preferred)
+        //sphereAabbBuffer.resize(1);
+        VkDeviceSize aabbBufferSize = sizeof(VkAabbPositionsKHR);// * sphereSize;
+        // 1) staging buffer
+        CWxjBuffer stagingBuffer;
+        stagingBuffer.init(
+            aabbBufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            GetLogicalDevice(),
+            GetPhysicalDevice(),
+            false // host visible
+        );
+
+        // map + copy
+        void* mapped = nullptr;
+        vkMapMemory(GetLogicalDevice(), stagingBuffer.deviceMemory, 0, stagingBuffer.GetSize(), 0, &mapped);
+        memcpy(mapped, &aabb, (size_t)aabbBufferSize);
+
+        //如果你的内存本来就是 HOST_COHERENT，那就没必要强行加 flush；这时 flush 只会增加无意义的调用成本
+        VkMappedMemoryRange mappedRange{};
+        mappedRange.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        mappedRange.memory = stagingBuffer.deviceMemory;
+        mappedRange.offset = 0;
+        mappedRange.size   = stagingBuffer.GetSize();   // 用实际 allocation size; VK_WHOLE_SIZE; // 调试时最省事
+        vkFlushMappedMemoryRanges(GetLogicalDevice(), 1, &mappedRange);
+
+        vkUnmapMemory(GetLogicalDevice(), stagingBuffer.deviceMemory);
+
+        // 2) device local AABB buffer
+        CWxjBuffer sphereAabbBuffer;
+        sphereAabbBuffer.init(
+            aabbBufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            GetLogicalDevice(),
+            GetPhysicalDevice(),
+            true
+        );
+
+        // 3) copy staging -> device local
+        // CopyBuffer(
+        //     stagingBuffer.buffer,
+        //     sphereAabbBuffer.buffer,
+        //     aabbBufferSize
+        // );
+        //sphereAabbBuffer.fill(stagingBuffer.buffer, GetLogicalDevice());//TODO: verify
+        //stagingBuffer.fill(aabbs.data(), GetLogicalDevice());//no need
+        BeginCommandBuffer_Raytracing(raytracingCmdId);
+        VkBufferCopy copyRegion{};
+        copyRegion.srcOffset = 0;
+        copyRegion.dstOffset = 0;
+        copyRegion.size = aabbBufferSize;
+        vkCmdCopyBuffer(
+            //commandBuffers[raytracingCmdId][currentFrame],
+            initCommandBuffer,
+            stagingBuffer.buffer,
+            sphereAabbBuffer.buffer,
+            1,
+            &copyRegion
+        );
+        
+        ///////////////
+        VkBufferMemoryBarrier aabbBarrier{};
+        aabbBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        aabbBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        aabbBarrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+        aabbBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        aabbBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        aabbBarrier.buffer = sphereAabbBuffer.buffer;
+        aabbBarrier.offset = 0;
+        aabbBarrier.size = aabbBufferSize;
+
+        vkCmdPipelineBarrier(
+            //commandBuffers[raytracingCmdId][currentFrame],
+            initCommandBuffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+            0,
+            0, nullptr,
+            1, &aabbBarrier,
+            0, nullptr
+        );
+        ////////////
+
+        //EndCommandBuffer_Raytracing(raytracingCmdId);
+
+        // 4) later get device address
+        VkDeviceAddress aabbAddress =
+            GetBufferAddress(GetLogicalDevice(), sphereAabbBuffer.buffer);
+
+        // 3) AABB data
+        VkAccelerationStructureGeometryAabbsDataKHR aabbData{};
+        aabbData.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR;
+        aabbData.data.deviceAddress = aabbAddress;
+        aabbData.stride = sizeof(VkAabbPositionsKHR);
+
+        // 4) geometry
+        VkAccelerationStructureGeometryKHR geometry{};
+        geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+        geometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
+        geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR; // opaque sphere first
+        geometry.geometry.aabbs = aabbData;
+
+        // 5) build info
+        VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+        buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+        buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+        buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        buildInfo.geometryCount = 1;
+        buildInfo.pGeometries = &geometry;
+
+        
+
+        // 6) query size
+        VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
+        sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+
+        fpGetAccelerationStructureBuildSizesKHR(
+            GetLogicalDevice(),
+            VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+            &buildInfo,
+            &primitiveCount,
+            &sizeInfo
+        );
+
+        // 7) create BLAS storage
+        s.blasBuffer.init(
+            sizeInfo.accelerationStructureSize,
+            VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            GetLogicalDevice(),
+            GetPhysicalDevice(),
+            true
+        );
+
+        VkAccelerationStructureCreateInfoKHR asCreateInfo{};
+        asCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+        asCreateInfo.buffer = s.blasBuffer.buffer;
+        asCreateInfo.offset = 0;
+        asCreateInfo.size = sizeInfo.accelerationStructureSize;
+        asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+
+        fpCreateAccelerationStructureKHR(
+            GetLogicalDevice(),
+            &asCreateInfo,
+            nullptr,
+            &s.blas
+        );
+
+        // 8) scratch
+        CWxjBuffer blas_sphere_scratch_buffer;
+        blas_sphere_scratch_buffer.init(
+            sizeInfo.buildScratchSize,
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+            GetLogicalDevice(),
+            GetPhysicalDevice(),
+            true
+        );
+
+        buildInfo.dstAccelerationStructure = s.blas;
+        buildInfo.scratchData.deviceAddress =
+            GetBufferAddress(GetLogicalDevice(), blas_sphere_scratch_buffer.buffer);
+
+        // 9) range
+        VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
+        rangeInfo.primitiveCount = primitiveCount;
+        rangeInfo.primitiveOffset = 0;
+        rangeInfo.firstVertex = 0;      // AABB时基本无意义，写0即可
+        rangeInfo.transformOffset = 0;
+
+        const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
+
+        // 10) build
+        //BeginCommandBuffer_Raytracing(raytracingCmdId);
+
+        fpCmdBuildAccelerationStructuresKHR(
+            //commandBuffers[raytracingCmdId][currentFrame],
+            initCommandBuffer,
+            1,
+            &buildInfo,
+            &pRangeInfo
+        );
+
+        VkMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+        barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+
+        vkCmdPipelineBarrier(
+            //commandBuffers[raytracingCmdId][currentFrame],
+            initCommandBuffer,
+            VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+            VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+            0,
+            1, &barrier,
+            0, nullptr,
+            0, nullptr
+        );
+
+        EndCommandBuffer_Raytracing(raytracingCmdId);
+        SubmitCommandBufferAndWait_Raytracing(raytracingCmdId, CContext::GetHandle().GetComputeQueue());
+
+        //vkDeviceWaitIdle(GetLogicalDevice());//no use
+
+        // 11) get address
+        VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};
+        addressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+        addressInfo.accelerationStructure = s.blas;
+
+        s.blasAddress =
+            fpGetAccelerationStructureDeviceAddressKHR(GetLogicalDevice(), &addressInfo);
+
+        
+        stagingBuffer.DestroyAndFree(GetLogicalDevice());
+        sphereAabbBuffer.DestroyAndFree(GetLogicalDevice());
+        blas_sphere_scratch_buffer.DestroyAndFree(GetLogicalDevice());
+    }
+}
+
 void RendererCore::CreateInstanceBuffer(){
     //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
 
-    instances.resize(game->GetObjectSize());//每个instance就是一个object
+    const uint32_t sphereSize = game->GetRtSphereSize();
+
+    instances.resize(game->GetObjectSize() + sphereSize);//每个instance就是一个object
+    //Step1 for triangle mesh
+    int count = 0;
     for(int i = 0; i < game->GetObjectSize(); i++){
         //VkAccelerationStructureInstanceKHR instance{};
         
@@ -1217,15 +1488,28 @@ void RendererCore::CreateInstanceBuffer(){
         instances[i].transform.matrix[2][3] = M[3][2];
 
         instances[i].instanceCustomIndex = model_id;
-        instances[i].mask = 0xFF;
+        instances[i].mask = 0x01; //triangle设置成01，那么在shader中traceRay时，ray的mask也必须cover 01才能命中这个instance
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
         instances[i].accelerationStructureReference = game->GetRtMesh(model_id).blasAddress;
         //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
-
+        count++;
     }
+    //step2 for sphere
+    for(int i = 0; i < sphereSize; i++){
+        VkTransformMatrixKHR identity = {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f
+        };
+        instances[count+i].transform = identity;
 
-    
+        instances[count+i].instanceCustomIndex = i;
+        instances[count+i].mask = 0x02; //sphere设置成02，那么在shader中traceRay时，ray的mask也必须cover 02才能命中这个instance
+        instances[count+i].instanceShaderBindingTableRecordOffset = 2; //there are 3 hit records in the hit SBT region: 0/1/2, group 2 is for sphere procedual hit
+        instances[count+i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR; //this doesn't matter here
+        instances[count+i].accelerationStructureReference = game->GetRtSphere(i).blasAddress;
+    }
 
     //std::vector<VkAccelerationStructureInstanceKHR> instances = { instance };
 
@@ -1251,7 +1535,7 @@ void RendererCore::CreateInstanceBuffer(){
     //instanceCount = static_cast<uint32_t>(instances.size());
 
     //std::cout << "TLAS instance buffer created. Device Address: " << instanceBufferAddress << std::endl;
-    
+
 }
 
 void RendererCore::CreateTlas(){
@@ -1363,7 +1647,8 @@ void RendererCore::CreateTlas(){
     BeginCommandBuffer_Raytracing(cmdId);
 
     fpCmdBuildAccelerationStructuresKHR(
-        commandBuffers[cmdId][currentFrame],
+        //commandBuffers[cmdId][currentFrame],
+        initCommandBuffer,
         1,
         &buildInfo,
         &pRangeInfo
@@ -1375,7 +1660,8 @@ void RendererCore::CreateTlas(){
     barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
 
     vkCmdPipelineBarrier(
-        commandBuffers[cmdId][currentFrame],
+        //commandBuffers[cmdId][currentFrame],
+        initCommandBuffer,
         VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
         VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
         0,
@@ -1459,6 +1745,8 @@ void RendererCore::Destroy(){
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), computeInFlightFences[i], nullptr);
         vkDestroyFence(CContext::GetHandle().GetLogicalDevice(), raytracingInFlightFences[i], nullptr);
     }
+    vkDestroyFence(GetLogicalDevice(), rtInitFence, nullptr);
+
     renderFinishedSemaphores.clear();
     imageAvailableSemaphores.clear();
     inFlightFences.clear();
@@ -1469,6 +1757,9 @@ void RendererCore::Destroy(){
 
     vkDestroyCommandPool(CContext::GetHandle().GetLogicalDevice(), commandPool, nullptr);
     commandPool = VK_NULL_HANDLE;
+
+    vkDestroyCommandPool(CContext::GetHandle().GetLogicalDevice(), initCommandPool, nullptr);
+    initCommandPool = VK_NULL_HANDLE;
 
     //Module Related
     logger->CloseLogFile();
@@ -1491,6 +1782,13 @@ void RendererCore::Destroy(){
             rtMesh.blas = VK_NULL_HANDLE;
         }
     }
+    for(int i = 0; i < game->GetRtSphereSize(); i++){
+        RtSphere &rtsphere = game->GetRtSphere(i);
+        if (rtsphere.blas != VK_NULL_HANDLE) {
+            fpDestroyAccelerationStructureKHR(GetLogicalDevice(), rtsphere.blas, nullptr);
+            rtsphere.blas = VK_NULL_HANDLE;
+        }
+    }
     // if (blas != VK_NULL_HANDLE) {
     //     fpDestroyAccelerationStructureKHR(GetLogicalDevice(), blas, nullptr);
     //     blas = VK_NULL_HANDLE;
@@ -1509,6 +1807,9 @@ void RendererCore::Destroy(){
 
     tlas_buffer.DestroyAndFree(GetLogicalDevice());
     tlas_scratch_buffer.DestroyAndFree(GetLogicalDevice());
+
+    //sphereAabbBuffer.DestroyAndFree(GetLogicalDevice());
+    //blas_sphere_scratch_buffer.DestroyAndFree(GetLogicalDevice());
 }
 
 void RendererCore::DestroyInstance(HMODULE handle, void* instance){

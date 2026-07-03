@@ -78,6 +78,8 @@ float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius
             continue;
         }
 
+        //shadowPayload.visibility = 0u;
+        uint vis = 0u;
         shadowPayload.visibility = 0u;
 
         traceRayEXT(
@@ -85,9 +87,9 @@ float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius
             gl_RayFlagsTerminateOnFirstHitEXT |
             gl_RayFlagsSkipClosestHitShaderEXT,
             0xFF,
-            1,
-            2,
-            1,
+            1,   // sbtRecordOffset
+            1,   // sbtRecordStride
+            1,   // missIndex
             shadowOrigin,
             EPS,
             L,
@@ -95,7 +97,11 @@ float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius
             1
         );
 
-        visible += (shadowPayload.visibility == 1u) ? 1.0 : 0.0;
+        //visible += (shadowPayload.visibility == 1u) ? 1.0 : 0.0;
+        vis = shadowPayload.visibility;
+        visible += (vis == 1u) ? 1.0 : 0.0;
+
+        //visible = 1u;//test
     }
 
     return visible / float(sampleCount);
@@ -223,6 +229,7 @@ void main(){
             SHADOW_SAMPLES,
             seed
         );
+        //float visibility = 1.0f;
 
         float attenuation = 1.0 / max(centerDist * centerDist, 1e-4);
         localLighting += baseColor * lightColor[i] * lightIntensity[i]

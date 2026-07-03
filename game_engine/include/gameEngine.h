@@ -141,6 +141,9 @@ namespace LEGameEngine{
         RtMesh& GetRtMesh(int index) override { return rtMeshes[index]; }
         int GetRtMeshSize() override { return rtMeshes.size(); }
         //std::vector<GeometryInfoGPU> geometryInfos;
+        std::vector<RtSphere> rtSpheres;
+        RtSphere& GetRtSphere(int index) override { return rtSpheres[index]; }
+        int GetRtSphereSize() override { return rtSpheres.size(); }
 
 
         //Module Related

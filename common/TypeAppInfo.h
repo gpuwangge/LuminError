@@ -300,8 +300,11 @@ struct RaytracingPipelineConfig{
     std::string resource_raytracing_pipeline_shadow_closesthit_shader_name = "Default";
     std::string resource_raytracing_pipeline_primary_anyhit_shader_name = "Default";
     std::string resource_raytracing_pipeline_shadow_anyhit_shader_name = "Default";
-    std::string resource_raytracing_pipeline_intersection_shader_name = "Default";
+    std::string resource_raytracing_pipeline_sphere_intersection_shader_name = "Default";
+    std::string resource_raytracing_pipeline_sphere_primary_closesthit_shader_name = "Default";
+    std::string resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name = "Default";
     std::string resource_raytracing_pipeline_callable_shader_name = "Default";
+    
 
     void loadFromYaml(const YAML::Node& node) {
         resource_raytracing_pipeline_raygeneration_shader_name  = getOrDefault(node, "resource_raytracing_pipeline_raygeneration_shader_name", std::string{"Default"});
@@ -311,7 +314,9 @@ struct RaytracingPipelineConfig{
         resource_raytracing_pipeline_shadow_closesthit_shader_name     = getOrDefault(node, "resource_raytracing_pipeline_shadow_closesthit_shader_name", std::string{"Default"});
         resource_raytracing_pipeline_primary_anyhit_shader_name         = getOrDefault(node, "resource_raytracing_pipeline_primary_anyhit_shader_name", std::string{"Default"});
         resource_raytracing_pipeline_shadow_anyhit_shader_name         = getOrDefault(node, "resource_raytracing_pipeline_shadow_anyhit_shader_name", std::string{"Default"});
-        resource_raytracing_pipeline_intersection_shader_name   = getOrDefault(node, "resource_raytracing_pipeline_intersection_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_sphere_intersection_shader_name   = getOrDefault(node, "resource_raytracing_pipeline_sphere_intersection_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_sphere_primary_closesthit_shader_name     = getOrDefault(node, "resource_raytracing_pipeline_sphere_primary_closesthit_shader_name", std::string{"Default"});
+        resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name     = getOrDefault(node, "resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name", std::string{"Default"});
         resource_raytracing_pipeline_callable_shader_name       = getOrDefault(node, "resource_raytracing_pipeline_callable_shader_name", std::string{"Default"});
     }
 };

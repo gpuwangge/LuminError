@@ -247,6 +247,7 @@ void GameEngine::SetupRayTracing(){
 
 
     /****************
+    * BLAS for triangles
     * Create buffer address so BLAS(in renderer core) can use
     * 建立BLAS就是建立Geometry,也就是model的信心。只需要建立一次就可以了。
     * 以前(上面的code)是通过storageBufferObject_TriangleVertexAttribute(本质是个TriangleVertexInfo的数组)建立的，这里使用storageBufferObject_GeometryInfo
@@ -320,6 +321,21 @@ void GameEngine::SetupRayTracing(){
 
     UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame(), &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
     UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame()+1, &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
+
+    /****************
+    * BLAS for Spheres
+    **************/
+    rtSpheres.resize(3);
+    rtSpheres[0].center = glm::vec3(1.5,0,0);
+    rtSpheres[0].radius = 1.0f;
+    rtSpheres[0].materialIndex = 0;
+    rtSpheres[1].center = glm::vec3(0,1.5,0.0);
+    rtSpheres[1].radius = 0.5f;
+    rtSpheres[1].materialIndex = 0;
+    rtSpheres[2].center = glm::vec3(-1.5,-1.5,1.5);
+    rtSpheres[2].radius = 1.5f;
+    rtSpheres[2].materialIndex = 0;
+
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

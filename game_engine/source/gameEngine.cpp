@@ -470,9 +470,9 @@ void GameEngine::Record_Present(){
             renderer->WaitForRaytracingFence();
             //must aquire swap image before record command buffer
             renderer->AquireSwapchainImage(renderer->GetSwapchainHandle());
-            //std::cout<<"Application: renderer.imageIndex = "<<renderer.imageIndex<< std::endl;
-            //std::cout<<"Application: renderer.currentFrame = "<<renderer.currentFrame<< std::endl;
-
+            
+            //std::cout<<"Application: renderer.imageIndex = "<<renderer->GetCurrentImage()<<", currentFrame = "<<renderer->GetCurrentFrame()<<std::endl;
+            
             vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
             //std::cout<<"Application: Start recording raytracing command buffer for RAYTRACING_SWAPCHAIN mode."<<std::endl;
@@ -522,6 +522,7 @@ void GameEngine::Record_Present(){
             //std::cout<<"Finished Presenting swapchain image for RAYTRACING_SWAPCHAIN mode."<<std::endl;
 
             //vkDeviceWaitIdle(renderer->GetLogicalDevice());//TODO: this line is only for debug
+            //std::cout<<std::endl;
         break;
         }
         case RenderModes::COMPUTE_GRAPHICS:

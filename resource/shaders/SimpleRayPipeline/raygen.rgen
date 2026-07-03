@@ -43,9 +43,9 @@ void main() {
             traceRayEXT( //primary ray
                 topLevelAS,
                 gl_RayFlagsOpaqueEXT,
-                0xff,
+                0xFF,
                 0,   // sbtRecordOffset
-                2,   // sbtRecordStride
+                1,   // sbtRecordStride
                 0,   // missIndex
                 rayOrigin,
                 0.001,

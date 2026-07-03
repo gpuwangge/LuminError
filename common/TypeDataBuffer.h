@@ -78,6 +78,8 @@ public:
     VkBuffer		buffer;
     VkDeviceMemory		deviceMemory;
 
+    VkDeviceSize GetSize(){ return m_size; }
+
 private:
 	VkDeviceSize		m_size;
 

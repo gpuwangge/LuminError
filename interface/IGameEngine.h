@@ -104,6 +104,8 @@ namespace LEGameEngine{
         // virtual uint32_t GetTriangleVertexStride() = 0;
         virtual RtMesh& GetRtMesh(int index) = 0;
         virtual int GetRtMeshSize() = 0;
+        virtual RtSphere& GetRtSphere(int index) = 0;
+        virtual int GetRtSphereSize() = 0;
 
         virtual void ComputeDispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
         virtual void RayTrace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;

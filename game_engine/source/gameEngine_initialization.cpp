@@ -5,6 +5,8 @@ namespace LEGameEngine{
 void GameEngine::Initialize(){
     bool bVerboseInitialization = false;
     TimePoint T0 = now();
+
+    renderer->CreateInitSyncObjects();
     /****************************
     * 1 Process blend and push constant
     ****************************/   
@@ -502,7 +504,9 @@ void GameEngine::Initialize(){
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_closesthit_shader_name<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_anyhit_shader_name<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_anyhit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_intersection_shader_name<<std::endl;
+        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_intersection_shader_name<<std::endl;
+        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_primary_closesthit_shader_name<<std::endl;
+        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name<<std::endl;
         std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_callable_shader_name<<std::endl;
         //for(int i = 0; i < appInfo->RaytracingPipelines.size(); i++){ 
             //std::cout<<"CreatePipeline: Done Create Shader for pipeline: "<<appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name<<std::endl;
@@ -513,6 +517,10 @@ void GameEngine::Initialize(){
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_closesthit_shader_name, RAYT);
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_anyhit_shader_name, RAYT);
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_anyhit_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_intersection_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_primary_closesthit_shader_name, RAYT);
+            resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name, RAYT);
+            
         //}
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
@@ -629,7 +637,10 @@ void GameEngine::Initialize(){
             resourcer->GetRaytracingShaderModule(3),
             resourcer->GetRaytracingShaderModule(4),
             resourcer->GetRaytracingShaderModule(5),
-            resourcer->GetRaytracingShaderModule(6));
+            resourcer->GetRaytracingShaderModule(6),
+            resourcer->GetRaytracingShaderModule(7),
+            resourcer->GetRaytracingShaderModule(8),
+            resourcer->GetRaytracingShaderModule(9));
 
         renderer->CreateSBT();
     }

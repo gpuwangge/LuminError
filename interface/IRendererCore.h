@@ -42,6 +42,7 @@ namespace LERenderer{
         virtual void CreateComputeCommandBuffer() = 0;
         virtual void CreateRaytracingCommandBuffer() = 0;
 
+        virtual void CreateInitSyncObjects() = 0;
         virtual void CreateSyncObjects(int swapchainSize, bool bVerbose = false) = 0;
 
         virtual void AquireSwapchainImage(VkSwapchainKHR swapchainHandle, bool bVerbose = false) = 0;
@@ -155,8 +156,8 @@ namespace LERenderer{
         virtual void CreateComputePipeline(VkShaderModule &computeShaderModule) = 0;
         virtual void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &primaryMissModule, VkShaderModule &shadowMissModule, 
             VkShaderModule &primaryRchitModule, VkShaderModule &shadowRchitModule,
-            VkShaderModule &primaryRahitModule, VkShaderModule &shadowRahitModule
-            ) = 0;
+            VkShaderModule &primaryRahitModule, VkShaderModule &shadowRahitModule,
+            VkShaderModule &sphereIntersectionModule, VkShaderModule &spherePrimaryRchitModule, VkShaderModule &sphereShadowRchitModule) = 0;
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,

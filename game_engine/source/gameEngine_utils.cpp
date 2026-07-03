@@ -92,6 +92,11 @@ void GameEngine::CleanUp(){
         rtMeshes[i].indexBuffer.DestroyAndFree(renderer->GetLogicalDevice());
         rtMeshes[i].blasBuffer.DestroyAndFree(renderer->GetLogicalDevice());
     }
+    for(int i = 0; i < rtSpheres.size(); i++){
+        //rtSpheres[i].vertexBuffer.DestroyAndFree(renderer->GetLogicalDevice());
+        //rtSpheres[i].indexBuffer.DestroyAndFree(renderer->GetLogicalDevice());
+        rtSpheres[i].blasBuffer.DestroyAndFree(renderer->GetLogicalDevice());
+    }
     //raytracing_vertex_buffer.DestroyAndFree(renderer->GetLogicalDevice());
     //raytracing_index_buffer.DestroyAndFree(renderer->GetLogicalDevice());
 

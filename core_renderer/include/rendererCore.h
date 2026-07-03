@@ -150,6 +150,7 @@ namespace LERenderer{
         void CreateRaytracingCommandBuffer() override;
         void CreateCommandBuffers();
 
+        void CreateInitSyncObjects() override;
         void CreateSyncObjects(int swapchainSize, bool bVerbose = false) override;
 
         void Destroy() override;
@@ -165,6 +166,9 @@ namespace LERenderer{
         std::vector<std::vector<VkCommandBuffer>> commandBuffers;  //commandBuffers[Size][MAX_FRAMES_IN_FLIGHT or currentFrame]
         VkCommandPool commandPool;
 
+        VkCommandPool initCommandPool;
+        VkCommandBuffer initCommandBuffer;
+
 
         int semaphoreIndex = 0;
         //std::deque<VkSemaphore> availableSemaphores;
@@ -178,6 +182,8 @@ namespace LERenderer{
 
         std::vector<VkSemaphore> raytracingFinishedSemaphores;
         std::vector<VkFence> raytracingInFlightFences;
+
+        VkFence rtInitFence = VK_NULL_HANDLE;
 
         void SetApplication(LEGameEngine::IGameEngine* pApplication) override;
         void LoadModuleAndInstance(HMODULE &handle, void* &instance, const std::string moduleName);
@@ -225,7 +231,21 @@ namespace LERenderer{
         CWxjBuffer blas_scratch_buffer;
         //VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
         //VkDeviceAddress blasDeviceAddress = 0;
-        void CreateBlas();
+        void CreateTriangleBlas();
+
+        //For Sphere BLAS AABB
+        // struct SphereGpu{
+        //     glm::vec3 center;
+        //     float radius;
+        //     uint32_t materialIndex;
+        //     uint32_t pad0, pad1, pad2;
+        // };
+        //std::vector<VkAabbPositionsKHR> aabbs;
+        //std::vector<SphereGpu> spheres;
+        //CWxjBuffer sphereAabbBuffer;
+        //std::vector<VkAabbPositionsKHR> sphereAabbBuffer;
+        //CWxjBuffer blas_sphere_scratch_buffer;
+        void CreateSphereBlas();
 
         //Instance buffer related
         std::vector<VkAccelerationStructureInstanceKHR> instances;
@@ -299,8 +319,11 @@ namespace LERenderer{
         void CreateComputePipeline(VkShaderModule &computeShaderModule) override { renderProcess.createComputePipeline(computeShaderModule); }
         void CreateRaytracingPipeline(VkShaderModule &rgenModule, VkShaderModule &primaryMissModule, VkShaderModule &shadowMissModule, 
             VkShaderModule &primaryRchitModule, VkShaderModule &shadowRchitModule,
-            VkShaderModule &primaryRahitModule, VkShaderModule &shadowRahitModule) override { 
-            renderProcess.createRaytracingPipeline(rgenModule, primaryMissModule, shadowMissModule, primaryRchitModule, shadowRchitModule, primaryRahitModule, shadowRahitModule); 
+            VkShaderModule &primaryRahitModule, VkShaderModule &shadowRahitModule,
+            VkShaderModule &sphereIntersectionModule, VkShaderModule &spherePrimaryRchitModule, VkShaderModule &sphereShadowRchitModule) override { 
+            renderProcess.createRaytracingPipeline(rgenModule, primaryMissModule, shadowMissModule, 
+                primaryRchitModule, shadowRchitModule, primaryRahitModule, shadowRahitModule, 
+                sphereIntersectionModule, spherePrimaryRchitModule, sphereShadowRchitModule); 
         }
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();

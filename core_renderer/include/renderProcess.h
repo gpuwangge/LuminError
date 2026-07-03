@@ -151,7 +151,8 @@ public:
     void createComputePipeline(VkShaderModule &computeShaderModule);
     void createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, 
         VkShaderModule& primaryRchitModule, VkShaderModule& shadowRchitModule,
-        VkShaderModule& primaryRahitModule, VkShaderModule& shadowRahitModule);
+        VkShaderModule& primaryRahitModule, VkShaderModule& shadowRahitModule,
+        VkShaderModule &sphereIntersectionModule, VkShaderModule &spherePrimaryRchitModule, VkShaderModule &sphereShadowRchitModule);
 
     PFN_vkCreateRayTracingPipelinesKHR             fpCreateRayTracingPipelinesKHR             = nullptr;
     bool LoadRayTracingFunctions_process();

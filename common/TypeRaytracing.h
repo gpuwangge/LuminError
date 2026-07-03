@@ -18,6 +18,19 @@ struct RtMesh{
     VkDeviceAddress blasAddress = 0;//blasDeviceAddress
 };
 
+struct RtSphere{
+    glm::vec3 center;      // 球心（object space 或 world space，二选一统一）
+    float radius;          // 半径
+    uint32_t materialIndex;// 材质索引
+    //uint32_t pad0;
+    //uint32_t pad1;
+    //uint32_t pad2;
+
+    VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
+    CWxjBuffer blasBuffer;
+    VkDeviceAddress blasAddress = 0;//blasDeviceAddress
+};
+
 struct alignas(16) GeometryInfoGPU{
     VkDeviceAddress vertexBuf;
     VkDeviceAddress indexBuf;
