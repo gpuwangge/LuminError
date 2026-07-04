@@ -1,49 +1,31 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
 
-hitAttributeEXT vec2 attribs;//只想判断有没有打中并上色 时，可以先不依赖它。
+hitAttributeEXT vec2 attribs;
 
-
-// const vec3 sphereCenter = vec3(1.5, 0.0, 0.0); //TODO: pass from host
-// const float sphereRadius = 1.0; //TODO
-// const vec3 sphereCenter1 = vec3(0.0, 0.0, 1.5); //TODO: pass from host
-// const float sphereRadius1 = 0.5; //TODO 把上述变成数组
-
-
-const vec3 sphereCenters[3] = vec3[]( //TODO: pass from host
-    vec3(1.5, 0, 0),
-    vec3(0.0, 1.5, 0.0),
-    vec3(-1.5, -1.5, 1.5)
-);
-
-const float sphereRadii[3] = float[]( //TODO: pass from host
-    1.0,
-    0.5,
-    1.5
-);
-
-void main() {
-    uint sphereId = gl_InstanceCustomIndexEXT;
-    vec3 sphereCenter = sphereCenters[sphereId];
-    float sphereRadius = sphereRadii[sphereId];
-
-    vec3 oc = gl_ObjectRayOriginEXT - sphereCenter;
+void main()
+{
+    vec3 ro = gl_ObjectRayOriginEXT;
     vec3 rd = gl_ObjectRayDirectionEXT;
 
     float a = dot(rd, rd);
-    float b = 2.0 * dot(oc, rd);
-    float c = dot(oc, oc) - sphereRadius * sphereRadius;
-    float disc = b * b - 4.0 * a * c;
+    float b = 2.0 * dot(ro, rd);
+    float c = dot(ro, ro) - 1.0;
 
+    float disc = b * b - 4.0 * a * c;
     if (disc < 0.0) return;
 
     float s = sqrt(disc);
-    float t0 = (-b - s) / (2.0 * a);
-    float t1 = (-b + s) / (2.0 * a);
+    float inv2a = 0.5 / a;
 
-    float t = t0;
-    if (t < gl_RayTminEXT || t > gl_RayTmaxEXT) t = t1;
-    if (t < gl_RayTminEXT || t > gl_RayTmaxEXT) return;
+    float t0 = (-b - s) * inv2a;
+    float t1 = (-b + s) * inv2a;
 
-    reportIntersectionEXT(t, 0);
+    float t = -1.0;
+    if (t0 >= gl_RayTminEXT && t0 <= gl_RayTmaxEXT) t = t0;
+    else if (t1 >= gl_RayTminEXT && t1 <= gl_RayTmaxEXT) t = t1;
+
+    if (t < 0.0) return;
+
+    reportIntersectionEXT(t, 1);
 }

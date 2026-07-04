@@ -496,18 +496,19 @@ void GameEngine::Initialize(){
     }
     //std::cout<<"RaytracingPipelines size: "<<appInfo->RaytracingPipelines.size()<<std::endl;
     if(appInfo->RaytracingPipelines.size() > 0){
-        std::cout<<"Create ray tracing shader module:"<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_miss_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_miss_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_closesthit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_closesthit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_anyhit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_anyhit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_intersection_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_primary_closesthit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name<<std::endl;
-        std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_callable_shader_name<<std::endl;
+        // std::cout<<"Create ray tracing shader module:"<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_miss_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_miss_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_closesthit_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_closesthit_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_primary_anyhit_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_shadow_anyhit_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_intersection_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_primary_closesthit_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name<<std::endl;
+        // std::cout<<"  "<<appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_callable_shader_name<<std::endl;
+
         //for(int i = 0; i < appInfo->RaytracingPipelines.size(); i++){ 
             //std::cout<<"CreatePipeline: Done Create Shader for pipeline: "<<appInfo->RaytracingPipelines[i].raytracing_pipeline_raytracingshader_name<<std::endl;
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_raygeneration_shader_name, RAYT);
@@ -520,7 +521,6 @@ void GameEngine::Initialize(){
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_intersection_shader_name, RAYT);
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_primary_closesthit_shader_name, RAYT);
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name, RAYT);
-            
         //}
     }
     if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;

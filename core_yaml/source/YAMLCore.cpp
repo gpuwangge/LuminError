@@ -104,23 +104,23 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
         }
     }
 
-    int max_computeSpheres_id = -1;
-    if (yamlNode["ComputeSpheres"]) {
-        for (const auto& sphere : yamlNode["ComputeSpheres"]) {
-            int computeSphere_id = sphere["compute_sphere_id"] ? sphere["compute_sphere_id"].as<int>() : 0;
-            max_computeSpheres_id = (computeSphere_id > max_computeSpheres_id) ? computeSphere_id : max_computeSpheres_id;
+    int max_customSpheres_id = -1;
+    if (yamlNode["CustomSpheres"]) {
+        for (const auto& sphere : yamlNode["CustomSpheres"]) {
+            int customSphere_id = sphere["custom_sphere_id"] ? sphere["custom_sphere_id"].as<int>() : 0;
+            max_customSpheres_id = (customSphere_id > max_customSpheres_id) ? customSphere_id : max_customSpheres_id;
         }
     }
-    //std::cout<<"Max computeSphere_id detected: "<<max_computeSpheres_id<<std::endl;
-    int customComputeSpheresCount = ((max_computeSpheres_id+1) < yamlNode["ComputeSpheres"].size()) ? (max_computeSpheres_id+1) : yamlNode["ComputeSpheres"].size();
-    //std::cout<<"Detected "<<customComputeSpheresCount<<" custom compute spheres in the YAML file."<<std::endl;
-    appInfo.ComputeSpheres.resize(customComputeSpheresCount);
-    if (yamlNode["ComputeSpheres"]) {
-        for (const auto& sphere : yamlNode["ComputeSpheres"]) {
-            int computeSphere_id = sphere["compute_sphere_id"] ? sphere["compute_sphere_id"].as<int>() : 0;
-            //std::cout<<"Loading compute sphere with ID "<<computeSphere_id<<std::endl;
-            appInfo.ComputeSpheres[computeSphere_id].loadFromYaml(sphere);
-            //std::cout<<"Finished loading compute sphere with ID "<<computeSphere_id<<std::endl;
+    //std::cout<<"Max customSphere_id detected: "<<max_customSpheres_id<<std::endl;
+    int customCustomSpheresCount = ((max_customSpheres_id+1) < yamlNode["CustomSpheres"].size()) ? (max_customSpheres_id+1) : yamlNode["CustomSpheres"].size();
+    //std::cout<<"Detected "<<customCustomSpheresCount<<" custom spheres in the YAML file."<<std::endl;
+    appInfo.CustomSpheres.resize(customCustomSpheresCount);
+    if (yamlNode["CustomSpheres"]) {
+        for (const auto& sphere : yamlNode["CustomSpheres"]) {
+            int customSphere_id = sphere["custom_sphere_id"] ? sphere["custom_sphere_id"].as<int>() : 0;
+            //std::cout<<"Loading custom sphere with ID "<<customSphere_id<<std::endl;
+            appInfo.CustomSpheres[customSphere_id].loadFromYaml(sphere);
+            //std::cout<<"Finished loading custom sphere with ID "<<customSphere_id<<std::endl;
         }
     }
 

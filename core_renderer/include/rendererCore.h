@@ -245,6 +245,11 @@ namespace LERenderer{
         //CWxjBuffer sphereAabbBuffer;
         //std::vector<VkAabbPositionsKHR> sphereAabbBuffer;
         //CWxjBuffer blas_sphere_scratch_buffer;
+
+        //All spheres share one BLAS
+        VkAccelerationStructureKHR sphere_blas = VK_NULL_HANDLE;
+        CWxjBuffer sphere_blasBuffer;
+        VkDeviceAddress sphere_blasAddress = 0;//blasDeviceAddress
         void CreateSphereBlas();
 
         //Instance buffer related

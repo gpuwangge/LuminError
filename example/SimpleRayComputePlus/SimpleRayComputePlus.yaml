@@ -22,31 +22,31 @@ Objects:
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
 
-ComputeSpheres:
-  - compute_sphere_name: Sphere
-    compute_sphere_id: 0
-    compute_sphere_position: [-1.5, -1.5, 0]
-    compute_sphere_radius: 0.5
-    compute_sphere_material_id: 4
-    compute_sphere_visibility: false
-  - compute_sphere_name: Sphere
-    compute_sphere_id: 1
-    compute_sphere_position: [1.5, 1.5, 0]
-    compute_sphere_radius: 0.5
-    compute_sphere_material_id: 5
-    compute_sphere_visibility: false
-  - compute_sphere_name: Sphere
-    compute_sphere_id: 2
-    compute_sphere_position: [-1.5, 1.5, 1.5]
-    compute_sphere_radius: 0.5
-    compute_sphere_material_id: 6
-    compute_sphere_visibility: false
-  - compute_sphere_name: Sphere
-    compute_sphere_id: 3
-    compute_sphere_position: [1.5, -1.5, -1.5]
-    compute_sphere_radius: 0.5
-    compute_sphere_material_id: 7
-    compute_sphere_visibility: false
+CustomSpheres:
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 0
+    custom_sphere_position: [-1.5, -1.5, 0]
+    custom_sphere_radius: 0.5
+    custom_sphere_material_id: 4
+    custom_sphere_visibility: false
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 1
+    custom_sphere_position: [1.5, 1.5, 0]
+    custom_sphere_radius: 0.5
+    custom_sphere_material_id: 5
+    custom_sphere_visibility: false
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 2
+    custom_sphere_position: [-1.5, 1.5, 1.5]
+    custom_sphere_radius: 0.5
+    custom_sphere_material_id: 6
+    custom_sphere_visibility: false
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 3
+    custom_sphere_position: [1.5, -1.5, -1.5]
+    custom_sphere_radius: 0.5
+    custom_sphere_material_id: 7
+    custom_sphere_visibility: false
 
 Resources:
   - Models:

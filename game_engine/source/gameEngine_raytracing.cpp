@@ -27,11 +27,11 @@ void GameEngine::InitializeComputeRayTracing(){
     }
     //Ray Tracing Setup 2: prepare sphere storage buffer data
     if(appInfo->Uniform.b_storage_compute_sphere){
-        for(int i = 0; i < appInfo->ComputeSpheres.size() && i < SPHERE_SIZE; i++){
-            storageBufferObject_Sphere.spheres[i].position = glm::vec3(appInfo->ComputeSpheres[i].compute_sphere_position[0], appInfo->ComputeSpheres[i].compute_sphere_position[1], appInfo->ComputeSpheres[i].compute_sphere_position[2]);
-            storageBufferObject_Sphere.spheres[i].radius = appInfo->ComputeSpheres[i].compute_sphere_radius;
-            storageBufferObject_Sphere.spheres[i].material_id = appInfo->ComputeSpheres[i].compute_sphere_material_id;
-            storageBufferObject_Sphere.spheres[i].visibility = appInfo->ComputeSpheres[i].compute_sphere_visibility;
+        for(int i = 0; i < appInfo->CustomSpheres.size() && i < SPHERE_SIZE; i++){
+            storageBufferObject_Sphere.spheres[i].position = glm::vec3(appInfo->CustomSpheres[i].custom_sphere_position[0], appInfo->CustomSpheres[i].custom_sphere_position[1], appInfo->CustomSpheres[i].custom_sphere_position[2]);
+            storageBufferObject_Sphere.spheres[i].radius = appInfo->CustomSpheres[i].custom_sphere_radius;
+            storageBufferObject_Sphere.spheres[i].material_id = appInfo->CustomSpheres[i].custom_sphere_material_id;
+            storageBufferObject_Sphere.spheres[i].visibility = appInfo->CustomSpheres[i].custom_sphere_visibility;
         }
     }
 }
@@ -325,16 +325,12 @@ void GameEngine::SetupRayTracing(){
     /****************
     * BLAS for Spheres
     **************/
-    rtSpheres.resize(3);
-    rtSpheres[0].center = glm::vec3(1.5,0,0);
-    rtSpheres[0].radius = 1.0f;
-    rtSpheres[0].materialIndex = 0;
-    rtSpheres[1].center = glm::vec3(0,1.5,0.0);
-    rtSpheres[1].radius = 0.5f;
-    rtSpheres[1].materialIndex = 0;
-    rtSpheres[2].center = glm::vec3(-1.5,-1.5,1.5);
-    rtSpheres[2].radius = 1.5f;
-    rtSpheres[2].materialIndex = 0;
+    rtSpheres.resize(appInfo->CustomSpheres.size());
+    for(int i = 0; i < appInfo->CustomSpheres.size(); i++){
+        rtSpheres[i].center = glm::vec3(appInfo->CustomSpheres[i].custom_sphere_position[0], appInfo->CustomSpheres[i].custom_sphere_position[1], appInfo->CustomSpheres[i].custom_sphere_position[2]);
+        rtSpheres[i].radius = appInfo->CustomSpheres[i].custom_sphere_radius;
+        rtSpheres[i].materialIndex = appInfo->CustomSpheres[i].custom_sphere_material_id;
+    }
 
 }
 

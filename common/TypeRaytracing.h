@@ -26,9 +26,9 @@ struct RtSphere{
     //uint32_t pad1;
     //uint32_t pad2;
 
-    VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
-    CWxjBuffer blasBuffer;
-    VkDeviceAddress blasAddress = 0;//blasDeviceAddress
+    // VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
+    // CWxjBuffer blasBuffer;
+    // VkDeviceAddress blasAddress = 0;//blasDeviceAddress
 };
 
 struct alignas(16) GeometryInfoGPU{

@@ -167,19 +167,19 @@ struct ObjectConfig {
     }
 };
 
-struct ComputeSphereConfig {
-    int compute_sphere_id = 0;
-    std::vector<float> compute_sphere_position = std::vector<float>(3, 0);
-    float compute_sphere_radius = 1.0f;
-    int compute_sphere_material_id = 0;
-    bool compute_sphere_visibility = true;
+struct CustomSphereConfig {
+    int custom_sphere_id = 0;
+    std::vector<float> custom_sphere_position = std::vector<float>(3, 0);
+    float custom_sphere_radius = 1.0f;
+    int custom_sphere_material_id = 0;
+    bool custom_sphere_visibility = true;
 
     void loadFromYaml(const YAML::Node& node) {
-        compute_sphere_id                             = getOrDefault(node, "compute_sphere_id", 0);
-        compute_sphere_position                       = getOrDefault(node, "compute_sphere_position", std::vector<float>(3, 0.0f));
-        compute_sphere_radius                         = getOrDefault(node, "compute_sphere_radius", 1.0f);
-        compute_sphere_material_id                   = getOrDefault(node, "compute_sphere_material_id", 0);
-        compute_sphere_visibility                     = getOrDefault(node, "compute_sphere_visibility", true);
+        custom_sphere_id                             = getOrDefault(node, "custom_sphere_id", 0);
+        custom_sphere_position                       = getOrDefault(node, "custom_sphere_position", std::vector<float>(3, 0.0f));
+        custom_sphere_radius                         = getOrDefault(node, "custom_sphere_radius", 1.0f);
+        custom_sphere_material_id                   = getOrDefault(node, "custom_sphere_material_id", 0);
+        custom_sphere_visibility                     = getOrDefault(node, "custom_sphere_visibility", true);
     }
 };
 
@@ -437,7 +437,7 @@ struct MaterialConfig {
 
 struct AppInfo{
     std::vector<ObjectConfig> Objects;
-    std::vector<ComputeSphereConfig> ComputeSpheres;
+    std::vector<CustomSphereConfig> CustomSpheres;
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
     std::vector<MaterialConfig> Materials;

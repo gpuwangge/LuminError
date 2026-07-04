@@ -712,16 +712,16 @@ void RendererCore::InitialRaytracing(){
 		std::cout<<"failed to load ray tracing functions!"<<std::endl;
 		throw std::runtime_error("failed to load ray tracing functions!");
 	}
-    std::cout<<"Load ray tracing functions successfully!"<<std::endl;
-    std::cout<<"Create Triangle Acceleration Structure..."<<std::endl;
+    //std::cout<<"Load ray tracing functions successfully!"<<std::endl;
+    //std::cout<<"Create Triangle Acceleration Structure..."<<std::endl;
     CreateTriangleBlas();
-    std::cout<<"Create Sphere Acceleration Structure..."<<std::endl;
+    //std::cout<<"Create Sphere Acceleration Structure..."<<std::endl;
     CreateSphereBlas();
-    std::cout<<"Create Instance Acceleration Structure..."<<std::endl;
+    //std::cout<<"Create Instance Acceleration Structure..."<<std::endl;
     CreateInstanceBuffer();
-    std::cout<<"Create Top Level Acceleration Structure..."<<std::endl;
+    //std::cout<<"Create Top Level Acceleration Structure..."<<std::endl;
     CreateTlas();
-    std::cout<<"Done create TLAS."<<std::endl;
+    //std::cout<<"Done create TLAS."<<std::endl;
 }
 
 void RendererCore::CreateSBT(){
@@ -1029,10 +1029,10 @@ void RendererCore::SubmitCommandBufferAndWait_Raytracing(int commandBufferIndex,
     }
 
     // 4) 如果你这个函数语义就是 “submit and wait”，那就在这里等这次完成
-    std::cout << "  Waiting for ray tracing command buffer to finish..." << std::endl;
+    //std::cout << "  Waiting for ray tracing command buffer to finish..." << std::endl;
     vkWaitForFences(GetLogicalDevice(), 1, &rtInitFence, VK_TRUE, UINT64_MAX);
     //vkResetFences(CContext::GetHandle().GetLogicalDevice(), 1, &rtInitFence);
-    std::cout << "  Ray tracing command buffer finished." << std::endl;
+    //std::cout << "  Ray tracing command buffer finished." << std::endl;
     // vkDestroyFence(GetLogicalDevice(), rtInitFence, nullptr);
 }
 
@@ -1204,20 +1204,25 @@ void RendererCore::CreateSphereBlas(){
 
     // 1) CPU build AABB array
     //std::vector<VkAabbPositionsKHR> aabbs(sphereSize);
-    for (uint32_t i = 0; i < sphereSize; ++i) {
+    //for (uint32_t i = 0; i < sphereSize; ++i) {
         uint32_t primitiveCount = 1; //aabb has one primitive, the sphere itself
 
         VkAabbPositionsKHR aabb{};
-        //int i = 0;
-        RtSphere& s = game->GetRtSphere(i);
+        aabb.minX = -1.0f;
+        aabb.minY = -1.0f;
+        aabb.minZ = -1.0f;
+        aabb.maxX =  1.0f;
+        aabb.maxY =  1.0f;
+        aabb.maxZ =  1.0f;
 
-        aabb.minX = s.center.x - s.radius;
-        aabb.minY = s.center.y - s.radius;
-        aabb.minZ = s.center.z - s.radius;
-        aabb.maxX = s.center.x + s.radius;
-        aabb.maxY = s.center.y + s.radius;
-        aabb.maxZ = s.center.z + s.radius;
-        //}
+        // RtSphere& s = game->GetRtSphere(i);
+        // aabb.minX = s.center.x - s.radius;
+        // aabb.minY = s.center.y - s.radius;
+        // aabb.minZ = s.center.z - s.radius;
+        // aabb.maxX = s.center.x + s.radius;
+        // aabb.maxY = s.center.y + s.radius;
+        // aabb.maxZ = s.center.z + s.radius;
+        
 
         // 2) upload AABB buffer (device local preferred)
         //sphereAabbBuffer.resize(1);
@@ -1348,7 +1353,7 @@ void RendererCore::CreateSphereBlas(){
         );
 
         // 7) create BLAS storage
-        s.blasBuffer.init(
+        sphere_blasBuffer.init(
             sizeInfo.accelerationStructureSize,
             VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR |
             VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
@@ -1359,7 +1364,7 @@ void RendererCore::CreateSphereBlas(){
 
         VkAccelerationStructureCreateInfoKHR asCreateInfo{};
         asCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
-        asCreateInfo.buffer = s.blasBuffer.buffer;
+        asCreateInfo.buffer = sphere_blasBuffer.buffer;
         asCreateInfo.offset = 0;
         asCreateInfo.size = sizeInfo.accelerationStructureSize;
         asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
@@ -1368,7 +1373,7 @@ void RendererCore::CreateSphereBlas(){
             GetLogicalDevice(),
             &asCreateInfo,
             nullptr,
-            &s.blas
+            &sphere_blas
         );
 
         // 8) scratch
@@ -1382,7 +1387,7 @@ void RendererCore::CreateSphereBlas(){
             true
         );
 
-        buildInfo.dstAccelerationStructure = s.blas;
+        buildInfo.dstAccelerationStructure = sphere_blas;
         buildInfo.scratchData.deviceAddress =
             GetBufferAddress(GetLogicalDevice(), blas_sphere_scratch_buffer.buffer);
 
@@ -1430,16 +1435,16 @@ void RendererCore::CreateSphereBlas(){
         // 11) get address
         VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};
         addressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
-        addressInfo.accelerationStructure = s.blas;
+        addressInfo.accelerationStructure = sphere_blas;
 
-        s.blasAddress =
+        sphere_blasAddress =
             fpGetAccelerationStructureDeviceAddressKHR(GetLogicalDevice(), &addressInfo);
 
         
         stagingBuffer.DestroyAndFree(GetLogicalDevice());
-        sphereAabbBuffer.DestroyAndFree(GetLogicalDevice());
+        sphereAabbBuffer.DestroyAndFree(GetLogicalDevice());//如果后面要做 update/rebuild，这个输入 buffer 不能立刻销毁，因为 AABB 位置更新属于 update 允许修改的内容之一，但前提是 primitive 数量不能变。
         blas_sphere_scratch_buffer.DestroyAndFree(GetLogicalDevice());
-    }
+    //}
 }
 
 void RendererCore::CreateInstanceBuffer(){
@@ -1497,18 +1502,29 @@ void RendererCore::CreateInstanceBuffer(){
     }
     //step2 for sphere
     for(int i = 0; i < sphereSize; i++){
-        VkTransformMatrixKHR identity = {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f
+        RtSphere& s = game->GetRtSphere(i);
+
+        // VkTransformMatrixKHR identity = {
+        //     1.0f, 0.0f, 0.0f, 0.0f,
+        //     0.0f, 1.0f, 0.0f, 0.0f,
+        //     0.0f, 0.0f, 1.0f, 0.0f
+        // };
+
+        // unit sphere in object space:
+        // center = (0,0,0), radius = 1
+        // instance transform => scale by radius, then translate to center
+        VkTransformMatrixKHR transform = {
+            s.radius, 0.0f,     0.0f,     s.center.x,
+            0.0f,     s.radius, 0.0f,     s.center.y,
+            0.0f,     0.0f,     s.radius, s.center.z
         };
-        instances[count+i].transform = identity;
+        instances[count+i].transform = transform;
 
         instances[count+i].instanceCustomIndex = i;
         instances[count+i].mask = 0x02; //sphere设置成02，那么在shader中traceRay时，ray的mask也必须cover 02才能命中这个instance
         instances[count+i].instanceShaderBindingTableRecordOffset = 2; //there are 3 hit records in the hit SBT region: 0/1/2, group 2 is for sphere procedual hit
         instances[count+i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR; //this doesn't matter here
-        instances[count+i].accelerationStructureReference = game->GetRtSphere(i).blasAddress;
+        instances[count+i].accelerationStructureReference = sphere_blasAddress;
     }
 
     //std::vector<VkAccelerationStructureInstanceKHR> instances = { instance };
@@ -1782,17 +1798,17 @@ void RendererCore::Destroy(){
             rtMesh.blas = VK_NULL_HANDLE;
         }
     }
-    for(int i = 0; i < game->GetRtSphereSize(); i++){
-        RtSphere &rtsphere = game->GetRtSphere(i);
-        if (rtsphere.blas != VK_NULL_HANDLE) {
-            fpDestroyAccelerationStructureKHR(GetLogicalDevice(), rtsphere.blas, nullptr);
-            rtsphere.blas = VK_NULL_HANDLE;
-        }
-    }
-    // if (blas != VK_NULL_HANDLE) {
-    //     fpDestroyAccelerationStructureKHR(GetLogicalDevice(), blas, nullptr);
-    //     blas = VK_NULL_HANDLE;
+    // for(int i = 0; i < game->GetRtSphereSize(); i++){
+    //     RtSphere &rtsphere = game->GetRtSphere(i);
+    //     if (rtsphere.blas != VK_NULL_HANDLE) {
+    //         fpDestroyAccelerationStructureKHR(GetLogicalDevice(), rtsphere.blas, nullptr);
+    //         rtsphere.blas = VK_NULL_HANDLE;
+    //     }
     // }
+    if (sphere_blas != VK_NULL_HANDLE) {
+        fpDestroyAccelerationStructureKHR(GetLogicalDevice(), sphere_blas, nullptr);
+        sphere_blas = VK_NULL_HANDLE;
+    }
 
     //std::cout<<"----Now free the SBT buffer----"<<std::endl;
     sbt_buffer.DestroyAndFree(GetLogicalDevice());
@@ -1802,6 +1818,7 @@ void RendererCore::Destroy(){
 
     //blas_buffer.DestroyAndFree(GetLogicalDevice());
     //blas_scratch_buffer.DestroyAndFree(GetLogicalDevice());
+    sphere_blasBuffer.DestroyAndFree(GetLogicalDevice());
 
     instance_buffer.DestroyAndFree(GetLogicalDevice());
 
