@@ -1520,7 +1520,7 @@ void RendererCore::CreateInstanceBuffer(){
         };
         instances[count+i].transform = transform;
 
-        instances[count+i].instanceCustomIndex = i;
+        instances[count+i].instanceCustomIndex = s.materialIndex; //use this index to fetch material data in shader
         instances[count+i].mask = 0x02; //sphere设置成02，那么在shader中traceRay时，ray的mask也必须cover 02才能命中这个instance
         instances[count+i].instanceShaderBindingTableRecordOffset = 2; //there are 3 hit records in the hit SBT region: 0/1/2, group 2 is for sphere procedual hit
         instances[count+i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR; //this doesn't matter here

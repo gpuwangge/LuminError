@@ -66,19 +66,19 @@ CustomSpheres:
     custom_sphere_id: 1
     custom_sphere_position: [1.5, 0, 0]
     custom_sphere_radius: 0.5
-    custom_sphere_material_id: 0
+    custom_sphere_material_id: 1
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere2
     custom_sphere_id: 2
     custom_sphere_position: [-1.5, 0, -1.5]
     custom_sphere_radius: 0.75
-    custom_sphere_material_id: 0
+    custom_sphere_material_id: 2
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere3
     custom_sphere_id: 3
     custom_sphere_position: [0.0, 3, 0.0]
     custom_sphere_radius: 1
-    custom_sphere_material_id: 0
+    custom_sphere_material_id: 3
     custom_sphere_visibility: true
 
 
@@ -103,6 +103,11 @@ Resources:
 Uniforms:
   RayTracing:
     uniform_raytracing_swapchain_storage: true
+    storage_raytracing_material: true
+  #Compute:
+    #storage_custom_material: true #need enable this if want to use materials, otherwise it won't read material yaml
+    #storage_custom_sphere: false this doesn't matter for rt pipeline. it is for compute pipeline. rt pipeline always enable spheres
+  
 
 Features:
   feature_rendermode: 5 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4， RAYTRACING_SWAPCHAIN=5

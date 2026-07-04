@@ -108,7 +108,7 @@ float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius
 }
 
 void main(){
-    uint modelId = gl_InstanceCustomIndexEXT; //gl_InstanceCustomIndexEXT是一个可以自定义的量，我用它来代表用第几个模型。
+    uint modelId = gl_InstanceCustomIndexEXT; //gl_InstanceCustomIndexEXT是一个可以自定义的量，用它来代表用第几个模型。
     GeometryInfo geo = sboGeometryInfos.infos[modelId];
 
     uint prim = gl_PrimitiveID * 3u; //gl_PrimitiveID 是当前命中 primitive 的本地 ID，不是全场景统一 primitive ID。

@@ -68,10 +68,10 @@ public:
      * 3 COMPUTE_STORAGEBUFFER_MATERIAL
      * Read only
      ************/
-    // static std::vector<CWxjBuffer> storageBuffers_material;
-    // static std::vector<void*> storageBuffersMapped_material;
-    // void addStorageBuffer_material();
-    // void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
+    static std::vector<CWxjBuffer> storageBuffers_material;
+    static std::vector<void*> storageBuffersMapped_material;
+    void addStorageBuffer_material();
+    void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE

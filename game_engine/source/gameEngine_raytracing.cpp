@@ -332,6 +332,34 @@ void GameEngine::SetupRayTracing(){
         rtSpheres[i].materialIndex = appInfo->CustomSpheres[i].custom_sphere_material_id;
     }
 
+    /****************
+    * Custom for Triangles and Spheres
+    **************/
+    if(appInfo->Uniform.b_storage_raytracing_material){
+        yamler->ReadMaterialYAMLFile("Materials");
+        for(int i = 0; i < appInfo->Materials.size(); i++){
+            storageBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
+            storageBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
+            storageBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
+            storageBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
+            storageBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
+            storageBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
+            storageBufferObject_Material.materials[i].emissionStrength = appInfo->Materials[i].emissionStrength;
+            storageBufferObject_Material.materials[i].reflectance = appInfo->Materials[i].reflectance;
+            storageBufferObject_Material.materials[i].specular = appInfo->Materials[i].specular;
+            storageBufferObject_Material.materials[i].ior = appInfo->Materials[i].ior;
+            storageBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
+        }
+    }
+    //std::cout<<"SetupRayTracing(): Found "<<appInfo->Materials.size()<<" materials."<<std::endl;
+    if(appInfo->Uniform.b_storage_raytracing_material){
+        //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
+        // UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        // UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
+        renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+    }
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

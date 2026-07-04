@@ -111,6 +111,10 @@ void CRaytracingDescriptorManager::createDescriptorPool(){
         raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //geometryInfo
 	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
+
+        raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //storage buffer for material
+	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++;
     }
     //std::cout<<std::endl;
 
@@ -276,6 +280,13 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         //}
 
         raytracingBindings[counter].binding = counter;
+        raytracingBindings[counter].descriptorCount = 1;
+        raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        raytracingBindings[counter].pImmutableSamplers = nullptr;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        counter++;
+
+        raytracingBindings[counter].binding = counter; //storage buffer for material
         raytracingBindings[counter].descriptorCount = 1;
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
@@ -573,10 +584,10 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             counter++;
 
             //if(computeUniformTypes & COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE){
-            VkDescriptorBufferInfo storageBufferInfo{};
-            storageBufferInfo.buffer = storageBuffers_triangleVertexAttribute[i].buffer;
-            storageBufferInfo.offset = 0;
-            storageBufferInfo.range = sizeof(StructStorageBuffer_TriangleVertexAttribute);
+            VkDescriptorBufferInfo storageBufferInfo1{};
+            storageBufferInfo1.buffer = storageBuffers_triangleVertexAttribute[i].buffer;
+            storageBufferInfo1.offset = 0;
+            storageBufferInfo1.range = sizeof(StructStorageBuffer_TriangleVertexAttribute);
 
             descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[counter].dstSet = descriptorSets[i];
@@ -584,7 +595,7 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             descriptorWrites[counter].dstArrayElement = 0;
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             descriptorWrites[counter].descriptorCount = 1;
-            descriptorWrites[counter].pBufferInfo = &storageBufferInfo;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo1;
             counter++;
             //}
 
@@ -616,6 +627,20 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             descriptorWrites[counter].descriptorCount = 1;
             descriptorWrites[counter].pBufferInfo = &storageBufferInfo3;
+            counter++;
+
+            VkDescriptorBufferInfo storageBufferInfo4{}; //storage buffer for material
+            storageBufferInfo4.buffer = storageBuffers_material[i].buffer;
+            storageBufferInfo4.offset = 0;
+            storageBufferInfo4.range = sizeof(StructStorageBuffer_Material);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &storageBufferInfo4;
             counter++;
         }
         
@@ -692,26 +717,28 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
 /************
  * 3 COMPUTE_STORAGEBUFFER_MATERIAL
  ************/
-// std::vector<CWxjBuffer> CRaytracingDescriptorManager::storageBuffers_material;
-// std::vector<void*> CRaytracingDescriptorManager::storageBuffersMapped_material;
-// void CRaytracingDescriptorManager::addStorageBuffer_material(){
-//     computeUniformTypes |= COMPUTE_STORAGEBUFFER_MATERIAL;
+std::vector<CWxjBuffer> CRaytracingDescriptorManager::storageBuffers_material;
+std::vector<void*> CRaytracingDescriptorManager::storageBuffersMapped_material;
+void CRaytracingDescriptorManager::addStorageBuffer_material(){
+    //std::cout<<"Raytracing Pipeline Descriptor: addStorageBuffer_material()"<<std::endl;
+    //computeUniformTypes |= COMPUTE_STORAGEBUFFER_MATERIAL;
 
-//     storageBuffers_material.resize(MAX_FRAMES_IN_FLIGHT);
-//     storageBuffersMapped_material.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffers_material.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_material.resize(MAX_FRAMES_IN_FLIGHT);
 
-//     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-//         storageBuffers_material[i].init(sizeof(StructStorageBuffer_Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
-//         vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_material[i].deviceMemory, 0, sizeof(StructStorageBuffer_Material), 0, &storageBuffersMapped_material[i]);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_material[i].init(sizeof(StructStorageBuffer_Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_material[i].deviceMemory, 0, sizeof(StructStorageBuffer_Material), 0, &storageBuffersMapped_material[i]);
  
-//     }
-// }
-// void CRaytracingDescriptorManager::uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size){
-//     if (data && size > 0) {
-//         //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
-//         memcpy(storageBuffersMapped_material[currentFrame], data, size);
-//     }
-// }
+    }
+}
+void CRaytracingDescriptorManager::uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size){
+    //std::cout<<"Raytracing Pipeline Descriptor: uploadStorageBuffer_material(), size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+    if (data && size > 0) {
+        //std::cout<<"uploadStorageBuffer_material: size = "<<size<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_material[currentFrame], data, size);
+    }
+}
 
 /************
  * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEX
@@ -946,7 +973,8 @@ int CRaytracingDescriptorManager::getPoolSize(){
     // descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
-    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 5:0; //TODO: currently combine image and tlas, vertex attributes and index, geometry Info
+    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 6:0; 
+    //TODO: currently combine image and tlas, vertex attributes and index, geometry Info, material
 	return descriptorPoolSize;
 }
 int CRaytracingDescriptorManager::getLayoutSize(){
@@ -963,9 +991,9 @@ void CRaytracingDescriptorManager::DestroyAndFree(){
     // for (size_t i = 0; i < storageBuffers_windowswap.size(); i++) {
     //     storageBuffers_windowswap[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     // }
-    // for (size_t i = 0; i < storageBuffers_material.size(); i++) {
-    //     storageBuffers_material[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
-    // }
+    for (size_t i = 0; i < storageBuffers_material.size(); i++) {
+        storageBuffers_material[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    }
     for (size_t i = 0; i < storageBuffers_triangleVertexAttribute.size(); i++) {
         storageBuffers_triangleVertexAttribute[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }

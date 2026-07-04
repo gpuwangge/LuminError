@@ -82,6 +82,7 @@ struct UniformConfig {
     } ComputeStorageBufferInfo_CustomSwap;
 
     bool b_uniform_raytracing_swapchain_storage = false;
+    bool b_storage_raytracing_material = false;
 
     void loadGraphicsFromYaml(const YAML::Node& node) {
         b_uniform_graphics_global                   = getOrDefault(node, "uniform_graphics_global", false);
@@ -116,6 +117,7 @@ struct UniformConfig {
 
     void loadRayTracingFromYaml(const YAML::Node& node) {
         b_uniform_raytracing_swapchain_storage        = getOrDefault(node, "uniform_raytracing_swapchain_storage", false);
+        b_storage_raytracing_material                          = getOrDefault(node, "storage_raytracing_material", false);
     }
 };
 

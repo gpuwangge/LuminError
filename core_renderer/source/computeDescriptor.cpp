@@ -581,6 +581,7 @@ void CComputeDescriptorManager::downloadStorageBuffer_windowswap(uint32_t curren
 std::vector<CWxjBuffer> CComputeDescriptorManager::storageBuffers_material;
 std::vector<void*> CComputeDescriptorManager::storageBuffersMapped_material;
 void CComputeDescriptorManager::addStorageBuffer_material(){
+    //std::cout<<"Compute Descriptor: addStorageBuffer_material()"<<std::endl;
     computeUniformTypes |= COMPUTE_STORAGEBUFFER_MATERIAL;
 
     storageBuffers_material.resize(MAX_FRAMES_IN_FLIGHT);
