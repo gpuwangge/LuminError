@@ -43,15 +43,6 @@ public:
 
 
     /************
-     * 1 COMPUTE_UNIFORMBUFFER_GLOBAL
-     ************/
-    // static std::vector<CWxjBuffer> m_globalUniformBuffers; 
-	// static std::vector<void*> m_globalUniformBuffersMapped;
-    // //static VkDeviceSize m_globalUniformBufferSize;
-    // void addGlobalUniformBuffer();
-    // void uploadGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
-
-    /************
      * 2 COMPUTE_STORAGEBUFFER_WINDOWSWAP
      * Read and Write
      ************/
@@ -62,16 +53,6 @@ public:
     // void addStorageBuffer_windowswap(); //the same function to add storage 1&2
     // void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size);
     // void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size);
-    
-
-    /************
-     * 3 COMPUTE_STORAGEBUFFER_MATERIAL
-     * Read only
-     ************/
-    static std::vector<CWxjBuffer> storageBuffers_material;
-    static std::vector<void*> storageBuffersMapped_material;
-    void addStorageBuffer_material();
-    void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE
@@ -98,6 +79,34 @@ public:
     void uploadStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size);
 
     /************
+     * 3 COMPUTE_STORAGEBUFFER_MATERIAL
+     * Read only
+     ************/
+    static std::vector<CWxjBuffer> storageBuffers_material;
+    static std::vector<void*> storageBuffersMapped_material;
+    void addStorageBuffer_material();
+    void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
+
+    /************
+     * 1 COMPUTE_UNIFORMBUFFER_GLOBAL
+     ************/
+    static std::vector<CWxjBuffer> m_globalUniformBuffers; 
+	static std::vector<void*> m_globalUniformBuffersMapped;
+    //static VkDeviceSize m_globalUniformBufferSize;
+    void addGlobalUniformBuffer_raytracing();
+    void uploadGlobalUniformBuffer_raytracing(uint32_t currentFrame, const void* data, size_t dataSize);
+
+    /************
+     * 8 COMPUTE_UNIFORMBUFFER_CUSTOM
+     ************/
+    static std::vector<CWxjBuffer> customUniformBuffers; 
+	static std::vector<void*> customUniformBuffersMapped;
+    static VkDeviceSize m_customUniformBufferSize;
+    void addCustomUniformBuffer_raytracing(VkDeviceSize customUniformBufferSize);
+    void uploadCustomUniformBuffer_raytracing(uint32_t currentFrame, const void* data, size_t dataSize);
+
+
+    /************
      * 5.5 COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX
      ************/
     // static std::vector<CWxjBuffer> storageBuffers_triangleReorderIndex;
@@ -121,14 +130,7 @@ public:
     // void addStorageBuffer_sphere();
     // void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size);
 
-    /************
-     * 8 COMPUTE_UNIFORMBUFFER_CUSTOM
-     ************/
-    // static std::vector<CWxjBuffer> customUniformBuffers; 
-	// static std::vector<void*> customUniformBuffersMapped;
-    // static VkDeviceSize m_customUniformBufferSize;
-    // void addCustomUniformBuffer(VkDeviceSize customUniformBufferSize);
-    // void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
+    
 
     /************
      * 9 COMPUTE_STORAGEBUFFER_CUSTOMSWAP

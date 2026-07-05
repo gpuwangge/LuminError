@@ -450,6 +450,11 @@ namespace LERenderer{
         void uploadRaytracingStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_geometryInfo(currentFrame, data, size); }
         void addRaytracingStorageBuffer_material() override { raytracingDescriptorManager.addStorageBuffer_material(); }
         void uploadRaytracingStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_material(currentFrame, data, size); }
+        void addRaytracingStorageBuffer_global() override { raytracingDescriptorManager.addGlobalUniformBuffer_raytracing(); }
+        void uploadRaytracingStorageBuffer_global(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadGlobalUniformBuffer_raytracing(currentFrame, data, size); }
+        void addRaytracingStorageBuffer_custom(VkDeviceSize customUniformBufferSize) override { raytracingDescriptorManager.addCustomUniformBuffer_raytracing(customUniformBufferSize); }
+        void uploadRaytracingStorageBuffer_custom(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadCustomUniformBuffer_raytracing(currentFrame, data, size); }
+
 
         void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer_customswap(storageBufferSize, usage); }
         void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_customswap(currentFrame, data, size); }

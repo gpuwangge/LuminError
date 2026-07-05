@@ -125,3 +125,16 @@ Attachments:
   mainsceneRenderpass_attachment_depth_camera: false
   mainsceneRenderpass_attachment_color_resovle: false
   mainsceneRenderpass_attachment_color_present: false
+
+MainCamera:
+  camera_mode: 1
+  camera_position: [0,0,-7]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 90
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 60

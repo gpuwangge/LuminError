@@ -114,6 +114,7 @@ void GameEngine::Initialize(){
         renderer->addRaytracingStorageBuffer_triangleVertexIndex();
         renderer->addRaytracingStorageBuffer_geometryInfo();
         renderer->addRaytracingStorageBuffer_material();
+        renderer->addRaytracingStorageBuffer_global();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
     }
 

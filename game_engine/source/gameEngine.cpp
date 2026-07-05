@@ -224,7 +224,10 @@ void GameEngine::Update(){
     computeGlobalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
     fovY = glm::radians(mainCamera.fov);
     computeGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
+    //todo: should only do this in compute ray tracing
     renderer->uploadComputeGlobalUniformBuffer(renderer->GetCurrentFrame(), &computeGlobalUniformBufferObject, sizeof(StructComputeGlobalUniformBuffer));
+    //todo: should only do this in ray tracing pipeline
+    renderer->uploadRaytracingStorageBuffer_global(renderer->GetCurrentFrame(), &computeGlobalUniformBufferObject, sizeof(StructComputeGlobalUniformBuffer));
 
 
     for(int i = 0; i < lights.size(); i++){//lightCameras.size()
