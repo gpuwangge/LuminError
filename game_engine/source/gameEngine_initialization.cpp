@@ -115,6 +115,7 @@ void GameEngine::Initialize(){
         renderer->addRaytracingStorageBuffer_geometryInfo();
         renderer->addRaytracingStorageBuffer_material();
         renderer->addRaytracingStorageBuffer_global();
+        renderer->addRaytracingStorageBuffer_custom(appInfo->Uniform.RaytracingCustom.Size);
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
     }
 
@@ -441,7 +442,7 @@ void GameEngine::Initialize(){
     if(b_uniform_raytracing) {
         SetupRayTracing(); //must load models and register objects, before this is called； create multi-object, multi-mesh
         renderer->InitialRaytracing(); //Create BLAS, instance and TLAS, TODO: initial ray tracing before description?
-        renderer->createRaytracingDescriptorSetLayout();
+        renderer->createRaytracingDescriptorSetLayout(&appInfo->Uniform.RaytracingCustom.Binding);
     }
 
     //UNIFORM STEP 3/3 (Set)

@@ -323,6 +323,15 @@ void GameEngine::UploadComputeCustomUniformBuffer(uint32_t currentFrame, const v
     renderer->uploadComputeCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 
+void GameEngine::SetRaytracingCustomSize(int size) { appInfo->Uniform.RaytracingCustom.Size = size; }
+void GameEngine::SetRaytracingCustomBinding(void* binding) {
+    VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);
+    if (bindingPtr) appInfo->Uniform.RaytracingCustom.Binding = *bindingPtr;
+}
+void GameEngine::UploadRaytracingCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) {
+    renderer->uploadRaytracingStorageBuffer_custom(currentFrame, customUniformBufferObject, dataSize);
+}
+
 // void GameEngine::SetComputeStorageBufferSize_WindowSwap(int size) { appInfo->Uniform.ComputeStorageBuffer.Size = size; }
 // void GameEngine::SetComputeStorageBufferUsage_WindowSwap(int usage) {appInfo->Uniform.ComputeStorageBuffer.Usage = usage; }
 void GameEngine::UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) {

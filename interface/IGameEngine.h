@@ -159,6 +159,11 @@ namespace LEGameEngine{
         virtual void SetComputeCustomBinding(void* VkDescriptorSetLayoutBinding) = 0;
         virtual void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) = 0;
 
+        //Expose functions for Example(SimpleRayPipeline) to use
+        virtual void SetRaytracingCustomSize(int size) = 0;
+        virtual void SetRaytracingCustomBinding(void* VkDescriptorSetLayoutBinding) = 0;
+        virtual void UploadRaytracingCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) = 0;
+
         //Expose functions for Example(SimpleShadowMap16Shadows) to use
         virtual void SetLightCameraFocusObjectId(int lightCameraId, int objectId) = 0;
         virtual int GetLightCameraFocusObjectId(int lightCameraId) = 0;

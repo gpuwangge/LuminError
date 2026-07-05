@@ -83,6 +83,10 @@ struct UniformConfig {
 
     bool b_uniform_raytracing_swapchain_storage = false;
     bool b_storage_raytracing_material = false;
+    struct RaytracingCustomInfo {
+        VkDeviceSize Size = 0;
+        VkDescriptorSetLayoutBinding Binding{};
+    } RaytracingCustom;
 
     void loadGraphicsFromYaml(const YAML::Node& node) {
         b_uniform_graphics_global                   = getOrDefault(node, "uniform_graphics_global", false);

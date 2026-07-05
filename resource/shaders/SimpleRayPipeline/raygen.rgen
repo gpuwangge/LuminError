@@ -22,9 +22,20 @@ layout(set = 0, binding = 6) uniform GlobalBufferObject {
     float padding[58];
 } globalUBO; //store camera and view information
 
+layout(set = 0, binding = 7) uniform CustomBufferObject {
+    int frameCount;
+    bool cameraInMotion;
+    uint triangleCount;
+    uint materialCount;
+} customUBO;
 
-void main()
-{
+void main(){
+
+    // if(customUBO.cameraInMotion){ //test customUBO
+    //     imageStore(resultImage, ivec2(gl_LaunchIDEXT.xy), vec4(0.0, 1.0, 0.0, 1.0));
+    //     return;
+    // }
+
     ivec2 pix  = ivec2(gl_LaunchIDEXT.xy);
     ivec2 size = ivec2(gl_LaunchSizeEXT.xy);
 

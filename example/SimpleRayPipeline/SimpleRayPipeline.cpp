@@ -23,25 +23,24 @@ namespace LuminError{
                 binding.descriptorCount = 1;
                 binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
                 binding.pImmutableSamplers = nullptr;
-                binding.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+                binding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR; //VK_SHADER_STAGE_COMPUTE_BIT;
                 return binding;
             }
         };
         StructCustomUniformBuffer customUniformBufferObject{};
 
         void Initialize() override {
-            // GameEngine->SetComputeCustomSize(sizeof(StructCustomUniformBuffer));
-            // VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
-            // GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
-
-            // customUniformBufferObject.triangleCount = 5;
-            // customUniformBufferObject.materialCount = 1;
+            GameEngine->SetRaytracingCustomSize(sizeof(StructCustomUniformBuffer));
+            VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
+            GameEngine->SetRaytracingCustomBinding(static_cast<void*>(&binding));
+            customUniformBufferObject.triangleCount = 5; //TODO
+            customUniformBufferObject.materialCount = 1; //TODO
         }
 
         void Update() override {
-            // customUniformBufferObject.frameCount = GameEngine->GetFrameCount();
-            // customUniformBufferObject.cameraInMotion = GameEngine->GetCameraInMotion();
-		    // GameEngine->UploadComputeCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+            customUniformBufferObject.frameCount = GameEngine->GetFrameCount();
+            customUniformBufferObject.cameraInMotion = GameEngine->GetCameraInMotion();
+            GameEngine->UploadRaytracingCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
 
             GameEngine->PrintFPS(1.0f);
         }

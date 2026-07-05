@@ -227,7 +227,11 @@ namespace LEGameEngine{
         void SetComputeCustomSize(int size) override;
         void SetComputeCustomBinding(void* binding) override;
         void UploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override;
-        
+
+        void SetRaytracingCustomSize(int size) override;
+        void SetRaytracingCustomBinding(void* binding) override;
+        void UploadRaytracingCustomUniformBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize) override;
+
         //void SetComputeStorageBufferSize_WindowSwap(int size) override;
         //void SetComputeStorageBufferUsage_WindowSwap(int usage) override;
         void UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
