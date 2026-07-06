@@ -787,12 +787,12 @@ void RendererCore::CreateSBT(){
     copyHandle(0, rgenRegionOffset + 0 * rgenStride);
 
     // miss region
-    copyHandle(1, missRegionOffset + 0 * missStride); // group 1 = primary miss
-    copyHandle(2, missRegionOffset + 1 * missStride); // group 2 = shadow miss
+    copyHandle(1, missRegionOffset + 0 * missStride); // group 1 = primary miss, triangle/sphere
+    copyHandle(2, missRegionOffset + 1 * missStride); // group 2 = shadow miss, triangle/sphere
 
     // hit region
-    copyHandle(3, hitRegionOffset + 0 * hitStride); // triangle primary, primary hit (rchit and rahit)
-    copyHandle(4, hitRegionOffset + 1 * hitStride); // triangle shadow, shadow hit (rchit and rahit)
+    copyHandle(3, hitRegionOffset + 0 * hitStride); // triangle primary hit (rchit and rahit)
+    copyHandle(4, hitRegionOffset + 1 * hitStride); // triangle shadow hit (rchit and rahit)
     copyHandle(5, hitRegionOffset + 2 * hitStride); // sphere procedural primary, (rchit and intersection)
     copyHandle(6, hitRegionOffset + 3 * hitStride); // sphere procedural shadow, (rchit and intersection)
 

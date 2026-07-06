@@ -4,7 +4,10 @@
 #include "../CommonShaders/rayPipelineCommon.glsl"
 
 layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
+layout(location = 1) rayPayloadEXT ShadowPayload shadowPayload;
 hitAttributeEXT vec2 attribs;
+
+layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 
 struct Material {
     vec3 albedo;
@@ -19,207 +22,324 @@ struct Material {
     float ior;
     float transmission;
 };
-
 layout(set = 0, binding = 5, std430) readonly buffer SBOMaterial {
    Material materials[];
 } sboMaterial;
 
+layout(set = 0, binding = 7) uniform CustomBufferObject {
+    int frameCount;
+    bool cameraInMotion;
+    uint lightCount;
+    uint materialCount;
+} customUBO;
 
-//////////////Untility functions/////////////////////
-const float PI  = 3.14159265359;
-const float EPS = 1e-4;
+struct RtLightInfo{
+    vec4 position;
+    vec4 color;
+    vec4 direction;
+    float intensity;
+    float radius;
+    float angle;
+    float type;
+};  //total size: 16+16+16+4*4=64 bytes
+const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
+layout(set = 0, binding = 8, std430) readonly buffer SBORtLightBuffer {
+    RtLightInfo lights[RTLIGHT_SIZE];
+} sboRtLightBuffer;
 
-float saturate(float x)
-{
-    return clamp(x, 0.0, 1.0);
+/*结构
+0.早退判断
+1.命中信息重建
+2.硬阴影：对light循环，面光源和软阴影。包含直接漫反射和高光。
+3.二次光线：镜面反射，折射，用于镜面和玻璃
+4.写回payload
+（最终看到的效果要包含如下部分：漫反射Lambert，镜面高光项Phong/Blinn，阴影shadowray）
+*/
+
+/**************
+Untility functions
+**************/
+
+bool isDirectionalLight(RtLightInfo light){
+    return false;
+    return light.type < 0.5;
 }
 
-vec3 saturate(vec3 v)
-{
-    return clamp(v, vec3(0.0), vec3(1.0));
+bool isPointLight(RtLightInfo light){
+    return true;
+    return light.type >= 0.5 && light.type < 1.5;
 }
 
-uint pcg_hash(uint v)
-{
-    v = v * 747796405u + 2891336453u;
-    v = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u;
-    v = (v >> 22u) ^ v;
-    return v;
+bool isSpotLight(RtLightInfo light){
+    return false;
+    return light.type >= 1.5 && light.type < 2.5;
 }
 
-float rand(inout uint state)
-{
-    state = pcg_hash(state);
-    return float(state) / 4294967296.0;
+
+vec3 getWorldHitPos(){
+    return gl_WorldRayOriginEXT + gl_HitTEXT * gl_WorldRayDirectionEXT;
 }
 
-vec3 randomUnitVector(inout uint rng)
-{
-    float z = rand(rng) * 2.0 - 1.0;
-    float a = rand(rng) * 2.0 * PI;
-    float r = sqrt(max(0.0, 1.0 - z * z));
-    return vec3(r * cos(a), r * sin(a), z);
+vec3 getObjectHitPos(){
+    return gl_ObjectRayOriginEXT + gl_HitTEXT * gl_ObjectRayDirectionEXT;
 }
 
-vec3 cosineHemisphere(vec3 N, inout uint rng)
-{
-    vec3 u = normalize(abs(N.x) > 0.1 ? cross(vec3(0.0, 1.0, 0.0), N)
-                                      : cross(vec3(1.0, 0.0, 0.0), N));
-    vec3 v = cross(N, u);
+vec3 getSphereWorldNormal(){
+    // 假设 sphere 在 object space 下球心为 (0,0,0)
+    vec3 objHitPos = getObjectHitPos();
+    vec3 objN = safeNormalize(objHitPos);
 
-    float r1 = rand(rng);
-    float r2 = rand(rng);
-
-    float phi = 2.0 * PI * r1;
-    float r   = sqrt(r2);
-    float x   = r * cos(phi);
-    float y   = r * sin(phi);
-    float z   = sqrt(max(0.0, 1.0 - r2));
-
-    return normalize(u * x + v * y + N * z);
+    // 如果只有均匀缩放/旋转/平移，这样基本可用
+    vec3 worldN = normalize((gl_ObjectToWorldEXT * vec4(objN, 0.0)).xyz);
+    return worldN;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
-{
-    float f = pow(1.0 - saturate(cosTheta), 5.0);
-    return F0 + (1.0 - F0) * f;
+vec3 getLightDirAndRadiance(
+    RtLightInfo light,
+    vec3 hitPos,
+    out float maxT,
+    out vec3 radiance
+){
+    vec3 L;
+
+    if(isDirectionalLight(light)){
+        L = safeNormalize(-light.direction.xyz);
+        maxT = 1e32;
+        radiance = light.color.rgb * light.intensity;
+        return L;
+    }
+
+    vec3 toLight = light.position.xyz - hitPos;
+    float dist2 = max(dot(toLight, toLight), 1e-6);
+    float dist = sqrt(dist2);
+    L = toLight / dist;
+    maxT = dist - SHADOW_BIAS;
+
+    float attenuation = 1.0 / dist2;
+
+    if(isSpotLight(light)){
+        vec3 spotDir = safeNormalize(-light.direction.xyz);
+        float cosTheta = dot(L, spotDir);
+        float cosOuter = cos(light.angle);
+        float spotFactor = smoothstep(cosOuter, min(1.0, cosOuter + 0.05), cosTheta);
+        attenuation *= spotFactor;
+    }
+
+    radiance = light.color.rgb * light.intensity * attenuation;
+    return L;
 }
 
-// 假设 attribs.xy 是 sphere 的 uv
-vec3 sphereNormalFromAttribs(vec2 uv)
-{
-    float phi   = uv.x * 2.0 * PI;
-    float theta = uv.y * PI;
+float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){
+    shadowPayload.visibility = 0u;
 
-    float sinTheta = sin(theta);
-    return normalize(vec3(
-        sinTheta * cos(phi),
-        cos(theta),
-        sinTheta * sin(phi)
-    ));
+    uint flags =
+        gl_RayFlagsTerminateOnFirstHitEXT |
+        gl_RayFlagsOpaqueEXT |
+        gl_RayFlagsSkipClosestHitShaderEXT;
+
+    traceRayEXT(
+        topLevelAS,
+        flags,
+        0xFF,
+        0, 0, 1,   // missIndex = 1，假设你的 shadow miss 在 index 1
+        origin,
+        EPSILON,
+        dir,
+        tMax,
+        1          // payload location = 1
+    );
+
+    return float(shadowPayload.visibility);
 }
-/////////////////////////
-
 void main(){
-    uint material_Id = uint(gl_InstanceCustomIndexEXT);
-    primaryPayload.throughput = vec3(1.0);
-    primaryPayload.radiance   = sboMaterial.materials[material_Id].albedo * primaryPayload.throughput;
-    primaryPayload.done       = 1u;
-    return;
+    // uint materialIndex0 = uint(gl_InstanceCustomIndexEXT);
+    // primaryPayload.radiance = vec3(
+    //     float((materialIndex0 * 97) % 255) / 255.0,
+    //     float((materialIndex0 * 57) % 255) / 255.0,
+    //     float((materialIndex0 * 17) % 255) / 255.0
+    // );
+    // primaryPayload.done = 1u;
+    // return;
 
-    uint materialId = uint(gl_InstanceCustomIndexEXT);
-    Material mat = sboMaterial.materials[materialId];
+    // uint materialIndex0 = gl_InstanceCustomIndexEXT;
+    // Material mat0 = sboMaterial.materials[materialIndex0];
+    // primaryPayload.radiance = mat0.albedo;
+    // primaryPayload.done = 1u;
+    // return;
 
-    vec3 baseColor         = saturate(mat.albedo);
-    vec3 emission          = mat.emissionColor * mat.emissionStrength;
-    vec3 transmissionColor = saturate(mat.transmissionColor);
 
-    float metallic     = saturate(mat.metallic);
-    float roughness    = 0;//clamp(mat.roughness, 0.0, 1.0);//！
-    float alpha        = saturate(mat.alpha);
-    float reflectance  = saturate(mat.reflectance);
-    float specular     = saturate(mat.specular);
-    float transmission = 0;//saturate(mat.transmission);//！
-    float ior          = max(mat.ior, 1.0001);
+    /**************
+    0.早退判断
+    **************/
+    uint materialIndex = uint(gl_InstanceCustomIndexEXT);
 
-    vec3 Nobj = sphereNormalFromAttribs(attribs);
-    vec3 N    = normalize((gl_ObjectToWorldEXT * vec4(Nobj, 0.0)).xyz);
-
-    vec3 rayOrigin = gl_WorldRayOriginEXT;
-    vec3 rayDir    = normalize(gl_WorldRayDirectionEXT);
-    float t        = gl_HitTEXT;
-    vec3 P         = rayOrigin + t * rayDir;
-
-    vec3 V = normalize(-rayDir);
-
-    bool frontFace = dot(rayDir, N) < 0.0;
-    vec3 Ns = frontFace ? N : -N;
-
-    uint rng = uint(gl_LaunchIDEXT.x) * 1973u +
-               uint(gl_LaunchIDEXT.y) * 9277u +
-               uint(gl_PrimitiveID)   * 2663u +
-               materialId             * 1619u +
-               floatBitsToUint(t);
-
-    vec3 dielectricF0 = vec3(0.16 * reflectance * reflectance);
-    dielectricF0 = mix(dielectricF0, vec3(specular), 0.5);
-    vec3 F0 = mix(dielectricF0, baseColor, metallic);
-
-    float NdotV = saturate(dot(Ns, V));
-    vec3  F     = fresnelSchlick(NdotV, F0);
-
-    primaryPayload.radiance = emission * primaryPayload.throughput;
-
-    // alpha 很低时，当作吸收/终止；若你以后做真正透明裁剪，应放到 any-hit。
-    if (alpha <= 0.001)
-    {
-        primaryPayload.done       = 1u;
-        primaryPayload.nextOrigin = P;
-        primaryPayload.nextDir    = vec3(0.0);
+    //if(materialIndex < 0 || materialIndex >= uint(customUBO.materialCount)){//customUBO.materialCount is buggy
+    if(materialIndex < 0){
+        primaryPayload.radiance = vec3(1.0, 0.0, 1.0);
+        primaryPayload.done = 1u;
         return;
     }
 
-    // 1) transmissive branch
-    if (transmission > 0.001)
-    {
-        float etaI = frontFace ? 1.0 : ior;
-        float etaT = frontFace ? ior : 1.0;
-        float eta  = etaI / etaT;
+    Material mat = sboMaterial.materials[materialIndex];
 
-        vec3 reflDir = reflect(rayDir, Ns);
-        vec3 refrDir = refract(rayDir, Ns, eta);
+    // 如果 alpha 表示完全不可见，建议透传，而不是直接终止
+    if(mat.alpha <= 0.001){
+        primaryPayload.radiance = vec3(0.0);
+        primaryPayload.nextOrigin = getWorldHitPos() + safeNormalize(gl_WorldRayDirectionEXT) * EPSILON;
+        primaryPayload.nextDir = safeNormalize(gl_WorldRayDirectionEXT);
+        primaryPayload.done = 0u;
+        return;
+    }
 
-        bool tir = length(refrDir) < 1e-6;
+    /**************
+    1.命中信息重建
+    **************/
+    vec3 hitPos = getWorldHitPos();
+    vec3 Ngeom = getSphereWorldNormal();
+    vec3 I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
+    vec3 V = -I;
 
-        float Fr = (F.x + F.y + F.z) * (1.0 / 3.0);
-        float choose = rand(rng);
+    bool frontFace = dot(I, Ngeom) < 0.0;
+    vec3 N = frontFace ? Ngeom : -Ngeom; // N 始终朝向入射光
 
-        if (tir || choose < Fr)
-        {
-            //vec3 glossyRefl = normalize(mix(reflDir, randomUnitVector(rng), roughness * roughness));
-            vec3 hemi = cosineHemisphere(Ns, rng);
-            vec3 glossyRefl = normalize(mix(reflDir, normalize(reflDir + hemi), roughness * roughness));
-            if (dot(glossyRefl, Ns) <= 0.0) glossyRefl = reflDir;
+    vec3 albedo = mat.albedo;
+    vec3 emission = mat.emissionColor * mat.emissionStrength;
 
-            primaryPayload.nextOrigin = P + Ns * EPS;
-            primaryPayload.nextDir    = glossyRefl;
-            primaryPayload.throughput *= mix(vec3(1.0), baseColor, metallic) * max(Fr, 0.05);
-            primaryPayload.done       = 0u;
-            return;
+    float metallic = clamp(mat.metallic, 0.0, 1.0);
+    float roughness = clamp(mat.roughness, 0.02, 1.0);
+    float transmission = clamp(mat.transmission, 0.0, 1.0);
+    float specular = clamp(mat.specular, 0.0, 1.0);
+    float ior = max(mat.ior, 1.01);
+
+    float f0Scalar = pow((1.0 - ior) / (1.0 + ior), 2.0);
+    vec3 dielectricF0 = vec3(f0Scalar);
+    vec3 F0 = mix(dielectricF0, albedo, metallic);
+
+    /**************
+    2.直接光 + 阴影
+    **************/
+    vec3 directDiffuse = vec3(0.0);
+    vec3 directSpecular = vec3(0.0);
+
+    uint lightNum = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
+
+    for(uint i = 0u; i < lightNum; ++i){
+        RtLightInfo light = sboRtLightBuffer.lights[i];
+
+        float maxT;
+        vec3 lightRadiance;
+        vec3 L = getLightDirAndRadiance(light, hitPos, maxT, lightRadiance);
+
+        float NdotL = max(dot(N, L), 0.0);
+        if(NdotL <= 0.0) continue;
+
+        // primaryPayload.radiance = vec3(light.type / 3.0);
+        // primaryPayload.done = 1u;
+        // return;
+
+        //test
+        // primaryPayload.radiance = L * 0.5 + 0.5;
+        // primaryPayload.done = 1u;
+        // return;
+
+        vec3 shadowOrigin = hitPos + N * SHADOW_BIAS;
+        float visibility = traceShadowVisibility(shadowOrigin, L, maxT);
+        if(visibility <= 0.0) continue;
+
+        //float visibility = 1.0;//test
+
+        //test
+        // primaryPayload.radiance = vec3(visibility);
+        // primaryPayload.done = 1u;
+        // return;
+
+        vec3 kd = (1.0 - metallic) * albedo;
+        vec3 diffuseBRDF = kd / PI;
+
+        vec3 H = safeNormalize(L + V);
+        float NdotH = max(dot(N, H), 0.0);
+        float VdotH = max(dot(V, H), 0.0);
+
+        vec3 F = fresnelSchlick(VdotH, F0);
+
+        float shininess = mix(128.0, 4.0, roughness);
+        float specFactor = pow(NdotH, shininess) * specular;
+
+        directDiffuse += diffuseBRDF * lightRadiance * NdotL * visibility;
+        directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
+    }
+
+    vec3 localRadiance = emission + directDiffuse + directSpecular;
+
+
+    //test
+    // primaryPayload.radiance = emission + directDiffuse + directSpecular;
+    // primaryPayload.done = 1u;
+    // return;
+
+    /**************
+    3. 二次光线
+    **************/
+    vec3 nextOrigin = vec3(0.0);
+    vec3 nextDir = vec3(0.0);
+    vec3 nextThroughputMul = vec3(1.0);
+    bool spawnNextRay = false;
+
+    float cosTheta = clamp(dot(V, N), 0.0, 1.0);
+    float fresnelScalar = fresnelSchlickScalar(cosTheta, ior);
+
+    bool hasReflection = (specular > 0.01 || metallic > 0.01 || mat.reflectance > 0.01);
+    bool hasTransmission = false;//transmission > 0.01; //recover
+
+    if(hasTransmission){
+        float eta = frontFace ? (1.0 / ior) : ior;
+
+        vec3 T = refract(I, N, eta);
+        bool tir = dot(T, T) < 1e-8;
+
+        if(tir){
+            vec3 R = reflect(I, N);
+            nextOrigin = hitPos + N * SHADOW_BIAS;
+            nextThroughputMul = mix(vec3(specular), albedo, metallic);
+            spawnNextRay = true;
+        }else{
+            // 反射/折射可按 Fresnel 概率做 Russian roulette；
+            // 如果你现在只走一条路径，建议先固定优先折射，别用 fresnel>0.5 这种硬阈值
+            nextOrigin = hitPos - N * SHADOW_BIAS;
+            nextDir = safeNormalize(T);
+            nextThroughputMul = mat.transmissionColor * transmission * (1.0 - fresnelScalar);
+            spawnNextRay = true;
         }
-        else
-        {
-            vec3 glossyRefr = normalize(mix(refrDir, randomUnitVector(rng), roughness * roughness * 0.25));
-            primaryPayload.nextOrigin = P + glossyRefr * EPS;
-            primaryPayload.nextDir    = glossyRefr;
-            primaryPayload.throughput *= transmissionColor * transmission * max(1.0 - Fr, 0.05);
-            primaryPayload.done       = 0u;
-            return;
-        }
+    }
+    else if(hasReflection){
+        vec3 R = reflect(I, N);
+        nextOrigin = hitPos + N * SHADOW_BIAS;
+        nextDir = safeNormalize(R);
+        nextThroughputMul = mix(vec3(specular), albedo, metallic) * fresnelScalar;
+        spawnNextRay = true;
     }
 
-    // 2) opaque branch: metallic specular vs diffuse
-    float specProb = clamp(max(max(F.r, F.g), F.b), 0.05, 0.95);
-    if (rand(rng) < mix(specProb, 1.0, metallic))
-    {
-        vec3 reflDir   = reflect(rayDir, Ns);
-        vec3 glossyDir = normalize(mix(reflDir, randomUnitVector(rng), roughness * roughness));
-        if (dot(glossyDir, Ns) < 0.0)
-            glossyDir = normalize(reflect(glossyDir, Ns));
+    /**************
+    4. 写回 payload
+    注意：这里不要提前把 throughput 乘成“下一跳”的值，
+    否则 rgen 若用 throughput * radiance 累加，会把本跳权重搞错
+    **************/
+    primaryPayload.radiance = localRadiance;
 
-        primaryPayload.nextOrigin = P + Ns * EPS;
-        primaryPayload.nextDir    = glossyDir;
-        primaryPayload.throughput *= F;
-        primaryPayload.done       = 0u;
-        return;
+    if(spawnNextRay && luminance(nextThroughputMul) > 1e-4){
+        primaryPayload.nextOrigin = nextOrigin;
+        primaryPayload.nextDir = nextDir;
+
+        // 关键点：
+        // 不要在这里直接 *= nextThroughputMul，
+        // 除非你的 rgen 是先 accum 当前 radiance，再更新 throughput。
+        // 如果你当前 rgen 不是这样，这里先改成“由 rgen 负责乘”。
+        primaryPayload.done = 0u;
+
+        // 如果你暂时又不想改 rgen，可以保留这一行，但必须调整 rgen 顺序
+        // primaryPayload.throughput *= nextThroughputMul;
     }
-    else
-    {
-        vec3 diffuseDir = cosineHemisphere(Ns, rng);
-        primaryPayload.nextOrigin = P + Ns * EPS;
-        primaryPayload.nextDir    = diffuseDir;
-        primaryPayload.throughput *= baseColor * (1.0 - metallic);
-        primaryPayload.done       = 0u;
-        return;
+    else{
+        primaryPayload.done = 1u;
     }
 }

@@ -34,7 +34,7 @@ namespace LuminError{
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetRaytracingCustomBinding(static_cast<void*>(&binding));
             customUniformBufferObject.lightCount = GameEngine->GetRTLightSize();
-            customUniformBufferObject.materialCount = 1; //TODO
+            customUniformBufferObject.materialCount = GameEngine->GetMaterialSize(); //目前只能读出0，暂时不用这个东西
         }
 
         void Update() override {

@@ -181,6 +181,7 @@ namespace LEGameEngine{
         }
 
         int GetRTLightSize() override { return appInfo->RTLights.size(); }
+        int GetMaterialSize() override { return appInfo->Materials.size(); }
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override;

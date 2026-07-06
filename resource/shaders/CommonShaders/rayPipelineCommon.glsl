@@ -39,8 +39,43 @@ vec2 rnd2(vec2 pix, int sampleIndex, int frameIndex)
 }
 
 
+
 /**************
-以下是为了做软阴影的utility函数
+Untility functions
+**************/
+const float PI = 3.14159265359;
+const float EPSILON = 0.001;
+const float SHADOW_BIAS = 0.01;
+
+float saturate(float x){
+    return clamp(x, 0.0, 1.0);
+}
+
+vec3 safeNormalize(vec3 v){
+    float len2 = dot(v, v);
+    if(len2 < 1e-12) return vec3(0.0, 0.0, 1.0);
+    return v * inversesqrt(len2);
+}
+
+float luminance(vec3 c){
+    return dot(c, vec3(0.2126, 0.7152, 0.0722));
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0){
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float fresnelSchlickScalar(float cosTheta, float ior){
+    float f0 = (1.0 - ior) / (1.0 + ior);
+    f0 = f0 * f0;
+    return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
+}
+
+
+
+
+/**************
+以下是为了做软阴影的utility函数(lagacy)
 **************/
 uint hash_u32(uint x) {
     x ^= x >> 16;
