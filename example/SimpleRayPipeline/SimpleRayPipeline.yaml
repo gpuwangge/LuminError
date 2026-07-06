@@ -1,126 +1,66 @@
 Objects:
-  - object_name: Cube0
+  - object_name: Tree
     object_id: 0
     object_scale: 1
-    object_position: [-2.0, -2.0, 0] #Bottom Left
-    object_rotation: [0,0,0]
+    object_position: [0,0,0]
+    object_rotation: [0,0,0] #no use
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
-    object_material_id: 0
+    object_material_id: 2
     resource_model_id: 0
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Cube1
-    object_id: 1
-    object_scale: 1
-    object_position: [-2.0, 2.0, 0] #Up Left
-    object_rotation: [0,0,0]
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 0
-    resource_model_id: 1
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Cube2
-    object_id: 2
-    object_scale: 1
-    object_position: [2.0, 2.0, 0] #Up Right
-    object_rotation: [0,0,0]
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 0
-    resource_model_id: 0
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Cube3
-    object_id: 3
-    object_scale: 1
-    object_position: [2.0, -2.0, 0] #Bottom Right
-    object_rotation: [0,0,0]
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 0
-    resource_model_id: 1
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Tree
-    object_id: 4
-    object_scale: 1.5
-    object_position: [0.0, -2.0, 0]
-    object_rotation: [0,0,0]
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 0
-    resource_model_id: 2
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
 
+
 CustomSpheres:
-  - custom_sphere_name: Sphere0
+  - custom_sphere_name: Sphere
     custom_sphere_id: 0
-    custom_sphere_position: [0.0, -4.5, 0]
-    custom_sphere_radius: 2.0
+    custom_sphere_position: [0, -8.0, 0]
+    custom_sphere_radius: 8.0
     custom_sphere_material_id: 0
     custom_sphere_visibility: true
-  - custom_sphere_name: Sphere1
+  - custom_sphere_name: Sphere
     custom_sphere_id: 1
-    custom_sphere_position: [1.5, 0, 0]
-    custom_sphere_radius: 0.5
+    custom_sphere_position: [3, 0.0, 0]
+    custom_sphere_radius: 0.75
     custom_sphere_material_id: 1
     custom_sphere_visibility: true
-  - custom_sphere_name: Sphere2
+  - custom_sphere_name: Sphere
     custom_sphere_id: 2
-    custom_sphere_position: [-1.5, 0, -1.5]
-    custom_sphere_radius: 0.75
+    custom_sphere_position: [-0.95, 0.2, -1.75]
+    custom_sphere_radius: 0.35
     custom_sphere_material_id: 2
     custom_sphere_visibility: true
-  - custom_sphere_name: Sphere3
+  - custom_sphere_name: Sphere
     custom_sphere_id: 3
-    custom_sphere_position: [0.0, 3, 0.0]
-    custom_sphere_radius: 1
+    custom_sphere_position: [0.5, 0.6, -1.8]
+    custom_sphere_radius: 0.35
     custom_sphere_material_id: 3
+    custom_sphere_visibility: true
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 4
+    custom_sphere_position: [0, 3, -1]
+    custom_sphere_radius: 1.15
+    custom_sphere_material_id: 4
     custom_sphere_visibility: true
 
 RTLights: #ray tracing pipeline lights to generate shadow
   - rt_light_name: Light0
     rt_light_id: 0
-    rt_light_position: [-0.6, -0.6, -2.0]
-    rt_light_color: [1, 0, 1]
-    rt_light_intensity: 5
+    rt_light_position: [-0.0, 1.5, -1.0]
+    rt_light_color: [1, 1, 1]
+    rt_light_intensity: 1
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
     rt_light_angle: 30 #only for spot light, not used yet
-  - rt_light_name: Light1
-    rt_light_id: 1
-    rt_light_position: [0.6, 0.6, -2.0]
-    rt_light_color: [0, 1, 0]
-    rt_light_intensity: 5
-    rt_light_radius: 0.08
-    rt_light_type: 0
-    rt_light_direction: [0, -1, 0]
-  - rt_light_name: Light2
-    rt_light_id: 2
-    rt_light_position: [-2, 2, 0]
-    rt_light_color: [1, 0, 0]
-    rt_light_intensity: 2
-    rt_light_radius: 0.08
-    rt_light_type: 0
-    rt_light_direction: [0, -1, 0]
-  - rt_light_name: Light3
-    rt_light_id: 3
-    rt_light_position: [2, -2, 0]
-    rt_light_color: [0, 0, 1]
-    rt_light_intensity: 2
-    rt_light_radius: 0.08
-    rt_light_type: 0
-    rt_light_direction: [0, -1, 0]
+
 
 Resources:
   - Models:
+    - resource_model_name: low_poly_tree.obj
     - resource_model_name: cube.obj
     - resource_model_name: cube_10facet.obj
-    - resource_model_name: low_poly_tree.obj
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
       resource_raytracing_pipeline_primary_miss_shader_name: simpleRayPipeline/primary.rmiss.spv
@@ -161,8 +101,8 @@ Attachments:
   mainsceneRenderpass_attachment_color_present: false
 
 MainCamera:
-  camera_mode: 1
-  camera_position: [0,0,-7]
+  camera_mode: 0
+  camera_position: [0,0,-3.0]
   camera_rotation: [0,0,0]
   object_id_target: 0
   camera_z: [0.1, 256]
@@ -171,4 +111,4 @@ MainCamera:
   camera_projection_orthographic_width: 8
   camera_projection_orthographic_height: 8
   camera_keyboard_sensitive: 3
-  camera_mouse_sensitive: 60
+  camera_mouse_sensitive: 20
