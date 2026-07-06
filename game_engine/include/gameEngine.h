@@ -94,6 +94,7 @@ namespace LEGameEngine{
         StructStorageBuffer_BVHNode storageBufferObject_BVHNode{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
         StructStorageBuffer_GeometryInfo storageBufferObject_GeometryInfo{};
+        StructStorageBuffer_RtLight storageBufferObject_rtLight{};
 
         //make these global so compute shader can access. TODO: support multiple models
 
@@ -178,6 +179,8 @@ namespace LEGameEngine{
             float fps = GetFPS();
             std::cout<<"FPS: "<<fps<<std::endl;
         }
+
+        int GetRTLightSize() override { return appInfo->RTLights.size(); }
 
         //Expose functions for SDL Core to use
         bool Get_feature_graphics_enable_controls() override;

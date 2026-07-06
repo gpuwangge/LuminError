@@ -53,6 +53,27 @@ layout(set = 0, binding = 4, scalar) readonly buffer SBOGeometryInfoBuffer {
     GeometryInfo infos[];
 } sboGeometryInfos;
 
+layout(set = 0, binding = 7) uniform CustomBufferObject {
+    int frameCount;
+    bool cameraInMotion;
+    uint lightCount;
+    uint materialCount;
+} customUBO;
+
+struct RtLightInfo{
+    vec4 position;
+    vec4 color;
+    vec4 direction;
+    float intensity;
+    float radius;
+    float angle;
+    float type;
+};  //total size: 16+16+16+4*4=64 bytes
+const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
+layout(set = 0, binding = 8, std430) readonly buffer SBORtLightBuffer {
+    RtLightInfo lights[RTLIGHT_SIZE];
+} sboRtLightBuffer;
+
 float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius, int sampleCount, uint baseSeed) {
     const float EPS = 0.001;
     vec3 shadowOrigin = P + N * EPS;
@@ -144,33 +165,29 @@ void main(){
     //vec3 Nshading = N;
     //if (dot(gl_WorldRayDirectionEXT, Nshading) < 0.0) Nshading = -Nshading; //do this so both sides of a triangle will have light color
     
-    const int LIGHT_COUNT = 4; //TODO: Lights should be input, not hard-code
-
-    vec3 lightPos[LIGHT_COUNT] = vec3[](
-        vec3(-0.6, -0.6, -2.0), //purple
-        vec3(0.6,  0.6, -2.0), //green
-        vec3(-2.0, 2.0, 0.0), //blue
-        vec3(2.0, -2.0, 0.0) //red
-    );
-
-    vec3 lightColor[LIGHT_COUNT] = vec3[](
-        vec3(1.0, 0.0, 1.0), //purple
-        vec3(0.0, 1.0, 0.0), //green
-        vec3(1.0, 0.0, 0.0), //blue
-        vec3(0.0, 0.0, 1.0) //red
-    );
-
-    float lightIntensity[LIGHT_COUNT] = float[](5.0, 5.0, 2.0, 2.0);
-
-    float lightRadius[LIGHT_COUNT] = float[](0.08, 0.08, 0.08, 0.08);
+    //const int LIGHT_COUNT = 4;
+    // vec3 lightPos[LIGHT_COUNT] = vec3[](
+    //     vec3(-0.6, -0.6, -2.0), //purple
+    //     vec3(0.6,  0.6, -2.0), //green
+    //     vec3(-2.0, 2.0, 0.0), //blue
+    //     vec3(2.0, -2.0, 0.0) //red
+    // );
+    // vec3 lightColor[LIGHT_COUNT] = vec3[](
+    //     vec3(1.0, 0.0, 1.0), //purple
+    //     vec3(0.0, 1.0, 0.0), //green
+    //     vec3(1.0, 0.0, 0.0), //blue
+    //     vec3(0.0, 0.0, 1.0) //red
+    // );
+    // float lightIntensity[LIGHT_COUNT] = float[](5.0, 5.0, 2.0, 2.0);
+    // float lightRadius[LIGHT_COUNT] = float[](0.08, 0.08, 0.08, 0.08);
 
     vec3 baseColor = vec3(0.8, 0.7, 0.6);
     vec3 localLighting = baseColor * 0.25;   // ambient
 
     const float EPS = 0.001;
 
-    for (int i = 0; i < LIGHT_COUNT; ++i){
-        if (lightIntensity[i] <= 0.0) continue;
+    for (int i = 0; i < customUBO.lightCount; ++i){
+        if (sboRtLightBuffer.lights[i].intensity <= 0.0) continue;
 
         /*Legacy - hard shadow
         vec3 toLight = lightPos[i] - P;
@@ -215,7 +232,7 @@ void main(){
             gl_InstanceCustomIndexEXT * 31847u +
             uint(i) * 101u;
 
-        vec3 toLightCenter = lightPos[i] - P;
+        vec3 toLightCenter = vec3(sboRtLightBuffer.lights[i].position) - P;
         float centerDist = length(toLightCenter);
         vec3 Lc = toLightCenter / max(centerDist, 1e-4);
 
@@ -224,15 +241,15 @@ void main(){
 
         float visibility = computeSoftShadowVisibility(
             P, N,
-            lightPos[i],
-            lightRadius[i],
+            vec3(sboRtLightBuffer.lights[i].position),
+            sboRtLightBuffer.lights[i].radius,
             SHADOW_SAMPLES,
             seed
         );
         //float visibility = 1.0f;
 
         float attenuation = 1.0 / max(centerDist * centerDist, 1e-4);
-        localLighting += baseColor * lightColor[i] * lightIntensity[i]
+        localLighting += baseColor * vec3(sboRtLightBuffer.lights[i].color) * sboRtLightBuffer.lights[i].intensity
                     * NdotL_center * attenuation * visibility;
 
 

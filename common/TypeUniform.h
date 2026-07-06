@@ -105,6 +105,22 @@ struct alignas(16) MaterialInfo{
     //alignas(4) float padding[44]; //44*4=176 bytes 
 }; //total size: 16*3+4*8=80, need+176=256 bytes but no need?
 
+
+
+struct alignas(16) RtLightInfo{
+    alignas(16) glm::vec4 position;
+    alignas(16) glm::vec4 color;
+    alignas(16) glm::vec4 direction;
+    alignas(4) float intensity;
+    alignas(4) float radius;
+    alignas(4) float angle;
+    alignas(4) float type;
+};  //total size: 16+16+16+4*4=64 bytes
+static constexpr size_t RTLIGHT_SIZE = 64;//assume max 64 materials for now
+struct StructStorageBuffer_RtLight{
+    RtLightInfo lights[RTLIGHT_SIZE];
+};
+
 static constexpr size_t MATERIAL_SIZE = 64;//assume max 64 materials for now
 struct StructStorageBuffer_Material{
     MaterialInfo materials[MATERIAL_SIZE];

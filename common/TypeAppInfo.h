@@ -189,6 +189,28 @@ struct CustomSphereConfig {
     }
 };
 
+struct RTLightConfig {
+    int rt_light_id = 0;
+    std::vector<float> rt_light_position = std::vector<float>(3, 0);
+    std::vector<float> rt_light_color = std::vector<float>(3, 1.0f);
+    float rt_light_intensity = 10.0f;
+    float rt_light_radius = 0.1f;
+    int rt_light_type = 0;
+    std::vector<float> rt_light_direction = std::vector<float>(3, 0);
+    float rt_light_angle = 30.0f;
+
+    void loadFromYaml(const YAML::Node& node) {
+        rt_light_id                             = getOrDefault(node, "rt_light_id", 0);
+        rt_light_position                       = getOrDefault(node, "rt_light_position", std::vector<float>(3, 0.0f));
+        rt_light_color                           = getOrDefault(node, "rt_light_color", std::vector<float>(3, 1.0f));
+        rt_light_intensity                       = getOrDefault(node, "rt_light_intensity", 10.0f);
+        rt_light_radius                           = getOrDefault(node, "rt_light_radius", 0.1f);
+        rt_light_type                             = getOrDefault(node, "rt_light_type", 0);
+        rt_light_direction                         = getOrDefault(node, "rt_light_direction", std::vector<float>(3, 0.0f));
+        rt_light_angle                             = getOrDefault(node, "rt_light_angle", 30.0f);
+    }
+};
+
 struct TextConfig {
     int textbox_id = 0;
     std::string textbox_name = "Default";
@@ -447,6 +469,7 @@ struct AppInfo{
     std::vector<TextConfig> Textboxes;
     std::vector<LightConfig> Lights;
     std::vector<MaterialConfig> Materials;
+    std::vector<RTLightConfig> RTLights;
 
     FontConfig Font;
     std::vector<ModelConfig> Models;

@@ -28,6 +28,8 @@ namespace LEGameEngine{
         virtual float GetFPS() = 0;
         virtual void PrintFPS(float interval) = 0;
 
+        virtual int GetRTLightSize() = 0;
+
         //Expose functions for SDL Core to use
         virtual bool Get_feature_graphics_enable_controls() = 0;
         virtual bool Get_feature_graphics_show_all_metric_controls() = 0;

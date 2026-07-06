@@ -159,6 +159,23 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
     if (yamlNode["MainCamera"]) appInfo.MainCamera.loadFromYaml(yamlNode["MainCamera"]);
     if (yamlNode["LightCamera"]) appInfo.LightCamera.loadFromYaml(yamlNode["LightCamera"]);
 
+    int max_rtlight_id = -1;
+    if (yamlNode["RTLights"]) {
+        for (const auto& rtlight : yamlNode["RTLights"]) {
+            int rtlight_id = rtlight["rt_light_id"] ? rtlight["rt_light_id"].as<int>() : 0;
+            max_rtlight_id = (rtlight_id > max_rtlight_id) ? rtlight_id : max_rtlight_id;
+        }
+    }
+    int customRTLightCount = ((max_rtlight_id+1) < yamlNode["RTLights"].size()) ? (max_rtlight_id+1) : yamlNode["RTLights"].size();
+    std::cout<<"Detected "<<customRTLightCount<<" custom RT lights in the YAML file."<<std::endl;
+    appInfo.RTLights.resize(customRTLightCount);
+    if (yamlNode["RTLights"]) {
+        //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
+        for (const auto& rtlight : yamlNode["RTLights"]) {
+            int rtlight_id = rtlight["rt_light_id"] ? rtlight["rt_light_id"].as<int>() : 0;
+            appInfo.RTLights[rtlight_id].loadFromYaml(rtlight);
+        }
+    }
 }
 
 void YAMLCore::ReadMaterialYAMLFile(const std::string& filename){

@@ -14,7 +14,7 @@ namespace LuminError{
         struct StructCustomUniformBuffer {
             alignas(4) int frameCount = 0;
             alignas(4) bool cameraInMotion = false;
-            alignas(4) unsigned int triangleCount = 0;
+            alignas(4) unsigned int lightCount = 0;
             alignas(4) unsigned int materialCount = 0;
 
             static VkDescriptorSetLayoutBinding GetBinding(){
@@ -33,7 +33,7 @@ namespace LuminError{
             GameEngine->SetRaytracingCustomSize(sizeof(StructCustomUniformBuffer));
             VkDescriptorSetLayoutBinding binding = StructCustomUniformBuffer::GetBinding();
             GameEngine->SetRaytracingCustomBinding(static_cast<void*>(&binding));
-            customUniformBufferObject.triangleCount = 5; //TODO
+            customUniformBufferObject.lightCount = GameEngine->GetRTLightSize();
             customUniformBufferObject.materialCount = 1; //TODO
         }
 

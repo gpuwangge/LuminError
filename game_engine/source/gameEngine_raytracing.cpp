@@ -360,6 +360,29 @@ void GameEngine::SetupRayTracing(){
         renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
     }
+
+    //Ray Tracing: prepare rt lights buffer data
+    //std::cout<<"Preparing RT Lights buffer data..."<<appInfo->RTLights.size()<<std::endl;
+    //TODO: bool switch
+    for(int i = 0; i < appInfo->RTLights.size() && i < RTLIGHT_SIZE; i++){
+        storageBufferObject_rtLight.lights[i].position = glm::vec4(appInfo->RTLights[i].rt_light_position[0], appInfo->RTLights[i].rt_light_position[1], appInfo->RTLights[i].rt_light_position[2], 1.0f);
+        storageBufferObject_rtLight.lights[i].color = glm::vec4(appInfo->RTLights[i].rt_light_color[0], appInfo->RTLights[i].rt_light_color[1], appInfo->RTLights[i].rt_light_color[2], 1.0f);
+        storageBufferObject_rtLight.lights[i].direction = glm::vec4(appInfo->RTLights[i].rt_light_direction[0], appInfo->RTLights[i].rt_light_direction[1], appInfo->RTLights[i].rt_light_direction[2], 1.0f);
+        storageBufferObject_rtLight.lights[i].intensity = appInfo->RTLights[i].rt_light_intensity;
+        storageBufferObject_rtLight.lights[i].radius = appInfo->RTLights[i].rt_light_radius;
+        storageBufferObject_rtLight.lights[i].angle = appInfo->RTLights[i].rt_light_angle;
+        storageBufferObject_rtLight.lights[i].type = appInfo->RTLights[i].rt_light_type;
+        //storageBufferObject_rtLight.lights[i].rt_light_id = appInfo->RTLights[i].rt_light_id;
+    }
+
+    // for(int i = 0; i < appInfo->RTLights.size(); i++){
+    //     std::cout<<"RT Light "<<i<<": position=("<<storageBufferObject_rtLight.lights[i].position.x<<","<<storageBufferObject_rtLight.lights[i].position.y<<","<<storageBufferObject_rtLight.lights[i].position.z<<"), color=("<<storageBufferObject_rtLight.lights[i].color.r<<","<<storageBufferObject_rtLight.lights[i].color.g<<","<<storageBufferObject_rtLight.lights[i].color.b<<"), intensity="<<storageBufferObject_rtLight.lights[i].intensity<<", radius="<<storageBufferObject_rtLight.lights[i].radius<<", type="<<storageBufferObject_rtLight.lights[i].type<<std::endl;
+    //     std::cout<<"    direction=("<<storageBufferObject_rtLight.lights[i].direction.x<<","<<storageBufferObject_rtLight.lights[i].direction.y<<","<<storageBufferObject_rtLight.lights[i].direction.z<<"), angle="<<storageBufferObject_rtLight.lights[i].angle<<std::endl;
+    // }
+
+    renderer->uploadRaytracingStorageBuffer_rtLight(GetCurrentFrame(), &storageBufferObject_rtLight, sizeof(StructStorageBuffer_RtLight));
+    renderer->uploadRaytracingStorageBuffer_rtLight(GetCurrentFrame()+1, &storageBufferObject_rtLight, sizeof(StructStorageBuffer_RtLight));
+
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

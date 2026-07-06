@@ -107,45 +107,14 @@ public:
 
 
     /************
-     * 5.5 COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX
+     * ? COMPUTE_UNIFORMBUFFER_RTLIGHT
      ************/
-    // static std::vector<CWxjBuffer> storageBuffers_triangleReorderIndex;
-    // static std::vector<void*> storageBuffersMapped_triangleReorderIndex;
-    // void addStorageBuffer_triangleReorderIndex();
-    // void uploadStorageBuffer_triangleReorderIndex(uint32_t currentFrame, const void* data, size_t size);
+    static std::vector<CWxjBuffer> m_storageBuffers_rtLight; 
+	static std::vector<void*> m_storageBuffersMapped_rtLight;
+    void addStorageBuffer_rtLight();
+    void uploadStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t dataSize);
 
-    /************
-     * 6 COMPUTE_STORAGEBUFFER_BVHNODE
-     ************/
-    // static std::vector<CWxjBuffer> storageBuffers_bvhNode;
-    // static std::vector<void*> storageBuffersMapped_bvhNode;
-    // void addStorageBuffer_bvhNode();
-    // void uploadStorageBuffer_bvhNode(uint32_t currentFrame, const void* data, size_t size);
 
-    /************
-     * 7 COMPUTE_STORAGEBUFFER_SPHERE
-     ************/
-    // static std::vector<CWxjBuffer> storageBuffers_sphere;
-    // static std::vector<void*> storageBuffersMapped_sphere;
-    // void addStorageBuffer_sphere();
-    // void uploadStorageBuffer_sphere(uint32_t currentFrame, const void* data, size_t size);
-
-    
-
-    /************
-     * 9 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
-     * Read and Write
-     * Need get size from game example
-     ************/
-    //define two sets(and layouts) of storage buffers, one for input, the other for output; however they share the same descriptor pool
-	// static std::vector<CWxjBuffer> storageBuffers_customswap;
-    // static std::vector<void*> storageBuffersMapped_customswap;
-    // static VkDeviceSize m_storageBufferSize_customswap;
-    // void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT); //the same function to add storage 1&2
-    // void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size);
-    // void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size);
-
-    
 
 
     /************

@@ -25,7 +25,7 @@ layout(set = 0, binding = 6) uniform GlobalBufferObject {
 layout(set = 0, binding = 7) uniform CustomBufferObject {
     int frameCount;
     bool cameraInMotion;
-    uint triangleCount;
+    uint lightCount;
     uint materialCount;
 } customUBO;
 

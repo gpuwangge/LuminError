@@ -116,6 +116,7 @@ void GameEngine::Initialize(){
         renderer->addRaytracingStorageBuffer_material();
         renderer->addRaytracingStorageBuffer_global();
         renderer->addRaytracingStorageBuffer_custom(appInfo->Uniform.RaytracingCustom.Size);
+        renderer->addRaytracingStorageBuffer_rtLight();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
     }
 

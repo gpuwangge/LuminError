@@ -81,6 +81,40 @@ CustomSpheres:
     custom_sphere_material_id: 3
     custom_sphere_visibility: true
 
+RTLights: #ray tracing pipeline lights to generate shadow
+  - rt_light_name: Light0
+    rt_light_id: 0
+    rt_light_position: [-0.6, -0.6, -2.0]
+    rt_light_color: [1, 0, 1]
+    rt_light_intensity: 5
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
+  - rt_light_name: Light1
+    rt_light_id: 1
+    rt_light_position: [0.6, 0.6, -2.0]
+    rt_light_color: [0, 1, 0]
+    rt_light_intensity: 5
+    rt_light_radius: 0.08
+    rt_light_type: 0
+    rt_light_direction: [0, -1, 0]
+  - rt_light_name: Light2
+    rt_light_id: 2
+    rt_light_position: [-2, 2, 0]
+    rt_light_color: [1, 0, 0]
+    rt_light_intensity: 2
+    rt_light_radius: 0.08
+    rt_light_type: 0
+    rt_light_direction: [0, -1, 0]
+  - rt_light_name: Light3
+    rt_light_id: 3
+    rt_light_position: [2, -2, 0]
+    rt_light_color: [0, 0, 1]
+    rt_light_intensity: 2
+    rt_light_radius: 0.08
+    rt_light_type: 0
+    rt_light_direction: [0, -1, 0]
 
 Resources:
   - Models:
