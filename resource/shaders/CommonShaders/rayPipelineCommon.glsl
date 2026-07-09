@@ -6,6 +6,7 @@ struct PrimaryPayload {
     vec3 throughput;  // 路径权重，给 rgen 累积用
     vec3 nextOrigin;  // 下一跳光线起点
     vec3 nextDir;     // 下一跳光线方向
+    uint depth;       // 当前 bounce 数（以后俄罗斯轮盘用）
     uint done;        // 1 = 终止，0 = 继续
 };
 

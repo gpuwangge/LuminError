@@ -2,6 +2,7 @@
 #extension GL_EXT_ray_tracing : require
 
 hitAttributeEXT vec2 attribs;
+//hitAttributeEXT vec3 hitNormal;
 
 void main()
 {
@@ -26,6 +27,11 @@ void main()
     else if (t1 >= gl_RayTminEXT && t1 <= gl_RayTmaxEXT) t = t1;
 
     if (t < 0.0) return;
+
+
+    //vec3 p = ro + rd * t;
+    //hitNormal = normalize(p);
+
 
     reportIntersectionEXT(t, 1);
 }

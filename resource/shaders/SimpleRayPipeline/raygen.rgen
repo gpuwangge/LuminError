@@ -3,7 +3,7 @@
 
 #include "../CommonShaders/rayPipelineCommon.glsl"
 
-const int RAY_PER_PIXEL = 16;
+const int RAY_PER_PIXEL = 4;
 const int BOUNCE_LIMIT  = 4;
 
 layout(set = 0, binding = 0, rgba8) uniform writeonly image2D resultImage;
@@ -66,6 +66,7 @@ void main(){
 
             primaryPayload.radiance = vec3(0.0);
             primaryPayload.done     = 1u;
+            primaryPayload.depth = bounce;
 
             traceRayEXT(
                 topLevelAS,
@@ -82,6 +83,7 @@ void main(){
             );
 
             lightColor += oldThroughput * primaryPayload.radiance;
+            //lightColor += primaryPayload.radiance;
 
             if (primaryPayload.done != 0u)
                 break;

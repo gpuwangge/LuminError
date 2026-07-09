@@ -1,26 +1,5 @@
 Objects:
-  - object_name: Tree
-    object_id: 0
-    object_scale: 1
-    object_position: [0,0,0]
-    object_rotation: [0,0,0] #no use
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 2
-    resource_model_id: 0
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Cube
-    object_id: 1
-    object_scale: 3
-    object_position: [4, 1, 7]
-    object_rotation: [0,0,0] #no use
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 2
-    resource_model_id: 1
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
+
 
 CustomSpheres:
   - custom_sphere_name: Sphere
@@ -45,7 +24,7 @@ CustomSpheres:
     custom_sphere_id: 3
     custom_sphere_position: [0.5, 0.6, -1.8]
     custom_sphere_radius: 0.35
-    custom_sphere_material_id: 3
+    custom_sphere_material_id: 1
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 4
@@ -57,14 +36,22 @@ CustomSpheres:
 RTLights: #ray tracing pipeline lights to generate shadow
   - rt_light_name: Light0
     rt_light_id: 0
-    rt_light_position: [1.0, 1.5, -3.0]
+    rt_light_position: [1.0, 1.5, -1.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 5
+    rt_light_intensity: 0
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
     rt_light_angle: 30 #only for spot light, not used yet
-
+  - rt_light_name: Light1
+    rt_light_id: 1
+    rt_light_position: [-1.0, 1.5, -3.0]
+    rt_light_color: [1, 1, 1]
+    rt_light_intensity: 10
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
 
 Resources:
   - Models:
