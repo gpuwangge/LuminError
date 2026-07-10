@@ -18,7 +18,7 @@ CustomSpheres:
     custom_sphere_id: 2
     custom_sphere_position: [-0.95, 0.2, -1.75]
     custom_sphere_radius: 0.35
-    custom_sphere_material_id: 3
+    custom_sphere_material_id: 2
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 3
