@@ -261,8 +261,8 @@ void main(){
     vec3 hitPos = gl_WorldRayOriginEXT + gl_HitTEXT * gl_WorldRayDirectionEXT;
     //vec3 reflDir = reflect(primaryPayload.nextDir, N); // 实际上建议单独存当前入射方向
     vec3 reflDir = reflect(gl_WorldRayDirectionEXT, N);
-    primaryPayload.nextOrigin = hitPos + N * 0.001;
-    primaryPayload.nextDir    = normalize(reflDir);
+    primaryPayload.nextRayOrigin0 = hitPos + N * 0.001;
+    primaryPayload.nextRayDir0    = normalize(reflDir);
 
     primaryPayload.radiance += primaryPayload.throughput * localLighting;
     float reflectance = 0.75f; //TODO: change this later

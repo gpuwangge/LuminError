@@ -1,12 +1,22 @@
 Objects:
-
+  # - object_name: Tree
+  #   object_id: 0
+  #   object_scale: 2
+  #   object_position: [0,-2.5,0]
+  #   object_rotation: [0,0,0] #no use
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 0
+  #   resource_model_id: 0
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
 
 CustomSpheres:
   - custom_sphere_name: Sphere
     custom_sphere_id: 0
     custom_sphere_position: [0, -8.0, 0]
     custom_sphere_radius: 8.0
-    custom_sphere_material_id: 3
+    custom_sphere_material_id: 0
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 1
@@ -26,6 +36,12 @@ CustomSpheres:
     custom_sphere_radius: 0.35
     custom_sphere_material_id: 1
     custom_sphere_visibility: true
+  # - custom_sphere_name: Sphere
+  #   custom_sphere_id: 4
+  #   custom_sphere_position: [0.5, 0.6, -1.8]
+  #   custom_sphere_radius: 0.2
+  #   custom_sphere_material_id: 1
+  #   custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 4
     custom_sphere_position: [0, 3, -1]

@@ -4,10 +4,40 @@
 struct PrimaryPayload {
     vec3 radiance;    // 当前这次 trace 返回的光照贡献
     vec3 throughput;  // 路径权重，给 rgen 累积用
-    vec3 nextOrigin;  // 下一跳光线起点
-    vec3 nextDir;     // 下一跳光线方向
+    float currentIOR;
+    uint insideMedium; // 0 = air, 1 = medium
+    vec3 mediumEntryPos;
+
+    uint spawnRayCount;  // 0, 1(折射或反射) or 2(折射和反射)
+
+    vec3 nextRayOrigin0;  // 下一跳光线起点
+    vec3 nextRayDir0;     // 下一跳光线方向
+    vec3 nextRayThroughputMul0;
+    float nextCurrentIOR0; // 当前 ray 所在介质
+    uint  nextInsideMedium0; // 0 = air, 1 = medium
+    vec3  nextMediumEntryPos0;
+
+    vec3 nextRayOrigin1;  // 下一跳光线起点
+    vec3 nextRayDir1;     // 下一跳光线方向
+    vec3 nextRayThroughputMul1;
+    float nextCurrentIOR1; // 当前 ray 所在介质
+    uint  nextInsideMedium1; // 0 = air, 1 = medium
+    vec3  nextMediumEntryPos1;
+
     uint depth;       // 当前 bounce 数（以后俄罗斯轮盘用）
     uint done;        // 1 = 终止，0 = 继续
+};
+
+struct PathState {
+    vec3 origin;
+    vec3 direction;
+    vec3 throughput;
+
+    float currentIOR;
+    vec3 mediumEntryPos; //这条 ray 进入玻璃时的位置
+    uint insideMedium; //0：当前 ray 在空气里；1：当前 ray 在玻璃里
+
+    uint depth;
 };
 
 struct ShadowPayload{
