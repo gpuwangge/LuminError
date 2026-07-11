@@ -337,8 +337,7 @@ void main(){
     if(transmission < 0.01){
         localRadiance += directDiffuse + directSpecular;
     } else {
-        // 玻璃只保留很弱的表面反射，先便于排查
-        localRadiance += directSpecular * 0.05;
+        localRadiance += directSpecular;
     }
 
     //3. 二次光线
@@ -350,25 +349,27 @@ void main(){
 
     //float cosTheta = clamp(dot(V, N), 0.0, 1.0);
     float fresnelScalar = fresnelSchlickScalar(cosTheta, ior);
+    fresnelScalar = pow(fresnelScalar,0.75);
     //vec3 F = fresnelSchlick(cosTheta, F0);
 
-    bool hasReflection = (specular > 0.01 || metallic > 0.01 || mat.reflectance > 0.01);
+    //bool hasReflection = (specular > 0.01 || metallic > 0.01 || mat.reflectance > 0.01);
+    bool hasReflection = (metallic > 0.8);
     bool hasTransmission = transmission > 0.01; //recover
 
     primaryPayload.radiance = localRadiance;
     primaryPayload.spawnRayCount = 0u;
     primaryPayload.done = 1u;
 
-    // if(hasReflection && transmission < 0.01){
-    //     vec3 R = normalize(reflect(I, N));
+    if(hasReflection && transmission < 0.01){ //金属
+        vec3 R = normalize(reflect(I, N));
 
-    //     primaryPayload.nextRayOrigin0 = hitPos + N * EPSILON;
-    //     primaryPayload.nextRayDir0 = R;//normalize(mix(R, RandomDirectionInHemisphere(N, state), roughness * roughness));
-    //     primaryPayload.nextRayThroughputMul0 = mix(vec3(0.04), albedo, metallic);
+        primaryPayload.nextRayOrigin0 = hitPos + N * EPSILON;
+        primaryPayload.nextRayDir0 = normalize(mix(R, RandomDirectionInHemisphere(N, state), roughness * roughness));
+        primaryPayload.nextRayThroughputMul0 = mix(vec3(0.04), albedo, metallic);
 
-    //     primaryPayload.spawnRayCount = 1u;
-    //     primaryPayload.done = 0u;
-    // }
+        primaryPayload.spawnRayCount = 1u;
+        primaryPayload.done = 0u;
+    }
 
     if(hasTransmission){
         //float eta = frontFace ? (1.0 / ior) : ior; //感觉这一段比下面那段看起来真实
@@ -402,10 +403,12 @@ void main(){
             vec3 Toff = dot(T, Ngeom) > 0.0 ? Ngeom : -Ngeom;
             vec3 Roff = dot(R, Ngeom) > 0.0 ? Ngeom : -Ngeom;
 
+            float F = pow(fresnelScalar,0.5);
+
             //折射
             primaryPayload.nextRayOrigin0 = hitPos + Toff * EPSILON;
             primaryPayload.nextRayDir0 = T;
-            primaryPayload.nextRayThroughputMul0 = transmissionColor * (1.0 - fresnelScalar);
+            primaryPayload.nextRayThroughputMul0 = transmissionColor * (1.0 - F);
 
             if(airToMedium){
                 primaryPayload.nextCurrentIOR0 = ior;
@@ -414,15 +417,15 @@ void main(){
             }else if(mediumToAir){
                 float distanceInGlass = length(hitPos - primaryPayload.mediumEntryPos);
                 
-                //test 根本没往这里走过
+                //test
                 //primaryPayload.radiance = vec3(distanceInGlass * 0.5);
-                primaryPayload.radiance = vec3(0,0,1);
-                primaryPayload.spawnRayCount = 0u;
-                primaryPayload.done = 1u;
-                return;
+                // primaryPayload.radiance = vec3(1,0,0);
+                // primaryPayload.spawnRayCount = 0u;
+                // primaryPayload.done = 1u;
+                // return;
                 
-                vec3 sigmaA = vec3(0.12, 0.06, 0.03);
-                //vec3 sigmaA = vec3(0.03, 0.02, 0.01);
+                //vec3 sigmaA = vec3(0.12, 0.06, 0.03);
+                vec3 sigmaA = vec3(0.03, 0.02, 0.01);
                 vec3 beer = exp(-sigmaA * distanceInGlass); //光穿过玻璃走得越远，剩下的能量越少
                 primaryPayload.nextRayThroughputMul0 *= beer;
 
@@ -434,7 +437,11 @@ void main(){
             //反射
             primaryPayload.nextRayOrigin1 = hitPos + Roff * EPSILON;
             primaryPayload.nextRayDir1 = R;
-            primaryPayload.nextRayThroughputMul1 = vec3(fresnelScalar);
+            //primaryPayload.nextRayThroughputMul1 = vec3(fresnelScalar);
+            //float F = pow(fresnelScalar,0.8);
+            primaryPayload.nextRayThroughputMul1 = vec3(F);
+            //float reflectionBoost = 2.0;
+            //primaryPayload.nextRayThroughputMul1 = vec3(min(fresnelScalar * reflectionBoost,1.0));
 
             primaryPayload.spawnRayCount = 2u;
         }
