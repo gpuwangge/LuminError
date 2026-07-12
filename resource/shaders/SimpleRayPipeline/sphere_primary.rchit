@@ -34,15 +34,7 @@ layout(set = 0, binding = 7) uniform CustomBufferObject {
     uint materialCount;
 } customUBO;
 
-struct RtLightInfo{
-    vec4 position;
-    vec4 color;
-    vec4 direction;
-    float intensity;
-    float radius;
-    float angle;
-    float type;
-};  //total size: 16+16+16+4*4=64 bytes
+
 const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
 layout(set = 0, binding = 8, std430) readonly buffer SBORtLightBuffer {
     RtLightInfo lights[RTLIGHT_SIZE];
@@ -60,21 +52,6 @@ layout(set = 0, binding = 8, std430) readonly buffer SBORtLightBuffer {
 /**************
 Untility functions
 **************/
-
-bool isDirectionalLight(RtLightInfo light){
-    return false;
-    return light.type < 0.5;
-}
-
-bool isPointLight(RtLightInfo light){
-    return true;
-    return light.type >= 0.5 && light.type < 1.5;
-}
-
-bool isSpotLight(RtLightInfo light){
-    return false;
-    return light.type >= 1.5 && light.type < 2.5;
-}
 
 
 vec3 getWorldHitPos(){

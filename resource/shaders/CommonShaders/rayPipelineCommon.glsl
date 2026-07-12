@@ -1,6 +1,23 @@
 #ifndef RAY_COMMON_GLSL
 #define RAY_COMMON_GLSL
 
+/*************
+SBO Structure
+**************/
+struct RtLightInfo{
+    vec4 position;
+    vec4 color;
+    vec4 direction;
+    float intensity;
+    float radius;
+    float angle;
+    float type;
+};  //total size: 16+16+16+4*4=64 bytes
+
+
+/*************
+Payload and State Structure
+**************/
 struct PrimaryPayload {
     vec3 radiance;    // 当前这次 trace 返回的光照贡献
     vec3 throughput;  // 路径权重，给 rgen 累积用
@@ -28,6 +45,11 @@ struct PrimaryPayload {
     uint done;        // 1 = 终止，0 = 继续
 };
 
+struct ShadowPayload{
+    uint visibility;
+};
+
+
 struct PathState {
     vec3 origin;
     vec3 direction;
@@ -40,9 +62,50 @@ struct PathState {
     uint depth;
 };
 
-struct ShadowPayload{
-    uint visibility;
-};
+
+
+
+
+/**************
+Light functions
+**************/
+bool isDirectionalLight(RtLightInfo light){
+    return false; //disable this function for now
+    return light.type < 0.5;
+}
+
+bool isPointLight(RtLightInfo light){
+    return true; //only implemented point light
+    return light.type >= 0.5 && light.type < 1.5;
+}
+
+bool isSpotLight(RtLightInfo light){
+    return false; //disable this function for now
+    return light.type >= 1.5 && light.type < 2.5;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 float hash11(float p)
