@@ -10,99 +10,106 @@ pass=0
 error=0
 skipped=0
 
+#--------------------------------------------------
+# Return 0 if any directly included file is newer
+# than the output SPV.
+#--------------------------------------------------
+include_newer() {
+
+    local shader="$1"
+    local output="$2"
+
+    local shader_dir
+    shader_dir="$(dirname "$shader")"
+
+    local line
+    local include
+    local include_path
+
+    while IFS= read -r line
+    do
+        # 跳过不是 #include 的行
+        [[ "$line" != *"#include"* ]] && continue
+
+        # 提取引号里的路径
+        include="${line#*\"}"
+        include="${include%%\"*}"
+
+        [ -z "$include" ] && continue
+
+        include_path="$shader_dir/$include"
+
+        if [ -f "$include_path" ] && [ "$include_path" -nt "$output" ]; then
+            return 0
+        fi
+
+    done < "$shader"
+
+    return 1
+}
+
 compile_if_newer() {
+
     local source_file="$1"
     local output_file="${source_file}.spv"
-    
+
     if [ ! -f "$output_file" ]; then
+
         echo "📦 Compile ${source_file} (new)"
-        ./glslc.exe --target-env=vulkan1.2 --target-spv=spv1.4 "${source_file}" -o "${output_file}"
+
+        ./glslc.exe \
+            --target-env=vulkan1.2 \
+            --target-spv=spv1.4 \
+            "$source_file" \
+            -o "$output_file"
+
         if [ $? -ne 0 ]; then
             error=$((error+1))
         else
             pass=$((pass+1))
         fi
+
         return 0
+
     elif [ "$source_file" -nt "$output_file" ] || \
-        [ "CommonShaders/rayBVH.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/rayTracing.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/constants.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/graphicsGlobalUBO.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/lightsUBO.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/objectUBO.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/rayPipelineCommon.glsl" -nt "$output_file" ] || \
-        [ "CommonShaders/rayUBO.glsl" -nt "$output_file" ]; then
+         include_newer "$source_file" "$output_file"; then
+
         echo "🔄 Compile ${source_file} (updated)"
-        ./glslc.exe --target-env=vulkan1.2 --target-spv=spv1.4 "${source_file}" -o "${output_file}"
+
+        ./glslc.exe \
+            --target-env=vulkan1.2 \
+            --target-spv=spv1.4 \
+            "$source_file" \
+            -o "$output_file"
+
         if [ $? -ne 0 ]; then
             error=$((error+1))
         else
             pass=$((pass+1))
         fi
+
         return 0
+
     else
+
         skipped=$((skipped+1))
         echo "✅ Skip ${source_file} (up to date)"
+
         return 1
+
     fi
 }
 
 echo "🔍 Scanning for shaders in: ${search_dir}"
 
-for entry in ${search_dir}/*.vert
+for ext in vert frag comp rgen rmiss rchit rahit rint
 do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.frag
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.comp
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.rgen
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.rmiss
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.rchit
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.rahit
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
-done
-
-for entry in ${search_dir}/*.rint
-do
-    if [ -e "$entry" ]; then
-        compile_if_newer "$entry"
-    fi
+    for entry in ${search_dir}/*.${ext}
+    do
+        if [ -e "$entry" ]; then
+            compile_if_newer "$entry"
+        fi
+    done
 done
 
 total=$((pass+error+skipped))
@@ -112,6 +119,8 @@ echo "📊 Compilation summary:"
 echo "   Error: ${error}/${total}"
 echo "   Passed: ${pass}/${total}"
 echo "   Skipped: ${skipped}/${total}"
+
+echo ""
 echo "📊 Press ENTER to exit..."
 
 read

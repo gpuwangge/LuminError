@@ -3,6 +3,7 @@
 
 /***************************
 * Ray Tracing Data Structure
+* This file is for compute shader ray tracing, not ray tracing pipeline
 ***************************/
 
 #define PRIMARY 0

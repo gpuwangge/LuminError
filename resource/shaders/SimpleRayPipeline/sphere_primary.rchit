@@ -372,7 +372,7 @@ void main(){
     }
 
     if(hasTransmission){
-        //float eta = frontFace ? (1.0 / ior) : ior; //感觉这一段比下面那段看起来真实
+        //float eta = frontFace ? (1.0 / ior) : ior;
 
         float n1 = primaryPayload.insideMedium == 1u ? mat.ior : 1.0;
         float n2 = primaryPayload.insideMedium == 1u ? 1.0    : mat.ior;
