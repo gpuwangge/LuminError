@@ -1,15 +1,16 @@
 #version 460
+#include "../CommonShaders/rayPipelineCommonStruct.glsl"
+
 #extension GL_EXT_ray_tracing : require
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_scalar_block_layout : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-#include "../CommonShaders/rayPipelineCommon.glsl"
 
-layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
 layout(location = 1) rayPayloadEXT ShadowPayload shadowPayload;
+layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 hitAttributeEXT vec2 bary;
 
 struct TriangleVertexInfo{

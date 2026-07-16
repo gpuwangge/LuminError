@@ -1,6 +1,8 @@
 #ifndef RAY_COMMON_GLSL
 #define RAY_COMMON_GLSL
 
+#extension GL_EXT_ray_tracing : require
+
 /*************
 SBO Structure
 **************/
@@ -14,6 +16,19 @@ struct RtLightInfo{
     float type;
 };  //total size: 16+16+16+4*4=64 bytes
 
+struct Material {
+    vec3 albedo;
+    vec3 emissionColor;
+    vec3 transmissionColor;
+    float metallic;
+    float roughness;
+    float alpha;
+    float emissionStrength;
+    float reflectance;
+    float specular;
+    float ior;
+    float transmission;
+};
 
 /*************
 Payload and State Structure
@@ -49,7 +64,6 @@ struct ShadowPayload{
     uint visibility;
 };
 
-
 struct PathState {
     vec3 origin;
     vec3 direction;
@@ -64,25 +78,12 @@ struct PathState {
 
 
 
-
-
 /**************
-Light functions
+Constants
 **************/
-bool isDirectionalLight(RtLightInfo light){
-    return false; //disable this function for now
-    return light.type < 0.5;
-}
-
-bool isPointLight(RtLightInfo light){
-    return true; //only implemented point light
-    return light.type >= 0.5 && light.type < 1.5;
-}
-
-bool isSpotLight(RtLightInfo light){
-    return false; //disable this function for now
-    return light.type >= 1.5 && light.type < 2.5;
-}
+const float PI = 3.14159265359;
+const float EPSILON = 0.001;
+const float SHADOW_BIAS = 0.01;
 
 
 
@@ -137,19 +138,12 @@ vec2 rnd2(vec2 pix, int sampleIndex, int frameIndex)
 /**************
 Untility functions
 **************/
-const float PI = 3.14159265359;
-const float EPSILON = 0.001;
-const float SHADOW_BIAS = 0.01;
 
 float saturate(float x){
     return clamp(x, 0.0, 1.0);
 }
 
-vec3 safeNormalize(vec3 v){
-    float len2 = dot(v, v);
-    if(len2 < 1e-12) return vec3(0.0, 0.0, 1.0);
-    return v * inversesqrt(len2);
-}
+
 
 float luminance(vec3 c){
     return dot(c, vec3(0.2126, 0.7152, 0.0722));
