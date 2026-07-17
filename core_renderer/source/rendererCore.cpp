@@ -1450,6 +1450,9 @@ void RendererCore::CreateSphereBlas(){
 void RendererCore::CreateInstanceBuffer(){
     //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
 
+    StructStorageBuffer_Instance storageBufferObject_instance{};
+    int instanceIndex = 0;
+
     const uint32_t sphereSize = game->GetRtSphereSize();
 
     instances.resize(game->GetObjectSize() + sphereSize);//每个instance就是一个object
@@ -1461,6 +1464,7 @@ void RendererCore::CreateInstanceBuffer(){
         glm::vec3 scale = game->GetObjectScale(i);
         glm::vec3 position = game->GetObjectPosition(i);
         int model_id = game->GetObjectModelID(i);
+        int material_id = game->GetObjectMaterialID(i);
         //std::cout<<"CreateInstanceBuffer(): model_id = "<<model_id<<std::endl;
         glm::vec3 rotation = game->GetObjectRotation(i); //Pitch, Yaw, Roll
 
@@ -1492,13 +1496,17 @@ void RendererCore::CreateInstanceBuffer(){
         instances[i].transform.matrix[2][2] = M[2][2];
         instances[i].transform.matrix[2][3] = M[3][2];
 
-        instances[i].instanceCustomIndex = model_id;
+        instances[i].instanceCustomIndex = instanceIndex;//model_id;
         instances[i].mask = 0x01; //triangle设置成01，那么在shader中traceRay时，ray的mask也必须cover 01才能命中这个instance
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
         instances[i].accelerationStructureReference = game->GetRtMesh(model_id).blasAddress;
         //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
         count++;
+
+        storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id;
+        storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id;
+        instanceIndex++;
     }
     //step2 for sphere
     for(int i = 0; i < sphereSize; i++){
@@ -1520,11 +1528,15 @@ void RendererCore::CreateInstanceBuffer(){
         };
         instances[count+i].transform = transform;
 
-        instances[count+i].instanceCustomIndex = s.materialIndex; //use this index to fetch material data in shader
+        instances[count+i].instanceCustomIndex = instanceIndex; //use this index to fetch material data in shader
         instances[count+i].mask = 0x02; //sphere设置成02，那么在shader中traceRay时，ray的mask也必须cover 02才能命中这个instance
         instances[count+i].instanceShaderBindingTableRecordOffset = 2; //there are 3 hit records in the hit SBT region: 0/1/2, group 2 is for sphere procedual hit
         instances[count+i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR; //this doesn't matter here
         instances[count+i].accelerationStructureReference = sphere_blasAddress;
+
+        storageBufferObject_instance.instances[instanceIndex].geometryIndex = 0; //geometryIndex doesnt exit for sphere
+        storageBufferObject_instance.instances[instanceIndex].materialIndex = s.materialIndex;
+        instanceIndex++;
     }
 
     //std::vector<VkAccelerationStructureInstanceKHR> instances = { instance };
@@ -1551,6 +1563,12 @@ void RendererCore::CreateInstanceBuffer(){
     //instanceCount = static_cast<uint32_t>(instances.size());
 
     //std::cout << "TLAS instance buffer created. Device Address: " << instanceBufferAddress << std::endl;
+
+
+    
+
+    uploadRaytracingStorageBuffer_instance(GetCurrentFrame(), &storageBufferObject_instance, sizeof(StructStorageBuffer_Instance));
+    uploadRaytracingStorageBuffer_instance(GetCurrentFrame()+1, &storageBufferObject_instance, sizeof(StructStorageBuffer_Instance));
 
 }
 

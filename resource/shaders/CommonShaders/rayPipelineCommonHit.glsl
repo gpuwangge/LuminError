@@ -7,6 +7,10 @@ layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
 layout(location = 1) rayPayloadEXT ShadowPayload shadowPayload;
 layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 
+layout(set = 0, binding = 5, std430) readonly buffer SBOMaterial {
+   Material materials[];
+} sboMaterial;
+
 layout(set = 0, binding = 7) uniform CustomBufferObject {
     int frameCount;
     bool cameraInMotion;
@@ -18,6 +22,10 @@ const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
 layout(set = 0, binding = 8, std430) readonly buffer SBORtLightBuffer {
     RtLightInfo lights[RTLIGHT_SIZE];
 } sboRtLightBuffer;
+
+layout(set = 0, binding = 9, std430) readonly buffer SBOInstance {
+   InstanceInfo instances[];
+} sboInstance;
 
 /**************
 Untility functions

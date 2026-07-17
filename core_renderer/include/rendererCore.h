@@ -456,6 +456,8 @@ namespace LERenderer{
         void uploadRaytracingStorageBuffer_custom(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadCustomUniformBuffer_raytracing(currentFrame, data, size); }
         void addRaytracingStorageBuffer_rtLight() override { raytracingDescriptorManager.addStorageBuffer_rtLight(); }
         void uploadRaytracingStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_rtLight(currentFrame, data, size); }
+        void addRaytracingStorageBuffer_instance() override { raytracingDescriptorManager.addStorageBuffer_instance(); }
+        void uploadRaytracingStorageBuffer_instance(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_instance(currentFrame, data, size); }
 
         void addStorageBuffer_customswap(VkDeviceSize storageBufferSize, VkBufferUsageFlags usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) override { computeDescriptorManager.addStorageBuffer_customswap(storageBufferSize, usage); }
         void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_customswap(currentFrame, data, size); }

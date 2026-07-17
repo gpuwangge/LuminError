@@ -1,15 +1,15 @@
 Objects:
-  # - object_name: Tree
-  #   object_id: 0
-  #   object_scale: 2
-  #   object_position: [0,-2.5,0]
-  #   object_rotation: [0,0,0] #no use
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   object_material_id: 0
-  #   resource_model_id: 0
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Tree
+    object_id: 0
+    object_scale: 1
+    object_position: [0,0.0,0]
+    object_rotation: [0,0,0] #no use
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 2
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
 
 CustomSpheres:
   - custom_sphere_name: Sphere

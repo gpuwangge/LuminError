@@ -30,6 +30,11 @@ struct Material {
     float transmission;
 };
 
+struct InstanceInfo {
+    uint geometryIndex;
+    uint materialIndex;
+};
+
 /*************
 Payload and State Structure
 **************/

@@ -126,6 +126,16 @@ struct StructStorageBuffer_Material{
     MaterialInfo materials[MATERIAL_SIZE];
 };
 
+struct InstanceInfo{
+    uint32_t geometryIndex;   // GeometryInfo 的下标
+    uint32_t materialIndex;   // Material 的下标
+};
+static constexpr size_t INSTANCE_SIZE = 256;//assume max 256 instances for now
+struct StructStorageBuffer_Instance{
+    InstanceInfo instances[INSTANCE_SIZE];
+};
+
+
 static constexpr size_t WINDOW_SIZE = WINDOW_WIDTH * WINDOW_HEIGHT;  
 struct StructStorageBuffer_WindowSwap {
     //static constexpr size_t WIDTH = 800; // 属于类，不属于对象,不占内存

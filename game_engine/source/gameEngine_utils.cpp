@@ -281,6 +281,7 @@ glm::vec3 GameEngine::GetObjectPosition(int objectId) { return objects[objectId]
 
 glm::vec3 GameEngine::GetObjectScale(int objectId) { return objects[objectId].Scale; }
 int GameEngine::GetObjectModelID(int objectId) { return objects[objectId].m_model_id; }
+int GameEngine::GetObjectMaterialID(int objectId) { return objects[objectId].m_material_id; }
 glm::vec3 GameEngine::GetObjectRotation(int objectId) { return objects[objectId].Rotation; }
 
 int GameEngine::GetLightSize() { return lights.size(); }

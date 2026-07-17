@@ -114,7 +114,13 @@ public:
     void addStorageBuffer_rtLight();
     void uploadStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t dataSize);
 
-
+    /************
+     * ? COMPUTE_UNIFORMBUFFER_INSTANCEINFO
+     ************/
+    static std::vector<CWxjBuffer> m_storageBuffers_instance; 
+	static std::vector<void*> m_storageBuffersMapped_instance;
+    void addStorageBuffer_instance();
+    void uploadStorageBuffer_instance(uint32_t currentFrame, const void* data, size_t dataSize);
 
 
     /************

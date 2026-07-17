@@ -271,6 +271,8 @@ namespace LERenderer{
         virtual void uploadRaytracingStorageBuffer_custom(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingStorageBuffer_rtLight() = 0;
         virtual void uploadRaytracingStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addRaytracingStorageBuffer_instance() = 0;
+        virtual void uploadRaytracingStorageBuffer_instance(uint32_t currentFrame, const void* data, size_t size) = 0;
 
         virtual void addStorageImage(VkBufferUsageFlags usage) = 0;
 

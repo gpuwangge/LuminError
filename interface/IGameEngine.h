@@ -153,6 +153,7 @@ namespace LEGameEngine{
 
         virtual glm::vec3 GetObjectScale(int objectId) = 0;
         virtual int GetObjectModelID(int objectId) = 0;
+        virtual int GetObjectMaterialID(int objectId) = 0;
         virtual glm::vec3 GetObjectRotation(int objectId) = 0;
 
         //Expose functions for Example(SimpleParticles) to use
