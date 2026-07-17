@@ -185,10 +185,9 @@ VkDeviceAddress GameEngine::GetBufferAddress(VkDevice device, VkBuffer buffer) {
 }
 
 void GameEngine::SetupRayTracing(){
-    /********
-     * Load data from modelData into allVertices3D and allIndices3D
-     * if size of vertices is 20 and size of triangle is 10, then allVertices3D.size() = 20, allIndices3D.size() = 30
-     */
+    /* these code are copied from compute ray function, no longer needed in rt pipeline
+     //Load data from modelData into allVertices3D and allIndices3D
+     //if size of vertices is 20 and size of triangle is 10, then allVertices3D.size() = 20, allIndices3D.size() = 30  
     std::vector<Vertex3D> allVertices3D;
     std::vector<uint32_t> allIndices3D;
     int vertexCount = 0;
@@ -231,9 +230,7 @@ void GameEngine::SetupRayTracing(){
     //std::cout<<"allVertices3D.size = "<<allVertices3D.size()<<std::endl;
     //std::cout<<"allIndices3D.size = "<<allIndices3D.size()<<std::endl;
 
-    /****************
-    * Upload triangle vertex/index to storage buffer TODO: change from compute to ray tracing
-    *****************/
+    //Upload triangle vertex/index to storage buffer TODO: change from compute to ray tracing
     //if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute){
         UploadRaytracingStorageBuffer_TriangleVertexAttribute(GetCurrentFrame(), &storageBufferObject_TriangleVertexAttribute, sizeof(StructStorageBuffer_TriangleVertexAttribute));
         UploadRaytracingStorageBuffer_TriangleVertexAttribute(GetCurrentFrame()+1, &storageBufferObject_TriangleVertexAttribute, sizeof(StructStorageBuffer_TriangleVertexAttribute));
@@ -244,7 +241,7 @@ void GameEngine::SetupRayTracing(){
         UploadRaytracingStorageBuffer_TriangleVertexIndex(GetCurrentFrame(), &storageBufferObject_TriangleVertexIndex, sizeof(StructStorageBuffer_TriangleVertexIndex));
         UploadRaytracingStorageBuffer_TriangleVertexIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleVertexIndex, sizeof(StructStorageBuffer_TriangleVertexIndex));
     //}
-
+    */
 
     /****************
     * BLAS for triangles

@@ -257,10 +257,10 @@ namespace LERenderer{
         virtual void uploadStorageBuffer_customswap(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void downloadStorageBuffer_customswap(uint32_t currentFrame, void* data, size_t size) = 0;
         
-        virtual void addRaytracingStorageBuffer_triangleVertexAttribute() = 0;
-        virtual void uploadRaytracingStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void addRaytracingStorageBuffer_triangleVertexIndex() = 0;
-        virtual void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
+        //virtual void addRaytracingStorageBuffer_triangleVertexAttribute() = 0;
+        //virtual void uploadRaytracingStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) = 0;
+        //virtual void addRaytracingStorageBuffer_triangleVertexIndex() = 0;
+        //virtual void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingStorageBuffer_geometryInfo() = 0;
         virtual void uploadRaytracingStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingStorageBuffer_material() = 0;

@@ -110,8 +110,8 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
     if(appInfo->Uniform.b_uniform_compute_swapchain_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_SWAPCHAIN);
     if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) {
-        renderer->addRaytracingStorageBuffer_triangleVertexAttribute();
-        renderer->addRaytracingStorageBuffer_triangleVertexIndex();
+        //renderer->addRaytracingStorageBuffer_triangleVertexAttribute();
+        //renderer->addRaytracingStorageBuffer_triangleVertexIndex();
         renderer->addRaytracingStorageBuffer_geometryInfo();
         renderer->addRaytracingStorageBuffer_material();
         renderer->addRaytracingStorageBuffer_global();

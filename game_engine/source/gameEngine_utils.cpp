@@ -361,12 +361,12 @@ void GameEngine::UploadComputeStorageBuffer_Sphere(uint32_t currentFrame, const 
     renderer->uploadStorageBuffer_sphere(currentFrame, storageBufferObject, dataSize);
 }
 
-void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
-    renderer->uploadRaytracingStorageBuffer_triangleVertexAttribute(currentFrame, storageBufferObject, dataSize);
-}
-void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
-    renderer->uploadRaytracingStorageBuffer_triangleVertexIndex(currentFrame, storageBufferObject, dataSize);
-}
+// void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+//     renderer->uploadRaytracingStorageBuffer_triangleVertexAttribute(currentFrame, storageBufferObject, dataSize);
+// }
+// void GameEngine::UploadRaytracingStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+//     renderer->uploadRaytracingStorageBuffer_triangleVertexIndex(currentFrame, storageBufferObject, dataSize);
+// }
 void GameEngine::UploadRaytracingStorageBuffer_GeometryInfo(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadRaytracingStorageBuffer_geometryInfo(currentFrame, storageBufferObject, dataSize);
 }

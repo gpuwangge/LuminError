@@ -47,24 +47,9 @@ struct GeometryInfo {
     IndexBufferRef  indexBuf;
 };
 
-layout(set = 0, binding = 4, scalar) readonly buffer SBOGeometryInfoBuffer {
+layout(set = 0, binding = 2, scalar) readonly buffer SBOGeometryInfoBuffer {
     GeometryInfo infos[];
 } sboGeometryInfos;
-
-
-// layout(set = 0, binding = 7) uniform CustomBufferObject {
-//     int frameCount;
-//     bool cameraInMotion;
-//     uint lightCount;
-//     uint materialCount;
-// } customUBO;
-
-// const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
-// layout(set = 0, binding = 8, std430) readonly buffer SBORtLightBuffer {
-//     RtLightInfo lights[RTLIGHT_SIZE];
-// } sboRtLightBuffer;
-
-
 
 float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius, int sampleCount, uint baseSeed) {
     const float EPS = 0.001;
