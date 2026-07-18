@@ -34,16 +34,23 @@ layout(set = 0, binding = 5) uniform CustomBufferObject {
     uint materialCount;
 } customUBO;
 
+//不要加 writeonly，因为既要 imageLoad() 又要 imageStore()。
+//rgba16f（或 rgba32f）用于保存 HDR 累积值。
+//resultImage 仍然是最终显示用。
+layout(set = 0, binding = 8, rgba16f) uniform image2D accumulationImage; 
+
 void main(){
-    ivec2 pix  = ivec2(gl_LaunchIDEXT.xy);
+    ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
     ivec2 size = ivec2(gl_LaunchSizeEXT.xy);
 
     vec3 accumulatedRadiance = vec3(0.0);
 
+    //int pathCount = 0;//test
+
     for (int s = 0; s < RAY_PER_PIXEL; ++s)
     {
-        vec2 jitter = rnd2(pix, s, customUBO.frameCount);
-        vec2 uv = (vec2(pix) + jitter) / vec2(size);
+        vec2 jitter = rnd2(pixel, s, customUBO.frameCount);
+        vec2 uv = (vec2(pixel) + jitter) / vec2(size);
         vec2 ndc = uv * 2.0 - 1.0;
 
         // 如有需要再开
@@ -71,7 +78,10 @@ void main(){
             0u //depth
         );
 
+        
         while(stackSize > 0){
+            //pathCount++;
+
             PathState path = pathStack[--stackSize];
 
             primaryPayload.radiance = vec3(0.0);
@@ -94,7 +104,9 @@ void main(){
                 0
             );
 
+            //if(path.depth <=2)//test
             accumulatedRadiance += path.throughput * primaryPayload.radiance;
+            //accumulatedRadiance += primaryPayload.radiance;//test
 
             if(path.depth + 1u >= BOUNCE_LIMIT) continue;
 
@@ -122,53 +134,34 @@ void main(){
                 pathStack[stackSize++] = secondPath; //for WhittedStyleRayTracing only
             }
         }//stack
-
-
-        // primaryPayload.throughput = vec3(1.0);
-        // primaryPayload.radiance   = vec3(0.0);
-        // primaryPayload.nextOrigin = rayOrigin;
-        // primaryPayload.nextDir    = rayDir;
-        // primaryPayload.done       = 0u;
-
-        // for (int bounce = 0; bounce < BOUNCE_LIMIT; ++bounce)
-        // {
-        //     vec3 oldThroughput = primaryPayload.throughput;
-
-        //     rayOrigin = primaryPayload.nextOrigin;
-        //     rayDir    = normalize(primaryPayload.nextDir);
-
-        //     primaryPayload.radiance = vec3(0.0);
-        //     primaryPayload.done     = 1u;
-        //     primaryPayload.depth = bounce;
-
-        //     traceRayEXT(
-        //         topLevelAS,
-        //         gl_RayFlagsOpaqueEXT,
-        //         0xFF,
-        //         0,   // sbtRecordOffset
-        //         1,   // sbtRecordStride，前提是你的 SBT 确实这样排
-        //         0,   // missIndex
-        //         rayOrigin,
-        //         0.001,
-        //         rayDir,
-        //         10000.0,
-        //         0
-        //     );
-
-        //     lightColor += oldThroughput * primaryPayload.radiance;
-        //     //lightColor += primaryPayload.radiance;
-
-        //     if (primaryPayload.done != 0u)
-        //         break;
-
-        //     if (max(primaryPayload.throughput.r,
-        //             max(primaryPayload.throughput.g, primaryPayload.throughput.b)) < 0.001)
-        //         break;
-        // }
-
-        //finalColor += lightColor;
     }//spp
 
-    accumulatedRadiance /= float(RAY_PER_PIXEL);
-    imageStore(resultImage, pix, vec4(accumulatedRadiance, 1.0).bgra);
+    vec3 frameRadiance = accumulatedRadiance / float(RAY_PER_PIXEL);
+
+    //non-accumulate image
+    // imageStore(resultImage, pixel, vec4(frameRadiance, 1.0).bgra); 
+    // return;
+
+
+    // EMA
+    float alphaEMA = 0.1;
+
+    // Running Average
+    float alphaRA = 1.0 / (customUBO.frameCount + 1);
+
+    // Running Average
+    vec3 prevColor = imageLoad(accumulationImage, pixel).bgr;
+    vec3 accumColor;
+    if(customUBO.frameCount == 0) accumColor = frameRadiance;
+    else accumColor = prevColor + (frameRadiance - prevColor) * alphaRA;// / float(customUBO.frameCount + 1);
+    imageStore(accumulationImage, pixel, vec4(accumColor, 1.0).bgra);
+    imageStore(resultImage,       pixel, vec4(accumColor, 1.0).bgra);
+
+    // float v = float(pathCount) / 20.0;
+    // imageStore(resultImage,pixel,vec4(v,v,v,1));
+
+    //我运行了很久，都没有变暗
+    // float L = dot(frameRadiance,vec3(0.2126,0.7152,0.0722));
+    // imageStore(resultImage,pixel,vec4(vec3(L),1));
+
 }

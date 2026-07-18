@@ -11,6 +11,8 @@
 
 namespace LuminError{
     class Game : public IGame {
+        int accumulatedFrameCount = 0;
+
         struct StructCustomUniformBuffer {
             alignas(4) int frameCount = 0;
             alignas(4) bool cameraInMotion = false;
@@ -38,9 +40,14 @@ namespace LuminError{
         }
 
         void Update() override {
-            customUniformBufferObject.frameCount = GameEngine->GetFrameCount();
             customUniformBufferObject.cameraInMotion = GameEngine->GetCameraInMotion();
+            if(GameEngine->GetCameraInMotion()) accumulatedFrameCount = 0;
+            
+            customUniformBufferObject.frameCount = accumulatedFrameCount;
+            
             GameEngine->UploadRaytracingCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
+
+            accumulatedFrameCount++;
 
             GameEngine->PrintFPS(1.0f);
         }

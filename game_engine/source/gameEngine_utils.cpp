@@ -451,7 +451,7 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
             renderer->StartRecordComputeCommandBuffer(renderer->GetComputePipeline(), renderer->GetComputePipelineLayout());
             renderer->RecordImageBarrier(
                 renderer->GetComputeCommandBuffer(),
-                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0),
                 oldLayout,
                 newLayout,
                 0,
@@ -483,11 +483,10 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
 
             vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);
 
-            //renderer->StartRecordComputeCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
             renderer->StartRecordRaytracingCommandBuffer(renderer->GetRaytracingPipeline(), renderer->GetRaytracingPipelineLayout());
             renderer->RecordImageBarrier(
                 renderer->GetRaytracingCommandBuffer(),
-                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0),
                 oldLayout,
                 newLayout,
                 0,
@@ -495,7 +494,16 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                 VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
             );
-            //renderer->EndRecordComputeCommandBuffer();
+            renderer->RecordImageBarrier(
+                renderer->GetRaytracingCommandBuffer(),
+                renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 1),
+                oldLayout,
+                newLayout,
+                0,
+                VK_ACCESS_SHADER_WRITE_BIT,
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
+            );
             renderer->EndRecordRaytracingCommandBuffer();
 
             VkSubmitInfo submitInfo{};

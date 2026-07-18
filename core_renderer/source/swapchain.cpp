@@ -195,6 +195,7 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     swapChainExtent = extent;
 
     createIntermediaColor(width, height); //this is only used when you try to use compute to render to swapchain(uniform_compute_swapchain_storage=true)
+    createIntermediaColor2(width, height); //this is only used in RT pipeline as accumulated image
 }
 
 void CSwapchain::createSwapchainViews(VkImageAspectFlags aspectFlags){
@@ -223,6 +224,23 @@ void CSwapchain::createIntermediaColor(int width, int height){
         //std::cout<<"debug"<<std::endl;
         intermediaColor[i].createImageView(format, VK_IMAGE_ASPECT_COLOR_BIT, 1, false);
     }
+}
+
+//Resource#6.intermediaColor_images and IntermediaColor_views
+void CSwapchain::createIntermediaColor2(int width, int height){
+    //std::cout<<"Create Intermedia Color2: width = "<<width<<", height = "<<height<<", swapchainImageSize = "<<swapchainImageSize<<std::endl;
+    VkImageUsageFlags usage = VK_IMAGE_LAYOUT_GENERAL | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    VkFormat format = VK_FORMAT_R16G16B16A16_SFLOAT;//instead of VK_FORMAT_R8G8B8A8_UNORM;, because accumulated image need higher accuracy
+
+    //intermediaColor2.resize(swapchainImageSize);
+    //for(int i = 0; i < swapchainImageSize; i++){
+        //std::cout<<"create intermediaColor["<<i<<"]"<<std::endl;
+        intermediaColor2.logicalDevice = CContext::GetHandle().GetLogicalDevice();
+	    intermediaColor2.physicalDevice = CContext::GetHandle().GetPhysicalDevice();
+        intermediaColor2.createImage(width, height, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, false, VK_IMAGE_LAYOUT_UNDEFINED); //VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_GENERAL
+        //std::cout<<"debug"<<std::endl;
+        intermediaColor2.createImageView(format, VK_IMAGE_ASPECT_COLOR_BIT, 1, false);
+    //}
 }
 
 
@@ -448,6 +466,10 @@ void CSwapchain::CleanUp(){
 
     for(int i = 0; i < intermediaColor.size(); i++)
         intermediaColor[i].destroy();
+
+    //for(int i = 0; i < intermediaColor2.size(); i++)
+        //intermediaColor2[i].destroy();
+    intermediaColor2.destroy();
 }
 
 // bool CSwapchain::CheckFormatSupport(VkPhysicalDevice gpu, VkFormat format, VkFormatFeatureFlags requestedSupport) {///!!!!

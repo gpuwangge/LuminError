@@ -521,7 +521,13 @@ namespace LERenderer{
         VkImageView GetSwapchain_Buffer_DepthCamera_View() override { return swapchain.buffer_depthcamera.view; }
         std::vector<VkImageView>& GetSwapchain_Views() override { return swapchain.swapchain_views; }
         std::vector<VkImage>& GetSwapchain_Images() override { return swapchain.swapchain_images; }
-        VkImage GetIntermediaColor_Image(int index) override { return swapchain.intermediaColor[index].image; }
+        VkImage GetIntermediaColor_Image(int frameIndex, int imageIndex) override { 
+            if(imageIndex == 0)
+                return swapchain.intermediaColor[frameIndex].image;
+            else
+                //return swapchain.intermediaColor2[frameIndex].image;
+                return swapchain.intermediaColor2.image;
+        }
         VkSwapchainKHR GetSwapchainHandle() override { return swapchain.getHandle(); }
         std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() override { return swapchain.framebuffers_mainscene; }
         std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) override { return swapchain.framebuffers_shadowmap[index]; }

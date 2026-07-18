@@ -82,6 +82,10 @@ void CRaytracingDescriptorManager::createDescriptorPool(){
         raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //instance
         raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++;
+
+        raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;//accumulated image
+	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT); ///!!!
+        counter++;
     }
     //std::cout<<std::endl;
 
@@ -207,7 +211,14 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
         raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-        counter++;        
+        counter++;
+
+        raytracingBindings[counter].binding = counter;
+        raytracingBindings[counter].descriptorCount = 1;
+        raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        raytracingBindings[counter].pImmutableSamplers = nullptr;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        counter++;
     }
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -456,6 +467,21 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             descriptorWrites[counter].descriptorCount = 1;
             descriptorWrites[counter].pBufferInfo = &storageBufferInfo6;
+            counter++;
+
+            VkDescriptorImageInfo storageImageInfo2{};
+            storageImageInfo2.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            //storageImageInfo.imageView = (*swapchainImageViews)[i];
+            storageImageInfo2.imageView = p_swapchain->intermediaColor2.view;
+            storageImageInfo2.sampler = VK_NULL_HANDLE; //textureSamplers[0];
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pImageInfo = &storageImageInfo2;
             counter++;
         }
         
@@ -838,8 +864,8 @@ int CRaytracingDescriptorManager::getPoolSize(){
     // descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
-    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 8:0; 
-    //TODO: currently combine image and tlas, geometry Info, material, global, custom, rtlight, instance
+    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 9:0; 
+    //TODO: currently combine image and tlas, geometry Info, material, global, custom, rtlight, instance, accumulated image
 	return descriptorPoolSize;
 }
 int CRaytracingDescriptorManager::getLayoutSize(){

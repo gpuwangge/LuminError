@@ -70,6 +70,11 @@ public:
     std::vector<CWxjImageBuffer> intermediaColor;
     void createIntermediaColor(int width, int height);
 
+    ////Resource#6.intermediaColor_images and IntermediaColor_views， create a second intermediaColor for rt pipeline(accumulated image)
+    //std::vector<CWxjImageBuffer> intermediaColor2;
+    CWxjImageBuffer intermediaColor2; //做accumulate只需要一个color image
+    void createIntermediaColor2(int width, int height);
+
     /************************
     * Framebuffers
     ************************/

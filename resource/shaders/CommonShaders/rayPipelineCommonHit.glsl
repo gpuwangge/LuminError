@@ -406,12 +406,12 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
     //result_brightness_score += emittedLight * payload.throughput;
 
     // 俄罗斯轮盘赌（从第3次反弹开始）
-    // if(i > 2) {
-    //     float p = max(throughput.r, max(throughput.g, throughput.b));
-    //     if(p < 0.001) break;
-    //     if(Rand(state) > p) break;
-    //     throughput /= p;
-    // }
+    //if(i > 2) {
+    //    float p = max(primaryPayload.throughput.r, max(primaryPayload.throughput.g, primaryPayload.throughput.b));
+    //    if(p < 0.001) return;
+    //    if(Rand(hitInfo.state) > p) return;
+        //throughput /= p;
+    //}
     
     primaryPayload.spawnRayCount = 0u;
     vec3 throughputMul = vec3(1.0);
@@ -527,12 +527,14 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
 
     //primaryPayload.radiance = primaryPayload.throughput;
     primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
+    //primaryPayload.radiance = vec3(1.0); //test不变暗
     //primaryPayload.radiance = hitInfo.emission + vec3(0.5);//test
     vec3 offsetDir = dot(I0,Ngeom0)>0?Ngeom0:-Ngeom0;
     vec3 origin=hitInfo.hitPos+offsetDir*0.001;
     primaryPayload.nextRayOrigin0 = origin; //hitPos + Ngeom * 0.001;
     primaryPayload.nextRayDir0 = I0;
     primaryPayload.nextRayThroughputMul0 = throughputMul;
+    //primaryPayload.nextRayThroughputMul0 = vec3(1.0);//test
 
     primaryPayload.done = 0u;
 }
@@ -588,9 +590,15 @@ void updatePayload(in Material mat, vec3 Ngeom){
     state = state * 747796405u + customUBO.frameCount;
     state = state * 747796405u + 2891336453u;
     hitInfo.state = state;
+    //TODO:state完全没有：
+    // bounce depth
+    // ray direction
+    // hit position
+    // primitive id
+    // instance id
 
-    WhittedStyleRayTracing(hitInfo);
-    //PathTracing(hitInfo);
+    //WhittedStyleRayTracing(hitInfo);
+    PathTracing(hitInfo);
 }
 
 

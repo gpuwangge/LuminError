@@ -425,7 +425,7 @@ void GameEngine::Record_Present(){
                 0, VK_ACCESS_TRANSFER_WRITE_BIT, //AccessMask
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT); //StageMask
 
-            vkCmdCopyImage(renderer->GetComputeCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
+            vkCmdCopyImage(renderer->GetComputeCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0), VK_IMAGE_LAYOUT_GENERAL,
                 renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
 
             //std::cout<<"Application: Recorded vkCmdCopyImage to copy from intermedia color image to swapchain image."<<std::endl;
@@ -507,7 +507,7 @@ void GameEngine::Record_Present(){
                 0, VK_ACCESS_TRANSFER_WRITE_BIT, //AccessMask
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT); //StageMask
 
-            vkCmdCopyImage(renderer->GetRaytracingCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame()), VK_IMAGE_LAYOUT_GENERAL,
+            vkCmdCopyImage(renderer->GetRaytracingCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0), VK_IMAGE_LAYOUT_GENERAL,
                 renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
 
 

@@ -320,7 +320,7 @@ namespace LERenderer{
         virtual VkImageView GetSwapchain_Buffer_DepthCamera_View() = 0;
         virtual std::vector<VkImageView>& GetSwapchain_Views() = 0;
         virtual std::vector<VkImage>& GetSwapchain_Images() = 0;
-        virtual VkImage GetIntermediaColor_Image(int index) = 0;
+        virtual VkImage GetIntermediaColor_Image(int frameIndex, int imageIndex) = 0;
         virtual VkSwapchainKHR GetSwapchainHandle() = 0;
         virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() = 0;
         virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) = 0;
