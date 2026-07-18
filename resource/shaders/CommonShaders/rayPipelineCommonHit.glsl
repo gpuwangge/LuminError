@@ -61,6 +61,7 @@ vec3 RandomDirectionInHemisphere(vec3 normal, inout uint state){
     float u1 = Rand(state);
     float u2 = Rand(state);
 
+    //Cosine-weighted Hemisphere Sampling（Malley's Method）
     float r = sqrt(u1);
     float theta = 2.0 * 3.14159265359 * u2;
     float x = r * cos(theta);
@@ -185,62 +186,41 @@ bool earlyExit(inout Material mat){
 4.写回payload
 （最终看到的效果要包含如下部分：漫反射Lambert，镜面高光项Phong/Blinn，阴影shadowray）
 */
-void updatePayload(in Material mat, vec3 Ngeom){
-    /**************
-    1.命中信息重建
-    **************/
-    vec3 hitPos = getWorldHitPos();
-    
-    vec3 I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
 
-    vec3 V = -I; //视向向量，观察方向
+struct HitInfoStruct{
+    vec3 hitPos;
+    vec3 V; //视向向量，观察方向
+    vec3 I; // 入射方向：射线前进方向
+    vec3 N; // N 始终朝向入射光
+    vec3 Ngeom;
+    float cosTheta;
 
-    bool frontFace = dot(I, Ngeom) < 0.0; //入射光线落在表面的哪一侧（正面还是背面）
-    vec3 N = frontFace ? Ngeom : -Ngeom; // N 始终朝向入射光
+    bool airToMedium;
+    bool mediumToAir;
 
-    bool airToMedium = (primaryPayload.insideMedium == 0u) && !frontFace;
-    bool mediumToAir = (primaryPayload.insideMedium == 1u) && frontFace;
-    //bool invalid1 = (primaryPayload.insideMedium == 1u && !frontFace);
-    //bool invalid2 = (primaryPayload.insideMedium == 0u && frontFace);
+    //material related
+    vec3 albedo;
+    vec3 emission;
+    float metallic;
+    float roughness;
+    float transmission;
+    float specular;
+    float ior;
+    float alpha;
+    vec3 transmissionColor;
 
-    vec3 albedo = mat.albedo;
-    vec3 emission = mat.emissionColor * mat.emissionStrength;
+    vec3 F0;
+    vec3 F;
 
-    float metallic = clamp(mat.metallic, 0.0, 1.0);
-    float roughness = clamp(mat.roughness, 0.02, 1.0);
-    float transmission = clamp(mat.transmission, 0.0, 1.0);
-    float specular = clamp(mat.specular, 0.0, 1.0);
-    float ior = max(mat.ior, 1.01);
-    float alpha = mat.alpha;
-    vec3 transmissionColor = mat.transmissionColor;
+    uint state;
+};
 
-    //float f0Scalar = pow((1.0 - ior) / (1.0 + ior), 2.0);
-    //vec3 dielectricF0 = vec3(f0Scalar);
-    //vec3 F0 = mix(dielectricF0, albedo, metallic);
-
-    // 计算基础反射率 F0
-    //vec3 F0 = mix(vec3(mat.reflectance), albedo, metallic);
-    float f0Scalar = pow((1.0 - ior) / (1.0 + ior), 2.0);
-    vec3 dielectricF0 = vec3(f0Scalar);
-    vec3 F0 = mix(dielectricF0, albedo, metallic);
-    // 计算菲涅尔项
-    //float cosTheta = abs(dot(Ngeom, -I));
-    //float cosTheta = abs(dot(N, -I));
-    float cosTheta = clamp(dot(N,-I),0.0,1.0);
-    vec3 F = F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-
-    uint state = gl_LaunchIDEXT.x;
-    state = state * 747796405u + gl_LaunchIDEXT.y;
-    state = state * 747796405u + customUBO.frameCount;
-    state = state * 747796405u + 2891336453u;
-
-
+void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
     /////////////////////
     //Method1： 确定性的 Whitted-style 光追 + 直接光照
     //没有随机分支，稳定
-    //INPUT: mat, Ngeom
     //OUTPUT: primaryPayload.throughput, primaryPayload.radiance
-    //2.直接光 + 阴影
+    //1.直接光 + 阴影
 
     vec3 directDiffuse = vec3(0.0);
     vec3 directSpecular = vec3(0.0);
@@ -252,13 +232,13 @@ void updatePayload(in Material mat, vec3 Ngeom){
 
         float maxT;
         vec3 lightRadiance;
-        vec3 L = getLightDirAndRadiance(light, hitPos, maxT, lightRadiance);
+        vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
 
-        float NdotL = max(dot(N, L), 0.0);
+        float NdotL = max(dot(hitInfo.N, L), 0.0);
         if(NdotL <= 0.0) continue;
 
 
-        vec3 shadowOrigin = hitPos + N * SHADOW_BIAS;
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
         float visibility = traceShadowVisibility(shadowOrigin, L, maxT);
         if(visibility <= 0.0) continue;
         //float visibility = 1.0;//test, disable shadow
@@ -269,21 +249,21 @@ void updatePayload(in Material mat, vec3 Ngeom){
         // kd *= (1.0 - transmission);
         // kd *= mat.alpha;
 
-        vec3 kd = (1.0 - metallic) * albedo;
-        kd *= (1.0 - transmission);
-        kd *= mat.alpha;
+        vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo;
+        kd *= (1.0 - hitInfo.transmission);
+        kd *= hitInfo.alpha;
         vec3 diffuseBRDF = kd / PI;
 
 
-        vec3 H = safeNormalize(L + V);
-        float NdotH = max(dot(N, H), 0.0);
-        float VdotH = max(dot(V, H), 0.0);
+        vec3 H = safeNormalize(L + hitInfo.V);
+        float NdotH = max(dot(hitInfo.N, H), 0.0);
+        float VdotH = max(dot(hitInfo.V, H), 0.0);
 
-        vec3 F = fresnelSchlick(VdotH, F0);
+        vec3 F1 = fresnelSchlick(VdotH, hitInfo.F0);
 
         //这是 Blinn-Phong。
-        float shininess = mix(128.0, 4.0, roughness);
-        float specFactor = pow(NdotH, shininess) * specular;
+        float shininess = mix(128.0, 4.0, hitInfo.roughness);
+        float specFactor = pow(NdotH, shininess) * hitInfo.specular;
         directDiffuse += diffuseBRDF * lightRadiance * NdotL * visibility;
         //directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
         // if(metallic > 0.9){
@@ -291,48 +271,47 @@ void updatePayload(in Material mat, vec3 Ngeom){
         // } else {
         //     directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
         // }
-        if(metallic > 0.5){
+        if(hitInfo.metallic > 0.5){
             directDiffuse = vec3(0.0);
-            directSpecular += albedo * specFactor * lightRadiance * NdotL * visibility;
+            directSpecular += hitInfo.albedo * specFactor * lightRadiance * NdotL * visibility;
         }else {
-            directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
+            directSpecular += F1 * specFactor * lightRadiance * NdotL * visibility;
         }
     }
 
     //vec3 localRadiance = emission + directDiffuse + directSpecular;
-    vec3 localRadiance = emission;
-    if(transmission < 0.01){
+    vec3 localRadiance = hitInfo.emission;
+    if(hitInfo.transmission < 0.01){
         localRadiance += directDiffuse + directSpecular;
     } else {
         localRadiance += directSpecular;
     }
 
-    //3. 二次光线
-
+    //2. 二次光线
     vec3 nextOrigin = vec3(0.0);
     vec3 nextDir = vec3(0.0);
     vec3 nextThroughputMul = vec3(1.0);
     bool spawnNextRay = false;
 
     //float cosTheta = clamp(dot(V, N), 0.0, 1.0);
-    float fresnelScalar = fresnelSchlickScalar(cosTheta, ior);
+    float fresnelScalar = fresnelSchlickScalar(hitInfo.cosTheta, hitInfo.ior);
     fresnelScalar = pow(fresnelScalar,0.75);
     //vec3 F = fresnelSchlick(cosTheta, F0);
 
     //bool hasReflection = (specular > 0.01 || metallic > 0.01 || mat.reflectance > 0.01);
-    bool hasReflection = (metallic > 0.8);
-    bool hasTransmission = transmission > 0.01; //recover
+    bool hasReflection = (hitInfo.metallic > 0.8);
+    bool hasTransmission = hitInfo.transmission > 0.01; //recover
 
     primaryPayload.radiance = localRadiance;
     primaryPayload.spawnRayCount = 0u;
     primaryPayload.done = 1u;
 
-    if(hasReflection && transmission < 0.01){ //金属
-        vec3 R = normalize(reflect(I, N));
+    if(hasReflection && hitInfo.transmission < 0.01){ //金属
+        vec3 R = normalize(reflect(hitInfo.I, hitInfo.N));
 
-        primaryPayload.nextRayOrigin0 = hitPos + N * EPSILON;
-        primaryPayload.nextRayDir0 = normalize(mix(R, RandomDirectionInHemisphere(N, state), roughness * roughness));
-        primaryPayload.nextRayThroughputMul0 = mix(vec3(0.04), albedo, metallic);
+        primaryPayload.nextRayOrigin0 = hitInfo.hitPos + hitInfo.N * EPSILON;
+        primaryPayload.nextRayDir0 = normalize(mix(R, RandomDirectionInHemisphere(hitInfo.N, hitInfo.state), hitInfo.roughness * hitInfo.roughness));
+        primaryPayload.nextRayThroughputMul0 = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
 
         primaryPayload.spawnRayCount = 1u;
         primaryPayload.done = 0u;
@@ -341,12 +320,12 @@ void updatePayload(in Material mat, vec3 Ngeom){
     if(hasTransmission){
         //float eta = frontFace ? (1.0 / ior) : ior;
 
-        float n1 = primaryPayload.insideMedium == 1u ? mat.ior : 1.0;
-        float n2 = primaryPayload.insideMedium == 1u ? 1.0    : mat.ior;
+        float n1 = primaryPayload.insideMedium == 1u ? hitInfo.ior : 1.0;
+        float n2 = primaryPayload.insideMedium == 1u ? 1.0    : hitInfo.ior;
         float eta = n1 / n2;
 
-        vec3 R = safeNormalize(reflect(I, N));
-        vec3 T = refract(I, N, eta);
+        vec3 R = safeNormalize(reflect(hitInfo.I, hitInfo.N));
+        vec3 T = refract(hitInfo.I, hitInfo.N, eta);
 
         bool tir = dot(T, T) < 1e-8;
 
@@ -358,8 +337,8 @@ void updatePayload(in Material mat, vec3 Ngeom){
         primaryPayload.nextMediumEntryPos1 = primaryPayload.mediumEntryPos;
         if(tir){ // 全反射
             //primaryPayload.nextRayOrigin0 = hitPos + R * EPSILON;
-            vec3 Roff = dot(R, Ngeom) > 0.0 ? Ngeom : -Ngeom;
-            primaryPayload.nextRayOrigin0 = hitPos + Roff * EPSILON;
+            vec3 Roff = dot(R, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom : -hitInfo.Ngeom;
+            primaryPayload.nextRayOrigin0 = hitInfo.hitPos + Roff * EPSILON;
             primaryPayload.nextRayDir0 = R;
             primaryPayload.nextRayThroughputMul0 = vec3(1.0);
             primaryPayload.spawnRayCount = 1u;
@@ -367,22 +346,22 @@ void updatePayload(in Material mat, vec3 Ngeom){
         else{ //有反射和折射
             T = safeNormalize(T);
 
-            vec3 Toff = dot(T, Ngeom) > 0.0 ? Ngeom : -Ngeom;
-            vec3 Roff = dot(R, Ngeom) > 0.0 ? Ngeom : -Ngeom;
+            vec3 Toff = dot(T, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom : -hitInfo.Ngeom;
+            vec3 Roff = dot(R, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom : -hitInfo.Ngeom;
 
-            float F = pow(fresnelScalar,0.5);
+            float F2 = pow(fresnelScalar,0.5);
 
             //折射
-            primaryPayload.nextRayOrigin0 = hitPos + Toff * EPSILON;
+            primaryPayload.nextRayOrigin0 = hitInfo.hitPos + Toff * EPSILON;
             primaryPayload.nextRayDir0 = T;
-            primaryPayload.nextRayThroughputMul0 = transmissionColor * (1.0 - F);
+            primaryPayload.nextRayThroughputMul0 = hitInfo.transmissionColor * (1.0 - F2);
 
-            if(airToMedium){
-                primaryPayload.nextCurrentIOR0 = ior;
+            if(hitInfo.airToMedium){
+                primaryPayload.nextCurrentIOR0 = hitInfo.ior;
                 primaryPayload.nextInsideMedium0 = 1u;
-                primaryPayload.nextMediumEntryPos0 = hitPos;
-            }else if(mediumToAir){
-                float distanceInGlass = length(hitPos - primaryPayload.mediumEntryPos);
+                primaryPayload.nextMediumEntryPos0 = hitInfo.hitPos;
+            }else if(hitInfo.mediumToAir){
+                float distanceInGlass = length(hitInfo.hitPos - primaryPayload.mediumEntryPos);
                 
                 //test
                 //primaryPayload.radiance = vec3(distanceInGlass * 0.5);
@@ -402,11 +381,11 @@ void updatePayload(in Material mat, vec3 Ngeom){
             }
 
             //反射
-            primaryPayload.nextRayOrigin1 = hitPos + Roff * EPSILON;
+            primaryPayload.nextRayOrigin1 = hitInfo.hitPos + Roff * EPSILON;
             primaryPayload.nextRayDir1 = R;
             //primaryPayload.nextRayThroughputMul1 = vec3(fresnelScalar);
             //float F = pow(fresnelScalar,0.8);
-            primaryPayload.nextRayThroughputMul1 = vec3(F);
+            primaryPayload.nextRayThroughputMul1 = vec3(F2);
             //float reflectionBoost = 2.0;
             //primaryPayload.nextRayThroughputMul1 = vec3(min(fresnelScalar * reflectionBoost,1.0));
 
@@ -414,7 +393,204 @@ void updatePayload(in Material mat, vec3 Ngeom){
         }
 
         primaryPayload.done = 0u;
+    }//end of transmission
+}
+
+void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path Tracing
+    //OUTPUT: primaryPayload.throughput
+
+    //Material mat = sboMaterial.materials[hitInfo.material_id];
+    
+    // 添加自发光贡献
+    //vec3 emittedLight = mat.emissionColor * mat.emissionStrength;
+    //result_brightness_score += emittedLight * payload.throughput;
+
+    // 俄罗斯轮盘赌（从第3次反弹开始）
+    // if(i > 2) {
+    //     float p = max(throughput.r, max(throughput.g, throughput.b));
+    //     if(p < 0.001) break;
+    //     if(Rand(state) > p) break;
+    //     throughput /= p;
+    // }
+    
+    primaryPayload.spawnRayCount = 0u;
+    vec3 throughputMul = vec3(1.0);
+
+    // 处理折射/透射材质（玻璃、水等）
+    vec3 I0 = hitInfo.I;
+    vec3 Ngeom0 = hitInfo.Ngeom;
+    if (hitInfo.transmission > 0.0 && hitInfo.alpha < 0.5) {
+        // float refractionRatio = hitInfo.ior;
+        // bool entering = dot(Ngeom0, -hitInfo.I) > 0.0;
+        
+        
+        // if (!entering) {
+        //     Ngeom0 = -Ngeom0;
+        //     refractionRatio = 1.0 / hitInfo.ior;
+        // }
+        
+        // vec3 refractedDir = refract(hitInfo.I, Ngeom0, refractionRatio);
+
+        // 判断当前是进入介质还是离开介质
+        bool entering = dot(hitInfo.I, Ngeom0) < 0.0;
+
+        // GLSL refract() 要求 eta = n1 / n2
+        float eta;
+
+        if (entering)
+        {
+            // Air -> Glass
+            eta = 1.0 / hitInfo.ior;
+        }
+        else
+        {
+            // Glass -> Air
+            Ngeom0 = -Ngeom0;
+            eta = hitInfo.ior;
+        }
+
+        vec3 refractedDir = refract(hitInfo.I, Ngeom0, eta);
+        
+        // 增加基于粗糙度的法线扰动
+        vec3 perturbedNormal = Ngeom0;
+        if (hitInfo.roughness > 0.0) {
+            vec3 randomJitter = RandomDirectionInHemisphere(Ngeom0, hitInfo.state) - Ngeom0;
+            perturbedNormal = normalize(Ngeom0 + randomJitter * hitInfo.roughness * 0.3);
+        }
+        
+        // 使用扰动后的法线重新计算
+        refractedDir = refract(hitInfo.I, perturbedNormal, eta);
+        float cosTheta = abs(dot(perturbedNormal, -hitInfo.I));
+        vec3 F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - cosTheta, 5.0);
+        
+        //float reflectionProbability = (F.r + F.g + F.b) / 3.0;
+        float reflectionProbability = clamp(dot(F, vec3(0.333333)), 0.05, 0.95);
+        
+        if (length(refractedDir) < 0.001 || Rand(hitInfo.state) < reflectionProbability * 0.8) {
+            I0 = reflect(hitInfo.I, perturbedNormal);
+            if (hitInfo.roughness > 0.0) {
+                I0 = normalize(mix(I0, RandomDirectionInHemisphere(perturbedNormal, hitInfo.state), hitInfo.roughness));
+            }
+            throughputMul *= F / max(reflectionProbability, 0.1);
+        } else {
+            I0 = refractedDir;
+            vec3 glassColor = hitInfo.transmissionColor * hitInfo.albedo;
+            throughputMul *= glassColor * (1.0 - F) / max(1.0 - reflectionProbability, 0.1);
+        }
+        primaryPayload.spawnRayCount = 1u;
     }
+    
+    // 处理金属材质（高反射）
+    else if (hitInfo.metallic > 0.8) {
+        // 金属材质主要进行镜面反射
+        vec3 reflectedDir = reflect(hitInfo.I, Ngeom0);
+        
+        // 根据粗糙度添加随机性
+        if (hitInfo.roughness > 0.0) {
+            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(Ngeom0, hitInfo.state), hitInfo.roughness));
+        }
+        
+        I0 = reflectedDir;
+        throughputMul *= hitInfo.F * hitInfo.albedo;
+        primaryPayload.spawnRayCount = 1u;
+    }
+
+    
+    // 处理电介质材质（混合漫反射和镜面反射）
+    else {
+        // 根据菲涅尔项决定反射和漫反射的比例
+        float reflectionProbability = (hitInfo.F.r + hitInfo.F.g + hitInfo.F.b) / 3.0;
+        
+        if (Rand(hitInfo.state) < reflectionProbability) {
+            // 镜面反射
+            vec3 reflectedDir = reflect(I0, Ngeom0);
+            
+            // 根据粗糙度添加随机性
+            if (hitInfo.roughness > 0.0) {
+                reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(Ngeom0, hitInfo.state), hitInfo.roughness));
+            }
+            
+            I0 = reflectedDir;
+            throughputMul *= hitInfo.F / reflectionProbability;
+            primaryPayload.spawnRayCount = 1u;
+        } else {
+            // 漫反射 
+            I0 = RandomDirectionInHemisphere(Ngeom0, hitInfo.state);
+            
+            // 能量守恒：漫反射部分 = (1 - F) * 漫反射颜色
+            vec3 kD = (1.0 - hitInfo.F) * (1.0 - hitInfo.metallic);
+            throughputMul *= kD * hitInfo.albedo / (1.0 - reflectionProbability);
+
+            primaryPayload.spawnRayCount = 1u;
+        }
+    }
+
+    //primaryPayload.radiance = primaryPayload.throughput;
+    primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
+    //primaryPayload.radiance = hitInfo.emission + vec3(0.5);//test
+    vec3 offsetDir = dot(I0,Ngeom0)>0?Ngeom0:-Ngeom0;
+    vec3 origin=hitInfo.hitPos+offsetDir*0.001;
+    primaryPayload.nextRayOrigin0 = origin; //hitPos + Ngeom * 0.001;
+    primaryPayload.nextRayDir0 = I0;
+    primaryPayload.nextRayThroughputMul0 = throughputMul;
+
+    primaryPayload.done = 0u;
+}
+
+
+
+void updatePayload(in Material mat, vec3 Ngeom){
+    /**************
+    命中信息重建
+    **************/
+    HitInfoStruct hitInfo;
+
+    hitInfo.hitPos = getWorldHitPos();
+    hitInfo.I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
+    hitInfo.V = -hitInfo.I; //视向向量，观察方向
+    bool frontFace = dot(hitInfo.I, Ngeom) < 0.0; //入射光线落在表面的哪一侧（正面还是背面）
+    vec3 N = frontFace ? Ngeom : -Ngeom; // N 始终朝向入射光
+    hitInfo.N = N;
+    hitInfo.Ngeom = Ngeom;
+
+    hitInfo.airToMedium = (primaryPayload.insideMedium == 0u) && !frontFace;
+    hitInfo.mediumToAir = (primaryPayload.insideMedium == 1u) && frontFace;
+    //bool invalid1 = (primaryPayload.insideMedium == 1u && !frontFace);
+    //bool invalid2 = (primaryPayload.insideMedium == 0u && frontFace);
+
+    hitInfo.albedo = mat.albedo;
+    hitInfo.emission = mat.emissionColor * mat.emissionStrength;
+    hitInfo.metallic = clamp(mat.metallic, 0.0, 1.0);
+    hitInfo.roughness = clamp(mat.roughness, 0.02, 1.0);
+    hitInfo.transmission = clamp(mat.transmission, 0.0, 1.0);
+    hitInfo.specular = clamp(mat.specular, 0.0, 1.0);
+    hitInfo.ior = max(mat.ior, 1.01);
+    hitInfo.alpha = mat.alpha;
+    hitInfo.transmissionColor = mat.transmissionColor;
+
+    //float f0Scalar = pow((1.0 - ior) / (1.0 + ior), 2.0);
+    //vec3 dielectricF0 = vec3(f0Scalar);
+    //vec3 F0 = mix(dielectricF0, albedo, metallic);
+
+    // 计算基础反射率 F0
+    //vec3 F0 = mix(vec3(mat.reflectance), albedo, metallic);
+    float f0Scalar = pow((1.0 - mat.ior) / (1.0 + mat.ior), 2.0);
+    vec3 dielectricF0 = vec3(f0Scalar);
+    hitInfo.F0 = mix(dielectricF0, mat.albedo, mat.metallic);
+    // 计算菲涅尔项
+    //float cosTheta = abs(dot(Ngeom, -I));
+    //float cosTheta = abs(dot(N, -I));
+    hitInfo.cosTheta = clamp(dot(hitInfo.N,-hitInfo.I),0.0,1.0);
+    hitInfo.F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - hitInfo.cosTheta, 5.0);
+
+    uint state = gl_LaunchIDEXT.x;
+    state = state * 747796405u + gl_LaunchIDEXT.y;
+    state = state * 747796405u + customUBO.frameCount;
+    state = state * 747796405u + 2891336453u;
+    hitInfo.state = state;
+
+    WhittedStyleRayTracing(hitInfo);
+    //PathTracing(hitInfo);
 }
 
 
