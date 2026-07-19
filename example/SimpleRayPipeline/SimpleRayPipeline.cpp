@@ -42,12 +42,11 @@ namespace LuminError{
         void Update() override {
             customUniformBufferObject.cameraInMotion = GameEngine->GetCameraInMotion();
             if(GameEngine->GetCameraInMotion()) accumulatedFrameCount = 0;
+            else accumulatedFrameCount++;
             
             customUniformBufferObject.frameCount = accumulatedFrameCount;
             
             GameEngine->UploadRaytracingCustomUniformBuffer(GameEngine->GetCurrentFrame(), &customUniformBufferObject, sizeof(StructCustomUniformBuffer));
-
-            accumulatedFrameCount++;
 
             GameEngine->PrintFPS(1.0f);
         }

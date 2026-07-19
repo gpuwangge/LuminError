@@ -525,16 +525,12 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
         }
     }
 
-    //primaryPayload.radiance = primaryPayload.throughput;
     primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
-    //primaryPayload.radiance = vec3(1.0); //test不变暗
-    //primaryPayload.radiance = hitInfo.emission + vec3(0.5);//test
     vec3 offsetDir = dot(I0,Ngeom0)>0?Ngeom0:-Ngeom0;
     vec3 origin=hitInfo.hitPos+offsetDir*0.001;
     primaryPayload.nextRayOrigin0 = origin; //hitPos + Ngeom * 0.001;
     primaryPayload.nextRayDir0 = I0;
     primaryPayload.nextRayThroughputMul0 = throughputMul;
-    //primaryPayload.nextRayThroughputMul0 = vec3(1.0);//test
 
     primaryPayload.done = 0u;
 }
@@ -585,17 +581,60 @@ void updatePayload(in Material mat, vec3 Ngeom){
     hitInfo.cosTheta = clamp(dot(hitInfo.N,-hitInfo.I),0.0,1.0);
     hitInfo.F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - hitInfo.cosTheta, 5.0);
 
-    uint state = gl_LaunchIDEXT.x;
-    state = state * 747796405u + gl_LaunchIDEXT.y;
-    state = state * 747796405u + customUBO.frameCount;
-    state = state * 747796405u + 2891336453u;
-    hitInfo.state = state;
+
+    /*
+     uint state = gl_LaunchIDEXT.x;
+     state = state * 747796405u + gl_LaunchIDEXT.y;
+     state = state * 747796405u + customUBO.frameCount;
+     state = state * 747796405u + 2891336453u;
+    //hitInfo.state = state;
     //TODO:state完全没有：
     // bounce depth
     // ray direction
     // hit position
     // primitive id
     // instance id
+
+    state = state * 747796405u + uint(primaryPayload.seed);
+    //state ^= uint(primaryPayload.seed);
+    state = state * 747796405u + primaryPayload.depth;
+    // state = state * 747796405u + uint(hitInfo.hitPos.x*12+hitInfo.hitPos.y*345);
+    // state = state * 747796405u + uint(hitInfo.I.x);
+    hitInfo.state = state;
+    */
+
+
+    uint state = gl_LaunchIDEXT.x;
+    state = state * 747796405u + gl_LaunchIDEXT.y;
+    state = state * 747796405u + uint(customUBO.frameCount);
+
+    state ^= primaryPayload.sampleIndex;
+    state *= 747796405u;
+
+    state ^= primaryPayload.depth;
+    state *= 747796405u;
+
+    state ^= floatBitsToUint(hitInfo.hitPos.x);
+    state *= 747796405u;
+    state ^= floatBitsToUint(hitInfo.hitPos.y);
+    state *= 747796405u;
+    state ^= floatBitsToUint(hitInfo.hitPos.z);
+    state *= 747796405u;
+
+    state ^= floatBitsToUint(hitInfo.I.x);
+    state *= 747796405u;
+    state ^= floatBitsToUint(hitInfo.I.y);
+    state *= 747796405u;
+    state ^= floatBitsToUint(hitInfo.I.z);
+    state *= 747796405u;
+
+    state ^= uint(gl_PrimitiveID);
+    state *= 747796405u;
+
+    state ^= gl_InstanceCustomIndexEXT;
+    state *= 747796405u;
+
+    hitInfo.state = state;
 
     //WhittedStyleRayTracing(hitInfo);
     PathTracing(hitInfo);

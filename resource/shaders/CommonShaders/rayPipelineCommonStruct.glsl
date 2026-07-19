@@ -63,6 +63,8 @@ struct PrimaryPayload {
 
     uint depth;       // 当前 bounce 数（以后俄罗斯轮盘用）
     uint done;        // 1 = 终止，0 = 继续
+
+    uint sampleIndex; //to generate random number
 };
 
 struct ShadowPayload{
@@ -131,7 +133,7 @@ float hash12(vec2 p)
 
 vec2 rnd2(vec2 pix, int sampleIndex, int frameIndex)
 {
-    float seed = hash12(pix + vec2(float(sampleIndex), float(frameIndex)));
+    float seed = hash12(pix + vec2(sampleIndex * 73.0, frameIndex * 977.0));
     return vec2(
         hash11(seed + 1.0),
         hash11(seed + 2.0)

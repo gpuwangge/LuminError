@@ -9,8 +9,9 @@
 
 //PathTracing
 const int RAY_PER_PIXEL = 1;
+//spp=16，噪点应该是spp=1的四分之一
 const int BOUNCE_LIMIT  = 8;
-const int MAX_PATHS = 32;
+const int MAX_PATHS = 8;
 
 layout(set = 0, binding = 0, rgba8) uniform writeonly image2D resultImage;
 layout(location = 0) rayPayloadEXT PrimaryPayload primaryPayload;
@@ -35,9 +36,14 @@ layout(set = 0, binding = 5) uniform CustomBufferObject {
 } customUBO;
 
 //不要加 writeonly，因为既要 imageLoad() 又要 imageStore()。
-//rgba16f（或 rgba32f）用于保存 HDR 累积值。
+//rgba32f（用rgba16f会有精度误差）用于保存 HDR 累积值。
 //resultImage 仍然是最终显示用。
-layout(set = 0, binding = 8, rgba16f) uniform image2D accumulationImage; 
+// TODO:
+// RGBA16F accumulation exhibits progressive darkening after ~100 frames.
+// RGBA32F works correctly.
+// Investigate whether this is due to numerical error,
+// synchronization, or driver-specific behavior.
+layout(set = 0, binding = 8, rgba32f) uniform image2D accumulationImage; 
 
 void main(){
     ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
@@ -47,8 +53,7 @@ void main(){
 
     //int pathCount = 0;//test
 
-    for (int s = 0; s < RAY_PER_PIXEL; ++s)
-    {
+    for (int s = 0; s < RAY_PER_PIXEL; ++s){
         vec2 jitter = rnd2(pixel, s, customUBO.frameCount);
         vec2 uv = (vec2(pixel) + jitter) / vec2(size);
         vec2 ndc = uv * 2.0 - 1.0;
@@ -78,10 +83,10 @@ void main(){
             0u //depth
         );
 
-        
-        while(stackSize > 0){
-            //pathCount++;
+        //primaryPayload.radiance = vec3(0.0);
+        primaryPayload.sampleIndex = s;
 
+        while(stackSize > 0){
             PathState path = pathStack[--stackSize];
 
             primaryPayload.radiance = vec3(0.0);
@@ -103,10 +108,8 @@ void main(){
                 1e32,
                 0
             );
-
-            //if(path.depth <=2)//test
+            //path.throughput = vec3(1.0);//test
             accumulatedRadiance += path.throughput * primaryPayload.radiance;
-            //accumulatedRadiance += primaryPayload.radiance;//test
 
             if(path.depth + 1u >= BOUNCE_LIMIT) continue;
 
@@ -139,29 +142,26 @@ void main(){
     vec3 frameRadiance = accumulatedRadiance / float(RAY_PER_PIXEL);
 
     //non-accumulate image
-    // imageStore(resultImage, pixel, vec4(frameRadiance, 1.0).bgra); 
-    // return;
+    //imageStore(resultImage, pixel, vec4(frameRadiance, 1.0).bgra); //有噪点
+    //return;
 
 
     // EMA
-    float alphaEMA = 0.1;
+    //float alphaEMA = 0.1;
 
     // Running Average
     float alphaRA = 1.0 / (customUBO.frameCount + 1);
+    //float alphaRA = 1.0 / (10 + 1); //test：固定frameCount 有噪点，但是不变暗
+    //alphaRA = max(alphaRA,0.0025);//test 16位的时候0.002会缓慢变暗
 
     // Running Average
     vec3 prevColor = imageLoad(accumulationImage, pixel).bgr;
     vec3 accumColor;
-    if(customUBO.frameCount == 0) accumColor = frameRadiance;
-    else accumColor = prevColor + (frameRadiance - prevColor) * alphaRA;// / float(customUBO.frameCount + 1);
+    if(customUBO.frameCount == 0) 
+        accumColor = frameRadiance;
+    else 
+        accumColor = prevColor + (frameRadiance - prevColor) * alphaRA;
     imageStore(accumulationImage, pixel, vec4(accumColor, 1.0).bgra);
     imageStore(resultImage,       pixel, vec4(accumColor, 1.0).bgra);
-
-    // float v = float(pathCount) / 20.0;
-    // imageStore(resultImage,pixel,vec4(v,v,v,1));
-
-    //我运行了很久，都没有变暗
-    // float L = dot(frameRadiance,vec3(0.2126,0.7152,0.0722));
-    // imageStore(resultImage,pixel,vec4(vec3(L),1));
 
 }
