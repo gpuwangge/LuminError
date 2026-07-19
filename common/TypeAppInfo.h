@@ -27,8 +27,17 @@ struct FeatureConfig {
     int feature_graphics_observe_attachment_id = -1;
     bool feature_graphics_show_performance_control = true;
     bool feature_graphics_show_all_metric_controls = true;
-
     bool feature_graphics_enable_controls = false; //this is not read from yaml
+
+    int feature_raytracing_pipeline_render_mode = 0;
+    int feature_raytracing_pipeline_interactive_render_mode = 0;
+    int feature_raytracing_pipeline_sampler_per_pixel = 1;
+    int feature_raytracing_pipeline_maximum_bounce = 8;
+    bool feature_raytracing_pipeline_accumulate = true;
+    bool feature_raytracing_pipeline_enableNEE = false;
+    bool feature_raytracing_pipeline_use_sky = false;
+    float feature_raytracing_pipeline_maximum_Radiance = 0;
+    int feature_raytracing_pipeline_debug_mode = 0;
 
     void loadFromYaml(const YAML::Node& node) {
         feature_rendermode                          = getOrDefault(node, "feature_rendermode", 0);
@@ -40,8 +49,17 @@ struct FeatureConfig {
         feature_graphics_observe_attachment_id      = getOrDefault(node, "feature_graphics_observe_attachment_id", -1);
         feature_graphics_show_performance_control   = getOrDefault(node, "feature_graphics_show_performance_control", false);
         feature_graphics_show_all_metric_controls   = getOrDefault(node, "feature_graphics_show_all_metric_controls", false);
-        
         feature_graphics_enable_controls = feature_graphics_show_performance_control || feature_graphics_show_all_metric_controls;
+    
+        feature_raytracing_pipeline_render_mode     = getOrDefault(node, "feature_raytracing_pipeline_render_mode", 0);
+        feature_raytracing_pipeline_interactive_render_mode     = getOrDefault(node, "feature_raytracing_pipeline_interactive_render_mode", 0);
+        feature_raytracing_pipeline_sampler_per_pixel     = getOrDefault(node, "feature_raytracing_pipeline_sampler_per_pixel", 1);
+        feature_raytracing_pipeline_maximum_bounce     = getOrDefault(node, "feature_raytracing_pipeline_maximum_bounce", 8);
+        feature_raytracing_pipeline_accumulate     = getOrDefault(node, "feature_raytracing_pipeline_accumulate", true);
+        feature_raytracing_pipeline_enableNEE     = getOrDefault(node, "feature_raytracing_pipeline_enableNEE", false);
+        feature_raytracing_pipeline_use_sky     = getOrDefault(node, "feature_raytracing_pipeline_use_sky", false);
+        feature_raytracing_pipeline_maximum_Radiance     = getOrDefault(node, "feature_raytracing_pipeline_maximum_Radiance", 0);
+        feature_raytracing_pipeline_debug_mode     = getOrDefault(node, "feature_raytracing_pipeline_debug_mode", 0);
     }
 };
 

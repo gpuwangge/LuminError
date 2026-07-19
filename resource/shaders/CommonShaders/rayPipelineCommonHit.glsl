@@ -13,9 +13,21 @@ layout(set = 0, binding = 3, std430) readonly buffer SBOMaterial {
 
 layout(set = 0, binding = 5) uniform CustomBufferObject {
     int frameCount;
-    bool cameraInMotion;
+    uint cameraInMotion;
     uint lightCount;
     uint materialCount;
+
+    uint renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+    uint spp;             // Samples Per Pixel
+    uint maxBounce;       // 最大反弹次数
+    uint accumulate;      // 0 = 不积累, 1 = 帧间积累
+    uint randomSeed;      // 可选，每次运行不同
+
+    float rrProbability;   //RR（俄罗斯轮盘）
+    uint enableNEE;
+    uint useSky;
+    float maxRadiance;
+    uint debugMode;
 } customUBO;
 
 const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
@@ -636,8 +648,11 @@ void updatePayload(in Material mat, vec3 Ngeom){
 
     hitInfo.state = state;
 
-    //WhittedStyleRayTracing(hitInfo);
-    PathTracing(hitInfo);
+    if(customUBO.renderMode == 0){
+        WhittedStyleRayTracing(hitInfo);
+    }else if(customUBO.renderMode == 1){
+        PathTracing(hitInfo);
+    }
 }
 
 

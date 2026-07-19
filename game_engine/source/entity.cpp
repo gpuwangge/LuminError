@@ -66,6 +66,7 @@ void CEntity::UpdateLength(){
 void CEntity::Update(float deltaTime){
     glm::vec3 CurrentVelocity = Velocity;
     glm::vec3 CurrentAngularVelocity = AngularVelocity;
+    float tmp_w_acculate = 0.0f; //to check if camera is moving or not
     for(int i = 0; i < 6; i++){
         if(TempVelocity[i].w > 0){
             CurrentVelocity += glm::vec3(TempVelocity[i]);
@@ -76,6 +77,7 @@ void CEntity::Update(float deltaTime){
             TempAngularVelocity[i].w -= deltaTime;
             //std::cout<<"TempAngularVelocity[i].w="<<TempAngularVelocity[i].w<<std::endl;
         }
+        tmp_w_acculate += TempVelocity[i].w;
     }
     if(TempMoveVelocity.w > 0){
         CurrentVelocity += glm::vec3(TempMoveVelocity);
@@ -89,10 +91,11 @@ void CEntity::Update(float deltaTime){
     //const float EPSILON = 1e-2f;
     const float EPSILON = 5;
     bool isVecZero = glm::dot(CurrentVelocity, CurrentVelocity) < EPSILON;
+    bool isTmpVecZero = tmp_w_acculate < 0.01f;
     bool isAngVecZero = glm::dot(CurrentAngularVelocity, CurrentAngularVelocity) < EPSILON;
     //bool isVecZero = glm::dot(Velocity, Velocity) < EPSILON;
     //bool isAngVecZero = glm::dot(AngularVelocity, AngularVelocity) < EPSILON;
-    if(isVecZero && isAngVecZero){
+    if(isVecZero && isTmpVecZero && isAngVecZero){
         bInMotion = false;
         //return; //can not return here, because even entity is not in motion, rotation and scale still works
     }else bInMotion = true;

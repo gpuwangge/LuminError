@@ -191,6 +191,16 @@ namespace LEGameEngine{
         void Set_feature_graphics_show_all_metric_controls(bool value) override;
         void Set_feature_graphics_show_performance_control(bool value) override;
 
+        int Get_feature_raytracing_pipeline_render_mode() override;
+        int Get_feature_raytracing_pipeline_interactive_render_mode() override;
+        int Get_feature_raytracing_pipeline_sampler_per_pixel() override;
+        int Get_feature_raytracing_pipeline_maximum_bounce() override;
+        bool Get_feature_raytracing_pipeline_accumulate() override;
+        bool Get_feature_raytracing_pipeline_enableNEE() override;
+        bool Get_feature_raytracing_pipeline_use_sky() override;
+        float Get_feature_raytracing_pipeline_maximum_Radiance() override;
+        int Get_feature_raytracing_pipeline_debug_mode() override;
+
         int GetControlNodeSize() override;
         void SetControlNodeVisible(int nodeId, bool value) override;
         void* GetInstanceHandle() override;

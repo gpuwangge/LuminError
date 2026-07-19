@@ -265,6 +265,16 @@ void GameEngine::Set_feature_graphics_enable_controls(bool value)  {appInfo->Fea
 void GameEngine::Set_feature_graphics_show_all_metric_controls(bool value) {appInfo->Feature.feature_graphics_show_all_metric_controls = value;}
 void GameEngine::Set_feature_graphics_show_performance_control(bool value) {appInfo->Feature.feature_graphics_show_performance_control = value;}
 
+int GameEngine::Get_feature_raytracing_pipeline_render_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_render_mode;}
+int GameEngine::Get_feature_raytracing_pipeline_interactive_render_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_interactive_render_mode;}
+int GameEngine::Get_feature_raytracing_pipeline_sampler_per_pixel() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_sampler_per_pixel;}
+int GameEngine::Get_feature_raytracing_pipeline_maximum_bounce() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_bounce;}
+bool GameEngine::Get_feature_raytracing_pipeline_accumulate() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_accumulate;}
+bool GameEngine::Get_feature_raytracing_pipeline_enableNEE() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_enableNEE;}
+bool GameEngine::Get_feature_raytracing_pipeline_use_sky() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_use_sky;}
+float GameEngine::Get_feature_raytracing_pipeline_maximum_Radiance() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_Radiance;}
+int GameEngine::Get_feature_raytracing_pipeline_debug_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_debug_mode;}
+
 int GameEngine::GetControlNodeSize() { return controlNodes.size();}
 void GameEngine::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}
 void* GameEngine::GetInstanceHandle() {return renderer->GetInstance();}// instance->getHandle();}

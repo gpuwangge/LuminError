@@ -84,6 +84,12 @@ A lightweight library for loading OBJ 3D model files.
 
 All components are bundled inside the repository under external/, and the CMake build system is already configured to include them.  
 
+## Mesh
+tinyobjloader只支持.obj文件。  
+对于.ply文件，可以先用meshlab转换成.obj。  
+更多测试模型的地址：https://graphics.stanford.edu/data/3Dscanrep/  
+
+
 ## Smart App Control（智能应用控制）导致的启动延迟说明
 
 在 Windows 11（22H2 及以上版本）中，微软引入了一项名为 Smart App Control（智能应用控制，SAC） 的安全功能。  

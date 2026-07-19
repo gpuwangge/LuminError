@@ -1,15 +1,59 @@
 Objects:
-  - object_name: Tree
+  # - object_name: Tree
+  #   object_id: 0
+  #   object_scale: 1
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 2
+  #   resource_model_id: 0
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Wineglass
+  #   object_id: 0
+  #   object_scale: 0.2
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 1
+  #   resource_model_id: 3
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Teapot
+  #   object_id: 0
+  #   object_scale: 0.4
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 2
+  #   resource_model_id: 4
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Female
     object_id: 0
     object_scale: 1
     object_position: [0,0.0,0]
-    object_rotation: [0,0,0] #no use
+    object_rotation: [0,180,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
-    object_material_id: 2
-    resource_model_id: 0
+    object_material_id: 0
+    resource_model_id: 5
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Skull
+  #   object_id: 0
+  #   object_scale: 0.075
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [-90,0,180]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 2
+  #   resource_model_id: 6
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
 
 CustomSpheres:
   - custom_sphere_name: Sphere
@@ -52,9 +96,9 @@ CustomSpheres:
 RTLights: #ray tracing pipeline lights to generate shadow
   - rt_light_name: Light0
     rt_light_id: 0
-    rt_light_position: [1.0, 1.5, -1.0]
+    rt_light_position: [0.0, 1.5, -1.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 0
+    rt_light_intensity: 6
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -63,7 +107,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 1
     rt_light_position: [-1.0, 1.5, -3.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 10
+    rt_light_intensity: 0
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -74,6 +118,12 @@ Resources:
     - resource_model_name: low_poly_tree.obj
     - resource_model_name: cube.obj
     - resource_model_name: cube_10facet.obj
+    - resource_model_name: wineglass.obj
+    - resource_model_name: teapot.obj
+    - resource_model_name: BaseMesh_Female.obj
+    - resource_model_name: Skull.obj
+    #- resource_model_name: dragon_vrip.obj
+    
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
       resource_raytracing_pipeline_primary_miss_shader_name: simpleRayPipeline/primary.rmiss.spv
@@ -105,6 +155,15 @@ Features:
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: false
   feature_graphics_show_all_metric_controls: false
+  feature_raytracing_pipeline_render_mode: 1 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+  feature_raytracing_pipeline_interactive_render_mode: 0 #change to this mode when camera is moving
+  feature_raytracing_pipeline_sampler_per_pixel: 1
+  feature_raytracing_pipeline_maximum_bounce: 8
+  feature_raytracing_pipeline_accumulate: true
+  feature_raytracing_pipeline_enableNEE: false
+  feature_raytracing_pipeline_use_sky: false
+  feature_raytracing_pipeline_maximum_Radiance: 0
+  feature_raytracing_pipeline_debug_mode: 0
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
