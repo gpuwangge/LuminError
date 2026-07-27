@@ -201,6 +201,8 @@ namespace LEGameEngine{
         bool Get_feature_raytracing_pipeline_use_sky() override;
         float Get_feature_raytracing_pipeline_maximum_Radiance() override;
         int Get_feature_raytracing_pipeline_debug_mode() override;
+        int Get_feature_raytracing_pipeline_softShadowEnable() override;
+        int Get_feature_raytracing_pipeline_softShadowSampleNumber() override;
 
         int GetControlNodeSize() override;
         void SetControlNodeVisible(int nodeId, bool value) override;

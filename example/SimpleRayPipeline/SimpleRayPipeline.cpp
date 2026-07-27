@@ -31,6 +31,9 @@ namespace LuminError{
             alignas(4) float maxRadiance;
             alignas(4) unsigned int debugMode;
 
+            alignas(4) unsigned int softShadowEnable; //for whitted style only
+            alignas(4) unsigned int softShadowSampleNumber; //for whitted style only
+
             static VkDescriptorSetLayoutBinding GetBinding(){
                 VkDescriptorSetLayoutBinding binding;
                 binding.binding = 0;//not important, will be reset
@@ -58,6 +61,8 @@ namespace LuminError{
             customUniformBufferObject.useSky = GameEngine->Get_feature_raytracing_pipeline_use_sky();
             customUniformBufferObject.maxRadiance = GameEngine->Get_feature_raytracing_pipeline_maximum_Radiance();
             customUniformBufferObject.debugMode = GameEngine->Get_feature_raytracing_pipeline_debug_mode();
+            customUniformBufferObject.softShadowEnable = GameEngine->Get_feature_raytracing_pipeline_softShadowEnable();
+            customUniformBufferObject.softShadowSampleNumber = GameEngine->Get_feature_raytracing_pipeline_softShadowSampleNumber();
         }
 
         void Update() override {

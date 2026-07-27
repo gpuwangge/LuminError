@@ -28,6 +28,9 @@ layout(set = 0, binding = 5) uniform CustomBufferObject {
     uint useSky;
     float maxRadiance;
     uint debugMode;
+
+    uint softShadowEnable; //for whitted style only
+    uint softShadowSampleNumber; //for whitted style only
 } customUBO;
 
 const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
@@ -183,7 +186,7 @@ vec3 SampleSky(vec3 dir){
     // return sky;
 }
 
-float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, int sampleCount, uint baseSeed) {
+float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, uint sampleCount, uint baseSeed) {
     float visible = 0.0;
 
     //vec3 lightNormal = normalize(hitpos); // disk faces shading point
@@ -331,18 +334,21 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
         if(NdotL <= 0.0) continue;
 
 
+        
         vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
-        //float visibility = traceShadowVisibility(shadowOrigin, L, maxT);
-        const int SHADOW_SAMPLES = 4; // 先从 4 / 8 / 16 试
-        float visibility = traceSoftShadowVisibility(
-            shadowOrigin, hitInfo.hitPos, hitInfo.N,
-            vec3(sboRtLightBuffer.lights[i].position),
-            sboRtLightBuffer.lights[i].radius,
-            SHADOW_SAMPLES,
-            hitInfo.state
-        );
+        float visibility = 1.0f; //default is disable shadow
+        if(customUBO.softShadowEnable == 0){
+            visibility = traceShadowVisibility(shadowOrigin, L, maxT);
+        }else{
+            visibility = traceSoftShadowVisibility(
+                shadowOrigin, hitInfo.hitPos, hitInfo.N,
+                vec3(sboRtLightBuffer.lights[i].position),
+                sboRtLightBuffer.lights[i].radius,
+                customUBO.softShadowSampleNumber,
+                hitInfo.state
+            );
+        }
         if(visibility <= 0.0) continue;
-        //float visibility = 1.0;//test, disable shadow
 
         vec3 H = safeNormalize(L + hitInfo.V);
         float NdotH = max(dot(hitInfo.N, H), 0.0);

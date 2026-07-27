@@ -274,6 +274,8 @@ bool GameEngine::Get_feature_raytracing_pipeline_enableNEE() {return yamler->Get
 bool GameEngine::Get_feature_raytracing_pipeline_use_sky() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_use_sky;}
 float GameEngine::Get_feature_raytracing_pipeline_maximum_Radiance() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_Radiance;}
 int GameEngine::Get_feature_raytracing_pipeline_debug_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_debug_mode;}
+int GameEngine::Get_feature_raytracing_pipeline_softShadowEnable() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_softShadowEnable; }
+int GameEngine::Get_feature_raytracing_pipeline_softShadowSampleNumber() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_softShadowSampleNumber; }
 
 int GameEngine::GetControlNodeSize() { return controlNodes.size();}
 void GameEngine::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}
