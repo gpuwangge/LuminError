@@ -51,60 +51,6 @@ layout(set = 0, binding = 2, scalar) readonly buffer SBOGeometryInfoBuffer {
     GeometryInfo infos[];
 } sboGeometryInfos;
 
-float computeSoftShadowVisibility(vec3 P, vec3 N, vec3 lightCenter, float radius, int sampleCount, uint baseSeed) {
-    const float EPS = 0.001;
-    vec3 shadowOrigin = P + N * EPS;
-
-    float visible = 0.0;
-
-    for (int s = 0; s < sampleCount; ++s) {
-        uint rng = baseSeed ^ uint(s) * 1664525u + 1013904223u;
-
-        vec3 lightNormal = normalize(P - lightCenter); // disk faces shading point
-        vec3 T, B;
-        buildOrthonormalBasis(lightNormal, T, B);
-
-        vec2 d = sampleDisk(rng) * radius;
-        vec3 samplePos = lightCenter + T * d.x + B * d.y;
-
-        vec3 toLight = samplePos - P;
-        float dist = length(toLight);
-        vec3 L = toLight / max(dist, 1e-4);
-
-        float NdotL = dot(N, L);
-        if (NdotL <= 0.0) {
-            continue;
-        }
-
-        //shadowPayload.visibility = 0u;
-        uint vis = 0u;
-        shadowPayload.visibility = 0u;
-
-        traceRayEXT(
-            topLevelAS,
-            gl_RayFlagsTerminateOnFirstHitEXT |
-            gl_RayFlagsSkipClosestHitShaderEXT,
-            0xFF,
-            1,   // sbtRecordOffset
-            1,   // sbtRecordStride
-            1,   // missIndex
-            shadowOrigin,
-            EPS,
-            L,
-            max(dist - EPS, EPS),
-            1
-        );
-
-        //visible += (shadowPayload.visibility == 1u) ? 1.0 : 0.0;
-        vis = shadowPayload.visibility;
-        visible += (vis == 1u) ? 1.0 : 0.0;
-
-        //visible = 1u;//test
-    }
-
-    return visible / float(sampleCount);
-}
-
 /**************
 Traingle related functions
 **************/

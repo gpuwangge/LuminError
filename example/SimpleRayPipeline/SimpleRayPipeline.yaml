@@ -134,7 +134,7 @@ Resources:
     # - resource_model_name: BaseMesh_Female.obj
     # - resource_model_name: Skull.obj
     # - resource_model_name: CoffeeTable.obj
-    - resource_model_name: dragon_vrip.obj
+    - resource_model_name: dragon.obj
     
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv

@@ -162,6 +162,77 @@ float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){ //inout ShadowPa
 }
 
 /**************
+Sky function
+**************/
+vec3 SampleSky(vec3 dir){
+    //纯色天空
+    //return vec3(0.2, 0.3, 0.4);
+
+    //渐变天空
+    dir = normalize(dir);
+    float t = 0.5 * (dir.y + 1.0);
+    return mix(vec3(1.0),vec3(0.5,0.7,1.0),t);
+
+    //种太阳
+    // dir = normalize(dir);
+    // float t = 0.5 * (dir.y + 1.0);
+    // vec3 sky = mix(vec3(1.0),vec3(0.5,0.7,1.0),t);
+    // vec3 sunDir = normalize(vec3(0.3, 0.8, 0.2));
+    // float sun = pow(max(dot(dir, sunDir),0.0),512.0);
+    // sky += sun * vec3(20.0);
+    // return sky;
+}
+
+float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, int sampleCount, uint baseSeed) {
+    float visible = 0.0;
+
+    //vec3 lightNormal = normalize(hitpos); // disk faces shading point
+    vec3 lightNormal = normalize(origin - lightCenter);
+    vec3 T, B;
+    buildOrthonormalBasis(lightNormal, T, B);
+
+    for (int s = 0; s < sampleCount; ++s) {
+        //uint rng = baseSeed ^ uint(s) * 1664525u + 1013904223u;
+        uint rng = baseSeed;
+        rng ^= uint(s) * 747796405u;
+        rng *= 2891336453u;
+
+        vec2 d = sampleDisk(rng) * radius;
+        vec3 samplePos = lightCenter + T * d.x + B * d.y;
+
+        vec3 toLight = samplePos - hitpos;
+        float dist = length(toLight);
+        vec3 L = toLight / max(dist, 1e-4);
+
+        float NdotL = dot(N, L);
+        if (NdotL <= 0.0) continue;
+
+        shadowPayload.visibility = 0u;
+
+        const float EPS = 0.001;
+
+        traceRayEXT(
+            topLevelAS,
+            gl_RayFlagsTerminateOnFirstHitEXT |
+            gl_RayFlagsSkipClosestHitShaderEXT,
+            0xFF,
+            1,   // sbtRecordOffset
+            1,   // sbtRecordStride
+            1,   // missIndex
+            origin,
+            SHADOW_BIAS,//EPS,
+            L,
+            max(dist - EPS, EPS),
+            1
+        );
+
+        visible += (shadowPayload.visibility == 1u) ? 1.0 : 0.0;
+    }
+
+    return visible / float(sampleCount);
+}
+
+/**************
 Core
 in是只读，	相当于T&
 inout是可读写，	相当于T&
@@ -239,6 +310,16 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
 
     uint lightNum = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
 
+    // vec3 kd = (1.0 - metallic) * albedo;
+    // vec3 diffuseBRDF = kd / PI;
+    // // diffuse 抑制：为了玻璃材质
+    // kd *= (1.0 - transmission);
+    // kd *= mat.alpha;
+    vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo;
+    kd *= (1.0 - hitInfo.transmission);
+    kd *= hitInfo.alpha;
+    vec3 diffuseBRDF = kd / PI;
+
     for(uint i = 0u; i < lightNum; ++i){
         RtLightInfo light = sboRtLightBuffer.lights[i];
 
@@ -251,21 +332,17 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
 
 
         vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
-        float visibility = traceShadowVisibility(shadowOrigin, L, maxT);
+        //float visibility = traceShadowVisibility(shadowOrigin, L, maxT);
+        const int SHADOW_SAMPLES = 4; // 先从 4 / 8 / 16 试
+        float visibility = traceSoftShadowVisibility(
+            shadowOrigin, hitInfo.hitPos, hitInfo.N,
+            vec3(sboRtLightBuffer.lights[i].position),
+            sboRtLightBuffer.lights[i].radius,
+            SHADOW_SAMPLES,
+            hitInfo.state
+        );
         if(visibility <= 0.0) continue;
         //float visibility = 1.0;//test, disable shadow
-
-        // vec3 kd = (1.0 - metallic) * albedo;
-        // vec3 diffuseBRDF = kd / PI;
-        // // diffuse 抑制：为了玻璃材质
-        // kd *= (1.0 - transmission);
-        // kd *= mat.alpha;
-
-        vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo;
-        kd *= (1.0 - hitInfo.transmission);
-        kd *= hitInfo.alpha;
-        vec3 diffuseBRDF = kd / PI;
-
 
         vec3 H = safeNormalize(L + hitInfo.V);
         float NdotH = max(dot(hitInfo.N, H), 0.0);
@@ -298,6 +375,13 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
     } else {
         localRadiance += directSpecular;
     }
+    float ambientIntensity = 0.2;
+    vec3 ambient = //增加天空漫反射
+        diffuseBRDF *
+        SampleSky(hitInfo.N) *
+        PI *
+        ambientIntensity;
+    localRadiance += ambient;
 
     //2. 二次光线
     vec3 nextOrigin = vec3(0.0);

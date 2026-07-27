@@ -5,11 +5,16 @@
 
 layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
 
-void main()
-{
-    //vec3 sky = vec3(0.6, 0.7, 0.9); // 先用常量天空色
+vec3 SampleSky(vec3 dir){
     vec3 sky = vec3(0.2, 0.3, 0.4);
-    //primaryPayload.radiance = primaryPayload.throughput * sky;
-    primaryPayload.radiance = sky;
+    //return sky;
+
+    dir = normalize(dir);
+    float t = 0.5 * (dir.y + 1.0);
+    return mix(vec3(1.0),sky,t);
+}
+
+void main(){
+    primaryPayload.radiance = SampleSky(gl_WorldRayDirectionEXT);
     primaryPayload.done = 1u;
 }
