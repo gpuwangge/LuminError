@@ -1040,6 +1040,7 @@ void RendererCore::CreateTriangleBlas(){
     //std::cout << "Creating BLAS for triangles..." << std::endl;
 
     for(int i = 0; i < game->GetRtMeshSize(); i++){
+        //std::cout << "Creating BLAS for RTMesh i = " << i << std::endl;
         RtMesh &rtMesh = game->GetRtMesh(i);
 
         // 一个 indexed triangle => 1 primitive
@@ -1069,6 +1070,7 @@ void RendererCore::CreateTriangleBlas(){
         buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
         buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        //buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR; //实测这个模式build速度提升10%
         buildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
         buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
         buildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
@@ -1180,8 +1182,21 @@ void RendererCore::CreateTriangleBlas(){
 
         EndCommandBuffer_Raytracing(raytracingCmdId);
 
+        // std::cout << "AS Size      = "
+        //   << sizeInfo.accelerationStructureSize / 1024.0 / 1024.0
+        //   << " MB\n";
+        // std::cout << "Scratch Size = "
+        //         << sizeInfo.buildScratchSize / 1024.0 / 1024.0
+        //         << " MB\n";
+        //Stanford Dragon的值
+        //AS Size      = 51.3984 MB
+        //Scratch Size = 11.9226 MB
+
         // 11) submit and wait
+        //std::cout << "SubmitCommandBufferAndWait_Raytracing..."<< std::endl;//实测主要的时间都花在这一步上
         SubmitCommandBufferAndWait_Raytracing(raytracingCmdId, CContext::GetHandle().GetComputeQueue());
+        //SubmitCommandBufferAndWait_Raytracing(raytracingCmdId, CContext::GetHandle().GetGraphicsQueue()); //also work
+        //std::cout << "SubmitCommandBufferAndWait_Raytracing Done!"<< std::endl;
 
         // 12) query BLAS device address for TLAS instance
         VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};

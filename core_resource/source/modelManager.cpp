@@ -77,7 +77,7 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 
-	//std::cout<<"Loading model: "<< modelName <<std::endl;
+	//std::cout<<"Begin loading model: "<< modelName <<std::endl;
 	std::string fullModelPath = MODEL_PATH + modelName;
 
 	// if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fullModelPath.c_str())) {
@@ -94,6 +94,7 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 
 	tinyobj::ObjReader reader;
 
+	std::cout<<"Reading file: "<< modelName<<std::endl;
 	if (!reader.ParseFromFile(fullModelPath, config)) {
 		if (!reader.Error().empty())
 			throw std::runtime_error(reader.Error());
@@ -115,7 +116,9 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 	float max_x = 0, max_y = 0, max_z = 0;
 	float min_x = 0, min_y = 0, min_z = 0;
 	for (const auto& shape : shapes) {
-		//std::cout<<"Processing shape with "<<shape.mesh.indices.size()<<" indices."<<std::endl;
+		std::cout<<"Processing shape with "<<shape.mesh.indices.size()<<" indices: ";
+		int verbose_interval = shape.mesh.indices.size() / 10;
+		int verbose_count = 0;
 		for (const auto& index : shape.mesh.indices) {
 			//std::cout<<"Processing index: v_idx="<<index.vertex_index<<", vt_idx="<<index.texcoord_index<<", vn_idx="<<index.normal_index<<std::endl;
 			Vertex3D vertex{};
@@ -168,7 +171,11 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 			}
 
 			indices3D.push_back(uniqueVertices[vertex]);
+
+			if(verbose_count%verbose_interval == 0) std::cout<<verbose_count/verbose_interval*10<<"% ";
+			verbose_count++;
 		}
+		std::cout<<std::endl;
 	}
 	
 	modelLengths.push_back(glm::vec3(max_x-min_x, max_y-min_y, max_z-min_z));

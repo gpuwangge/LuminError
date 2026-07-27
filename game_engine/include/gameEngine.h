@@ -177,7 +177,8 @@ namespace LEGameEngine{
             elapsed = 0.0f;
 
             float fps = GetFPS();
-            std::cout<<"FPS: "<<fps<<std::endl;
+            //std::cout<<"FPS: "<<fps<<std::endl;
+            std::cout<<static_cast<int>(fps)<<" ";
         }
 
         int GetRTLightSize() override { return appInfo->RTLights.size(); }
