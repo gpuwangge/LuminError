@@ -192,7 +192,11 @@ namespace LERenderer{
         /*********
         * Ray Tracing Related
         *********/
-        void InitialRaytracing() override;
+        void LoadRayTracingFunctions() override;
+        void CreateTriangleBlas() override;
+        void CreateSphereBlas() override;
+        void CreateInstanceBuffer() override;
+        void CreateTlas() override;
         void CreateSBT() override;
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
@@ -231,7 +235,7 @@ namespace LERenderer{
         CWxjBuffer blas_scratch_buffer;
         //VkAccelerationStructureKHR blas = VK_NULL_HANDLE;
         //VkDeviceAddress blasDeviceAddress = 0;
-        void CreateTriangleBlas();
+        //void CreateTriangleBlas();
 
         //For Sphere BLAS AABB
         // struct SphereGpu{
@@ -250,7 +254,7 @@ namespace LERenderer{
         VkAccelerationStructureKHR sphere_blas = VK_NULL_HANDLE;
         CWxjBuffer sphere_blasBuffer;
         VkDeviceAddress sphere_blasAddress = 0;//blasDeviceAddress
-        void CreateSphereBlas();
+        //void CreateSphereBlas();
 
         //Instance buffer related
         std::vector<VkAccelerationStructureInstanceKHR> instances;
@@ -258,7 +262,7 @@ namespace LERenderer{
         CWxjBuffer instance_buffer; //only need one instance buffer, with all instances inside
         VkDeviceAddress instanceBufferAddress = 0;
         //uint32_t instanceCount = 0;
-        void CreateInstanceBuffer();
+        //void CreateInstanceBuffer();
 
         //Tlas related
         CWxjBuffer tlas_buffer;
@@ -266,7 +270,7 @@ namespace LERenderer{
         VkDeviceAddress tlasDeviceAddress = 0;
         VkAccelerationStructureKHR tlas = VK_NULL_HANDLE;
         VkAccelerationStructureKHR GetTlas() override { return tlas; }
-        void CreateTlas();
+        //void CreateTlas();
 
         /**************************
          * RenderProcess

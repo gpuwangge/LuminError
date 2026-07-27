@@ -126,7 +126,7 @@ namespace LEGameEngine{
         void SetupComputeRayTracing(); //for compute ray tracing, not ray tracing pipeline
 
         //Ray Tracing Pipeline
-        void SetupRayTracing(); //for ray tracing pipeline
+        void SetupRayTracing(bool bVerboseRaytracing); //for ray tracing pipeline
         //CWxjBuffer& GetRaytracingVertexBuffer() override { return allvertex};
         //CWxjBuffer raytracing_vertex_buffer; //use this to get buffer address
         //CWxjBuffer raytracing_index_buffer; //use this to get buffer address

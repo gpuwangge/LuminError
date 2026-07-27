@@ -32,17 +32,17 @@ Objects:
   #   resource_model_id: 4
   #   resource_texture_id_list: [1] #no use
   #   resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Female
-    object_id: 0
-    object_scale: 1
-    object_position: [0,0.0,0]
-    object_rotation: [0,180,0]
-    object_velocity: [0,0,0] #no use
-    object_angular_velocity: [0,0,0] #no use
-    object_material_id: 0
-    resource_model_id: 5
-    resource_texture_id_list: [1] #no use
-    resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Female
+  #   object_id: 0
+  #   object_scale: 1
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,180,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 0
+  #   resource_model_id: 5
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
   # - object_name: Skull
   #   object_id: 0
   #   object_scale: 0.075
@@ -54,6 +54,17 @@ Objects:
   #   resource_model_id: 6
   #   resource_texture_id_list: [1] #no use
   #   resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: CoffeeTable
+    object_id: 0
+    object_scale: 10
+    object_position: [0,-0.6,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 2
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
 
 CustomSpheres:
   - custom_sphere_name: Sphere
@@ -115,14 +126,15 @@ RTLights: #ray tracing pipeline lights to generate shadow
 
 Resources:
   - Models:
-    - resource_model_name: low_poly_tree.obj
-    - resource_model_name: cube.obj
-    - resource_model_name: cube_10facet.obj
-    - resource_model_name: wineglass.obj
-    - resource_model_name: teapot.obj
-    - resource_model_name: BaseMesh_Female.obj
-    - resource_model_name: Skull.obj
-    #- resource_model_name: dragon_vrip.obj
+    # - resource_model_name: low_poly_tree.obj
+    # - resource_model_name: cube.obj
+    # - resource_model_name: cube_10facet.obj
+    # - resource_model_name: wineglass.obj
+    # - resource_model_name: teapot.obj
+    # - resource_model_name: BaseMesh_Female.obj
+    # - resource_model_name: Skull.obj
+    # - resource_model_name: CoffeeTable.obj
+    - resource_model_name: dragon_vrip.obj
     
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv

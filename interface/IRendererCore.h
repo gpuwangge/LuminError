@@ -99,7 +99,11 @@ namespace LERenderer{
         virtual void Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
         virtual void Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ) = 0;
 
-        virtual void InitialRaytracing() = 0;
+        virtual void LoadRayTracingFunctions() = 0;
+        virtual void CreateTriangleBlas() = 0;
+        virtual void CreateSphereBlas() = 0;
+        virtual void CreateInstanceBuffer() = 0;
+        virtual void CreateTlas() = 0;
         virtual void CreateSBT() = 0;
 
         virtual void Destroy() = 0;

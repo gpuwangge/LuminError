@@ -3,8 +3,9 @@
 namespace LEGameEngine{
 
 void GameEngine::Initialize(){
-    bool bVerboseInitialization = false;
-    TimePoint T0 = now();
+    bool bVerboseInitialization = true;
+    std::vector<TimePoint> timePoints;
+    timePoints.push_back(now());
 
     renderer->CreateInitSyncObjects();
     /****************************
@@ -20,8 +21,12 @@ void GameEngine::Initialize(){
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
             VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO);        
 
-    TimePoint T1 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for reading features", T0, T1);
+    
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for reading features", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 2 Initialize control nodes
@@ -68,8 +73,11 @@ void GameEngine::Initialize(){
 
     renderer->SetSwapchainDevice();
     
-    TimePoint T2 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for object/textbox/light", T1, T2);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for object/textbox/light", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 4 Initialize Uniforms
@@ -133,8 +141,11 @@ void GameEngine::Initialize(){
         renderer->addTextureImageSamplerUniformBuffer(mipLevels, UVWRepeats);
     }
 
-    TimePoint T3 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for uniforms", T2, T3);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for uniforms", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 5 Initialize attachments
@@ -175,9 +186,11 @@ void GameEngine::Initialize(){
     if(renderer->GetMainSceneAttachmentColorPresent() >= 0) //dont need create swapchain attachment resource here
         renderer->Create_attachmentdescription_mainscene_colorpresent(renderer->GetSwapchainImageFormat());
 
-    TimePoint T4 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for attachements", T3, T4);
-    
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for attachements", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 6 Initialize Subpasses
@@ -206,8 +219,11 @@ void GameEngine::Initialize(){
     //create framebuffer
     renderer->CreateFramebuffer_mainscene(renderer->GetRenderpass_mainscene());
 
-    TimePoint T5 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for reading subpasses", T4, T5);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for reading subpasses", timePoints[timePoints.size()-2], timePoints.back());
+    }
     
     /****************************
     * 7 Initialize Resources
@@ -228,6 +244,12 @@ void GameEngine::Initialize(){
         textManager.CreateTextImage(); //create text atlas image and push to textImageManager
         textManager.CreateGlyphMap(); //create glyph map
         textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
+    }
+
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for resources: textManager", timePoints[timePoints.size()-2], timePoints.back());
     }
 
     if(appInfo->Models.size() > 0){
@@ -303,6 +325,12 @@ void GameEngine::Initialize(){
 
     }
 
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for resources: model(mesh/geometry)", timePoints[timePoints.size()-2], timePoints.back());
+    }
+
     if(appInfo->Textures.size() > 0){
         for(int i = 0; i < appInfo->Textures.size(); i++){
             //std::cout<<"test Textures:"<<i<<std::endl;
@@ -336,9 +364,11 @@ void GameEngine::Initialize(){
         }
     }
 
-
-    TimePoint T6 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for resources", T5, T6);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for resources: texture", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
 
     /****************************
@@ -349,7 +379,13 @@ void GameEngine::Initialize(){
     //if(appInfo->ComputeShader && appInfo->ComputeShader->size() > 0) renderer.CreateComputeCommandBuffer();
     if(appInfo->ComputePipelines.size() > 0) renderer->CreateComputeCommandBuffer();
     if(appInfo->RaytracingPipelines.size() > 0) renderer->CreateRaytracingCommandBuffer();
-    //if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
+    //if(bVerboseInitialization) std::cout<<"CreatePipeline: Done Command Buffer"<<std::endl;
+
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for command buffers", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 8 Create Uniform Descriptors
@@ -383,6 +419,12 @@ void GameEngine::Initialize(){
             //std::cout<<"Application: Create Compute Descriptor Set Layout without custom uniform buffer"<<std::endl;
             renderer->createComputeDescriptorSetLayout();
         }
+    }
+
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for uniform descriptors(pool and layouts)", timePoints[timePoints.size()-2], timePoints.back());
     }
 
     /****************************
@@ -439,14 +481,66 @@ void GameEngine::Initialize(){
         logger->Log("");
     }
 
-
-
-    if(b_uniform_raytracing) {
-        SetupRayTracing(); //must load models and register objects, before this is called； create multi-object, multi-mesh
-        renderer->InitialRaytracing(); //Create BLAS, instance and TLAS, TODO: initial ray tracing before description?
-        renderer->createRaytracingDescriptorSetLayout(&appInfo->Uniform.RaytracingCustom.Binding);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for objects register", timePoints[timePoints.size()-2], timePoints.back());
     }
 
+    if(b_uniform_raytracing) {
+        SetupRayTracing(bVerboseInitialization); //must load models and register objects, before this is called； create multi-object, multi-mesh
+        //if(bVerboseInitialization) std::cout<<"CreatePipeline: Done setup ray tracing."<<std::endl;
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: upload object buffer", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        renderer->LoadRayTracingFunctions(); //Create BLAS, instance and TLAS, TODO: initial ray tracing before description?
+        //if(bVerboseInitialization) std::cout<<"CreatePipeline: Done intiate ray tracing pipeline."<<std::endl;
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: Load RT Functions", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        renderer->CreateTriangleBlas();
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: Triangle BLAS", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        renderer->CreateSphereBlas();
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: Sphere BLAS", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        renderer->CreateInstanceBuffer();
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: Instancebuffer", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        renderer->CreateTlas();
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: TLAS", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        renderer->createRaytracingDescriptorSetLayout(&appInfo->Uniform.RaytracingCustom.Binding);
+        //if(bVerboseInitialization) std::cout<<"CreatePipeline: Done create ray tracing descriptor layout."<<std::endl;
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for RT Pipeline: layouts", timePoints[timePoints.size()-2], timePoints.back());
+        }
+    }
+    
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
     for(int i = 0; i < renderer->GetSwapchain_BufferSize_Depthlight(); i++) depthlight_imageviews.push_back(renderer->GetSwapchain_Buffer_DepthLight_View(i));
@@ -463,8 +557,11 @@ void GameEngine::Initialize(){
         renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas());
     }
 
-    TimePoint T7 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for creating uniform descriptors", T6, T7);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for creating uniform descriptor sets", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 9 Create Pipelines
@@ -528,7 +625,12 @@ void GameEngine::Initialize(){
             resourcer->CreateShader(appInfo->RaytracingPipelines[0].resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name, RAYT);
         //}
     }
-    if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Shaders"<<std::endl;
+
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for creating shaders", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 9.3 Create Pipelines
@@ -544,12 +646,12 @@ void GameEngine::Initialize(){
             (type & GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC) ||
             (type & GRAPHCIS_UNIFORMBUFFER_GLOBAL)
             ){
-            if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set0: graphics general layout"<<std::endl;
+            //if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set0: graphics general layout"<<std::endl;
             dsLayouts.push_back(renderer->GetDescriptorSetLayout_General()); //set = 0
         }
 
         if(type & GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE) {
-            if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set1: sampler(texture) layout"<<std::endl;
+            //if(bPipelineVerbose) std::cout<<"CreatePipeline: Add layout set1: sampler(texture) layout"<<std::endl;
             dsLayouts.push_back(renderer->GetDescriptorSetLayout_TextureImageSampler()); //set = 1
         }
   
@@ -566,16 +668,16 @@ void GameEngine::Initialize(){
             //std::cout<<"test create pipeline"<<std::endl;
             //! All graphics pipelines use the same dsLayouts
             if(resourcer->GetShaderEnablePushConstant()){
-                if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create Push Constant Layout"<<std::endl;
+                //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create Push Constant Layout"<<std::endl;
                 renderer->CreateGraphicsPipelineLayout(dsLayouts, resourcer->GetShaderPushConstantRange(), true, i);
-                if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Push Constant Layout"<<std::endl;
+                //if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Push Constant Layout"<<std::endl;
             }
             else renderer->CreateGraphicsPipelineLayout(dsLayouts, i);
 
             
             //int vertexDatatype = appInfo->VertexDatatype ? (*appInfo->VertexDatatype)[i] : 0;
             int vertexDatatype = appInfo->GraphicsPipelines[i].graphics_pipeline_vertexdatatype;
-            if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
+            //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
 
             switch(vertexDatatype){
                 case VertexStructureTypes::NoType:
@@ -615,26 +717,26 @@ void GameEngine::Initialize(){
                 default:
                 break;
             }
-            if(bPipelineVerbose) std::cout<<"Done create one graphics pipeline"<<std::endl;
+            //if(bPipelineVerbose) std::cout<<"Done create one graphics pipeline"<<std::endl;
         }
         
     }
     if(appInfo->ComputePipelines.size() > 0){ //for now assume only one compute pipeline
         //! only support one compute pipeline
-        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute layout"<<std::endl;
+        //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute layout"<<std::endl;
         renderer->CreateComputePipelineLayout(renderer->GetComputeDescriptorSetLayout());
-        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute pipeline"<<std::endl;
+        //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create compute pipeline"<<std::endl;
         renderer->CreateComputePipeline(resourcer->GetComputeShaderModule(0));
-        if(bPipelineVerbose) std::cout<<"Done create one compute pipeline"<<std::endl;
+        //if(bPipelineVerbose) std::cout<<"Done create one compute pipeline"<<std::endl;
     }
     if(appInfo->RaytracingPipelines.size() > 0){ //for now assume only one raytracing pipeline
         //renderer->CreateComputePipelineLayout(renderer->GetRaytracingDescriptorSetLayout());
         //renderer->CreateComputePipeline(resourcer->GetRaytracingShaderModule(0));
 
         //! only support one raytracing pipeline
-        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing layout"<<std::endl;
+        //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing layout"<<std::endl;
         renderer->CreateRaytracingPipelineLayout(renderer->GetRaytracingDescriptorSetLayout());
-        if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing pipeline"<<std::endl;
+        //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create raytracing pipeline"<<std::endl;
         renderer->CreateRaytracingPipeline(
             resourcer->GetRaytracingShaderModule(0), 
             resourcer->GetRaytracingShaderModule(1), 
@@ -649,14 +751,12 @@ void GameEngine::Initialize(){
 
         renderer->CreateSBT();
     }
-    if(bPipelineVerbose) std::cout<<"CreatePipeline: Done Create Pipelines"<<std::endl;
 
-    TimePoint T8 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for creating pipelines", T7, T8);
-
-
-    TimePoint T9 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for ?", T8, T9);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for creating pipelines", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 11 Register Textboxes
@@ -703,8 +803,11 @@ void GameEngine::Initialize(){
         logger->Log("");
     }
 
-    TimePoint T10 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for register textboxes", T9, T10);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for register textboxes", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 12 Register Lightings
@@ -731,8 +834,11 @@ void GameEngine::Initialize(){
 
     for(int i = 0; i < lights.size(); i++) if(!lights[i].bRegistered) std::cout<<"WARNING: Light id("<<i<<") is not registered!"<<std::endl;
 
-    TimePoint T11 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for register lightings", T10, T11);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for register lightings", timePoints[timePoints.size()-2], timePoints.back());
+    }
     
     /****************************
     * 13 Set Main Camera
@@ -787,8 +893,11 @@ void GameEngine::Initialize(){
         //lightCameras[i].SetRotationSensitivity(100.0f);
     }
 
-    TimePoint T12 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for set cameras", T11, T12);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for set cameras", timePoints[timePoints.size()-2], timePoints.back());
+    }
 
     /****************************
     * 14 Create Sync Objects and Clean up Shaders (+and call example initialization)
@@ -796,8 +905,11 @@ void GameEngine::Initialize(){
     renderer->CreateSyncObjects(renderer->GetSwapchain_ImageSize(), false);
     resourcer->DestroyShaderManager();
 
-    TimePoint T13 = now();
-    if(bVerboseInitialization) printElapsed("Application: Initialize time for creating sync objects and destroy shaders", T12, T13);
+    if(bVerboseInitialization) {
+        timePoints.push_back(now());
+        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+        printElapsed("Application: Initialize time for creating sync objects and destroy shaders", timePoints[timePoints.size()-2], timePoints.back());
+    }
 }
 
 }

@@ -7,7 +7,7 @@ namespace LEYAML{
 
 void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
     std::string fullYamlName = YAML_PATH + examplename + "/" + examplename + ".yaml";
-    std::cout<<"Loading Example YAML file: "<<fullYamlName<<std::endl;
+    //std::cout<<"Loading Example YAML file: "<<fullYamlName<<std::endl;
     try{
         yamlNode = YAML::LoadFile(fullYamlName);
     } catch (...){
@@ -167,7 +167,7 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
         }
     }
     int customRTLightCount = ((max_rtlight_id+1) < yamlNode["RTLights"].size()) ? (max_rtlight_id+1) : yamlNode["RTLights"].size();
-    std::cout<<"Detected "<<customRTLightCount<<" custom RT lights in the YAML file."<<std::endl;
+    //std::cout<<"Detected "<<customRTLightCount<<" custom RT lights in the YAML file."<<std::endl;
     appInfo.RTLights.resize(customRTLightCount);
     if (yamlNode["RTLights"]) {
         //std::cerr << "No 'Objects' key found in the YAML file!" << std::endl;
@@ -180,7 +180,7 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
 
 void YAMLCore::ReadMaterialYAMLFile(const std::string& filename){
     std::string fullYamlName = MATERIAL_YAML_PATH + filename + ".yaml";
-    std::cout<<"Loading Material YAML file: "<<fullYamlName<<std::endl;
+    //std::cout<<"Loading Material YAML file: "<<fullYamlName<<std::endl;
 
     try{
         yamlNode = YAML::LoadFile(fullYamlName);

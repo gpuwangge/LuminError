@@ -2,6 +2,7 @@
 #include <vulkan/vulkan.h>
 #include "Config.h"
 #include <stdexcept>
+//#include <iostream>
 
 class CWxjBuffer final{
 public:
@@ -34,7 +35,16 @@ public:
         //fprintf(debugger->FpDebug, "Buffer vmr.memoryTypeBits = 0x%08x\n", vmr.memoryTypeBits);
         //fflush(debugger->FpDebug);
         //}
-        m_size = vmr.size;//vmr.size is different than the input requiredSize, because of alignment reason, vmr.size can be larger
+        //m_size = vmr.size;//vmr.size is different than the input requiredSize, because of alignment reason, vmr.size can be larger
+        m_size = requiredSize;//m_size应该取需要的size而不是实际内存size
+        //实际size因为内存对齐的原因会更大(256对齐)
+        //若是在实际的使用中读到了对齐的部分会导致crash
+
+        // std::cout
+        //     << "requiredSize = " << requiredSize << std::endl
+        //     << "actural size = " << vmr.size << std::endl
+        //     << "alignment = " << vmr.alignment << std::endl;
+
 
         //add for ray tracing pipeline
         VkMemoryAllocateFlagsInfo flagsInfo{};
@@ -61,8 +71,42 @@ public:
 
     VkResult fill(IN void * data, VkDevice logicalDevice) {
         //Step 4:copy memory(copy data into deviceMemory)
-        void * pGpuMemory;
-        vkMapMemory(logicalDevice, IN deviceMemory, 0, VK_WHOLE_SIZE, 0, &pGpuMemory);	// 0 and 0 are offset and flags
+        void * pGpuMemory = nullptr;
+
+        // vkMapMemory(logicalDevice, IN deviceMemory, 0, VK_WHOLE_SIZE, 0, &pGpuMemory);	// 0 and 0 are offset and flags
+
+        //Notes: 
+        //对于dragon, 内存布局是：
+        //deviceMemory
+        //+------------------------------------------------------+
+        //|                    allocationSize                    |
+        //|<--------------------63021056------------------------>|
+        //|<--------------requiredSize-------------->| padding   |
+        //|<---------------63020880----------------->|<-176B---->|
+        //VK_WHOLE_SIZE:全部映射  
+        //m_size/requiredSize:部分映射
+        //所以结果完全一样。
+
+        VkResult result = vkMapMemory(
+            logicalDevice,
+            deviceMemory,
+            0,
+            VK_WHOLE_SIZE,//m_size,
+            0,
+            &pGpuMemory
+        );
+
+        // std::cout
+        //     << "vkMapMemory result = " << result
+        //     << ", memory = " << deviceMemory
+        //     << ", mapped ptr = " << pGpuMemory
+        //     << ", copy size = " << m_size
+        //     << std::endl;
+
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
         memcpy(pGpuMemory, data, (size_t)m_size);
         vkUnmapMemory(logicalDevice, IN deviceMemory);
         return VK_SUCCESS;

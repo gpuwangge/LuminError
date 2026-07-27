@@ -707,20 +707,20 @@ void RendererCore::Dispatch(int numWorkGroupsX, int numWorkGroupsY, int numWorkG
     vkCmdDispatch(commandBuffers[computeCmdId][currentFrame], numWorkGroupsX, numWorkGroupsY, numWorkGroupsZ); 
 }
 
-void RendererCore::InitialRaytracing(){
+void RendererCore::LoadRayTracingFunctions(){
     if (!LoadRayTracingFunctions_core()) {
 		std::cout<<"failed to load ray tracing functions!"<<std::endl;
 		throw std::runtime_error("failed to load ray tracing functions!");
 	}
     //std::cout<<"Load ray tracing functions successfully!"<<std::endl;
     //std::cout<<"Create Triangle Acceleration Structure..."<<std::endl;
-    CreateTriangleBlas();
+    //CreateTriangleBlas();
     //std::cout<<"Create Sphere Acceleration Structure..."<<std::endl;
-    CreateSphereBlas();
+    //CreateSphereBlas();
     //std::cout<<"Create Instance Acceleration Structure..."<<std::endl;
-    CreateInstanceBuffer();
+    //CreateInstanceBuffer();
     //std::cout<<"Create Top Level Acceleration Structure..."<<std::endl;
-    CreateTlas();
+    //CreateTlas();
     //std::cout<<"Done create TLAS."<<std::endl;
 }
 
@@ -1239,16 +1239,18 @@ void RendererCore::CreateSphereBlas(){
 
         // map + copy
         void* mapped = nullptr;
-        vkMapMemory(GetLogicalDevice(), stagingBuffer.deviceMemory, 0, stagingBuffer.GetSize(), 0, &mapped);
+        //这里不要用stagingBuffer.GetSize()，目前这个函数返回的是实际memory size(通常比allocated memory size小)
+        vkMapMemory(GetLogicalDevice(), stagingBuffer.deviceMemory, 0, VK_WHOLE_SIZE, 0, &mapped);
         memcpy(mapped, &aabb, (size_t)aabbBufferSize);
 
-        //如果你的内存本来就是 HOST_COHERENT，那就没必要强行加 flush；这时 flush 只会增加无意义的调用成本
+        //如果内存本来就是 HOST_COHERENT，那就没必要强行加 flush；这时 flush 只会增加无意义的调用成本
         VkMappedMemoryRange mappedRange{};
         mappedRange.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
         mappedRange.memory = stagingBuffer.deviceMemory;
         mappedRange.offset = 0;
-        mappedRange.size   = stagingBuffer.GetSize();   // 用实际 allocation size; VK_WHOLE_SIZE; // 调试时最省事
+        mappedRange.size   = VK_WHOLE_SIZE;
         vkFlushMappedMemoryRanges(GetLogicalDevice(), 1, &mappedRange);
+
 
         vkUnmapMemory(GetLogicalDevice(), stagingBuffer.deviceMemory);
 

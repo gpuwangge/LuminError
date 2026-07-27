@@ -184,65 +184,7 @@ VkDeviceAddress GameEngine::GetBufferAddress(VkDevice device, VkBuffer buffer) {
     return fpGetBufferDeviceAddressKHR(device, &info);
 }
 
-void GameEngine::SetupRayTracing(){
-    /* these code are copied from compute ray function, no longer needed in rt pipeline
-     //Load data from modelData into allVertices3D and allIndices3D
-     //if size of vertices is 20 and size of triangle is 10, then allVertices3D.size() = 20, allIndices3D.size() = 30  
-    std::vector<Vertex3D> allVertices3D;
-    std::vector<uint32_t> allIndices3D;
-    int vertexCount = 0;
-    int indexCount = 0;
-    int vertexOffset = 0;
-    //std::cout<<"SetupRayTracing(): Found "<<objects.size()<<" objects."<<std::endl;
-    //std::cout<<"SetupRayTracing(): Found "<<modelData.size()<<" models."<<std::endl;
-    for(int j = 0; j < objects.size(); j++){
-        //std::cout<<"Filling data for object "<<j<<", position=("<<objects[j].Position.x<<","<<objects[j].Position.y<<","<<objects[j].Position.z<<")"<<std::endl;
-        //std::cout<<"    Object "<<j<<" uses model_id="<<objects[j].m_model_id<<", and has "<<modelData[objects[j].m_model_id].modelVertices3D.size()<<" vertices and "<<modelData[objects[j].m_model_id].modelIndices3D.size()/3<<" triangles."<<std::endl;
-        // Vertex Data for a 3d model
-        int modelIndex = objects[j].m_model_id;
-        for(int i = 0; i < modelData[modelIndex].modelVertices3D.size(); i++){
-            glm::vec3 tranformedVertexPos; //this is to do what vertex shader normally does, transform the vertex position from model space to world space by applying scale and translation (no rotation for now)
-            //tranformedVertexPos = modelData[modelIndex].modelVertices3D[i].pos * objects[j].Scale;
-            //tranformedVertexPos = tranformedVertexPos + objects[j].Position;
-            tranformedVertexPos = modelData[modelIndex].modelVertices3D[i].pos; //not use scale and translation
-            storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].position = tranformedVertexPos;
-            storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].normal = modelData[modelIndex].modelVertices3D[i].normal;
-            storageBufferObject_TriangleVertexAttribute.vertices[vertexCount].material_id = objects[j].m_material_id;
-            vertexCount++;
-
-            Vertex3D vertexForBVH;
-            vertexForBVH.pos = tranformedVertexPos;
-            allVertices3D.push_back(vertexForBVH);
-        }
-        // Index Data for a 3d model
-        for(int i = 0; i < modelData[modelIndex].modelIndices3D.size(); i++){
-            uint32_t vertexIndex = modelData[modelIndex].modelIndices3D[i] + vertexOffset;
-            storageBufferObject_TriangleVertexIndex.indices[indexCount] = vertexIndex;
-            indexCount++;
-
-            allIndices3D.push_back(vertexIndex);
-            //std::cout<<"    Filling index "<<indexCount-1<<": "<<storageBufferObject_TriangleVertexIndex.indices[indexCount-1]<<std::endl;
-        }
-        vertexOffset += modelData[modelIndex].modelVertices3D.size();
-        //std::cout<<"    vertexOffset after filling object "<<j<<": "<<vertexOffset<<std::endl;
-        logger->Log("BVH: {} vertices and {} indices filled so far.", vertexCount, indexCount);
-    }
-    //std::cout<<"allVertices3D.size = "<<allVertices3D.size()<<std::endl;
-    //std::cout<<"allIndices3D.size = "<<allIndices3D.size()<<std::endl;
-
-    //Upload triangle vertex/index to storage buffer TODO: change from compute to ray tracing
-    //if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute){
-        UploadRaytracingStorageBuffer_TriangleVertexAttribute(GetCurrentFrame(), &storageBufferObject_TriangleVertexAttribute, sizeof(StructStorageBuffer_TriangleVertexAttribute));
-        UploadRaytracingStorageBuffer_TriangleVertexAttribute(GetCurrentFrame()+1, &storageBufferObject_TriangleVertexAttribute, sizeof(StructStorageBuffer_TriangleVertexAttribute));
-    //}
-    //if(appInfo->Uniform.b_storage_compute_triangle_vertex_index){
-        // Index Data for a quad(two triangles)
-        // storageBufferObject_TriangleIndex.indices[0] = 0;
-        UploadRaytracingStorageBuffer_TriangleVertexIndex(GetCurrentFrame(), &storageBufferObject_TriangleVertexIndex, sizeof(StructStorageBuffer_TriangleVertexIndex));
-        UploadRaytracingStorageBuffer_TriangleVertexIndex(GetCurrentFrame()+1, &storageBufferObject_TriangleVertexIndex, sizeof(StructStorageBuffer_TriangleVertexIndex));
-    //}
-    */
-
+void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
     /****************
     * BLAS for triangles
     * Create buffer address so BLAS(in renderer core) can use
@@ -251,11 +193,14 @@ void GameEngine::SetupRayTracing(){
     * storageBufferObject_GeometryInfo里面有一个vertex buffer地址，这个地址也应该指向一个TriangleVertexInfo的数组
     **************/
     rtMeshes.resize(modelData.size());
+    //if(bVerboseRaytracing) std::cout<<"Done resize rtMeshes to: "<<rtMeshes.size()<<std::endl;
     
     for(int i = 0; i < modelData.size(); i++){
         rtMeshes[i].modelId = i;
         rtMeshes[i].vertexCount = static_cast<uint32_t>(modelData[i].modelVertices3D.size());
         rtMeshes[i].indexCount = static_cast<uint32_t>(modelData[i].modelIndices3D.size());
+        //if(bVerboseRaytracing) std::cout << "vertexCount = " << rtMeshes[i].vertexCount << std::endl;
+        //if(bVerboseRaytracing) std::cout << "indexCount = " << rtMeshes[i].indexCount << std::endl;
 
         std::vector<TriangleVertexInfo> modelVertexAttribute;
         rtMeshes[i].vertexStride = sizeof(TriangleVertexInfo);
@@ -265,6 +210,9 @@ void GameEngine::SetupRayTracing(){
             modelVertexAttribute[j].position = modelData[i].modelVertices3D[j].pos;
             modelVertexAttribute[j].color = modelData[i].modelVertices3D[j].color;
         }
+        //std::cout<<"test1"<<std::endl;
+        //std::cout.flush();
+
         rtMeshes[i].vertexBuffer.init(
             sizeof(TriangleVertexInfo) * rtMeshes[i].vertexCount,
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
@@ -274,7 +222,29 @@ void GameEngine::SetupRayTracing(){
             renderer->GetPhysicalDevice(),
             true
         );
-        rtMeshes[i].vertexBuffer.fill(modelVertexAttribute.data(), renderer->GetLogicalDevice());
+        //std::cout<<"test1.5"<<std::endl;
+        //std::cout.flush();
+        //test
+        // if(i == 1){
+        //     std::cout<<"try to print out some position."<<std::endl;
+        //     std::cout.flush();
+        //     TriangleVertexInfo* p = modelVertexAttribute.data();
+        //     std::cout << p[0].position.x << std::endl;
+        //     std::cout.flush();
+        //     std::cout << p[100].position.x << std::endl;
+        //     std::cout << p[1000].position.x << std::endl;
+        //     std::cout << p[10000].position.x << std::endl;
+        //     std::cout << p[100000].position.x << std::endl;
+        //     std::cout << p[437644].position.x << std::endl;
+        //     std::cout.flush();
+        // }
+
+        VkResult result = rtMeshes[i].vertexBuffer.fill(modelVertexAttribute.data(), renderer->GetLogicalDevice());
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("Failed to fill vertex buffer");
+        }
+        //std::cout<<"test2"<<std::endl;
+        //std::cout.flush();
 
         rtMeshes[i].indexBuffer.init(
             sizeof(uint32_t) * rtMeshes[i].indexCount,
@@ -285,7 +255,9 @@ void GameEngine::SetupRayTracing(){
             renderer->GetPhysicalDevice(),
             true
         );
+
         rtMeshes[i].indexBuffer.fill(modelData[i].modelIndices3D.data(), renderer->GetLogicalDevice());
+        //std::cout<<"test3"<<std::endl;
 
         fpGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(vkGetDeviceProcAddr(renderer->GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
 
@@ -311,13 +283,17 @@ void GameEngine::SetupRayTracing(){
         //     logger->Log("modelVertexAttribute[{}].position = {}, {}, {}", j, modelVertexAttribute[j].position.x, modelVertexAttribute[j].position.y, modelVertexAttribute[j].position.z);
         //     logger->Log("modelVertexAttribute[{}].normal = {}, {}, {}", j, modelVertexAttribute[j].normal.x, modelVertexAttribute[j].normal.y, modelVertexAttribute[j].normal.z);
         // }
+        //if(bVerboseRaytracing) std::cout<<"Done upload geometry(model): "<<i<<std::endl;
+        std::cout.flush();
     }
+    //if(bVerboseRaytracing) std::cout<<"Done upload all geometry(model) data to storage buffer objects."<<std::endl;
 
     //static_assert(sizeof(GeometryInfoGPU) == 16);
     //static_assert(alignof(GeometryInfoGPU) >= 8);
 
     UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame(), &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
     UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame()+1, &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
+    //if(bVerboseRaytracing) std::cout<<"Done upload geometry info to device."<<std::endl;
 
     /****************
     * BLAS for Spheres
@@ -357,6 +333,7 @@ void GameEngine::SetupRayTracing(){
         renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
     }
+    //if(bVerboseRaytracing) std::cout<<"Done upload material info to device."<<std::endl;
 
     //Ray Tracing: prepare rt lights buffer data
     //std::cout<<"Preparing RT Lights buffer data..."<<appInfo->RTLights.size()<<std::endl;
@@ -379,7 +356,7 @@ void GameEngine::SetupRayTracing(){
 
     renderer->uploadRaytracingStorageBuffer_rtLight(GetCurrentFrame(), &storageBufferObject_rtLight, sizeof(StructStorageBuffer_RtLight));
     renderer->uploadRaytracingStorageBuffer_rtLight(GetCurrentFrame()+1, &storageBufferObject_rtLight, sizeof(StructStorageBuffer_RtLight));
-
+    //if(bVerboseRaytracing) std::cout<<"Done upload ray tracing light info to device."<<std::endl;
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){
