@@ -603,6 +603,117 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
     }//end of transmission
 }
 
+struct ScatterResult{
+    vec3 direction;
+    vec3 throughputMul;
+    uint valid;
+};
+ScatterResult ScatterGlass(in HitInfoStruct hitInfo){// 只处理玻璃
+    ScatterResult result;
+    
+    // float refractionRatio = hitInfo.ior;
+    // bool entering = dot(Ngeom0, -hitInfo.I) > 0.0;
+
+    // if (!entering) {
+    //     Ngeom0 = -Ngeom0;
+    //     refractionRatio = 1.0 / hitInfo.ior;
+    // }
+    
+    // vec3 refractedDir = refract(hitInfo.I, Ngeom0, refractionRatio);
+
+    // 判断当前是进入介质还是离开介质
+    bool entering = dot(hitInfo.I, hitInfo.Ngeom) < 0.0;
+
+    // GLSL refract() 要求 eta = n1 / n2
+    float eta;
+    vec3 Ngeom0 = hitInfo.Ngeom;
+
+    if (entering){ // Air -> Glass
+        eta = 1.0 / hitInfo.ior;
+    }
+    else{ // Glass -> Air
+        Ngeom0 = -Ngeom0;
+        eta = hitInfo.ior;
+    }
+
+    vec3 refractedDir = refract(hitInfo.I, Ngeom0, eta);
+    
+    // 增加基于粗糙度的法线扰动
+    vec3 perturbedNormal = Ngeom0;
+    if (hitInfo.roughness > 0.0) {
+        vec3 randomJitter = RandomDirectionInHemisphere(Ngeom0, hitInfo.state) - Ngeom0;
+        perturbedNormal = normalize(Ngeom0 + randomJitter * hitInfo.roughness * 0.3);
+    }
+    
+    // 使用扰动后的法线重新计算
+    refractedDir = refract(hitInfo.I, perturbedNormal, eta);
+    float cosTheta = abs(dot(perturbedNormal, -hitInfo.I));
+    vec3 F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - cosTheta, 5.0);
+    
+    //float reflectionProbability = (F.r + F.g + F.b) / 3.0;
+    float reflectionProbability = clamp(dot(F, vec3(0.333333)), 0.05, 0.95);
+    
+    if (length(refractedDir) < 0.001 || Rand(hitInfo.state) < reflectionProbability * 0.8) {
+        result.direction = reflect(hitInfo.I, perturbedNormal);
+        if (hitInfo.roughness > 0.0) {
+            result.direction = normalize(mix(hitInfo.I, RandomDirectionInHemisphere(perturbedNormal, hitInfo.state), hitInfo.roughness));
+        }
+        result.throughputMul = F / max(reflectionProbability, 0.1);
+    } else {
+        result.direction = refractedDir;
+        vec3 glassColor = hitInfo.transmissionColor * hitInfo.albedo;
+        result.throughputMul = glassColor * (1.0 - F) / max(1.0 - reflectionProbability, 0.1);
+    }
+
+    result.valid = 1u;
+    return result;
+}
+
+ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
+    ScatterResult result;
+
+    // 金属材质主要进行镜面反射
+    vec3 reflectedDir = reflect(hitInfo.I, hitInfo.Ngeom);
+    
+    // 根据粗糙度添加随机性
+    if (hitInfo.roughness > 0.0) {
+        reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.Ngeom, hitInfo.state), hitInfo.roughness));
+    }
+
+    result.valid = 1u;
+    result.direction = reflectedDir;
+    result.throughputMul = hitInfo.F * hitInfo.albedo;
+
+    return result;
+}
+
+ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/介电反射
+    ScatterResult result;
+
+    // 根据菲涅尔项决定反射和漫反射的比例
+    float reflectionProbability = (hitInfo.F.r + hitInfo.F.g + hitInfo.F.b) / 3.0;
+    
+    if (Rand(hitInfo.state) < reflectionProbability) {
+        // 镜面反射
+        vec3 reflectedDir = reflect(hitInfo.I, hitInfo.Ngeom);
+        
+        // 根据粗糙度添加随机性
+        if (hitInfo.roughness > 0.0) {
+            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.Ngeom, hitInfo.state), hitInfo.roughness));
+        }
+
+        result.direction = reflectedDir;
+        result.throughputMul = hitInfo.F / reflectionProbability;
+    } else {
+        result.direction = RandomDirectionInHemisphere(hitInfo.Ngeom, hitInfo.state);// 漫反射 
+
+        vec3 kD = (1.0 - hitInfo.F) * (1.0 - hitInfo.metallic); // 能量守恒：漫反射部分 = (1 - F) * 漫反射颜色
+        result.throughputMul = kD * hitInfo.albedo / (1.0 - reflectionProbability);
+    }
+
+    result.valid = 1u;
+    return result;
+}
 void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path Tracing
     //OUTPUT: primaryPayload.throughput
 
@@ -621,7 +732,7 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
     //}
     
     primaryPayload.spawnRayCount = 0u;
-    vec3 throughputMul = vec3(1.0);
+    //vec3 throughputMul = vec3(1.0);
 
     /* NEE = Next Event Estimation
      * 当前顶点的局部贡献：
@@ -635,111 +746,30 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
     }
 
     // 处理折射/透射材质（玻璃、水等）
-    vec3 I0 = hitInfo.I;
-    vec3 Ngeom0 = hitInfo.Ngeom;
+    //vec3 I0 = hitInfo.I;
+    //vec3 Ngeom0 = hitInfo.Ngeom;
+    ScatterResult scatter;
     if (hitInfo.transmission > 0.0 && hitInfo.alpha < 0.5) {
-        // float refractionRatio = hitInfo.ior;
-        // bool entering = dot(Ngeom0, -hitInfo.I) > 0.0;
-
-        // if (!entering) {
-        //     Ngeom0 = -Ngeom0;
-        //     refractionRatio = 1.0 / hitInfo.ior;
-        // }
-        
-        // vec3 refractedDir = refract(hitInfo.I, Ngeom0, refractionRatio);
-
-        // 判断当前是进入介质还是离开介质
-        bool entering = dot(hitInfo.I, Ngeom0) < 0.0;
-
-        // GLSL refract() 要求 eta = n1 / n2
-        float eta;
-
-        if (entering){ // Air -> Glass
-            eta = 1.0 / hitInfo.ior;
-        }
-        else{ // Glass -> Air
-            Ngeom0 = -Ngeom0;
-            eta = hitInfo.ior;
-        }
-
-        vec3 refractedDir = refract(hitInfo.I, Ngeom0, eta);
-        
-        // 增加基于粗糙度的法线扰动
-        vec3 perturbedNormal = Ngeom0;
-        if (hitInfo.roughness > 0.0) {
-            vec3 randomJitter = RandomDirectionInHemisphere(Ngeom0, hitInfo.state) - Ngeom0;
-            perturbedNormal = normalize(Ngeom0 + randomJitter * hitInfo.roughness * 0.3);
-        }
-        
-        // 使用扰动后的法线重新计算
-        refractedDir = refract(hitInfo.I, perturbedNormal, eta);
-        float cosTheta = abs(dot(perturbedNormal, -hitInfo.I));
-        vec3 F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - cosTheta, 5.0);
-        
-        //float reflectionProbability = (F.r + F.g + F.b) / 3.0;
-        float reflectionProbability = clamp(dot(F, vec3(0.333333)), 0.05, 0.95);
-        
-        if (length(refractedDir) < 0.001 || Rand(hitInfo.state) < reflectionProbability * 0.8) {
-            I0 = reflect(hitInfo.I, perturbedNormal);
-            if (hitInfo.roughness > 0.0) {
-                I0 = normalize(mix(I0, RandomDirectionInHemisphere(perturbedNormal, hitInfo.state), hitInfo.roughness));
-            }
-            throughputMul *= F / max(reflectionProbability, 0.1);
-        } else {
-            I0 = refractedDir;
-            vec3 glassColor = hitInfo.transmissionColor * hitInfo.albedo;
-            throughputMul *= glassColor * (1.0 - F) / max(1.0 - reflectionProbability, 0.1);
-        }
-        primaryPayload.spawnRayCount = 1u;
+        scatter = ScatterGlass(hitInfo);
     }else if (hitInfo.metallic > 0.8) { // 处理金属材质（高反射）
-        // 金属材质主要进行镜面反射
-        vec3 reflectedDir = reflect(hitInfo.I, Ngeom0);
-        
-        // 根据粗糙度添加随机性
-        if (hitInfo.roughness > 0.0) {
-            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(Ngeom0, hitInfo.state), hitInfo.roughness));
-        }
-        
-        I0 = reflectedDir;
-        throughputMul *= hitInfo.F * hitInfo.albedo;
-        primaryPayload.spawnRayCount = 1u;
+        scatter = ScatterMetal(hitInfo);
     }else { // 处理电介质材质（混合漫反射和镜面反射）
-        // 根据菲涅尔项决定反射和漫反射的比例
-        float reflectionProbability = (hitInfo.F.r + hitInfo.F.g + hitInfo.F.b) / 3.0;
-        
-        if (Rand(hitInfo.state) < reflectionProbability) {
-            // 镜面反射
-            vec3 reflectedDir = reflect(I0, Ngeom0);
-            
-            // 根据粗糙度添加随机性
-            if (hitInfo.roughness > 0.0) {
-                reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(Ngeom0, hitInfo.state), hitInfo.roughness));
-            }
-            
-            I0 = reflectedDir;
-            throughputMul *= hitInfo.F / reflectionProbability;
-            primaryPayload.spawnRayCount = 1u;
-        } else {
-            // 漫反射 
-            I0 = RandomDirectionInHemisphere(Ngeom0, hitInfo.state);
-            
-            // 能量守恒：漫反射部分 = (1 - F) * 漫反射颜色
-            vec3 kD = (1.0 - hitInfo.F) * (1.0 - hitInfo.metallic);
-            throughputMul *= kD * hitInfo.albedo / (1.0 - reflectionProbability);
-
-            primaryPayload.spawnRayCount = 1u;
-        }
+        scatter = ScatterDiffuse(hitInfo);
     }
 
+    vec3 offsetDir =
+        dot(scatter.direction, hitInfo.Ngeom) > 0.0
+        ? hitInfo.Ngeom
+        : -hitInfo.Ngeom;
+
+    primaryPayload.spawnRayCount = scatter.valid;
     //primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
     primaryPayload.radiance = localRadiance; //NEE
-    vec3 offsetDir = dot(I0,Ngeom0)>0?Ngeom0:-Ngeom0;
     vec3 origin=hitInfo.hitPos+offsetDir*0.001;
     primaryPayload.nextRayOrigin0 = origin; //hitPos + Ngeom * 0.001;
-    primaryPayload.nextRayDir0 = I0;
-    primaryPayload.nextRayThroughputMul0 = throughputMul;
-
-    primaryPayload.done = 0u;
+    primaryPayload.nextRayDir0 = scatter.direction;
+    primaryPayload.nextRayThroughputMul0 = scatter.throughputMul;
+    primaryPayload.done = scatter.valid == 0u ? 1u : 0u;
 }
 
 
