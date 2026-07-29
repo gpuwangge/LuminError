@@ -57,6 +57,16 @@ layout(set = 0, binding = 5) uniform CustomBufferObject {
 // synchronization, or driver-specific behavior.
 layout(set = 0, binding = 8, rgba32f) uniform image2D accumulationImage; 
 
+// 返回 [0,1) 的随机数，给RR用的
+// float Rand(inout uint state){
+//     state = state * 747796405u + 2891336453u;
+
+//     uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+//     word = (word >> 22u) ^ word;
+
+//     return float(word) * (1.0 / 4294967296.0); // 2^32
+// }
+
 void main(){
     ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
     ivec2 size = ivec2(gl_LaunchSizeEXT.xy);
@@ -134,6 +144,23 @@ void main(){
                 nextPath.currentIOR = primaryPayload.nextCurrentIOR0;
                 nextPath.mediumEntryPos = primaryPayload.nextMediumEntryPos0;
                 nextPath.insideMedium = primaryPayload.nextInsideMedium0;
+
+                // RR俄罗斯轮盘赌(如果场景本来路径就很短，RR 几乎没有工作。也就没有效果。)
+                // 另外，在whitted style里面完全不需要RR。
+                // 因此，这里先注释掉。
+                // if(nextPath.depth >= 3u){ //从第三次开始
+                //     float p = clamp(
+                //         max(nextPath.throughput.r,
+                //         max(nextPath.throughput.g,
+                //             nextPath.throughput.b)),
+                //         0.05,
+                //         0.95);
+
+                //     if(Rand(primaryPayload.state) > p) continue;
+                //     nextPath.throughput /= p;
+                // }
+
+
                 pathStack[stackSize++] = nextPath;
             }
 

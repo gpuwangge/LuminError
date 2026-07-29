@@ -387,30 +387,17 @@ Core
 in是只读，	相当于T&
 inout是可读写，	相当于T&
 **************/
-bool earlyExit(inout Material mat){
-    //if(materialIndex < 0 || materialIndex >= uint(customUBO.materialCount)){//customUBO.materialCount is buggy
-    // if(materialIndex < 0){
-    //     primaryPayload.radiance = vec3(1.0, 0.0, 1.0);
-    //     primaryPayload.done = 1u;
-    //     return;
-    // }
-
-    // 如果 alpha 表示完全不可见，建议透传，而不是直接终止
-    if(mat.alpha <= 0.001){
-        primaryPayload.radiance = vec3(0.0);
-        primaryPayload.nextRayOrigin0 = getWorldHitPos() + safeNormalize(gl_WorldRayDirectionEXT) * EPSILON;
-        primaryPayload.nextRayDir0 = safeNormalize(gl_WorldRayDirectionEXT);
-        primaryPayload.nextRayOrigin1 = getWorldHitPos() + safeNormalize(gl_WorldRayDirectionEXT) * EPSILON;
-        primaryPayload.nextRayDir1 = safeNormalize(gl_WorldRayDirectionEXT);
-        primaryPayload.spawnRayCount = 1;//?
-        primaryPayload.nextCurrentIOR0 = primaryPayload.currentIOR;
-        primaryPayload.nextInsideMedium0 = primaryPayload.insideMedium;
-        primaryPayload.nextMediumEntryPos0 = primaryPayload.mediumEntryPos;
-        primaryPayload.done = 0u;
-        return true;
-    }
-    return false;
-}
+//目前没用
+//如果以后支持树叶、围栏等 alpha 材质，可以把它升级成 stochastic alpha test，这样它就会真正发挥作用。
+// bool earlyExit(inout Material mat){
+//     if(mat.alpha < 0.5)
+//     {
+//         if(Rand(primaryPayload.state) > mat.alpha){// stochastic alpha test
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 /*结构
 1.命中信息重建
@@ -625,7 +612,7 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
     //vec3 emittedLight = mat.emissionColor * mat.emissionStrength;
     //result_brightness_score += emittedLight * payload.throughput;
 
-    // 俄罗斯轮盘赌（从第3次反弹开始）
+    // 俄罗斯轮盘赌（从第3次反弹开始）不应该放在这里，因为没有完整的throughput，而是要放在rgen里
     //if(i > 2) {
     //    float p = max(primaryPayload.throughput.r, max(primaryPayload.throughput.g, primaryPayload.throughput.b));
     //    if(p < 0.001) return;
@@ -855,6 +842,8 @@ void updatePayload(in Material mat, vec3 Ngeom){
     state *= 747796405u;
 
     hitInfo.state = state;
+
+    //primaryPayload.state = state; //更新primary payload的state，给RR使用
 
     if(customUBO.renderMode == 0){
         WhittedStyleRayTracing(hitInfo);

@@ -65,6 +65,7 @@ struct PrimaryPayload {
     uint done;        // 1 = 终止，0 = 继续
 
     uint sampleIndex; //to generate random number
+    //uint state;
 };
 
 struct ShadowPayload{
