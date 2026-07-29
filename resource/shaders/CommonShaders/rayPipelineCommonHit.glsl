@@ -42,6 +42,34 @@ layout(set = 0, binding = 7, std430) readonly buffer SBOInstance {
    InstanceInfo instances[];
 } sboInstance;
 
+struct HitInfoStruct{
+    vec3 hitPos;
+    vec3 V; //视向向量，观察方向
+    vec3 I; // 入射方向：射线前进方向
+    vec3 N; // N 始终朝向入射光
+    vec3 Ngeom;
+    float cosTheta;
+
+    bool airToMedium;
+    bool mediumToAir;
+
+    //material related
+    vec3 albedo;
+    vec3 emission;
+    float metallic;
+    float roughness;
+    float transmission;
+    float specular;
+    float ior;
+    float alpha;
+    vec3 transmissionColor;
+
+    vec3 F0;
+    vec3 F;
+
+    uint state;
+};
+
 /**************
 Untility functions
 **************/
@@ -87,6 +115,10 @@ vec3 RandomDirectionInHemisphere(vec3 normal, inout uint state){
     vec3 bitangent = cross(tangent, normal);
 
     vec3 direction = x * tangent + y * bitangent + z * normal;
+    
+    // float cosTheta = max(dot(normal, direction), 0.0);
+    // pdf = cosTheta / PI;
+
     return normalize(direction);
 }
 
@@ -138,30 +170,20 @@ vec3 getLightDirAndRadiance(RtLightInfo light, vec3 hitPos, out float maxT, out 
     return L;
 }
 
-/**************
-Shadow functions
-**************/
-float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){ //inout ShadowPayload shadowPayload inout相当于引用
-    shadowPayload.visibility = 0u;
+vec3 SampleDiskLight(RtLightInfo light, vec3 shadingPos, inout uint state){ //for path tracing NEE
+    // 光源法线（与你 Whitted 保持一致）
+    vec3 lightNormal = normalize(shadingPos - light.position.xyz);
 
-    uint flags =
-        gl_RayFlagsTerminateOnFirstHitEXT |
-        //gl_RayFlagsOpaqueEXT | //临时去掉
-        gl_RayFlagsSkipClosestHitShaderEXT;
+    vec3 T, B;
+    buildOrthonormalBasis(lightNormal, T, B);
 
-    traceRayEXT(
-        topLevelAS,
-        flags,
-        0xFF,
-        0, 0, 1,   // missIndex = 1，假设你的 shadow miss 在 index 1
-        origin,
-        SHADOW_BIAS,
-        dir,
-        tMax,
-        1          // payload location = 1
-    );
+    // 在单位圆盘随机采样
+    vec2 d = sampleDisk(state) * light.radius;
 
-    return float(shadowPayload.visibility);
+    // 返回圆盘上的一点
+    return light.position.xyz +
+           T * d.x +
+           B * d.y;
 }
 
 /**************
@@ -186,7 +208,33 @@ vec3 SampleSky(vec3 dir){
     // return sky;
 }
 
-float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, uint sampleCount, uint baseSeed) {
+/**************
+Shadow functions
+**************/
+float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){ //inout ShadowPayload shadowPayload inout相当于引用, for whitted and path tracing(NEE)
+    shadowPayload.visibility = 0u;
+
+    uint flags =
+        gl_RayFlagsTerminateOnFirstHitEXT |
+        //gl_RayFlagsOpaqueEXT | //临时去掉
+        gl_RayFlagsSkipClosestHitShaderEXT;
+
+    traceRayEXT(
+        topLevelAS,
+        flags,
+        0xFF,
+        0, 0, 1,   // missIndex = 1，假设你的 shadow miss 在 index 1
+        origin,
+        SHADOW_BIAS,
+        dir,
+        tMax,
+        1          // payload location = 1
+    );
+
+    return float(shadowPayload.visibility);
+}
+
+float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, uint sampleCount, uint baseSeed) {//for whitted
     float visible = 0.0;
 
     //vec3 lightNormal = normalize(hitpos); // disk faces shading point
@@ -235,6 +283,104 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
     return visible / float(sampleCount);
 }
 
+//目前发光材质和NEE最好只enable一个，需要进一步测试
+vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //for path tracing
+    //return vec3(20,0,0); //test
+    uint lightCount = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
+
+    if(customUBO.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
+
+    // 暂时只在具有漫反射分量的表面做 NEE。
+    // 金属和玻璃当前使用近似 delta 路径，不在这里处理。
+    if(hitInfo.metallic > 0.8 || hitInfo.transmission > 0.01) return vec3(0.0);
+
+    /*
+     * 从所有注册光源中随机选择一个。
+     *
+     * 每个光源被选择的概率：
+     * lightPdf = 1 / lightCount
+     */
+    uint lightIndex = min(uint(Rand(state) * float(lightCount)), lightCount - 1u);
+
+    RtLightInfo light = sboRtLightBuffer.lights[lightIndex];
+
+    vec3 direct = vec3(0.0);
+    const int LIGHT_SAMPLES = 1;//4; 1已经足够，因为有frame accumulate
+    for(int i = 0; i < LIGHT_SAMPLES; ++i){
+        //使用点光源做NEE
+        float maxT;
+        vec3 lightRadiance;
+        vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
+
+        //使用disk light做NEE，效果比较一般，需要调整
+        // vec3 samplePos = SampleDiskLight(light, hitInfo.hitPos, state);
+        // vec3 toLight = samplePos - hitInfo.hitPos;
+        // float dist = length(toLight);
+        // vec3 L = toLight / dist;
+        // float maxT = dist - SHADOW_BIAS;
+        // float dist2 = max(dot(toLight,toLight),1e-6);
+        // vec3 lightRadiance = light.color.rgb * light.intensity / dist2;
+    
+        // vec3 lightNormal = normalize(hitInfo.hitPos - light.position.xyz);  // 光源法线（与你采样时保持一致）
+        // float cosThetaLight = max(dot(lightNormal, -L), 1e-4);// 光源面朝向 shading point
+        // if (cosThetaLight <= 0.0) continue;
+        // float pdfArea = 1.0 / (PI * light.radius * light.radius); // 面积 PDF
+        // float pdfSolidAngle = pdfArea * dist2 / cosThetaLight;  // 转成立体角 PDF
+
+        
+
+        float NdotL = max(dot(hitInfo.N, L), 0.0);
+        if(NdotL <= 0.0) continue;//return vec3(0.0);
+
+        // 发射 shadow ray，判断采样到的光源是否可见
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
+
+        float visibility = traceShadowVisibility(shadowOrigin,L,maxT);
+
+        if(visibility <= 0.0) continue;//return vec3(0.0);
+        
+        /*
+        * Lambert BRDF：
+        *
+        * f = kd / PI
+        *
+        * 这里加入：
+        * 1. 菲涅尔留下的漫反射能量 (1-F)
+        * 2. 非金属部分
+        * 3. 非透射部分
+        * 4. alpha
+        */
+        vec3 kd =
+            (vec3(1.0) - hitInfo.F) *
+            (1.0 - hitInfo.metallic) *
+            (1.0 - hitInfo.transmission) *
+            hitInfo.alpha *
+            hitInfo.albedo;
+
+        vec3 diffuseBRDF = kd / PI;
+
+        /*
+        * Monte Carlo estimator：
+        *
+        * direct =
+        *     f * Li * cosTheta * visibility
+        *     --------------------------------
+        *              lightPdf
+        *
+        * lightPdf = 1 / lightCount
+        *
+        * 所以等价于乘以 lightCount。
+        */
+        float lightPdf = 1.0 / float(lightCount);
+        direct += diffuseBRDF * lightRadiance * NdotL * visibility / lightPdf; //使用点光源做NEE
+        //return diffuseBRDF * lightRadiance * NdotL * visibility / lightPdf;
+
+        //direct += diffuseBRDF * lightRadiance * NdotL * visibility / pdfSolidAngle; //使用disk light做NEE
+    }
+
+    return direct / float(LIGHT_SAMPLES);
+}
+
 /**************
 Core
 in是只读，	相当于T&
@@ -272,35 +418,6 @@ bool earlyExit(inout Material mat){
 4.写回payload
 （最终看到的效果要包含如下部分：漫反射Lambert，镜面高光项Phong/Blinn，阴影shadowray）
 */
-
-struct HitInfoStruct{
-    vec3 hitPos;
-    vec3 V; //视向向量，观察方向
-    vec3 I; // 入射方向：射线前进方向
-    vec3 N; // N 始终朝向入射光
-    vec3 Ngeom;
-    float cosTheta;
-
-    bool airToMedium;
-    bool mediumToAir;
-
-    //material related
-    vec3 albedo;
-    vec3 emission;
-    float metallic;
-    float roughness;
-    float transmission;
-    float specular;
-    float ior;
-    float alpha;
-    vec3 transmissionColor;
-
-    vec3 F0;
-    vec3 F;
-
-    uint state;
-};
-
 void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
     /////////////////////
     //Method1： 确定性的 Whitted-style 光追 + 直接光照
@@ -334,7 +451,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){
         if(NdotL <= 0.0) continue;
 
 
-        
+        //给每一个light发射一根shadowray
         vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
         float visibility = 1.0f; //default is disable shadow
         if(customUBO.softShadowEnable == 0){
@@ -518,14 +635,24 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
     primaryPayload.spawnRayCount = 0u;
     vec3 throughputMul = vec3(1.0);
 
+    /* NEE = Next Event Estimation
+     * 当前顶点的局部贡献：
+     *
+     * 1. 命中自发光物体的 emission
+     * 2. NEE 直接采样注册光源
+     */
+    vec3 localRadiance = hitInfo.emission; // 当前命中点的局部 radiance
+    if(customUBO.enableNEE != 0u){
+        localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
+    }
+
     // 处理折射/透射材质（玻璃、水等）
     vec3 I0 = hitInfo.I;
     vec3 Ngeom0 = hitInfo.Ngeom;
     if (hitInfo.transmission > 0.0 && hitInfo.alpha < 0.5) {
         // float refractionRatio = hitInfo.ior;
         // bool entering = dot(Ngeom0, -hitInfo.I) > 0.0;
-        
-        
+
         // if (!entering) {
         //     Ngeom0 = -Ngeom0;
         //     refractionRatio = 1.0 / hitInfo.ior;
@@ -539,14 +666,10 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
         // GLSL refract() 要求 eta = n1 / n2
         float eta;
 
-        if (entering)
-        {
-            // Air -> Glass
+        if (entering){ // Air -> Glass
             eta = 1.0 / hitInfo.ior;
         }
-        else
-        {
-            // Glass -> Air
+        else{ // Glass -> Air
             Ngeom0 = -Ngeom0;
             eta = hitInfo.ior;
         }
@@ -580,10 +703,7 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
             throughputMul *= glassColor * (1.0 - F) / max(1.0 - reflectionProbability, 0.1);
         }
         primaryPayload.spawnRayCount = 1u;
-    }
-    
-    // 处理金属材质（高反射）
-    else if (hitInfo.metallic > 0.8) {
+    }else if (hitInfo.metallic > 0.8) { // 处理金属材质（高反射）
         // 金属材质主要进行镜面反射
         vec3 reflectedDir = reflect(hitInfo.I, Ngeom0);
         
@@ -595,11 +715,7 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
         I0 = reflectedDir;
         throughputMul *= hitInfo.F * hitInfo.albedo;
         primaryPayload.spawnRayCount = 1u;
-    }
-
-    
-    // 处理电介质材质（混合漫反射和镜面反射）
-    else {
+    }else { // 处理电介质材质（混合漫反射和镜面反射）
         // 根据菲涅尔项决定反射和漫反射的比例
         float reflectionProbability = (hitInfo.F.r + hitInfo.F.g + hitInfo.F.b) / 3.0;
         
@@ -627,7 +743,8 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
         }
     }
 
-    primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
+    //primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
+    primaryPayload.radiance = localRadiance; //NEE
     vec3 offsetDir = dot(I0,Ngeom0)>0?Ngeom0:-Ngeom0;
     vec3 origin=hitInfo.hitPos+offsetDir*0.001;
     primaryPayload.nextRayOrigin0 = origin; //hitPos + Ngeom * 0.001;
