@@ -234,7 +234,8 @@ float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){ //inout ShadowPa
     return float(shadowPayload.visibility);
 }
 
-float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, uint sampleCount, uint baseSeed) {//for whitted
+//soft shadow只对whitted style有效
+float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, uint sampleCount, uint baseSeed) {
     float visible = 0.0;
 
     //vec3 lightNormal = normalize(hitpos); // disk faces shading point
@@ -283,7 +284,7 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
     return visible / float(sampleCount);
 }
 
-//目前发光材质和NEE最好只enable一个，需要进一步测试
+//目前发光材质和NEE最好只enable其中一个，不要一起开，需要进一步测试
 vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //for path tracing
     //return vec3(20,0,0); //test
     uint lightCount = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
