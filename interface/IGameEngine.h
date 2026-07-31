@@ -50,6 +50,8 @@ namespace LEGameEngine{
         virtual int Get_feature_raytracing_pipeline_debug_mode() = 0;
         virtual bool Get_feature_raytracing_pipeline_softShadowEnable() = 0;
         virtual int Get_feature_raytracing_pipeline_softShadowSampleNumber() = 0;
+        virtual int Get_feature_raytracing_pipeline_maxReflectionDepth() = 0;
+        virtual int Get_feature_raytracing_pipeline_maxRefractionDepth() = 0;
         
         virtual int GetControlNodeSize() = 0;
         virtual void SetControlNodeVisible(int nodeId, bool value) = 0;

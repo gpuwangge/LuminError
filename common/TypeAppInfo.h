@@ -40,6 +40,8 @@ struct FeatureConfig {
     int feature_raytracing_pipeline_debug_mode = 0;
     bool feature_raytracing_pipeline_softShadowEnable = false;
     int feature_raytracing_pipeline_softShadowSampleNumber = 4;
+    int feature_raytracing_pipeline_maxReflectionDepth = 0;
+    int feature_raytracing_pipeline_maxRefractionDepth = 0;
 
     void loadFromYaml(const YAML::Node& node) {
         feature_rendermode                          = getOrDefault(node, "feature_rendermode", 0);
@@ -64,6 +66,8 @@ struct FeatureConfig {
         feature_raytracing_pipeline_debug_mode     = getOrDefault(node, "feature_raytracing_pipeline_debug_mode", 0);
         feature_raytracing_pipeline_softShadowEnable     = getOrDefault(node, "feature_raytracing_pipeline_softShadowEnable", false);
         feature_raytracing_pipeline_softShadowSampleNumber     = getOrDefault(node, "feature_raytracing_pipeline_softShadowSampleNumber", 0);
+        feature_raytracing_pipeline_maxReflectionDepth     = getOrDefault(node, "feature_raytracing_pipeline_maxReflectionDepth", 0);
+        feature_raytracing_pipeline_maxRefractionDepth     = getOrDefault(node, "feature_raytracing_pipeline_maxRefractionDepth", 0);
     }
 };
 

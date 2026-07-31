@@ -203,6 +203,8 @@ namespace LEGameEngine{
         int Get_feature_raytracing_pipeline_debug_mode() override;
         bool Get_feature_raytracing_pipeline_softShadowEnable() override;
         int Get_feature_raytracing_pipeline_softShadowSampleNumber() override;
+        int Get_feature_raytracing_pipeline_maxReflectionDepth() override;
+        int Get_feature_raytracing_pipeline_maxRefractionDepth() override;
 
         int GetControlNodeSize() override;
         void SetControlNodeVisible(int nodeId, bool value) override;

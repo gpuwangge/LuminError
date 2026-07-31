@@ -54,14 +54,14 @@ Objects:
   #   resource_model_id: 6
   #   resource_texture_id_list: [1] #no use
   #   resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: CoffeeTable
+  - object_name: Dragon
     object_id: 0
     object_scale: 10
     object_position: [0,-0.6,0]
     object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
-    object_material_id: 2
+    object_material_id: 8
     resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
@@ -167,7 +167,7 @@ Features:
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: false
   feature_graphics_show_all_metric_controls: false
-  feature_raytracing_pipeline_render_mode: 1 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+  feature_raytracing_pipeline_render_mode: 0 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
   feature_raytracing_pipeline_interactive_render_mode: 0 #change to this mode when camera is moving
   feature_raytracing_pipeline_sampler_per_pixel: 1
   feature_raytracing_pipeline_maximum_bounce: 8
@@ -178,6 +178,8 @@ Features:
   feature_raytracing_pipeline_debug_mode: 0
   feature_raytracing_pipeline_softShadowEnable: false
   feature_raytracing_pipeline_softShadowSampleNumber: 4
+  feature_raytracing_pipeline_maxReflectionDepth: 1 #优化方法(reflect=1,refract=3)：depth 0：折射 + 反射；depth 1~2：只有折射(这样就防止指数分裂)；depth >= 3：停止
+  feature_raytracing_pipeline_maxRefractionDepth: 3
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false

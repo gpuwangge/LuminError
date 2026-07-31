@@ -103,3 +103,16 @@ Materials:
     specular: 0.0
     ior: 1.0
     transmission: 0.0
+  - material_name: jade
+    material_id: 8
+    albedo: [0.58, 0.8, 0.7]
+    emissionColor: [0.0, 0.0, 0.0]
+    transmissionColor: [0.65, 0.95, 0.8]
+    metallic: 0.0
+    roughness: 0.35
+    alpha: 1.0
+    emissionStrength: 0.0
+    reflectance: 0.04
+    specular: 0.5
+    ior: 1.62
+    transmission: 0.25

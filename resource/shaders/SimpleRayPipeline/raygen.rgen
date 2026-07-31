@@ -11,7 +11,7 @@
 const int RAY_PER_PIXEL = 1;
 //spp=16，噪点应该是spp=1的四分之一
 const int BOUNCE_LIMIT  = 8;
-const int MAX_PATHS = 8;
+const int MAX_PATHS = 4;
 
 layout(set = 0, binding = 0, rgba8) uniform writeonly image2D resultImage;
 layout(location = 0) rayPayloadEXT PrimaryPayload primaryPayload;
@@ -118,6 +118,7 @@ void main(){
             primaryPayload.currentIOR = path.currentIOR;
             primaryPayload.insideMedium = path.insideMedium;
             primaryPayload.mediumEntryPos = path.mediumEntryPos;
+            primaryPayload.depth = path.depth;
 
             traceRayEXT(
                 topLevelAS,
@@ -135,6 +136,22 @@ void main(){
 
             if(path.depth + 1u >= BOUNCE_LIMIT) continue;
 
+            for(uint i = 0u; i < primaryPayload.spawnRayCount; ++i){
+                PathState nextPath;
+
+                nextPath.origin         = primaryPayload.nextRay[i].origin;
+                nextPath.direction      = primaryPayload.nextRay[i].dir;
+                nextPath.throughput     = path.throughput * primaryPayload.nextRay[i].throughputMul;
+                nextPath.currentIOR     = primaryPayload.nextRay[i].currentIOR;
+                nextPath.insideMedium   = primaryPayload.nextRay[i].insideMedium;
+                nextPath.mediumEntryPos = primaryPayload.nextRay[i].mediumEntryPos;
+
+                nextPath.depth = path.depth + 1u;
+                pathStack[stackSize++] = nextPath;
+                if(stackSize >= MAX_PATHS) break;
+            }
+
+            /*
             if(primaryPayload.spawnRayCount >= 1u && stackSize < MAX_PATHS){
                 PathState nextPath;
                 nextPath.origin = primaryPayload.nextRayOrigin0;
@@ -174,7 +191,7 @@ void main(){
                 secondPath.mediumEntryPos = primaryPayload.nextMediumEntryPos1;
                 secondPath.insideMedium = primaryPayload.nextInsideMedium1;
                 pathStack[stackSize++] = secondPath; //for WhittedStyleRayTracing only
-            }
+            }*/
         }//stack
     }//spp
 
