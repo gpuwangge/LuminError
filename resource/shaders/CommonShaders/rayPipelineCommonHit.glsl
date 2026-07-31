@@ -519,7 +519,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
     kd *= hitInfo.alpha;
     vec3 diffuseBRDF = kd / PI;
 
-    //1. 直接光线(漫反射，高光，阴影)
+    //直接光线(漫反射，高光，阴影)
     for(uint i = 0u; i < lightNum; ++i){
         RtLightInfo light = sboRtLightBuffer.lights[i];
 
@@ -585,7 +585,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
     primaryPayload.spawnRayCount = 0u;
     primaryPayload.done = 1u;
 
-    UploadNextRays(hitInfo); //2. 二次光线(折射，反射)
+    UploadNextRays(hitInfo); //二次光线(折射，反射)
 }
 
 struct ScatterResult{
@@ -593,66 +593,6 @@ struct ScatterResult{
     vec3 throughputMul;
     uint valid;
 };
-ScatterResult ScatterGlass(in HitInfoStruct hitInfo){// 只处理玻璃
-    ScatterResult result;
-    
-    // float refractionRatio = hitInfo.ior;
-    // bool entering = dot(Ngeom0, -hitInfo.I) > 0.0;
-
-    // if (!entering) {
-    //     Ngeom0 = -Ngeom0;
-    //     refractionRatio = 1.0 / hitInfo.ior;
-    // }
-    
-    // vec3 refractedDir = refract(hitInfo.I, Ngeom0, refractionRatio);
-
-    // 判断当前是进入介质还是离开介质
-    bool entering = dot(hitInfo.I, hitInfo.Ngeom) < 0.0;
-
-    // GLSL refract() 要求 eta = n1 / n2
-    float eta;
-    vec3 Ngeom0 = hitInfo.Ngeom;
-
-    if (entering){ // Air -> Glass
-        eta = 1.0 / hitInfo.ior;
-    }
-    else{ // Glass -> Air
-        Ngeom0 = -Ngeom0;
-        eta = hitInfo.ior;
-    }
-
-    vec3 refractedDir = refract(hitInfo.I, Ngeom0, eta);
-    
-    // 增加基于粗糙度的法线扰动
-    vec3 perturbedNormal = Ngeom0;
-    if (hitInfo.roughness > 0.0) {
-        vec3 randomJitter = RandomDirectionInHemisphere(Ngeom0, hitInfo.state) - Ngeom0;
-        perturbedNormal = normalize(Ngeom0 + randomJitter * hitInfo.roughness * 0.3);
-    }
-    
-    // 使用扰动后的法线重新计算
-    refractedDir = refract(hitInfo.I, perturbedNormal, eta);
-    //float cosTheta = abs(dot(perturbedNormal, -hitInfo.I));
-    //vec3 F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - cosTheta, 5.0);
-    
-    //float reflectionProbability = (F.r + F.g + F.b) / 3.0;
-    float reflectionProbability = clamp(dot(hitInfo.F, vec3(0.333333)), 0.05, 0.95);
-    
-    if (length(refractedDir) < 0.001 || Rand(hitInfo.state) < reflectionProbability * 0.8) {
-        result.direction = reflect(hitInfo.I, perturbedNormal);
-        if (hitInfo.roughness > 0.0) {
-            result.direction = normalize(mix(hitInfo.I, RandomDirectionInHemisphere(perturbedNormal, hitInfo.state), hitInfo.roughness));
-        }
-        result.throughputMul = hitInfo.F / max(reflectionProbability, 0.1);
-    } else {
-        result.direction = refractedDir;
-        vec3 glassColor = hitInfo.transmissionColor * hitInfo.albedo;
-        result.throughputMul = glassColor * (1.0 - hitInfo.F) / max(1.0 - reflectionProbability, 0.1);
-    }
-
-    result.valid = 1u;
-    return result;
-}
 
 ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
     ScatterResult result;
@@ -700,13 +640,9 @@ ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/�
     return result;
 }
 
-bool isGlass(float transmission, float alpha){ return transmission > 0.0 && alpha < 0.5; }
-bool isJade(float transmission, float alpha){  return transmission > 0.05 && alpha > 0.9; }
-bool isMetal(float metallic){ return metallic > 0.8; }
-//bool isLambert(){}
 
-void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path Tracing
-    // 俄罗斯轮盘赌不应该放在这里，因为没有完整的throughput，而是要放在rgen里
+
+void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic PT
     primaryPayload.spawnRayCount = 0u;
 
     //NEE = Next Event Estimation
@@ -714,20 +650,23 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
     if(customUBO.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
 
     ScatterResult scatter; //散射逻辑：TODO 解决Warp Divergence问题
-    if(isGlass(hitInfo.transmission, hitInfo.alpha)) scatter = ScatterGlass(hitInfo);
-    else if(isMetal(hitInfo.metallic)) scatter = ScatterMetal(hitInfo);
-    //else if(isJade(hitInfo.transmission, hitInfo.alpha)) scatter = ScatterJade(hitInfo);
-    else scatter = ScatterDiffuse(hitInfo);// 处理电介质材质（混合漫反射和镜面反射）
-
-    vec3 offsetDir = dot(scatter.direction, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom: -hitInfo.Ngeom;
-    primaryPayload.spawnRayCount = scatter.valid;
-    //primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
-    primaryPayload.radiance = localRadiance; //NEE
-    vec3 origin=hitInfo.hitPos+offsetDir*0.001;
-    primaryPayload.nextRay[0].origin = origin; //hitPos + Ngeom * 0.001;
-    primaryPayload.nextRay[0].dir = scatter.direction;
-    primaryPayload.nextRay[0].throughputMul = scatter.throughputMul;
-    primaryPayload.done = scatter.valid == 0u ? 1u : 0u;
+    if(hitInfo.material_type != MATERIAL_GLASS && hitInfo.material_type != MATERIAL_JADE){ //传统PathTracing部分，随机采样的 Monte Carlo Path Tracing
+        if(hitInfo.material_type == MATERIAL_GOLD) 
+            scatter = ScatterMetal(hitInfo);
+        else if(hitInfo.material_type == MATERIAL_PLASTIC || hitInfo.material_type == MATERIAL_CERAMIC || hitInfo.material_type == MATERIAL_LIGHT) 
+            scatter = ScatterDiffuse(hitInfo);// 处理电介质材质（混合漫反射和镜面反射）
+        vec3 offsetDir = dot(scatter.direction, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom: -hitInfo.Ngeom;
+        primaryPayload.spawnRayCount = scatter.valid;
+        //primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
+        primaryPayload.radiance = localRadiance; //NEE
+        vec3 origin=hitInfo.hitPos+offsetDir*0.001;
+        primaryPayload.nextRay[0].origin = origin; //hitPos + Ngeom * 0.001;
+        primaryPayload.nextRay[0].dir = scatter.direction;
+        primaryPayload.nextRay[0].throughputMul = scatter.throughputMul;
+        primaryPayload.done = scatter.valid == 0u ? 1u : 0u;
+    }else{ //whitted-style部分
+        UploadNextRays(hitInfo); //对glass/jade，发射二次光线(折射，反射)
+    }
 }
 
 void updatePayload(in Material mat, vec3 Ngeom){
@@ -806,7 +745,7 @@ void updatePayload(in Material mat, vec3 Ngeom){
     //primaryPayload.state = state; //更新primary payload的state，给RR使用
 
     if(customUBO.renderMode == 0) WhittedStyleRayTracing(hitInfo);
-    else if(customUBO.renderMode == 1) PathTracing(hitInfo);
+    else if(customUBO.renderMode == 1) MDSPathTracing(hitInfo);
 
 }
 

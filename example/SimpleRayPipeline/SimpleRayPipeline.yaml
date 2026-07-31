@@ -178,7 +178,7 @@ Features:
   feature_raytracing_pipeline_debug_mode: 0
   feature_raytracing_pipeline_softShadowEnable: false
   feature_raytracing_pipeline_softShadowSampleNumber: 4
-  feature_raytracing_pipeline_maxReflectionDepth: 1 #优化方法(reflect=1,refract=3)：depth 0：折射 + 反射；depth 1~2：只有折射(这样就防止指数分裂)；depth >= 3：停止
+  feature_raytracing_pipeline_maxReflectionDepth: 2 #优化方法(reflect=1,refract=3)：depth 0：折射 + 反射；depth 1~2：只有折射(这样就防止指数分裂)；depth >= 3：停止
   feature_raytracing_pipeline_maxRefractionDepth: 3
 
 Attachments:
