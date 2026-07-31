@@ -57,6 +57,7 @@ struct HitInfoStruct{
     bool mediumToAir;
 
     //material related
+    uint material_type;
     vec3 albedo;
     vec3 emission;
     float metallic;
@@ -402,90 +403,7 @@ inout是可读写，	相当于T&
 //     return false;
 // }
 
-void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳定
-    vec3 directDiffuse = vec3(0.0);
-    vec3 directSpecular = vec3(0.0);
-
-    uint lightNum = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
-
-    // vec3 kd = (1.0 - metallic) * albedo;
-    // vec3 diffuseBRDF = kd / PI;
-    // // diffuse 抑制：为了玻璃材质
-    // kd *= (1.0 - transmission);
-    // kd *= mat.alpha;
-    vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo;
-    kd *= (1.0 - hitInfo.transmission);
-    kd *= hitInfo.alpha;
-    vec3 diffuseBRDF = kd / PI;
-
-    //1. 硬阴影
-    for(uint i = 0u; i < lightNum; ++i){
-        RtLightInfo light = sboRtLightBuffer.lights[i];
-
-        float maxT;
-        vec3 lightRadiance;
-        vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
-
-        float NdotL = max(dot(hitInfo.N, L), 0.0);
-        if(NdotL <= 0.0) continue;
-
-
-        //给每一个light发射一根shadowray
-        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
-        float visibility = 1.0f; //default is disable shadow
-        if(customUBO.softShadowEnable == 0){
-            visibility = traceShadowVisibility(shadowOrigin, L, maxT);
-        }else{
-            visibility = traceSoftShadowVisibility(
-                shadowOrigin, hitInfo.hitPos, hitInfo.N,
-                vec3(sboRtLightBuffer.lights[i].position),
-                sboRtLightBuffer.lights[i].radius,
-                customUBO.softShadowSampleNumber,
-                hitInfo.state
-            );
-        }
-        if(visibility <= 0.0) continue;
-
-        vec3 H = safeNormalize(L + hitInfo.V);
-        float NdotH = max(dot(hitInfo.N, H), 0.0);
-        float VdotH = max(dot(hitInfo.V, H), 0.0);
-
-        vec3 F1 = fresnelSchlick(VdotH, hitInfo.F0);
-
-        //这是 Blinn-Phong。
-        float shininess = mix(128.0, 4.0, hitInfo.roughness);
-        float specFactor = pow(NdotH, shininess) * hitInfo.specular;
-        directDiffuse += diffuseBRDF * lightRadiance * NdotL * visibility;
-        //directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
-        // if(metallic > 0.9){
-        //     directSpecular += albedo * specFactor * lightRadiance * NdotL * visibility;
-        // } else {
-        //     directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
-        // }
-        if(hitInfo.metallic > 0.5){
-            directDiffuse = vec3(0.0);
-            directSpecular += hitInfo.albedo * specFactor * lightRadiance * NdotL * visibility;
-        }else {
-            directSpecular += F1 * specFactor * lightRadiance * NdotL * visibility;
-        }
-    }
-
-    //vec3 localRadiance = emission + directDiffuse + directSpecular;
-    vec3 localRadiance = hitInfo.emission;
-    if(hitInfo.transmission < 0.01){
-        localRadiance += directDiffuse + directSpecular;
-    } else {
-        localRadiance += directSpecular;
-    }
-    float ambientIntensity = 0.2;
-    vec3 ambient = //增加天空漫反射
-        diffuseBRDF *
-        SampleSky(hitInfo.N) *
-        PI *
-        ambientIntensity;
-    localRadiance += ambient;
-
-    //2. 二次光线
+void UploadNextRays(in HitInfoStruct hitInfo){
     vec3 nextOrigin = vec3(0.0);
     vec3 nextDir = vec3(0.0);
     vec3 nextThroughputMul = vec3(1.0);
@@ -500,11 +418,8 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
     bool hasReflection = (hitInfo.metallic > 0.8);
     bool hasTransmission = hitInfo.transmission > 0.01;
 
-    primaryPayload.radiance = localRadiance;
-    primaryPayload.spawnRayCount = 0u;
-    primaryPayload.done = 1u;
-
-    if(hasReflection && hitInfo.transmission < 0.01){ //金属
+    if(hitInfo.material_type == MATERIAL_GOLD){
+    //if(hasReflection && hitInfo.transmission < 0.01){ //金属
         vec3 R = normalize(reflect(hitInfo.I, hitInfo.N));
 
         primaryPayload.nextRay[0].origin = hitInfo.hitPos + hitInfo.N * EPSILON;
@@ -513,9 +428,8 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
 
         primaryPayload.spawnRayCount = 1u;
         primaryPayload.done = 0u;
-    }
-
-    if(hasTransmission){
+    }else if(hitInfo.material_type == MATERIAL_GLASS || hitInfo.material_type == MATERIAL_JADE){
+    //if(hasTransmission){
         //float eta = frontFace ? (1.0 / ior) : ior;
 
         float n1 = primaryPayload.insideMedium == 1u ? hitInfo.ior : 1.0;
@@ -582,38 +496,96 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
                 primaryPayload.nextRay[rayIndex].dir = R;
                 primaryPayload.nextRay[rayIndex].throughputMul = vec3(F2);
             }
-            
-            //fakeSSS效果一般，暂时保留commentted code
-            //else{
-                //vec3 fakeSSS=SampleSky(hitInfo.N)*hitInfo.transmissionColor*0.35; //sub surface scatter
 
-                // RtLightInfo light = sboRtLightBuffer.lights[0];
-                // vec3 L = normalize(light.position.xyz - hitInfo.hitPos);
-                // float backLight = max(dot(-hitInfo.N, L), 0.0);
-                // vec3 fakeSSS =
-                //     backLight *
-                //     light.color.rgb *
-                //     light.intensity *
-                //     hitInfo.transmissionColor *
-                //     0.03;
-
-                //primaryPayload.radiance += fakeSSS;
-            //}
-
-            //旧的反射代码
-            // primaryPayload.nextRayOrigin1 = hitInfo.hitPos + Roff * EPSILON;
-            // primaryPayload.nextRayDir1 = R;
-            // //primaryPayload.nextRayThroughputMul1 = vec3(fresnelScalar);
-            // //float F = pow(fresnelScalar,0.8);
-            // primaryPayload.nextRayThroughputMul1 = vec3(F2);
-            // //float reflectionBoost = 2.0;
-            // //primaryPayload.nextRayThroughputMul1 = vec3(min(fresnelScalar * reflectionBoost,1.0));
-
-            // primaryPayload.spawnRayCount = 2u;
         }
 
         primaryPayload.done = 0u;
-    }//end of transmission
+    }
+}
+
+void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳定
+    vec3 directDiffuse = vec3(0.0);
+    vec3 directSpecular = vec3(0.0);
+
+    uint lightNum = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
+
+    // vec3 kd = (1.0 - metallic) * albedo;
+    // vec3 diffuseBRDF = kd / PI;
+    // // diffuse 抑制：为了玻璃材质
+    // kd *= (1.0 - transmission);
+    // kd *= mat.alpha;
+    vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo;
+    kd *= (1.0 - hitInfo.transmission);
+    kd *= hitInfo.alpha;
+    vec3 diffuseBRDF = kd / PI;
+
+    //1. 直接光线(漫反射，高光，阴影)
+    for(uint i = 0u; i < lightNum; ++i){
+        RtLightInfo light = sboRtLightBuffer.lights[i];
+
+        float maxT;
+        vec3 lightRadiance;
+        vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
+
+        float NdotL = max(dot(hitInfo.N, L), 0.0);
+        if(NdotL <= 0.0) continue;
+
+        //给每一个light发射一根shadowray
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
+        float visibility = 1.0f; //default is disable shadow
+        if(customUBO.softShadowEnable == 0){
+            visibility = traceShadowVisibility(shadowOrigin, L, maxT);
+        }else{
+            visibility = traceSoftShadowVisibility(
+                shadowOrigin, hitInfo.hitPos, hitInfo.N,
+                vec3(sboRtLightBuffer.lights[i].position),
+                sboRtLightBuffer.lights[i].radius,
+                customUBO.softShadowSampleNumber,
+                hitInfo.state
+            );
+        }
+        if(visibility <= 0.0) continue;
+
+        vec3 H = safeNormalize(L + hitInfo.V);
+        float NdotH = max(dot(hitInfo.N, H), 0.0);
+        float VdotH = max(dot(hitInfo.V, H), 0.0);
+
+        vec3 F1 = fresnelSchlick(VdotH, hitInfo.F0);
+
+        //这是 Blinn-Phong。
+        float shininess = mix(128.0, 4.0, hitInfo.roughness);
+        float specFactor = pow(NdotH, shininess) * hitInfo.specular;
+        directDiffuse += diffuseBRDF * lightRadiance * NdotL * visibility;
+        //directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
+        // if(metallic > 0.9){
+        //     directSpecular += albedo * specFactor * lightRadiance * NdotL * visibility;
+        // } else {
+        //     directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
+        // }
+        if(hitInfo.metallic > 0.5){
+            directDiffuse = vec3(0.0);
+            directSpecular += hitInfo.albedo * specFactor * lightRadiance * NdotL * visibility;
+        }else {
+            directSpecular += F1 * specFactor * lightRadiance * NdotL * visibility;
+        }
+    }
+
+    //vec3 localRadiance = emission + directDiffuse + directSpecular;
+    vec3 localRadiance = hitInfo.emission;
+    if(hitInfo.transmission < 0.01){
+        localRadiance += directDiffuse + directSpecular;
+    } else {
+        localRadiance += directSpecular;
+    }
+    float ambientIntensity = 0.2;
+    vec3 ambient = diffuseBRDF * SampleSky(hitInfo.N) * PI * ambientIntensity; //增加天空漫反射
+    localRadiance += ambient;
+
+    primaryPayload.radiance = localRadiance;
+    primaryPayload.spawnRayCount = 0u;
+    primaryPayload.done = 1u;
+
+    UploadNextRays(hitInfo); //2. 二次光线(折射，反射)
 }
 
 struct ScatterResult{
@@ -727,280 +699,6 @@ ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/�
     result.valid = 1u;
     return result;
 }
-float JadeLuminance(vec3 color)
-{
-    return dot(color, vec3(0.2126, 0.7152, 0.0722));
-}
-
-ScatterResult ScatterJade(in HitInfoStruct hitInfo)
-{
-    ScatterResult result;
-    result.direction = vec3(0.0);
-    result.throughputMul = vec3(0.0);
-    result.valid = 0u;
-
-    /*
-     * Jade 近似为三个散射分量：
-     *
-     * 1. 镜面反射：
-     *      F
-     *
-     * 2. 弱透射：
-     *      (1-F) * transmission * transmissionColor
-     *
-     * 3. 漫反射：
-     *      (1-F) * (1-transmission) * albedo
-     *
-     * 三个分量的采样概率根据各自能量计算。
-     * 因此不会因为 transProb 较小而把 throughput 放大十几倍。
-     */
-
-    vec3 F = clamp(hitInfo.F, vec3(0.0), vec3(1.0));
-
-    float transmission =
-        clamp(hitInfo.transmission, 0.0, 0.95);
-
-    vec3 albedo =
-        clamp(hitInfo.albedo, vec3(0.0), vec3(1.0));
-
-    vec3 transmissionColor =
-        clamp(hitInfo.transmissionColor, vec3(0.0), vec3(1.0));
-
-    // 每个 lobe 真正携带的颜色/能量
-    vec3 specWeight = F;
-
-    vec3 transWeight =
-        (vec3(1.0) - F) *
-        transmission *
-        transmissionColor;
-
-    vec3 diffuseWeight =
-        (vec3(1.0) - F) *
-        (1.0 - transmission) *
-        albedo;
-
-    /*
-     * 使用亮度构造标量采样概率。
-     * EPS 避免所有分量恰好为零。
-     */
-    float specEnergy = max(JadeLuminance(specWeight), 0.0);
-    float transEnergy = max(JadeLuminance(transWeight), 0.0);
-    float diffuseEnergy = max(JadeLuminance(diffuseWeight), 0.0);
-
-    float totalEnergy =
-        specEnergy +
-        transEnergy +
-        diffuseEnergy;
-
-    if(totalEnergy < 1e-6)
-    {
-        return result;
-    }
-
-    float specProb = specEnergy / totalEnergy;
-    float transProb = transEnergy / totalEnergy;
-    float diffuseProb = diffuseEnergy / totalEnergy;
-
-    float randomValue = Rand(hitInfo.state);
-
-    /*
-     * hitInfo.N 是朝向入射射线一侧的法线。
-     * 用它处理反射和漫反射，避免背面方向错误。
-     */
-    vec3 shadingNormal = hitInfo.N;
-
-    /**********************************************************
-     * 1. Glossy reflection
-     **********************************************************/
-    if(randomValue < specProb)
-    {
-        vec3 reflectedDir =
-            safeNormalize(reflect(hitInfo.I, shadingNormal));
-
-        /*
-         * 当前不是严格的 GGX 采样，只是简单的粗糙反射近似。
-         * 使用 roughness² 可以避免 roughness=0.35 时扰动过强。
-         */
-        float roughnessAmount =
-            hitInfo.roughness * hitInfo.roughness;
-
-        if(roughnessAmount > 0.001)
-        {
-            vec3 randomDir =
-                RandomDirectionInHemisphere(
-                    shadingNormal,
-                    hitInfo.state
-                );
-
-            reflectedDir = safeNormalize(
-                mix(
-                    reflectedDir,
-                    randomDir,
-                    roughnessAmount
-                )
-            );
-        }
-
-        // 防止粗糙扰动把反射方向推入物体内部
-        if(dot(reflectedDir, shadingNormal) <= 0.0)
-        {
-            reflectedDir =
-                safeNormalize(reflect(hitInfo.I, shadingNormal));
-        }
-
-        result.direction = reflectedDir;
-
-        /*
-         * Monte Carlo 权重：
-         *
-         * contribution / samplingProbability
-         */
-        result.throughputMul =
-            specWeight /
-            max(specProb, 1e-6);
-
-        result.valid = 1u;
-        return result;
-    }
-
-    /**********************************************************
-     * 2. Weak transmission
-     **********************************************************/
-    if(randomValue < specProb + transProb)
-    {
-        bool entering =
-            dot(hitInfo.I, hitInfo.Ngeom) < 0.0;
-
-        /*
-         * refract() 要求法线朝向入射射线所在介质。
-         */
-        vec3 refractNormal =
-            entering
-                ? hitInfo.Ngeom
-                : -hitInfo.Ngeom;
-
-        float eta =
-            entering
-                ? 1.0 / hitInfo.ior
-                : hitInfo.ior;
-
-        /*
-         * 对折射法线施加很小的粗糙扰动。
-         * Jade 不应该像毛玻璃一样强烈随机折射。
-         */
-        float transmissionRoughness =
-            hitInfo.roughness *
-            hitInfo.roughness *
-            0.20;
-
-        if(transmissionRoughness > 0.001)
-        {
-            vec3 randomNormal =
-                RandomDirectionInHemisphere(
-                    refractNormal,
-                    hitInfo.state
-                );
-
-            refractNormal = safeNormalize(
-                mix(
-                    refractNormal,
-                    randomNormal,
-                    transmissionRoughness
-                )
-            );
-
-            // 扰动后仍须朝向入射射线
-            if(dot(hitInfo.I, refractNormal) > 0.0)
-            {
-                refractNormal = -refractNormal;
-            }
-        }
-
-        vec3 transmittedDir =
-            refract(
-                hitInfo.I,
-                refractNormal,
-                eta
-            );
-
-        /*
-         * 全反射：
-         * 本次虽然选择了 transmission lobe，
-         * 但物理结果只能反射。
-         */
-        if(dot(transmittedDir, transmittedDir) < 1e-8)
-        {
-            result.direction =
-                safeNormalize(
-                    reflect(
-                        hitInfo.I,
-                        refractNormal
-                    )
-                );
-
-            /*
-             * TIR 时当前透射分量转为反射。
-             * 使用 transWeight / transProb 保持本次样本能量稳定。
-             */
-            result.throughputMul =
-                transWeight /
-                max(transProb, 1e-6);
-
-            result.valid = 1u;
-            return result;
-        }
-
-        result.direction =
-            safeNormalize(transmittedDir);
-
-        /*
-         * 关键修复：
-         *
-         * transWeight 中已经包含：
-         *
-         * transmissionColor
-         * * transmission
-         * * (1-F)
-         *
-         * 不会再发生：
-         *
-         * transmissionColor*(1-F)/0.05 ≈ 15
-         */
-        result.throughputMul =
-            transWeight /
-            max(transProb, 1e-6);
-
-        result.valid = 1u;
-        return result;
-    }
-
-    /**********************************************************
-     * 3. Diffuse
-     **********************************************************/
-    result.direction =
-        RandomDirectionInHemisphere(
-            shadingNormal,
-            hitInfo.state
-        );
-
-    /*
-     * RandomDirectionInHemisphere 是 cosine-weighted。
-     *
-     * Lambert：
-     *     f = diffuseWeight / PI
-     *
-     * PDF：
-     *     pdf = cosTheta / PI
-     *
-     * f*cosTheta/pdf 抵消后为 diffuseWeight。
-     */
-    result.throughputMul =
-        diffuseWeight /
-        max(diffuseProb, 1e-6);
-
-    result.valid = 1u;
-    return result;
-}
 
 bool isGlass(float transmission, float alpha){ return transmission > 0.0 && alpha < 0.5; }
 bool isJade(float transmission, float alpha){  return transmission > 0.05 && alpha > 0.9; }
@@ -1035,6 +733,7 @@ void PathTracing(in HitInfoStruct hitInfo){ //随机采样的 Monte Carlo Path T
 void updatePayload(in Material mat, vec3 Ngeom){
     //命中信息重建
     HitInfoStruct hitInfo;
+    hitInfo.material_type = mat.type;
     hitInfo.albedo = mat.albedo;
     hitInfo.emission = mat.emissionColor * mat.emissionStrength;
     hitInfo.metallic = clamp(mat.metallic, 0.0, 1.0);

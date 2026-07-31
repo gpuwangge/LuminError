@@ -460,6 +460,7 @@ struct SamplerConfig{
 struct MaterialConfig {
     std::string material_name;
     int material_id = -1;
+    int material_type = 0;
     std::array<float, 3> albedo{1.0f, 1.0f, 1.0f};
     std::array<float, 3> emissionColor{0.0f, 0.0f, 0.0f};
     std::array<float, 3> transmissionColor{1.0f, 1.0f, 1.0f};
@@ -475,6 +476,7 @@ struct MaterialConfig {
     void loadFromYaml(const YAML::Node& node) {
         material_name = getOrDefault(node, "material_name", std::string{"Default"});
         material_id = getOrDefault(node, "material_id", -1);
+        material_type = getOrDefault(node, "material_type", 0);
         albedo = getOrDefault(node, "albedo", std::array<float, 3>{1.0f, 1.0f, 1.0f});
         emissionColor = getOrDefault(node, "emissionColor", std::array<float, 3>{0.0f, 0.0f, 0.0f});
         transmissionColor = getOrDefault(node, "transmissionColor", std::array<float, 3>{1.0f, 1.0f, 1.0f});

@@ -1,6 +1,7 @@
 Materials:
   - material_name: rough_plastic
     material_id: 0
+    material_type: 0 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [0.8, 0.8, 0.8]         #Material Color
     emissionColor: [0.0, 0.0, 0.0]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -14,6 +15,7 @@ Materials:
     transmission: 0.0            #Whether it transmits light
   - material_name: transparent_glass
     material_id: 1
+    material_type: 1 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 1.0, 1.0]
     emissionColor: [0.0, 0.0, 0.0]
     transmissionColor: [0.95, 1.0, 0.98]
@@ -27,6 +29,7 @@ Materials:
     transmission: 0.85
   - material_name: gold
     material_id: 2
+    material_type: 2 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 0.86, 0.35]
     emissionColor: [0.0, 0.0, 0.0]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -40,6 +43,7 @@ Materials:
     transmission: 0.0
   - material_name: red_plastic_ceramic
     material_id: 3
+    material_type: 3 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [0.8, 0.2, 0.2]
     emissionColor: [0.0, 0.0, 0.0]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -53,6 +57,7 @@ Materials:
     transmission: 0.0
   - material_name: light_sphere_white
     material_id: 4
+    material_type: 4 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 1.0, 1.0]
     emissionColor: [1.0, 0.9, 0.7]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -66,6 +71,7 @@ Materials:
     transmission: 0.0
   - material_name: light_sphere_red
     material_id: 5
+    material_type: 4 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 1.0, 1.0]
     emissionColor: [1.0, 0.1, 0.1]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -79,6 +85,7 @@ Materials:
     transmission: 0.0
   - material_name: light_sphere_green
     material_id: 6
+    material_type: 4 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 1.0, 1.0]
     emissionColor: [0.1, 1.0, 0.1]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -92,6 +99,7 @@ Materials:
     transmission: 0.0
   - material_name: light_sphere_blue
     material_id: 7
+    material_type: 4 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 1.0, 1.0]
     emissionColor: [0.1, 0.1, 1.0]
     transmissionColor: [1.0, 1.0, 1.0]
@@ -105,6 +113,7 @@ Materials:
     transmission: 0.0
   - material_name: jade
     material_id: 8
+    material_type: 5 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [0.58, 0.8, 0.7]
     emissionColor: [0.0, 0.0, 0.0]
     transmissionColor: [0.65, 0.95, 0.8]

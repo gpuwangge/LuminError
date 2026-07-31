@@ -94,6 +94,7 @@ struct alignas(16) MaterialInfo{
     alignas(16) glm::vec3 albedo;
     alignas(16) glm::vec3 emissionColor;
     alignas(16) glm::vec3 transmissionColor;
+    alignas(4) int type;
     alignas(4) float metallic;
     alignas(4) float roughness;
     alignas(4) float alpha;

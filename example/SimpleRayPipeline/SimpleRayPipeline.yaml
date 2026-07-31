@@ -167,7 +167,7 @@ Features:
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: false
   feature_graphics_show_all_metric_controls: false
-  feature_raytracing_pipeline_render_mode: 0 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+  feature_raytracing_pipeline_render_mode: 1 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
   feature_raytracing_pipeline_interactive_render_mode: 0 #change to this mode when camera is moving
   feature_raytracing_pipeline_sampler_per_pixel: 1
   feature_raytracing_pipeline_maximum_bounce: 8

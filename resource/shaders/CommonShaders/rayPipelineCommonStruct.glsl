@@ -4,6 +4,18 @@
 #extension GL_EXT_ray_tracing : require
 
 /*************
+Constants
+GLSL 不支持真正的 enum
+**************/
+// Material Types
+const uint MATERIAL_PLASTIC = 0u;
+const uint MATERIAL_GLASS   = 1u;
+const uint MATERIAL_GOLD    = 2u;
+const uint MATERIAL_CERAMIC = 3u;
+const uint MATERIAL_LIGHT   = 4u;
+const uint MATERIAL_JADE    = 5u;
+
+/*************
 SBO Structure
 **************/
 struct RtLightInfo{
@@ -20,6 +32,7 @@ struct Material {
     vec3 albedo;
     vec3 emissionColor;
     vec3 transmissionColor;
+    uint type; //0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     float metallic;
     float roughness;
     float alpha;

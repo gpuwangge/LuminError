@@ -8,6 +8,7 @@ struct Material {
     //float _padding1;
     vec3 transmissionColor;
     //float _padding2;
+    uint type;
     float metallic;
     float roughness;
     float alpha;

@@ -15,6 +15,7 @@ void GameEngine::InitializeComputeRayTracing(){
             storageBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
             storageBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
             storageBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
+            storageBufferObject_Material.materials[i].type = appInfo->Materials[i].material_type;
             storageBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
             storageBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
             storageBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
@@ -314,6 +315,7 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
             storageBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
             storageBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
             storageBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
+            storageBufferObject_Material.materials[i].type = appInfo->Materials[i].material_type;
             storageBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
             storageBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
             storageBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
