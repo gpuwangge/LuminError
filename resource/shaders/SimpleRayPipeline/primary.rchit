@@ -27,14 +27,6 @@ struct TriangleVertexInfo{
     //total size: 16*4+4+60=128 bytes
 };
 
-//layout(set = 0, binding = 2, std430) readonly buffer SBOTriangleVertex { //host setup, but not used
-//   TriangleVertexInfo vertices[];
-//} sboTriangleVertex;
-
-//layout(set = 0, binding = 3, std430) readonly buffer SBOTriangleIndex { //host setup, but not used
-//   uint indices[];
-//} sboTriangleIndex;
-
 //buffer_reference：启用“缓冲引用”类型，即允许定义一个包含未定长数组或指针的 block，着色器会把它当作引用类型处理（像 pointer-to-buffer）
 //scalar：表明使用“标量对齐”规则（而不是 std140/std430 的向量/结构对齐规则），这会影响数组和结构成员在内存中的偏移计算。
 //buffer_reference_align = N：这是告诉编译器“这个引用所指向的数据在内存中至少按 N 字节对齐”，编译器据此生成更高效或正确的内存加载指令；你也必须保证运行时传入的设备地址满足这个对齐要求，否则行为可能未定义或性能受损。

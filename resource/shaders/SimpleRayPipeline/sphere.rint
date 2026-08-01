@@ -4,8 +4,7 @@
 hitAttributeEXT vec2 attribs;
 //hitAttributeEXT vec3 hitNormal;
 
-void main()
-{
+void main(){
     vec3 ro = gl_ObjectRayOriginEXT;
     vec3 rd = gl_ObjectRayDirectionEXT;
 
