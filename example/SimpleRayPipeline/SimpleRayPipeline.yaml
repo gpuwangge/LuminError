@@ -171,6 +171,7 @@ Features:
   feature_raytracing_pipeline_interactive_render_mode: 0 #change to this mode when camera is moving
   feature_raytracing_pipeline_sampler_per_pixel: 1
   feature_raytracing_pipeline_maximum_bounce: 8
+  feature_raytracing_pipeline_maximum_path: 4
   feature_raytracing_pipeline_accumulate: true
   feature_raytracing_pipeline_enableNEE: false
   feature_raytracing_pipeline_use_sky: false

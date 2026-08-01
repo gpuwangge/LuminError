@@ -1,5 +1,5 @@
-#ifndef RAY_COMMON_GLSL
-#define RAY_COMMON_GLSL
+#ifndef RAY_COMMONSTRUCT_GLSL
+#define RAY_COMMONSTRUCT_GLSL
 
 #extension GL_EXT_ray_tracing : require
 

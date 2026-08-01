@@ -22,6 +22,7 @@ namespace LuminError{
             alignas(4) unsigned int renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
             alignas(4) unsigned int spp;             // Samples Per Pixel
             alignas(4) unsigned int maxBounce;       // 最大反弹次数
+            alignas(4) unsigned int maxPath;         // 最大路径数
             alignas(4) unsigned int accumulate;      // 0 = 不积累, 1 = 帧间积累
             alignas(4) unsigned int randomSeed;      // 可选，每次运行不同
 
@@ -59,6 +60,7 @@ namespace LuminError{
             customUniformBufferObject.renderMode = GameEngine->Get_feature_raytracing_pipeline_render_mode();
             customUniformBufferObject.spp = GameEngine->Get_feature_raytracing_pipeline_sampler_per_pixel();
             customUniformBufferObject.maxBounce = GameEngine->Get_feature_raytracing_pipeline_maximum_bounce();
+            customUniformBufferObject.maxPath = GameEngine->Get_feature_raytracing_pipeline_maximum_path();
             customUniformBufferObject.accumulate = GameEngine->Get_feature_raytracing_pipeline_accumulate();
             customUniformBufferObject.enableNEE = GameEngine->Get_feature_raytracing_pipeline_enableNEE();
             customUniformBufferObject.useSky = GameEngine->Get_feature_raytracing_pipeline_use_sky();

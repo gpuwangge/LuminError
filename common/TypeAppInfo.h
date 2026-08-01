@@ -33,6 +33,7 @@ struct FeatureConfig {
     int feature_raytracing_pipeline_interactive_render_mode = 0;
     int feature_raytracing_pipeline_sampler_per_pixel = 1;
     int feature_raytracing_pipeline_maximum_bounce = 8;
+    int feature_raytracing_pipeline_maximum_path = 4;
     bool feature_raytracing_pipeline_accumulate = true;
     bool feature_raytracing_pipeline_enableNEE = false;
     bool feature_raytracing_pipeline_use_sky = false;
@@ -59,6 +60,7 @@ struct FeatureConfig {
         feature_raytracing_pipeline_interactive_render_mode     = getOrDefault(node, "feature_raytracing_pipeline_interactive_render_mode", 0);
         feature_raytracing_pipeline_sampler_per_pixel     = getOrDefault(node, "feature_raytracing_pipeline_sampler_per_pixel", 1);
         feature_raytracing_pipeline_maximum_bounce     = getOrDefault(node, "feature_raytracing_pipeline_maximum_bounce", 8);
+        feature_raytracing_pipeline_maximum_path     = getOrDefault(node, "feature_raytracing_pipeline_maximum_path", 4);
         feature_raytracing_pipeline_accumulate     = getOrDefault(node, "feature_raytracing_pipeline_accumulate", true);
         feature_raytracing_pipeline_enableNEE     = getOrDefault(node, "feature_raytracing_pipeline_enableNEE", false);
         feature_raytracing_pipeline_use_sky     = getOrDefault(node, "feature_raytracing_pipeline_use_sky", false);
