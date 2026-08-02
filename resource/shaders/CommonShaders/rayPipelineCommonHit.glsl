@@ -268,9 +268,9 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
 //目前发光材质和NEE最好只enable其中一个，不要一起开，需要进一步测试
 vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //for path tracing
     //return vec3(20,0,0); //test
-    uint lightCount = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
+    uint lightCount = min(configObject.lightCount, uint(RTLIGHT_SIZE)); 
 
-    if(customUBO.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
+    if(configObject.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
 
     // 暂时只在具有漫反射分量的表面做 NEE。
     // 金属和玻璃当前使用近似 delta 路径，不在这里处理。
@@ -439,7 +439,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
             float F2 = pow(fresnelScalar,0.5);
 
             uint rayIndex = 0; //第一条射线，查询折射
-            if(primaryPayload.depth < customUBO.maxRefractionDepth ){ //&& Rand(hitInfo.state) < hitInfo.transmission
+            if(primaryPayload.depth < configObject.maxRefractionDepth ){ //&& Rand(hitInfo.state) < hitInfo.transmission
                 primaryPayload.spawnRayCount = 1u;
                 //折射
                 primaryPayload.nextRay[rayIndex].origin = hitInfo.hitPos + Toff * EPSILON;
@@ -466,7 +466,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
             }
 
             rayIndex++;//第二条射线，查询反射
-            if(primaryPayload.depth < customUBO.maxReflectionDepth ){
+            if(primaryPayload.depth < configObject.maxReflectionDepth ){
                 primaryPayload.spawnRayCount = 2u;
                 //反射
                 primaryPayload.nextRay[rayIndex].origin = hitInfo.hitPos + Roff * EPSILON;
@@ -484,7 +484,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
     vec3 directDiffuse = vec3(0.0);
     vec3 directSpecular = vec3(0.0);
 
-    uint lightNum = min(customUBO.lightCount, uint(RTLIGHT_SIZE));
+    uint lightNum = min(configObject.lightCount, uint(RTLIGHT_SIZE));
 
     // vec3 kd = (1.0 - metallic) * albedo;
     // vec3 diffuseBRDF = kd / PI;
@@ -510,14 +510,14 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         //给每一个light发射一根shadowray
         vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
         float visibility = 1.0f; //default is disable shadow
-        if(customUBO.softShadowEnable == 0){
+        if(configObject.softShadowEnable == 0){
             visibility = traceShadowVisibility(shadowOrigin, L, maxT);
         }else{
             visibility = traceSoftShadowVisibility(
                 shadowOrigin, hitInfo.hitPos, hitInfo.N,
                 vec3(sboRtLightBuffer.lights[i].position),
                 sboRtLightBuffer.lights[i].radius,
-                customUBO.softShadowSampleNumber,
+                configObject.softShadowSampleNumber,
                 hitInfo.state
             );
         }
@@ -617,14 +617,12 @@ ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/�
     return result;
 }
 
-
-
 void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic PT
     primaryPayload.spawnRayCount = 0u;
 
     //NEE = Next Event Estimation
     vec3 localRadiance = hitInfo.emission; // 当前命中点的局部 radiance
-    if(customUBO.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
+    if(configObject.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
 
     ScatterResult scatter; //散射逻辑：TODO 解决Warp Divergence问题
     if(hitInfo.material_type != MATERIAL_GLASS && hitInfo.material_type != MATERIAL_JADE){ //传统PathTracing部分，随机采样的 Monte Carlo Path Tracing
@@ -689,7 +687,7 @@ void updatePayload(in Material mat, vec3 Ngeom){
 
     uint state = gl_LaunchIDEXT.x;
     state = state * 747796405u + gl_LaunchIDEXT.y;
-    state = state * 747796405u + uint(customUBO.frameCount);
+    state = state * 747796405u + uint(customObject.frameCount);
 
     state ^= primaryPayload.sampleIndex;
     state *= 747796405u;
@@ -721,8 +719,8 @@ void updatePayload(in Material mat, vec3 Ngeom){
 
     //primaryPayload.state = state; //更新primary payload的state，给RR使用
 
-    if(customUBO.renderMode == 0) WhittedStyleRayTracing(hitInfo);
-    else if(customUBO.renderMode == 1) MDSPathTracing(hitInfo);
+    if(customObject.renderMode == 0) WhittedStyleRayTracing(hitInfo);
+    else if(customObject.renderMode == 1) MDSPathTracing(hitInfo);
 
 }
 

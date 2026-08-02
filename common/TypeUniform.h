@@ -106,7 +106,29 @@ struct alignas(16) MaterialInfo{
     //alignas(4) float padding[44]; //44*4=176 bytes 
 }; //total size: 16*3+4*8=80, need+176=256 bytes but no need?
 
+struct StructConfigUniformBuffer {
+    alignas(4) unsigned int lightCount = 0;
+    alignas(4) unsigned int materialCount = 0;
 
+    //alignas(4) unsigned int renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+    alignas(4) unsigned int spp;             // Samples Per Pixel
+    alignas(4) unsigned int maxBounce;       // 最大反弹次数
+    alignas(4) unsigned int maxPath;         // 最大路径数
+    alignas(4) unsigned int accumulate;      // 0 = 不积累, 1 = 帧间积累
+    alignas(4) unsigned int randomSeed;      // 可选，每次运行不同
+
+    alignas(4) float rrProbability;   //RR（俄罗斯轮盘）
+    alignas(4) unsigned enableNEE;
+    alignas(4) unsigned useSky;
+    alignas(4) float maxRadiance;
+    alignas(4) unsigned int debugMode;
+
+    alignas(4) unsigned int softShadowEnable; //for whitted style only
+    alignas(4) unsigned int softShadowSampleNumber; //for whitted style only
+
+    alignas(4) unsigned int maxReflectionDepth;
+    alignas(4) unsigned int maxRefractionDepth;
+};
 
 struct alignas(16) RtLightInfo{
     alignas(16) glm::vec4 position;
@@ -175,6 +197,29 @@ struct StructGraphicsGlobalUniformBuffer {
 };
 
 struct StructComputeGlobalUniformBuffer {
+    alignas(16) glm::mat4 mainCameraView; //16*4=64 bytes
+    alignas(16) glm::mat4 mainCameraViewInverse; //16*4=64 bytes
+    alignas(16) glm::mat4 mainCameraProj; //16*4=64 bytes
+    alignas(16) glm::mat4 mainCameraProjInverse; //16*4=64 bytes
+    alignas(16) glm::vec3 mainCameraPos;       // 12 bytes，need 16 bytes alignment
+    alignas(4) float tanHalfFovY;          // 4 bytes
+    alignas(4) float aspect;               // 4 bytes
+    alignas(4) float padding[58];          // 4 × 58 = 232 bytes
+    //alignas(4) float padding[14];
+    // Sum: 64*4 + 16 + 4 + 4 + 232 = 512 bytes, the size is defined in Config.h
+
+    static VkDescriptorSetLayoutBinding GetBinding(){
+        VkDescriptorSetLayoutBinding binding;
+        binding.binding = 0;
+		binding.descriptorCount = 1;
+		binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		binding.pImmutableSamplers = nullptr;
+		binding.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        return binding;
+    }
+};
+
+struct StructRaytracingGlobalUniformBuffer {
     alignas(16) glm::mat4 mainCameraView; //16*4=64 bytes
     alignas(16) glm::mat4 mainCameraViewInverse; //16*4=64 bytes
     alignas(16) glm::mat4 mainCameraProj; //16*4=64 bytes

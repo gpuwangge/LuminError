@@ -215,20 +215,34 @@ void GameEngine::Update(){
     graphicsGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
     renderer->uploadGraphicsGlobalUniformBuffer(renderer->GetCurrentFrame(), &graphicsGlobalUniformBufferObject, sizeof(StructGraphicsGlobalUniformBuffer));
 
-    StructComputeGlobalUniformBuffer computeGlobalUniformBufferObject{};
-    computeGlobalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
-    computeGlobalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
-    computeGlobalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
-    computeGlobalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
-    computeGlobalUniformBufferObject.mainCameraPos = mainCamera.Position;
-    computeGlobalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-    fovY = glm::radians(mainCamera.fov);
-    computeGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
-    //todo: should only do this in compute ray tracing
-    renderer->uploadComputeGlobalUniformBuffer(renderer->GetCurrentFrame(), &computeGlobalUniformBufferObject, sizeof(StructComputeGlobalUniformBuffer));
-    //todo: should only do this in ray tracing pipeline
-    renderer->uploadRaytracingStorageBuffer_global(renderer->GetCurrentFrame(), &computeGlobalUniformBufferObject, sizeof(StructComputeGlobalUniformBuffer));
+    if(appInfo->Feature.feature_rendermode == RenderModes::COMPUTE_SWAPCHAIN){//todo：并不是所有的compute pipeline都是ray tracing，应该分一些类别
+        //std::cout<<"DEBUG: Uploading compute global uniform buffer."<<std::endl;
+        StructComputeGlobalUniformBuffer computeGlobalUniformBufferObject{};
+        computeGlobalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
+        computeGlobalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
+        computeGlobalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
+        computeGlobalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
+        computeGlobalUniformBufferObject.mainCameraPos = mainCamera.Position;
+        computeGlobalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+        fovY = glm::radians(mainCamera.fov);
+        computeGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
+        //todo: should only do this in compute ray tracing
+        renderer->uploadComputeGlobalUniformBuffer(renderer->GetCurrentFrame(), &computeGlobalUniformBufferObject, sizeof(StructComputeGlobalUniformBuffer));
+    }
 
+    if(appInfo->Feature.feature_rendermode == RenderModes::RAYTRACING_SWAPCHAIN){
+        //std::cout<<"DEBUG: Uploading raytracing global uniform buffer."<<std::endl;
+        StructRaytracingGlobalUniformBuffer raytracingGlobalUniformBufferObject{};
+        raytracingGlobalUniformBufferObject.mainCameraView = mainCamera.matrices.view;
+        raytracingGlobalUniformBufferObject.mainCameraViewInverse = glm::inverse(mainCamera.matrices.view);
+        raytracingGlobalUniformBufferObject.mainCameraProj = mainCamera.matrices.projection;
+        raytracingGlobalUniformBufferObject.mainCameraProjInverse = glm::inverse(mainCamera.matrices.projection);
+        raytracingGlobalUniformBufferObject.mainCameraPos = mainCamera.Position;
+        raytracingGlobalUniformBufferObject.aspect = (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+        fovY = glm::radians(mainCamera.fov);
+        raytracingGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
+        renderer->uploadRaytracingStorageBuffer_global(renderer->GetCurrentFrame(), &raytracingGlobalUniformBufferObject, sizeof(StructRaytracingGlobalUniformBuffer));
+    }
 
     for(int i = 0; i < lights.size(); i++){//lightCameras.size()
         if(lights.size() > 0 && lightCameras[i].focusObjectId < objects.size())

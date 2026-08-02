@@ -4,10 +4,13 @@
 layout(set = 0, binding = 5) uniform CustomBufferObject {
     int frameCount;
     uint cameraInMotion;
+    uint renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+} customObject;
+
+layout(set = 0, binding = 8) uniform ConfigUniformBufferStruct {
     uint lightCount;
     uint materialCount;
 
-    uint renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
     uint spp;             // Samples Per Pixel
     uint maxBounce;       // 最大反弹次数
     uint maxPath;         // 最大路径数
@@ -25,6 +28,6 @@ layout(set = 0, binding = 5) uniform CustomBufferObject {
 
     uint maxReflectionDepth;
     uint maxRefractionDepth;
-} customUBO;
+} configObject;
 
 #endif

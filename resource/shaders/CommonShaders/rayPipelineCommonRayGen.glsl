@@ -20,8 +20,8 @@ const uint MAX_PATHS = 8u;//最大支持的path。不是实际使用的path
 vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
     vec3 accumulatedRadiance = vec3(0.0);
 
-    for (int s = 0; s < customUBO.spp; ++s){
-        vec2 jitter = rnd2(pixel, s, customUBO.frameCount);
+    for (int s = 0; s < configObject.spp; ++s){
+        vec2 jitter = rnd2(pixel, s, customObject.frameCount);
         vec2 uv = (vec2(pixel) + jitter) / vec2(size);
         vec2 ndc = uv * 2.0 - 1.0;
         // ndc.y = -ndc.y;// 如有需要再开
@@ -41,7 +41,7 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
             vec3(1.0),
             1.0, //ior
             vec3(0.0),   // mediumEntryPos
-            0u,           // insideMedium=0，假设一开始在空气里
+            0u,          // insideMedium=0，假设一开始在空气里
             0u //depth
         );
 
@@ -73,7 +73,7 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
             //path.throughput = vec3(1.0);//test
             accumulatedRadiance += path.throughput * primaryPayload.radiance;
 
-            if(path.depth + 1u >= customUBO.maxBounce) continue;
+            if(path.depth + 1u >= configObject.maxBounce) continue;
 
             for(uint i = 0u; i < primaryPayload.spawnRayCount; ++i){
                 PathState nextPath;
@@ -87,13 +87,13 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
 
                 nextPath.depth = path.depth + 1u;
                 pathStack[stackSize++] = nextPath;
-                if(stackSize >= customUBO.maxPath) break;
+                if(stackSize >= configObject.maxPath) break;
             }
         }//stack
         
     }//spp
 
-    return accumulatedRadiance / float(customUBO.spp);
+    return accumulatedRadiance / float(configObject.spp);
 }
 
 #endif

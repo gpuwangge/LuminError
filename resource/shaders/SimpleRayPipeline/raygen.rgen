@@ -8,7 +8,7 @@ layout(set = 0, binding = 0, rgba8) uniform writeonly image2D resultImage;
 
 //不要加 writeonly，因为既要 imageLoad() 又要 imageStore()。
 //rgba32f（用rgba16f会有精度误差）用于保存 HDR 累积值。
-layout(set = 0, binding = 8, rgba32f) uniform image2D accumulationImage;  
+layout(set = 0, binding = 9, rgba32f) uniform image2D accumulationImage;  
 
 void main(){
     ivec2 size = ivec2(gl_LaunchSizeEXT.xy);
@@ -16,13 +16,13 @@ void main(){
 
     vec3 frameRadiance = TracePixelRadiance(size, pixel);
 
-    if(customUBO.accumulate == 0u){
+    if(configObject.accumulate == 0u){
         imageStore(resultImage, pixel, vec4(frameRadiance, 1.0).bgra);
     }else{ // Running Average
-        float alphaRA = 1.0 / (customUBO.frameCount + 1);
+        float alphaRA = 1.0 / (customObject.frameCount + 1);
         vec3 prevColor = imageLoad(accumulationImage, pixel).bgr;
         vec3 accumColor;
-        if(customUBO.frameCount == 0) accumColor = frameRadiance;
+        if(customObject.frameCount == 0) accumColor = frameRadiance;
         else accumColor = prevColor + (frameRadiance - prevColor) * alphaRA;
         imageStore(accumulationImage, pixel, vec4(accumColor, 1.0).bgra);
         imageStore(resultImage,       pixel, vec4(accumColor, 1.0).bgra);

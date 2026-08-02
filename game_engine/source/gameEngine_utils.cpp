@@ -458,7 +458,7 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
     if(renderer->GetRenderMode() == RenderModes::COMPUTE_SWAPCHAIN){
         //std::cout<<"Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode COMPUTE_SWAPCHAIN."<<std::endl;
 
-        for(int i = 0; i < 2; i++){
+        for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
             renderer->SetCurrentFrame(i);
 
             vkResetCommandBuffer(renderer->GetComputeCommandBuffer(), 0);//VkCommandBufferResetFlagBits
@@ -493,7 +493,7 @@ void GameEngine::ConvertStorageImageLayout(VkImageLayout oldLayout, VkImageLayou
     if(renderer->GetRenderMode() == RenderModes::RAYTRACING_SWAPCHAIN){
         //std::cout<<"Convert intermedia color image layout to VK_IMAGE_LAYOUT_GENERAL for Render Mode RAYTRACING_SWAPCHAIN."<<std::endl;
 
-        for(int i = 0; i < 2; i++){
+        for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
             renderer->SetCurrentFrame(i);
 
             vkResetCommandBuffer(renderer->GetRaytracingCommandBuffer(), /*VkCommandBufferResetFlagBits*/ 0);

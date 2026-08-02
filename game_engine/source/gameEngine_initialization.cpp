@@ -126,7 +126,31 @@ void GameEngine::Initialize(){
         renderer->addRaytracingStorageBuffer_custom(appInfo->Uniform.RaytracingCustom.Size);
         renderer->addRaytracingStorageBuffer_rtLight();
         renderer->addRaytracingStorageBuffer_instance();
+        renderer->addRaytracingUniformBuffer_config();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
+
+        StructConfigUniformBuffer configUniformBufferObject{};
+        configUniformBufferObject.lightCount = GetRTLightSize();
+        configUniformBufferObject.materialCount = GetMaterialSize();
+        //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
+        configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
+        configUniformBufferObject.maxBounce = Get_feature_raytracing_pipeline_maximum_bounce();
+        configUniformBufferObject.maxPath = Get_feature_raytracing_pipeline_maximum_path();
+        configUniformBufferObject.accumulate = Get_feature_raytracing_pipeline_accumulate();
+        configUniformBufferObject.enableNEE = Get_feature_raytracing_pipeline_enableNEE();
+        configUniformBufferObject.useSky = Get_feature_raytracing_pipeline_use_sky();
+        configUniformBufferObject.maxRadiance = Get_feature_raytracing_pipeline_maximum_Radiance();
+        configUniformBufferObject.debugMode = Get_feature_raytracing_pipeline_debug_mode();
+        configUniformBufferObject.softShadowEnable = Get_feature_raytracing_pipeline_softShadowEnable();
+        configUniformBufferObject.softShadowSampleNumber = Get_feature_raytracing_pipeline_softShadowSampleNumber();
+        configUniformBufferObject.maxReflectionDepth = Get_feature_raytracing_pipeline_maxReflectionDepth();
+        configUniformBufferObject.maxRefractionDepth = Get_feature_raytracing_pipeline_maxRefractionDepth();
+
+        for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
+            renderer->SetCurrentFrame(i);
+            renderer->uploadRaytracingUniformBuffer_config(GetCurrentFrame(), &configUniformBufferObject, sizeof(StructConfigUniformBuffer));
+        }
+        renderer->SetCurrentFrame(0);
     }
 
     if(appInfo->Samplers.size() > 0){
