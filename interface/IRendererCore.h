@@ -245,8 +245,8 @@ namespace LERenderer{
         virtual void addStorageBuffer_windowswap() = 0; //the same function to add storage 1&2
         virtual void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) = 0;
-        virtual void addStorageBuffer_material() = 0;
-        virtual void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addComputeUniformBuffer_material() = 0;
+        virtual void uploadComputeUniformBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_triangleVertexAttribute() = 0;
         virtual void uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addStorageBuffer_triangleVertexIndex() = 0;
@@ -267,16 +267,16 @@ namespace LERenderer{
         //virtual void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingStorageBuffer_geometryInfo() = 0;
         virtual void uploadRaytracingStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void addRaytracingStorageBuffer_material() = 0;
-        virtual void uploadRaytracingStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addRaytracingUniformBuffer_material() = 0;
+        virtual void uploadRaytracingUniformBuffer_material(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingStorageBuffer_global() = 0;
         virtual void uploadRaytracingStorageBuffer_global(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingStorageBuffer_custom(VkDeviceSize customUniformBufferSize) = 0;
         virtual void uploadRaytracingStorageBuffer_custom(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void addRaytracingStorageBuffer_rtLight() = 0;
-        virtual void uploadRaytracingStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t size) = 0;
-        virtual void addRaytracingStorageBuffer_instance() = 0;
-        virtual void uploadRaytracingStorageBuffer_instance(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addRaytracingUniformBuffer_rtLight() = 0;
+        virtual void uploadRaytracingUniformBuffer_rtLight(uint32_t currentFrame, const void* data, size_t size) = 0;
+        virtual void addRaytracingUniformBuffer_instance() = 0;
+        virtual void uploadRaytracingUniformBuffer_instance(uint32_t currentFrame, const void* data, size_t size) = 0;
         virtual void addRaytracingUniformBuffer_config() = 0;
         virtual void uploadRaytracingUniformBuffer_config(uint32_t currentFrame, const void* data, size_t size) = 0;
  

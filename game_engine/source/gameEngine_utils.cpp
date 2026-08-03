@@ -357,8 +357,8 @@ void GameEngine::DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, 
     renderer->downloadStorageBuffer_windowswap(currentFrame, storageBufferObject, dataSize);
 }
 
-void GameEngine::UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
-    renderer->uploadStorageBuffer_material(currentFrame, storageBufferObject, dataSize);
+void GameEngine::UploadComputeUniformBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
+    renderer->uploadComputeUniformBuffer_material(currentFrame, storageBufferObject, dataSize);
 }
 void GameEngine::UploadComputeStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize){
     renderer->uploadStorageBuffer_triangleVertexAttribute(currentFrame, storageBufferObject, dataSize);

@@ -18,7 +18,7 @@ const uint MATERIAL_JADE    = 5u;
 /*************
 SBO Structure
 **************/
-struct RtLightInfo{
+struct RtLightStruct{
     vec4 position;
     vec4 color;
     vec4 direction;
@@ -28,7 +28,7 @@ struct RtLightInfo{
     float type;
 };  //total size: 16+16+16+4*4=64 bytes
 
-struct Material {
+struct MaterialStruct {
     vec3 albedo;
     vec3 emissionColor;
     vec3 transmissionColor;
@@ -43,7 +43,7 @@ struct Material {
     float transmission;
 };
 
-struct InstanceInfo {
+struct InstanceStruct {
     uint geometryIndex;
     uint materialIndex;
 };

@@ -433,8 +433,8 @@ namespace LERenderer{
         void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_windowswap(currentFrame, data, size); }
         void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer_windowswap(currentFrame, data, size); }
         
-        void addStorageBuffer_material() override { computeDescriptorManager.addStorageBuffer_material(); }
-        void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_material(currentFrame, data, size); }
+        void addComputeUniformBuffer_material() override { computeDescriptorManager.addUniformBuffer_material(); }
+        void uploadComputeUniformBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadUniformBuffer_material(currentFrame, data, size); }
         void addStorageBuffer_triangleVertexAttribute() override { computeDescriptorManager.addStorageBuffer_triangleVertexAttribute(); }
         void uploadStorageBuffer_triangleVertexAttribute(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_triangleVertexAttribute(currentFrame, data, size); }
         void addStorageBuffer_triangleVertexIndex() override { computeDescriptorManager.addStorageBuffer_triangleVertexIndex(); }
@@ -452,16 +452,16 @@ namespace LERenderer{
         //void uploadRaytracingStorageBuffer_triangleVertexIndex(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_triangleVertexIndex(currentFrame, data, size); }
         void addRaytracingStorageBuffer_geometryInfo() override { raytracingDescriptorManager.addStorageBuffer_geometryInfo(); }
         void uploadRaytracingStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_geometryInfo(currentFrame, data, size); }
-        void addRaytracingStorageBuffer_material() override { raytracingDescriptorManager.addStorageBuffer_material(); }
-        void uploadRaytracingStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_material(currentFrame, data, size); }
+        void addRaytracingUniformBuffer_material() override { raytracingDescriptorManager.addUniformBuffer_material(); }
+        void uploadRaytracingUniformBuffer_material(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadUniformBuffer_material(currentFrame, data, size); }
         void addRaytracingStorageBuffer_global() override { raytracingDescriptorManager.addGlobalUniformBuffer_raytracing(); }
         void uploadRaytracingStorageBuffer_global(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadGlobalUniformBuffer_raytracing(currentFrame, data, size); }
         void addRaytracingStorageBuffer_custom(VkDeviceSize customUniformBufferSize) override { raytracingDescriptorManager.addCustomUniformBuffer_raytracing(customUniformBufferSize); }
         void uploadRaytracingStorageBuffer_custom(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadCustomUniformBuffer_raytracing(currentFrame, data, size); }
-        void addRaytracingStorageBuffer_rtLight() override { raytracingDescriptorManager.addStorageBuffer_rtLight(); }
-        void uploadRaytracingStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_rtLight(currentFrame, data, size); }
-        void addRaytracingStorageBuffer_instance() override { raytracingDescriptorManager.addStorageBuffer_instance(); }
-        void uploadRaytracingStorageBuffer_instance(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadStorageBuffer_instance(currentFrame, data, size); }
+        void addRaytracingUniformBuffer_rtLight() override { raytracingDescriptorManager.addUniformBuffer_rtLight(); }
+        void uploadRaytracingUniformBuffer_rtLight(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadUniformBuffer_rtLight(currentFrame, data, size); }
+        void addRaytracingUniformBuffer_instance() override { raytracingDescriptorManager.addUniformBuffer_instance(); }
+        void uploadRaytracingUniformBuffer_instance(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadUniformBuffer_instance(currentFrame, data, size); }
         void addRaytracingUniformBuffer_config() override { raytracingDescriptorManager.addUniformBuffer_config(); }
         void uploadRaytracingUniformBuffer_config(uint32_t currentFrame, const void* data, size_t size) override { raytracingDescriptorManager.uploadUniformBuffer_config(currentFrame, data, size); }
 

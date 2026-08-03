@@ -1,7 +1,7 @@
 #ifndef RAYUBO_GLSL
 #define RAYUBO_GLSL
 
-struct Material {
+struct MaterialStruct {
     vec3 albedo;
     //float _padding0;
     vec3 emissionColor;
@@ -20,8 +20,9 @@ struct Material {
     //float padding[44];
 };
 
-layout(set = 0, binding = 3, std430) readonly buffer SBOMaterial {
-   Material materials[];
+const int MATERIAL_SIZE = 64;//assume max 64 materials for now
+layout(set = 0, binding = 3) readonly uniform MaterialUniformBufferInfo {
+   MaterialStruct materials[MATERIAL_SIZE];
 } sboMaterial;
 
 struct TriangleVertexInfo{

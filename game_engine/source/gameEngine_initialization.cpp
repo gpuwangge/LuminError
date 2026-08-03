@@ -106,7 +106,7 @@ void GameEngine::Initialize(){
     //if(appInfo->Uniform.b_uniform_compute_storage) renderer->addStorageBuffer(appInfo->Uniform.ComputeStorageBuffer.Size, appInfo->Uniform.ComputeStorageBuffer.Usage);
     
     if(appInfo->Uniform.b_storage_compute_windowswap) renderer->addStorageBuffer_windowswap();
-    if(appInfo->Uniform.b_storage_compute_material) renderer->addStorageBuffer_material();
+    if(appInfo->Uniform.b_storage_compute_material) renderer->addComputeUniformBuffer_material();
     if(appInfo->Uniform.b_storage_compute_triangle_vertex_attribute) renderer->addStorageBuffer_triangleVertexAttribute();
     if(appInfo->Uniform.b_storage_compute_triangle_vertex_index) renderer->addStorageBuffer_triangleVertexIndex();
     if(appInfo->Uniform.b_storage_compute_triangle_reorder_index) renderer->addStorageBuffer_triangleReorderIndex();
@@ -121,11 +121,11 @@ void GameEngine::Initialize(){
         //renderer->addRaytracingStorageBuffer_triangleVertexAttribute();
         //renderer->addRaytracingStorageBuffer_triangleVertexIndex();
         renderer->addRaytracingStorageBuffer_geometryInfo();
-        renderer->addRaytracingStorageBuffer_material();
+        renderer->addRaytracingUniformBuffer_material();
         renderer->addRaytracingStorageBuffer_global();
         renderer->addRaytracingStorageBuffer_custom(appInfo->Uniform.RaytracingCustom.Size);
-        renderer->addRaytracingStorageBuffer_rtLight();
-        renderer->addRaytracingStorageBuffer_instance();
+        renderer->addRaytracingUniformBuffer_rtLight();
+        renderer->addRaytracingUniformBuffer_instance();
         renderer->addRaytracingUniformBuffer_config();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
 

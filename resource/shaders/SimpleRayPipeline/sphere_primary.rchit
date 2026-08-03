@@ -15,7 +15,7 @@ vec3 getSphereWorldNormal(){
 void main(){
     uint instanceIndex = uint(gl_InstanceCustomIndexEXT);
     uint materialIndex = sboInstance.instances[instanceIndex].materialIndex;
-    Material mat = sboMaterial.materials[materialIndex];
+    MaterialStruct mat = sboMaterial.materials[materialIndex];
 
     //bool bExit = earlyExit(mat);
     //if(bExit) return;

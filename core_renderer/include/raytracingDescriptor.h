@@ -89,16 +89,16 @@ public:
     void uploadStorageBuffer_geometryInfo(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 3 COMPUTE_STORAGEBUFFER_MATERIAL
+     * 3 UNIFORMBUFFER_MATERIAL
      * Read only
      ************/
-    static std::vector<CWxjBuffer> storageBuffers_material;
-    static std::vector<void*> storageBuffersMapped_material;
-    void addStorageBuffer_material();
-    void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
+    static std::vector<CWxjBuffer> uniformBuffers_material;
+    static std::vector<void*> uniformBuffersMapped_material;
+    void addUniformBuffer_material();
+    void uploadUniformBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
-     * 4 COMPUTE_UNIFORMBUFFER_GLOBAL
+     * 4 UNIFORMBUFFER_GLOBAL
      ************/
     static std::vector<CWxjBuffer> m_globalUniformBuffers; 
 	static std::vector<void*> m_globalUniformBuffersMapped;
@@ -107,7 +107,7 @@ public:
     void uploadGlobalUniformBuffer_raytracing(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
-     * 5 COMPUTE_UNIFORMBUFFER_CUSTOM
+     * 5 UNIFORMBUFFER_CUSTOM
      ************/
     static std::vector<CWxjBuffer> customUniformBuffers; 
 	static std::vector<void*> customUniformBuffersMapped;
@@ -118,18 +118,18 @@ public:
     /************
      * 6 UNIFORMBUFFER_RTLIGHT
      ************/
-    static std::vector<CWxjBuffer> m_storageBuffers_rtLight; 
-	static std::vector<void*> m_storageBuffersMapped_rtLight;
-    void addStorageBuffer_rtLight();
-    void uploadStorageBuffer_rtLight(uint32_t currentFrame, const void* data, size_t dataSize);
+    static std::vector<CWxjBuffer> m_uniformBuffers_rtLight; 
+	static std::vector<void*> m_uniformBuffersMapped_rtLight;
+    void addUniformBuffer_rtLight();
+    void uploadUniformBuffer_rtLight(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
      * 7 UNIFORMBUFFER_INSTANCEINFO
      ************/
-    static std::vector<CWxjBuffer> m_storageBuffers_instance; 
-	static std::vector<void*> m_storageBuffersMapped_instance;
-    void addStorageBuffer_instance();
-    void uploadStorageBuffer_instance(uint32_t currentFrame, const void* data, size_t dataSize);
+    static std::vector<CWxjBuffer> m_uniformBuffers_instance; 
+	static std::vector<void*> m_uniformBuffersMapped_instance;
+    void addUniformBuffer_instance();
+    void uploadUniformBuffer_instance(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
      * 8 UNIFORMBUFFER_CONFIGINFO

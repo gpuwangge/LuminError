@@ -87,14 +87,14 @@ namespace LEGameEngine{
         std::vector<std::unique_ptr<CControlNode>> controlNodes;
 
         //StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{}; //?define here not work?
-        StructStorageBuffer_Material storageBufferObject_Material{};
+        StructUniformBuffer_Material storageBufferObject_Material{};
         StructStorageBuffer_TriangleVertexAttribute storageBufferObject_TriangleVertexAttribute{};
         StructStorageBuffer_TriangleVertexIndex storageBufferObject_TriangleVertexIndex{};
         StructStorageBuffer_TriangleReorderIndex storageBufferObject_TriangleReorderIndex{};
         StructStorageBuffer_BVHNode storageBufferObject_BVHNode{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
         StructStorageBuffer_GeometryInfo storageBufferObject_GeometryInfo{};
-        StructStorageBuffer_RtLight storageBufferObject_rtLight{};
+        StructUniformBuffer_RtLight storageBufferObject_rtLight{};
 
         //make these global so compute shader can access. TODO: support multiple models
 
@@ -258,7 +258,7 @@ namespace LEGameEngine{
         void UploadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void DownloadComputeStorageBuffer_WindowSwap(uint32_t currentFrame, void* storageBufferObject, int dataSize) override;
 
-        void UploadComputeStorageBuffer_Material(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
+        void UploadComputeUniformBuffer_Material(uint32_t currentFrame, const void* uniformBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_TriangleVertexAttribute(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_TriangleVertexIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;
         void UploadComputeStorageBuffer_TriangleReorderIndex(uint32_t currentFrame, const void* storageBufferObject, size_t dataSize) override;

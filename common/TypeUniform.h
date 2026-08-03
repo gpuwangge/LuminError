@@ -19,8 +19,8 @@ enum UniformTypes {
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS =   0x00000100,  //for light camera(Hardware depth bias, use two renderpass, dynamic depth bias)
     COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000200,
     COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00000400,
-    COMPUTE_STORAGEBUFFER_MATERIAL =                                    0x00000800,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                      0x00001000,
+    COMPUTE_UNIFORMBUFFER_MATERIAL =                                    0x00000800,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                     0x00001000,
     COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX =                         0x00002000,
     COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00004000,
     COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00008000,
@@ -32,6 +32,9 @@ enum UniformTypes {
     RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00200000
 };
 
+/*********
+ * BVH
+ *******/
 struct alignas(16) BVHNode {
     alignas(16) glm::vec3 bbox_min; //16 bytes
     alignas(16) glm::vec3 bbox_max; //16 bytes
@@ -52,7 +55,9 @@ struct StructStorageBuffer_BVHNode {
     BVHNode nodes[BVHNODE_SIZE];
 };
 
-
+/*********
+ * Triangle Vertex Attribute
+ *******/
 struct alignas(16) TriangleVertexInfo{
     alignas(16) glm::vec3 position;
     alignas(16) glm::vec3 normal;
@@ -68,6 +73,9 @@ struct StructStorageBuffer_TriangleVertexAttribute{
     TriangleVertexInfo vertices[TriangleVertex_SIZE];
 };
 
+/*********
+ * Triangle Vertex Index
+ *******/
 static constexpr size_t TriangleIndex_SIZE = 800; //this is the maximum vertex index count for all triangles
 struct StructStorageBuffer_TriangleVertexIndex{
     unsigned int indices[TriangleIndex_SIZE]; //each triangle has 3 indices
@@ -78,6 +86,9 @@ struct StructStorageBuffer_TriangleReorderIndex{
     unsigned int indices[TriangleReorderIndex_SIZE]; //each triangle has 3 indices
 };
 
+/*********
+ * Sphere
+ *******/
 struct alignas(16) SphereInfo{
     alignas(16) glm::vec3 position;
     alignas(4) float radius;
@@ -90,6 +101,9 @@ struct StructStorageBuffer_Sphere{
     SphereInfo spheres[SPHERE_SIZE];
 };
 
+/*********
+ * Material
+ *******/
 struct alignas(16) MaterialInfo{
     alignas(16) glm::vec3 albedo;
     alignas(16) glm::vec3 emissionColor;
@@ -106,6 +120,14 @@ struct alignas(16) MaterialInfo{
     //alignas(4) float padding[44]; //44*4=176 bytes 
 }; //total size: 16*3+4*8=80, need+176=256 bytes but no need?
 
+static constexpr size_t MATERIAL_SIZE = 64;//assume max 64 materials for now
+struct StructUniformBuffer_Material{
+    MaterialInfo materials[MATERIAL_SIZE];
+};
+
+/*********
+ * Config
+ *******/
 struct StructConfigUniformBuffer {
     alignas(4) unsigned int lightCount = 0;
     alignas(4) unsigned int materialCount = 0;
@@ -130,6 +152,9 @@ struct StructConfigUniformBuffer {
     alignas(4) unsigned int maxRefractionDepth;
 };
 
+/*********
+ * Ray Tracing Light
+ *******/
 struct alignas(16) RtLightInfo{
     alignas(16) glm::vec4 position;
     alignas(16) glm::vec4 color;
@@ -140,21 +165,20 @@ struct alignas(16) RtLightInfo{
     alignas(4) float type;
 };  //total size: 16+16+16+4*4=64 bytes
 static constexpr size_t RTLIGHT_SIZE = 64;//assume max 64 materials for now
-struct StructStorageBuffer_RtLight{
+struct StructUniformBuffer_RtLight{
     RtLightInfo lights[RTLIGHT_SIZE];
 };
 
-static constexpr size_t MATERIAL_SIZE = 64;//assume max 64 materials for now
-struct StructStorageBuffer_Material{
-    MaterialInfo materials[MATERIAL_SIZE];
-};
-
-struct InstanceInfo{
-    uint32_t geometryIndex;   // GeometryInfo 的下标
-    uint32_t materialIndex;   // Material 的下标
-};
+/*********
+ * Ray Tracing Instance
+ *******/
+struct InstanceInfo{ //alignas(4)没必要
+    alignas(4) uint32_t geometryIndex;   // GeometryInfo 的下标 4 bytes
+    alignas(4) uint32_t materialIndex;   // Material 的下标  4 bytes
+    alignas(4) float padding[2];  //8 bytes
+};  // 总共16 bytes,符合 std140 中一个 struct 元素通常需要 16-byte 对齐的要求。
 static constexpr size_t INSTANCE_SIZE = 256;//assume max 256 instances for now
-struct StructStorageBuffer_Instance{
+struct StructUniformBuffer_Instance{
     InstanceInfo instances[INSTANCE_SIZE];
 };
 

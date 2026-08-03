@@ -41,8 +41,8 @@ void GameEngine::SetupComputeRayTracing(){
     //Ray Tracing Setup 3: upload material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){
         //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
-        UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
-        UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        UploadComputeUniformBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
+        UploadComputeUniformBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
     }
 
@@ -332,8 +332,8 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
         // UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         // UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
-        renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
-        renderer->uploadRaytracingStorageBuffer_material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
+        renderer->uploadRaytracingUniformBuffer_material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
+        renderer->uploadRaytracingUniformBuffer_material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
     }
     //if(bVerboseRaytracing) std::cout<<"Done upload material info to device."<<std::endl;
 
@@ -356,8 +356,8 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
     //     std::cout<<"    direction=("<<storageBufferObject_rtLight.lights[i].direction.x<<","<<storageBufferObject_rtLight.lights[i].direction.y<<","<<storageBufferObject_rtLight.lights[i].direction.z<<"), angle="<<storageBufferObject_rtLight.lights[i].angle<<std::endl;
     // }
 
-    renderer->uploadRaytracingStorageBuffer_rtLight(GetCurrentFrame(), &storageBufferObject_rtLight, sizeof(StructStorageBuffer_RtLight));
-    renderer->uploadRaytracingStorageBuffer_rtLight(GetCurrentFrame()+1, &storageBufferObject_rtLight, sizeof(StructStorageBuffer_RtLight));
+    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame(), &storageBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
+    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame()+1, &storageBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
     //if(bVerboseRaytracing) std::cout<<"Done upload ray tracing light info to device."<<std::endl;
 }
 

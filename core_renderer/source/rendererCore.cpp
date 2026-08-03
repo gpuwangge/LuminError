@@ -1467,7 +1467,7 @@ void RendererCore::CreateSphereBlas(){
 void RendererCore::CreateInstanceBuffer(){
     //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
 
-    StructStorageBuffer_Instance storageBufferObject_instance{};
+    StructUniformBuffer_Instance storageBufferObject_instance{};
     int instanceIndex = 0;
 
     const uint32_t sphereSize = game->GetRtSphereSize();
@@ -1513,7 +1513,7 @@ void RendererCore::CreateInstanceBuffer(){
         instances[i].transform.matrix[2][2] = M[2][2];
         instances[i].transform.matrix[2][3] = M[3][2];
 
-        instances[i].instanceCustomIndex = instanceIndex;//model_id;
+        instances[i].instanceCustomIndex = instanceIndex;
         instances[i].mask = 0x01; //triangle设置成01，那么在shader中traceRay时，ray的mask也必须cover 01才能命中这个instance
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
@@ -1581,11 +1581,8 @@ void RendererCore::CreateInstanceBuffer(){
 
     //std::cout << "TLAS instance buffer created. Device Address: " << instanceBufferAddress << std::endl;
 
-
-    
-
-    uploadRaytracingStorageBuffer_instance(GetCurrentFrame(), &storageBufferObject_instance, sizeof(StructStorageBuffer_Instance));
-    uploadRaytracingStorageBuffer_instance(GetCurrentFrame()+1, &storageBufferObject_instance, sizeof(StructStorageBuffer_Instance));
+    uploadRaytracingUniformBuffer_instance(GetCurrentFrame(), &storageBufferObject_instance, sizeof(StructUniformBuffer_Instance));
+    uploadRaytracingUniformBuffer_instance(GetCurrentFrame()+1, &storageBufferObject_instance, sizeof(StructUniformBuffer_Instance));
 
 }
 

@@ -84,7 +84,7 @@ void main(){
     uint materialIndex = sboInstance.instances[instanceIndex].materialIndex;
     uint geometryIndex = sboInstance.instances[instanceIndex].geometryIndex; //thats the model
 
-    Material mat = sboMaterial.materials[materialIndex];
+    MaterialStruct mat = sboMaterial.materials[materialIndex];
     
     //Core
     vec3 Ntri = getTriangleWorldNormal(geometryIndex);

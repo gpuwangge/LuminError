@@ -9,17 +9,19 @@ layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
 layout(location = 1) rayPayloadEXT ShadowPayload shadowPayload;
 layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 
-layout(set = 0, binding = 3, std430) readonly buffer SBOMaterial {
-   Material materials[];
+const int MATERIAL_SIZE = 64;//assume max 64 materials for now
+layout(set = 0, binding = 3) uniform MaterialUniformInfo {
+   MaterialStruct materials[MATERIAL_SIZE];
 } sboMaterial;
 
 const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
-layout(set = 0, binding = 6, std430) readonly buffer SBORtLightBuffer {
-    RtLightInfo lights[RTLIGHT_SIZE];
+layout(set = 0, binding = 6) uniform RtLightUniformInfo {
+    RtLightStruct lights[RTLIGHT_SIZE];
 } sboRtLightBuffer;
 
-layout(set = 0, binding = 7, std430) readonly buffer SBOInstance {
-   InstanceInfo instances[];
+const int INSTANCE_SIZE = 256;//assume max 256 instances for now
+layout(set = 0, binding = 7) uniform InstanceUniformInfo {
+   InstanceStruct instances[INSTANCE_SIZE];
 } sboInstance;
 
 struct HitInfoStruct{
@@ -106,22 +108,22 @@ vec3 RandomDirectionInHemisphere(vec3 normal, inout uint state){
 /**************
 Light functions
 **************/
-bool isDirectionalLight(RtLightInfo light){
+bool isDirectionalLight(RtLightStruct light){
     return false; //disable this function for now
     return light.type < 0.5;
 }
 
-bool isPointLight(RtLightInfo light){
+bool isPointLight(RtLightStruct light){
     return true; //only implemented point light
     return light.type >= 0.5 && light.type < 1.5;
 }
 
-bool isSpotLight(RtLightInfo light){
+bool isSpotLight(RtLightStruct light){
     return false; //disable this function for now
     return light.type >= 1.5 && light.type < 2.5;
 }
 
-vec3 getLightDirAndRadiance(RtLightInfo light, vec3 hitPos, out float maxT, out vec3 radiance){
+vec3 getLightDirAndRadiance(RtLightStruct light, vec3 hitPos, out float maxT, out vec3 radiance){
     vec3 L;
 
     if(isDirectionalLight(light)){
@@ -151,7 +153,7 @@ vec3 getLightDirAndRadiance(RtLightInfo light, vec3 hitPos, out float maxT, out 
     return L;
 }
 
-vec3 SampleDiskLight(RtLightInfo light, vec3 shadingPos, inout uint state){ //for path tracing NEE
+vec3 SampleDiskLight(RtLightStruct light, vec3 shadingPos, inout uint state){ //for path tracing NEE
     // 光源法线（与你 Whitted 保持一致）
     vec3 lightNormal = normalize(shadingPos - light.position.xyz);
 
@@ -284,7 +286,7 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //fo
      */
     uint lightIndex = min(uint(Rand(state) * float(lightCount)), lightCount - 1u);
 
-    RtLightInfo light = sboRtLightBuffer.lights[lightIndex];
+    RtLightStruct light = sboRtLightBuffer.lights[lightIndex];
 
     vec3 direct = vec3(0.0);
     const int LIGHT_SAMPLES = 1;//4; 1已经足够，因为有frame accumulate
@@ -498,7 +500,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
 
     //直接光线(漫反射，高光，阴影)
     for(uint i = 0u; i < lightNum; ++i){
-        RtLightInfo light = sboRtLightBuffer.lights[i];
+        RtLightStruct light = sboRtLightBuffer.lights[i];
 
         float maxT;
         vec3 lightRadiance;
@@ -644,7 +646,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
     }
 }
 
-void updatePayload(in Material mat, vec3 Ngeom){
+void updatePayload(in MaterialStruct mat, vec3 Ngeom){
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;

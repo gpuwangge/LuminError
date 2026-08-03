@@ -65,13 +65,13 @@ public:
     
 
     /************
-     * 3 COMPUTE_STORAGEBUFFER_MATERIAL
+     * 3 COMPUTE_UNIFORMBUFFER_MATERIAL
      * Read only
      ************/
-    static std::vector<CWxjBuffer> storageBuffers_material;
-    static std::vector<void*> storageBuffersMapped_material;
-    void addStorageBuffer_material();
-    void uploadStorageBuffer_material(uint32_t currentFrame, const void* data, size_t size);
+    static std::vector<CWxjBuffer> uniformBuffers_material;
+    static std::vector<void*> uniformBuffersMapped_material;
+    void addUniformBuffer_material();
+    void uploadUniformBuffer_material(uint32_t currentFrame, const void* data, size_t size);
 
     /************
      * 4 COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE
