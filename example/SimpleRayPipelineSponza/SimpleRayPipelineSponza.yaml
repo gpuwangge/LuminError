@@ -1,0 +1,203 @@
+Objects:
+  # - object_name: Tree
+  #   object_id: 0
+  #   object_scale: 1
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 2
+  #   resource_model_id: 0
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Wineglass
+  #   object_id: 0
+  #   object_scale: 0.2
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 1
+  #   resource_model_id: 3
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Teapot
+  #   object_id: 0
+  #   object_scale: 0.4
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 2
+  #   resource_model_id: 4
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Female
+    object_id: 0
+    object_scale: 1
+    object_position: [0,0.0,0]
+    object_rotation: [0,180,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 8
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Skull
+  #   object_id: 0
+  #   object_scale: 0.075
+  #   object_position: [0,0.0,0]
+  #   object_rotation: [-90,0,180]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 2
+  #   resource_model_id: 6
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+  # - object_name: Dragon
+  #   object_id: 0
+  #   object_scale: 10
+  #   object_position: [0,-0.6,0]
+  #   object_rotation: [0,0,0]
+  #   object_velocity: [0,0,0] #no use
+  #   object_angular_velocity: [0,0,0] #no use
+  #   object_material_id: 8
+  #   resource_model_id: 0
+  #   resource_texture_id_list: [1] #no use
+  #   resource_default_graphics_pipeline_id: 2 #no use
+
+CustomSpheres:
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 0
+    custom_sphere_position: [0, -8.0, 0]
+    custom_sphere_radius: 8.0
+    custom_sphere_material_id: 0
+    custom_sphere_visibility: true
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 1
+    custom_sphere_position: [3, 0.0, 0]
+    custom_sphere_radius: 0.75
+    custom_sphere_material_id: 3
+    custom_sphere_visibility: true
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 2
+    custom_sphere_position: [-0.95, 0.2, -1.75]
+    custom_sphere_radius: 0.35
+    custom_sphere_material_id: 2
+    custom_sphere_visibility: true
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 3
+    custom_sphere_position: [0.5, 0.6, -1.8]
+    custom_sphere_radius: 0.35
+    custom_sphere_material_id: 1
+    custom_sphere_visibility: true
+  # - custom_sphere_name: Sphere
+  #   custom_sphere_id: 4
+  #   custom_sphere_position: [0.5, 0.6, -1.8]
+  #   custom_sphere_radius: 0.2
+  #   custom_sphere_material_id: 1
+  #   custom_sphere_visibility: true
+  - custom_sphere_name: Sphere
+    custom_sphere_id: 4
+    custom_sphere_position: [0, 3, -1]
+    custom_sphere_radius: 1.15
+    custom_sphere_material_id: 4
+    custom_sphere_visibility: true
+
+RTLights: #ray tracing pipeline lights to generate shadow
+  - rt_light_name: Light0
+    rt_light_id: 0
+    rt_light_position: [0.0, 1.5, -1.0]
+    rt_light_color: [1, 1, 1]
+    rt_light_intensity: 6
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
+  - rt_light_name: Light1
+    rt_light_id: 1
+    rt_light_position: [-1.0, 1.5, -3.0]
+    rt_light_color: [1, 1, 1]
+    rt_light_intensity: 0
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
+
+Resources:
+  - Models:
+    # - resource_model_name: low_poly_tree.obj
+    # - resource_model_name: cube.obj
+    # - resource_model_name: cube_10facet.obj
+    # - resource_model_name: wineglass.obj
+    # - resource_model_name: teapot.obj
+    - resource_model_name: BaseMesh_Female.obj
+    # - resource_model_name: Skull.obj
+    # - resource_model_name: CoffeeTable.obj
+    # - resource_model_name: dragon.obj
+    
+  - RayTracingShaders:
+      resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
+      resource_raytracing_pipeline_primary_miss_shader_name: simpleRayPipeline/primary.rmiss.spv
+      resource_raytracing_pipeline_shadow_miss_shader_name: simpleRayPipeline/shadow.rmiss.spv
+      resource_raytracing_pipeline_primary_closesthit_shader_name: simpleRayPipeline/primary.rchit.spv
+      resource_raytracing_pipeline_shadow_closesthit_shader_name: simpleRayPipeline/shadow.rchit.spv
+      resource_raytracing_pipeline_primary_anyhit_shader_name: simpleRayPipeline/primary.rahit.spv
+      resource_raytracing_pipeline_shadow_anyhit_shader_name: simpleRayPipeline/shadow.rahit.spv
+      resource_raytracing_pipeline_sphere_intersection_shader_name: simpleRayPipeline/sphere.rint.spv
+      resource_raytracing_pipeline_sphere_primary_closesthit_shader_name: simpleRayPipeline/sphere_primary.rchit.spv
+      resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name: simpleRayPipeline/sphere_shadow.rchit.spv
+      resource_raytracing_pipeline_callable_shader_name: none
+
+Uniforms:
+  RayTracing:
+    uniform_raytracing_swapchain_storage: true
+    storage_raytracing_material: true
+  #Compute:
+    #storage_custom_material: true #need enable this if want to use materials, otherwise it won't read material yaml
+    #storage_custom_sphere: false this doesn't matter for rt pipeline. it is for compute pipeline. rt pipeline always enable spheres
+  
+
+Features:
+  feature_rendermode: 5 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4， RAYTRACING_SWAPCHAIN=5
+  feature_graphics_48pbt: false
+  feature_graphics_push_constant: false
+  feature_graphics_global_blend: false
+  feature_graphics_rainbow_mipmap: false
+  feature_graphics_observe_attachment_id: -1
+  feature_graphics_show_performance_control: false
+  feature_graphics_show_all_metric_controls: false
+  feature_raytracing_pipeline_render_mode: 1 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+  feature_raytracing_pipeline_interactive_render_mode: 0 #change to this mode when camera is moving
+  feature_raytracing_pipeline_sampler_per_pixel: 1
+  feature_raytracing_pipeline_maximum_bounce: 8
+  feature_raytracing_pipeline_maximum_path: 4
+  feature_raytracing_pipeline_accumulate: true
+  feature_raytracing_pipeline_enableNEE: false
+  feature_raytracing_pipeline_use_sky: false
+  feature_raytracing_pipeline_maximum_Radiance: 0
+  feature_raytracing_pipeline_debug_mode: 0
+  feature_raytracing_pipeline_softShadowEnable: false
+  feature_raytracing_pipeline_softShadowSampleNumber: 4
+  feature_raytracing_pipeline_maxReflectionDepth: 2 #优化方法(reflect=1,refract=3)：depth 0：折射 + 反射；depth 1~2：只有折射(这样就防止指数分裂)；depth >= 3：停止
+  feature_raytracing_pipeline_maxRefractionDepth: 3
+
+Attachments:
+  ShadowmapRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_light: false
+  mainsceneRenderpass_attachment_depth_camera: false
+  mainsceneRenderpass_attachment_color_resovle: false
+  mainsceneRenderpass_attachment_color_present: false
+
+MainCamera:
+  camera_mode: 0
+  camera_position: [0,2,-3.0]
+  camera_rotation: [0,0,0]
+  object_id_target: 0
+  camera_z: [0.1, 256]
+  camera_projection_enable_orthographic: false
+  camera_projection_perspective_fov: 90
+  camera_projection_orthographic_width: 8
+  camera_projection_orthographic_height: 8
+  camera_keyboard_sensitive: 3
+  camera_mouse_sensitive: 20
