@@ -3,7 +3,7 @@
 
 #include "../CommonShaders/rayPipelineCommonStruct.glsl"
 
-layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
+layout(location = 0) rayPayloadInEXT PrimaryPayloadStruct primaryPayload;
 
 vec3 SampleSky(vec3 dir){
     vec3 sky = vec3(0.2, 0.3, 0.4);

@@ -211,7 +211,7 @@ vec3 TraceRay(Ray ray, inout uint state){
             break;
         }
 
-        MaterialStruct mat = sboMaterial.materials[hitInfo.material_id];
+        MaterialStruct mat = materialUBO.materials[hitInfo.material_id];
         
         // 添加自发光贡献
         vec3 emittedLight = mat.emissionColor * mat.emissionStrength;

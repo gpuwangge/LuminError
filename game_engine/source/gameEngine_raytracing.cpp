@@ -12,18 +12,18 @@ void GameEngine::InitializeComputeRayTracing(){
     if(appInfo->Uniform.b_storage_compute_material){
         yamler->ReadMaterialYAMLFile("Materials");
         for(int i = 0; i < appInfo->Materials.size(); i++){
-            storageBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
-            storageBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
-            storageBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
-            storageBufferObject_Material.materials[i].type = appInfo->Materials[i].material_type;
-            storageBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
-            storageBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
-            storageBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
-            storageBufferObject_Material.materials[i].emissionStrength = appInfo->Materials[i].emissionStrength;
-            storageBufferObject_Material.materials[i].reflectance = appInfo->Materials[i].reflectance;
-            storageBufferObject_Material.materials[i].specular = appInfo->Materials[i].specular;
-            storageBufferObject_Material.materials[i].ior = appInfo->Materials[i].ior;
-            storageBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
+            uniformBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
+            uniformBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
+            uniformBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
+            uniformBufferObject_Material.materials[i].type = appInfo->Materials[i].material_type;
+            uniformBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
+            uniformBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
+            uniformBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
+            uniformBufferObject_Material.materials[i].emissionStrength = appInfo->Materials[i].emissionStrength;
+            uniformBufferObject_Material.materials[i].reflectance = appInfo->Materials[i].reflectance;
+            uniformBufferObject_Material.materials[i].specular = appInfo->Materials[i].specular;
+            uniformBufferObject_Material.materials[i].ior = appInfo->Materials[i].ior;
+            uniformBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
         }
     }
     //Ray Tracing Setup 2: prepare sphere storage buffer data
@@ -41,8 +41,8 @@ void GameEngine::SetupComputeRayTracing(){
     //Ray Tracing Setup 3: upload material storage buffer data
     if(appInfo->Uniform.b_storage_compute_material){
         //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
-        UploadComputeUniformBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
-        UploadComputeUniformBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
+        UploadComputeUniformBuffer_Material(GetCurrentFrame(), &uniformBufferObject_Material, sizeof(StructUniformBuffer_Material));
+        UploadComputeUniformBuffer_Material(GetCurrentFrame()+1, &uniformBufferObject_Material, sizeof(StructUniformBuffer_Material));
         //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
     }
 
@@ -312,28 +312,24 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
     if(appInfo->Uniform.b_storage_raytracing_material){
         yamler->ReadMaterialYAMLFile("Materials");
         for(int i = 0; i < appInfo->Materials.size(); i++){
-            storageBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
-            storageBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
-            storageBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
-            storageBufferObject_Material.materials[i].type = appInfo->Materials[i].material_type;
-            storageBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
-            storageBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
-            storageBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
-            storageBufferObject_Material.materials[i].emissionStrength = appInfo->Materials[i].emissionStrength;
-            storageBufferObject_Material.materials[i].reflectance = appInfo->Materials[i].reflectance;
-            storageBufferObject_Material.materials[i].specular = appInfo->Materials[i].specular;
-            storageBufferObject_Material.materials[i].ior = appInfo->Materials[i].ior;
-            storageBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
+            uniformBufferObject_Material.materials[i].albedo = glm::vec3(appInfo->Materials[i].albedo[0], appInfo->Materials[i].albedo[1], appInfo->Materials[i].albedo[2]);
+            uniformBufferObject_Material.materials[i].emissionColor = glm::vec3(appInfo->Materials[i].emissionColor[0], appInfo->Materials[i].emissionColor[1], appInfo->Materials[i].emissionColor[2]);
+            uniformBufferObject_Material.materials[i].transmissionColor = glm::vec3(appInfo->Materials[i].transmissionColor[0], appInfo->Materials[i].transmissionColor[1], appInfo->Materials[i].transmissionColor[2]);
+            uniformBufferObject_Material.materials[i].type = appInfo->Materials[i].material_type;
+            uniformBufferObject_Material.materials[i].metallic = appInfo->Materials[i].metallic;
+            uniformBufferObject_Material.materials[i].roughness = appInfo->Materials[i].roughness;
+            uniformBufferObject_Material.materials[i].alpha = appInfo->Materials[i].alpha;
+            uniformBufferObject_Material.materials[i].emissionStrength = appInfo->Materials[i].emissionStrength;
+            uniformBufferObject_Material.materials[i].reflectance = appInfo->Materials[i].reflectance;
+            uniformBufferObject_Material.materials[i].specular = appInfo->Materials[i].specular;
+            uniformBufferObject_Material.materials[i].ior = appInfo->Materials[i].ior;
+            uniformBufferObject_Material.materials[i].transmission = appInfo->Materials[i].transmission;
         }
     }
     //std::cout<<"SetupRayTracing(): Found "<<appInfo->Materials.size()<<" materials."<<std::endl;
     if(appInfo->Uniform.b_storage_raytracing_material){
-        //std::cout<<"sizeof(StructStorageBuffer_Material)="<<sizeof(StructStorageBuffer_Material)<<std::endl;
-        // UploadComputeStorageBuffer_Material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
-        // UploadComputeStorageBuffer_Material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructStorageBuffer_Material));
-        //std::cout<<"Uploaded material storage buffer to GPU."<<std::endl;
-        renderer->uploadRaytracingUniformBuffer_material(GetCurrentFrame(), &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
-        renderer->uploadRaytracingUniformBuffer_material(GetCurrentFrame()+1, &storageBufferObject_Material, sizeof(StructUniformBuffer_Material));
+        renderer->uploadRaytracingUniformBuffer_material(GetCurrentFrame(), &uniformBufferObject_Material, sizeof(StructUniformBuffer_Material));
+        renderer->uploadRaytracingUniformBuffer_material(GetCurrentFrame()+1, &uniformBufferObject_Material, sizeof(StructUniformBuffer_Material));
     }
     //if(bVerboseRaytracing) std::cout<<"Done upload material info to device."<<std::endl;
 
@@ -341,23 +337,18 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
     //std::cout<<"Preparing RT Lights buffer data..."<<appInfo->RTLights.size()<<std::endl;
     //TODO: bool switch
     for(int i = 0; i < appInfo->RTLights.size() && i < RTLIGHT_SIZE; i++){
-        storageBufferObject_rtLight.lights[i].position = glm::vec4(appInfo->RTLights[i].rt_light_position[0], appInfo->RTLights[i].rt_light_position[1], appInfo->RTLights[i].rt_light_position[2], 1.0f);
-        storageBufferObject_rtLight.lights[i].color = glm::vec4(appInfo->RTLights[i].rt_light_color[0], appInfo->RTLights[i].rt_light_color[1], appInfo->RTLights[i].rt_light_color[2], 1.0f);
-        storageBufferObject_rtLight.lights[i].direction = glm::vec4(appInfo->RTLights[i].rt_light_direction[0], appInfo->RTLights[i].rt_light_direction[1], appInfo->RTLights[i].rt_light_direction[2], 1.0f);
-        storageBufferObject_rtLight.lights[i].intensity = appInfo->RTLights[i].rt_light_intensity;
-        storageBufferObject_rtLight.lights[i].radius = appInfo->RTLights[i].rt_light_radius;
-        storageBufferObject_rtLight.lights[i].angle = appInfo->RTLights[i].rt_light_angle;
-        storageBufferObject_rtLight.lights[i].type = appInfo->RTLights[i].rt_light_type;
+        uniformBufferObject_rtLight.lights[i].position = glm::vec4(appInfo->RTLights[i].rt_light_position[0], appInfo->RTLights[i].rt_light_position[1], appInfo->RTLights[i].rt_light_position[2], 1.0f);
+        uniformBufferObject_rtLight.lights[i].color = glm::vec4(appInfo->RTLights[i].rt_light_color[0], appInfo->RTLights[i].rt_light_color[1], appInfo->RTLights[i].rt_light_color[2], 1.0f);
+        uniformBufferObject_rtLight.lights[i].direction = glm::vec4(appInfo->RTLights[i].rt_light_direction[0], appInfo->RTLights[i].rt_light_direction[1], appInfo->RTLights[i].rt_light_direction[2], 1.0f);
+        uniformBufferObject_rtLight.lights[i].intensity = appInfo->RTLights[i].rt_light_intensity;
+        uniformBufferObject_rtLight.lights[i].radius = appInfo->RTLights[i].rt_light_radius;
+        uniformBufferObject_rtLight.lights[i].angle = appInfo->RTLights[i].rt_light_angle;
+        uniformBufferObject_rtLight.lights[i].type = appInfo->RTLights[i].rt_light_type;
         //storageBufferObject_rtLight.lights[i].rt_light_id = appInfo->RTLights[i].rt_light_id;
     }
 
-    // for(int i = 0; i < appInfo->RTLights.size(); i++){
-    //     std::cout<<"RT Light "<<i<<": position=("<<storageBufferObject_rtLight.lights[i].position.x<<","<<storageBufferObject_rtLight.lights[i].position.y<<","<<storageBufferObject_rtLight.lights[i].position.z<<"), color=("<<storageBufferObject_rtLight.lights[i].color.r<<","<<storageBufferObject_rtLight.lights[i].color.g<<","<<storageBufferObject_rtLight.lights[i].color.b<<"), intensity="<<storageBufferObject_rtLight.lights[i].intensity<<", radius="<<storageBufferObject_rtLight.lights[i].radius<<", type="<<storageBufferObject_rtLight.lights[i].type<<std::endl;
-    //     std::cout<<"    direction=("<<storageBufferObject_rtLight.lights[i].direction.x<<","<<storageBufferObject_rtLight.lights[i].direction.y<<","<<storageBufferObject_rtLight.lights[i].direction.z<<"), angle="<<storageBufferObject_rtLight.lights[i].angle<<std::endl;
-    // }
-
-    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame(), &storageBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
-    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame()+1, &storageBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
+    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame(), &uniformBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
+    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame()+1, &uniformBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
     //if(bVerboseRaytracing) std::cout<<"Done upload ray tracing light info to device."<<std::endl;
 }
 

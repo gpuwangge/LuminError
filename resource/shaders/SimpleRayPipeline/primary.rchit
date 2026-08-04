@@ -81,10 +81,10 @@ vec3 getTriangleWorldNormal(uint geometryIndex){
 
 void main(){
     uint instanceIndex = uint(gl_InstanceCustomIndexEXT);
-    uint materialIndex = sboInstance.instances[instanceIndex].materialIndex;
-    uint geometryIndex = sboInstance.instances[instanceIndex].geometryIndex; //thats the model
+    uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
+    uint geometryIndex = instanceUBO.instances[instanceIndex].geometryIndex; //thats the model
 
-    MaterialStruct mat = sboMaterial.materials[materialIndex];
+    MaterialStruct mat = materialUBO.materials[materialIndex];
     
     //Core
     vec3 Ntri = getTriangleWorldNormal(geometryIndex);

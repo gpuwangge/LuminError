@@ -23,7 +23,7 @@ struct MaterialStruct {
 const int MATERIAL_SIZE = 64;//assume max 64 materials for now
 layout(set = 0, binding = 3) readonly uniform MaterialUniformBufferInfo {
    MaterialStruct materials[MATERIAL_SIZE];
-} sboMaterial;
+} materialUBO;
 
 struct TriangleVertexInfo{
     vec3 position;

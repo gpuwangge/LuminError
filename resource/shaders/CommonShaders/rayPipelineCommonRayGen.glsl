@@ -1,11 +1,11 @@
 #ifndef RAY_COMMONRAYGEN_GLSL
 #define RAY_COMMONRAYGEN_GLSL
 
-layout(location = 0) rayPayloadEXT PrimaryPayload primaryPayload;
+layout(location = 0) rayPayloadEXT PrimaryPayloadStruct primaryPayload;
 
 layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 
-layout(set = 0, binding = 4) uniform GlobalBufferObject {
+layout(set = 0, binding = 4) uniform GlobalUniformInfo {
     mat4 mainCameraView;
     mat4 mainCameraViewInverse;
     mat4 mainCameraProj;
@@ -20,8 +20,8 @@ const uint MAX_PATHS = 8u;//最大支持的path。不是实际使用的path
 vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
     vec3 accumulatedRadiance = vec3(0.0);
 
-    for (int s = 0; s < configObject.spp; ++s){
-        vec2 jitter = rnd2(pixel, s, customObject.frameCount);
+    for (int s = 0; s < configUBO.spp; ++s){
+        vec2 jitter = rnd2(pixel, s, customUBO.frameCount);
         vec2 uv = (vec2(pixel) + jitter) / vec2(size);
         vec2 ndc = uv * 2.0 - 1.0;
         // ndc.y = -ndc.y;// 如有需要再开
@@ -32,10 +32,10 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
 
         vec3 lightColor = vec3(0.0);
 
-        PathState pathStack[MAX_PATHS]; //最大路径数
+        PathStateStruct pathStack[MAX_PATHS]; //最大路径数
         int stackSize = 0;
 
-        pathStack[stackSize++] = PathState(
+        pathStack[stackSize++] = PathStateStruct(
             rayOrigin,
             rayDir,
             vec3(1.0),
@@ -48,7 +48,7 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
         primaryPayload.sampleIndex = s;
 
         while(stackSize > 0){
-            PathState path = pathStack[--stackSize];
+            PathStateStruct path = pathStack[--stackSize];
 
             primaryPayload.radiance = vec3(0.0);
             primaryPayload.throughput = path.throughput;
@@ -73,10 +73,10 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
             //path.throughput = vec3(1.0);//test
             accumulatedRadiance += path.throughput * primaryPayload.radiance;
 
-            if(path.depth + 1u >= configObject.maxBounce) continue;
+            if(path.depth + 1u >= configUBO.maxBounce) continue;
 
             for(uint i = 0u; i < primaryPayload.spawnRayCount; ++i){
-                PathState nextPath;
+                PathStateStruct nextPath;
 
                 nextPath.origin         = primaryPayload.nextRay[i].origin;
                 nextPath.direction      = primaryPayload.nextRay[i].dir;
@@ -87,13 +87,13 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
 
                 nextPath.depth = path.depth + 1u;
                 pathStack[stackSize++] = nextPath;
-                if(stackSize >= configObject.maxPath) break;
+                if(stackSize >= configUBO.maxPath) break;
             }
         }//stack
         
     }//spp
 
-    return accumulatedRadiance / float(configObject.spp);
+    return accumulatedRadiance / float(configUBO.spp);
 }
 
 #endif

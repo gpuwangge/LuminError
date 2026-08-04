@@ -1,13 +1,13 @@
 #ifndef RAY_COMMONUBO_GLSL
 #define RAY_COMMONUBO_GLSL
 
-layout(set = 0, binding = 5) uniform CustomBufferObject {
+layout(set = 0, binding = 5) uniform CustomUniformInfo {
     int frameCount;
     uint cameraInMotion;
     uint renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
-} customObject;
+} customUBO;
 
-layout(set = 0, binding = 8) uniform ConfigUniformBufferStruct {
+layout(set = 0, binding = 8) uniform ConfigUniformInfo {
     uint lightCount;
     uint materialCount;
 
@@ -28,6 +28,6 @@ layout(set = 0, binding = 8) uniform ConfigUniformBufferStruct {
 
     uint maxReflectionDepth;
     uint maxRefractionDepth;
-} configObject;
+} configUBO;
 
 #endif

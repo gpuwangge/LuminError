@@ -5,24 +5,24 @@
 
 #extension GL_EXT_ray_tracing : require
 
-layout(location = 0) rayPayloadInEXT PrimaryPayload primaryPayload;
-layout(location = 1) rayPayloadEXT ShadowPayload shadowPayload;
+layout(location = 0) rayPayloadInEXT PrimaryPayloadStruct primaryPayload;
+layout(location = 1) rayPayloadEXT ShadowPayloadStruct shadowPayload;
 layout(set = 0, binding = 1) uniform accelerationStructureEXT topLevelAS;
 
 const int MATERIAL_SIZE = 64;//assume max 64 materials for now
 layout(set = 0, binding = 3) uniform MaterialUniformInfo {
    MaterialStruct materials[MATERIAL_SIZE];
-} sboMaterial;
+} materialUBO;
 
 const int RTLIGHT_SIZE = 64;//assume max 64 rt lights for now
 layout(set = 0, binding = 6) uniform RtLightUniformInfo {
     RtLightStruct lights[RTLIGHT_SIZE];
-} sboRtLightBuffer;
+} rtLightUBO;
 
 const int INSTANCE_SIZE = 256;//assume max 256 instances for now
 layout(set = 0, binding = 7) uniform InstanceUniformInfo {
    InstanceStruct instances[INSTANCE_SIZE];
-} sboInstance;
+} instanceUBO;
 
 struct HitInfoStruct{
     vec3 hitPos;
@@ -270,9 +270,9 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
 //目前发光材质和NEE最好只enable其中一个，不要一起开，需要进一步测试
 vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //for path tracing
     //return vec3(20,0,0); //test
-    uint lightCount = min(configObject.lightCount, uint(RTLIGHT_SIZE)); 
+    uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE)); 
 
-    if(configObject.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
+    if(configUBO.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
 
     // 暂时只在具有漫反射分量的表面做 NEE。
     // 金属和玻璃当前使用近似 delta 路径，不在这里处理。
@@ -286,7 +286,7 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //fo
      */
     uint lightIndex = min(uint(Rand(state) * float(lightCount)), lightCount - 1u);
 
-    RtLightStruct light = sboRtLightBuffer.lights[lightIndex];
+    RtLightStruct light = rtLightUBO.lights[lightIndex];
 
     vec3 direct = vec3(0.0);
     const int LIGHT_SAMPLES = 1;//4; 1已经足够，因为有frame accumulate
@@ -441,7 +441,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
             float F2 = pow(fresnelScalar,0.5);
 
             uint rayIndex = 0; //第一条射线，查询折射
-            if(primaryPayload.depth < configObject.maxRefractionDepth ){ //&& Rand(hitInfo.state) < hitInfo.transmission
+            if(primaryPayload.depth < configUBO.maxRefractionDepth ){ //&& Rand(hitInfo.state) < hitInfo.transmission
                 primaryPayload.spawnRayCount = 1u;
                 //折射
                 primaryPayload.nextRay[rayIndex].origin = hitInfo.hitPos + Toff * EPSILON;
@@ -468,7 +468,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
             }
 
             rayIndex++;//第二条射线，查询反射
-            if(primaryPayload.depth < configObject.maxReflectionDepth ){
+            if(primaryPayload.depth < configUBO.maxReflectionDepth ){
                 primaryPayload.spawnRayCount = 2u;
                 //反射
                 primaryPayload.nextRay[rayIndex].origin = hitInfo.hitPos + Roff * EPSILON;
@@ -486,7 +486,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
     vec3 directDiffuse = vec3(0.0);
     vec3 directSpecular = vec3(0.0);
 
-    uint lightNum = min(configObject.lightCount, uint(RTLIGHT_SIZE));
+    uint lightNum = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
 
     // vec3 kd = (1.0 - metallic) * albedo;
     // vec3 diffuseBRDF = kd / PI;
@@ -500,7 +500,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
 
     //直接光线(漫反射，高光，阴影)
     for(uint i = 0u; i < lightNum; ++i){
-        RtLightStruct light = sboRtLightBuffer.lights[i];
+        RtLightStruct light = rtLightUBO.lights[i];
 
         float maxT;
         vec3 lightRadiance;
@@ -512,14 +512,14 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         //给每一个light发射一根shadowray
         vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
         float visibility = 1.0f; //default is disable shadow
-        if(configObject.softShadowEnable == 0){
+        if(configUBO.softShadowEnable == 0){
             visibility = traceShadowVisibility(shadowOrigin, L, maxT);
         }else{
             visibility = traceSoftShadowVisibility(
                 shadowOrigin, hitInfo.hitPos, hitInfo.N,
-                vec3(sboRtLightBuffer.lights[i].position),
-                sboRtLightBuffer.lights[i].radius,
-                configObject.softShadowSampleNumber,
+                vec3(rtLightUBO.lights[i].position),
+                rtLightUBO.lights[i].radius,
+                configUBO.softShadowSampleNumber,
                 hitInfo.state
             );
         }
@@ -624,7 +624,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
 
     //NEE = Next Event Estimation
     vec3 localRadiance = hitInfo.emission; // 当前命中点的局部 radiance
-    if(configObject.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
+    if(configUBO.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
 
     ScatterResult scatter; //散射逻辑：TODO 解决Warp Divergence问题
     if(hitInfo.material_type != MATERIAL_GLASS && hitInfo.material_type != MATERIAL_JADE){ //传统PathTracing部分，随机采样的 Monte Carlo Path Tracing
@@ -689,7 +689,7 @@ void updatePayload(in MaterialStruct mat, vec3 Ngeom){
 
     uint state = gl_LaunchIDEXT.x;
     state = state * 747796405u + gl_LaunchIDEXT.y;
-    state = state * 747796405u + uint(customObject.frameCount);
+    state = state * 747796405u + uint(customUBO.frameCount);
 
     state ^= primaryPayload.sampleIndex;
     state *= 747796405u;
@@ -721,8 +721,8 @@ void updatePayload(in MaterialStruct mat, vec3 Ngeom){
 
     //primaryPayload.state = state; //更新primary payload的state，给RR使用
 
-    if(customObject.renderMode == 0) WhittedStyleRayTracing(hitInfo);
-    else if(customObject.renderMode == 1) MDSPathTracing(hitInfo);
+    if(customUBO.renderMode == 0) WhittedStyleRayTracing(hitInfo);
+    else if(customUBO.renderMode == 1) MDSPathTracing(hitInfo);
 
 }
 

@@ -51,7 +51,7 @@ struct InstanceStruct {
 /*************
 Payload and State Structure
 **************/
-struct NextRay{
+struct NextRayStruct{
     vec3 origin; // 下一跳光线起点
     vec3 dir; // 下一跳光线方向
     vec3 throughputMul;
@@ -60,8 +60,9 @@ struct NextRay{
     uint  insideMedium; // 0 = air, 1 = medium
     vec3  mediumEntryPos;
 };
+
 const uint MAX_SPAWN = 2u;
-struct PrimaryPayload {
+struct PrimaryPayloadStruct {
     vec3 radiance;    // 当前这次 trace 返回的光照贡献
     vec3 throughput;  // 路径权重，给 rgen 累积用
     float currentIOR;
@@ -70,7 +71,7 @@ struct PrimaryPayload {
 
     uint spawnRayCount;  // 0, 1(折射或反射) or 2(折射和反射)
 
-    NextRay nextRay[MAX_SPAWN];
+    NextRayStruct nextRay[MAX_SPAWN];
 
     uint depth;       // 当前 bounce 数（以后俄罗斯轮盘用）
     uint done;        // 1 = 终止，0 = 继续
@@ -79,11 +80,11 @@ struct PrimaryPayload {
     //uint state;
 };
 
-struct ShadowPayload{
+struct ShadowPayloadStruct{
     uint visibility;
 };
 
-struct PathState {
+struct PathStateStruct {
     vec3 origin;
     vec3 direction;
     vec3 throughput;

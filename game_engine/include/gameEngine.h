@@ -87,14 +87,14 @@ namespace LEGameEngine{
         std::vector<std::unique_ptr<CControlNode>> controlNodes;
 
         //StructStorageBuffer_WindowSwap storageBufferObject_WindowSwap{}; //?define here not work?
-        StructUniformBuffer_Material storageBufferObject_Material{};
+        StructUniformBuffer_Material uniformBufferObject_Material{};
         StructStorageBuffer_TriangleVertexAttribute storageBufferObject_TriangleVertexAttribute{};
         StructStorageBuffer_TriangleVertexIndex storageBufferObject_TriangleVertexIndex{};
         StructStorageBuffer_TriangleReorderIndex storageBufferObject_TriangleReorderIndex{};
         StructStorageBuffer_BVHNode storageBufferObject_BVHNode{};
         StructStorageBuffer_Sphere storageBufferObject_Sphere{};
-        StructStorageBuffer_GeometryInfo storageBufferObject_GeometryInfo{};
-        StructUniformBuffer_RtLight storageBufferObject_rtLight{};
+        StructStorageBuffer_GeometryInfo storageBufferObject_GeometryInfo{}; //use VkDeviceAddress, so must use storage buffer
+        StructUniformBuffer_RtLight uniformBufferObject_rtLight{};
 
         //make these global so compute shader can access. TODO: support multiple models
 
