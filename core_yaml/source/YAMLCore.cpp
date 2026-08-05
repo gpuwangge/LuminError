@@ -39,6 +39,13 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
     }
 
     for (const auto& resource : yamlNode["Resources"]) {
+        if (resource["Glbs"]) {
+            for (const auto& glb : resource["Glbs"]) {
+                appInfo.Glbs.emplace_back();
+                appInfo.Glbs.back().loadFromYaml(glb);
+            }
+        }
+
         if (resource["Fonts"]) {
             for (const auto& font : resource["Fonts"]) {
                 appInfo.Font.loadFromYaml(font);
@@ -46,11 +53,15 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
         }
 
         if (resource["Models"]) {
-            int modelCount = 0;
-            for (const auto& model : resource["Models"]) modelCount++;
-            appInfo.Models.resize(modelCount);
-            modelCount=0;
-            for (const auto& model : resource["Models"]) appInfo.Models[modelCount++].loadFromYaml(model);
+            // int modelCount = 0;
+            // for (const auto& model : resource["Models"]) modelCount++;
+            // appInfo.Models.resize(modelCount);
+            // modelCount=0;
+            // for (const auto& model : resource["Models"]) appInfo.Models[modelCount++].loadFromYaml(model);
+            for (const auto& model : resource["Models"]) {
+                appInfo.Models.emplace_back();
+                appInfo.Models.back().loadFromYaml(model);
+            }
         }
 
         if (resource["Textures"]) {

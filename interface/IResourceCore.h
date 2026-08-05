@@ -18,6 +18,11 @@ namespace LEResource{
         virtual void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_) = 0;
 
         /**************************
+         * GLB Resource
+         * ***********************/
+        virtual void LoadGLB(IN const std::string glbName, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) = 0;
+
+        /**************************
          * Shader Resource
          * ***********************/
         // virtual std::vector<VkShaderModule>& GetVertexShaderModules() = 0;

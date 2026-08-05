@@ -3,6 +3,7 @@
 #include "shaderManager.h"
 #include "modelManager.h"
 #include "texture.h"
+#include "glbManager.h"
 
 namespace LEResource{
     class ResourceCore final : public IResourceCore{
@@ -11,6 +12,11 @@ namespace LEResource{
         ~ResourceCore(){}
         void SetApplication(LEGameEngine::IGameEngine* pApplication, LELog::ILogCore *logger_) override;
         void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_) override;
+
+        /**************************
+         * GLB Resource
+         * ***********************/
+        void LoadGLB(IN const std::string glbName, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
 
         /**************************
          * Shader Resource
@@ -96,6 +102,7 @@ namespace LEResource{
 
         CShaderManager shaderManager;
         CModelManager modelManager;
+        CGLBManager glbManager;
 
         CTextureManager textureManager; //in texture.h
         CTextImageManager textImageManager; //in texture.h

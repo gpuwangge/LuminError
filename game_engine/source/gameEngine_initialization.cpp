@@ -253,147 +253,169 @@ void GameEngine::Initialize(){
     * 7 Initialize Resources
     * When creating texture resource, need uniform information, so must read uniforms before read resources
     ****************************/
-    if( appInfo->Font.font_size > 0){
-        //std::cout<<"textManager"<<std::endl;
-        textManager.SetFontSize(appInfo->Font.font_size);
-        textManager.SetSamplerID(appInfo->Font.font_samplerid);
-        textManager.SetOutlineColor(glm::vec4(appInfo->Font.font_outlineColor[0], appInfo->Font.font_outlineColor[1], appInfo->Font.font_outlineColor[2], appInfo->Font.font_outlineColor[3]));
-        textManager.SetTextColor(glm::vec4(appInfo->Font.font_textColor[0], appInfo->Font.font_textColor[1], appInfo->Font.font_textColor[2], appInfo->Font.font_textColor[3]));
-        //textManager.p_renderer = &renderer;
-        textManager.renderer = renderer;
-        textManager.resourcer = resourcer;
-        //textManager.p_textImageManager = &textImageManager;
-        //textManager.p_modelManager = &modelManager;
-        
-        textManager.CreateTextImage(); //create text atlas image and push to textImageManager
-        textManager.CreateGlyphMap(); //create glyph map
-        textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
+    bool bLoadGLB = false;
+    std::cout<<appInfo->Glbs.size()<<" GLB Resources to load."<<std::endl;
+    for(int i = 0; i < appInfo->Glbs.size(); i++){
+        std::string glbName = appInfo->Glbs[i].resource_glb_name;
+        std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<std::endl;
+
+        modelData.emplace_back();
+        int currentModelIndex = modelData.size() - 1;
+        resourcer->LoadGLB(glbName, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
+        renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
+        renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
+
+        bLoadGLB = true;
     }
 
     if(bVerboseInitialization) {
         timePoints.push_back(now());
-        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
-        printElapsed("Application: Initialize time for resources: textManager", timePoints[timePoints.size()-2], timePoints.back());
+        printElapsed("Application: Initialize time for resources: GLBs", timePoints[timePoints.size()-2], timePoints.back());
     }
 
-    if(appInfo->Models.size() > 0){
-        for(int i = 0; i < appInfo->Models.size(); i++){
-            std::string modelName = appInfo->Models[i].model_names;
-            //std::cout<<"test:"<<i<<", modelName="<<modelName<<std::endl;
-            if(modelName == "CUSTOM3D0"){
-                renderer->CreateVertexBuffer(resourcer->GetModelCustomModel3DData(0), sizeof(Vertex3D), resourcer->GetModelCustomModel3DSize(0));
-                renderer->CreateIndexBuffer(resourcer->GetModelCustomModel3DIndices(0));
-                
-                resourcer->GetModelLengths().push_back(resourcer->GetModelCustomModel3DLength(0)[0]);
-                resourcer->GetModelLengthsMin().push_back(resourcer->GetModelCustomModel3DLength(0)[1]);
-                resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel3DLength(0)[2]);
+    if(!bLoadGLB){ //if glb is loaded, skip loose resources(font, model and texture), because glb will load all resources
+        if( appInfo->Font.font_size > 0){
+            //std::cout<<"textManager"<<std::endl;
+            textManager.SetFontSize(appInfo->Font.font_size);
+            textManager.SetSamplerID(appInfo->Font.font_samplerid);
+            textManager.SetOutlineColor(glm::vec4(appInfo->Font.font_outlineColor[0], appInfo->Font.font_outlineColor[1], appInfo->Font.font_outlineColor[2], appInfo->Font.font_outlineColor[3]));
+            textManager.SetTextColor(glm::vec4(appInfo->Font.font_textColor[0], appInfo->Font.font_textColor[1], appInfo->Font.font_textColor[2], appInfo->Font.font_textColor[3]));
+            //textManager.p_renderer = &renderer;
+            textManager.renderer = renderer;
+            textManager.resourcer = resourcer;
+            //textManager.p_textImageManager = &textImageManager;
+            //textManager.p_modelManager = &modelManager;
+            
+            textManager.CreateTextImage(); //create text atlas image and push to textImageManager
+            textManager.CreateGlyphMap(); //create glyph map
+            textManager.CreateTextResource(); //loop every textbox[i], create instance data, and create model based on instance data
+        }
 
-            // }else if(name == "CUSTOM3D1"){
-            //     renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[1].vertices);
-            //     renderer.CreateIndexBuffer(modelManager.customModels3D[1].indices);
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for resources: textManager", timePoints[timePoints.size()-2], timePoints.back());
+        }
 
-            //     modelManager.modelLengths.push_back(modelManager.customModels3D[1].length);
-            //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
-            //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
-            }else if(modelName == "TEXTBOXIMAGE"){
-                renderer->CreateVertexBuffer(resourcer->GetModelTextboxImageModelData(0), sizeof(Vertex3D), resourcer->GetModelTextboxImageModelSize(0));
-                renderer->CreateIndexBuffer(resourcer->GetModelTextboxImageModelIndices(0));
-                
-                //modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
-                //modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
-                //modelManager.modelLengthsMax.push_back(modelManager.textboxImageModels[0].lengthMax);
-                resourcer->GetModelLengths().push_back(resourcer->GetModelTextboxImageModelLength(0)[0]);
-                resourcer->GetModelLengthsMin().push_back(resourcer->GetModelTextboxImageModelLength(0)[1]);
-                resourcer->GetModelLengthsMax().push_back(resourcer->GetModelTextboxImageModelLength(0)[2]);
+        if(appInfo->Models.size() > 0){
+            for(int i = 0; i < appInfo->Models.size(); i++){
+                std::string modelName = appInfo->Models[i].model_names;
+                //std::cout<<"test:"<<i<<", modelName="<<modelName<<std::endl;
+                if(modelName == "CUSTOM3D0"){
+                    renderer->CreateVertexBuffer(resourcer->GetModelCustomModel3DData(0), sizeof(Vertex3D), resourcer->GetModelCustomModel3DSize(0));
+                    renderer->CreateIndexBuffer(resourcer->GetModelCustomModel3DIndices(0));
+                    
+                    resourcer->GetModelLengths().push_back(resourcer->GetModelCustomModel3DLength(0)[0]);
+                    resourcer->GetModelLengthsMin().push_back(resourcer->GetModelCustomModel3DLength(0)[1]);
+                    resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel3DLength(0)[2]);
 
-            }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
-                //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
-                //std::cout<<"Application: Load "<<std::endl;
-                renderer->CreateVertexBuffer(resourcer->GetModelTextQuadModelData(0), sizeof(TextQuadVertex), resourcer->GetModelTextQuadModelSize(0));
-                //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
-                renderer->CreateIndexBuffer(resourcer->GetModelTextQuadModelIndices(0));
+                // }else if(name == "CUSTOM3D1"){
+                //     renderer.CreateVertexBuffer<Vertex3D>(modelManager.customModels3D[1].vertices);
+                //     renderer.CreateIndexBuffer(modelManager.customModels3D[1].indices);
 
-                //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
-                //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
-                //std::cout<<"Application: Created IndexBuffer, size = "<<renderer.indexDataBuffers.size()<<std::endl;
+                //     modelManager.modelLengths.push_back(modelManager.customModels3D[1].length);
+                //     modelManager.modelLengthsMin.push_back(modelManager.customModels3D[1].lengthMin);
+                //     modelManager.modelLengthsMax.push_back(modelManager.customModels3D[1].lengthMax);
+                }else if(modelName == "TEXTBOXIMAGE"){
+                    renderer->CreateVertexBuffer(resourcer->GetModelTextboxImageModelData(0), sizeof(Vertex3D), resourcer->GetModelTextboxImageModelSize(0));
+                    renderer->CreateIndexBuffer(resourcer->GetModelTextboxImageModelIndices(0));
+                    
+                    //modelManager.modelLengths.push_back(modelManager.textboxImageModels[0].length);
+                    //modelManager.modelLengthsMin.push_back(modelManager.textboxImageModels[0].lengthMin);
+                    //modelManager.modelLengthsMax.push_back(modelManager.textboxImageModels[0].lengthMax);
+                    resourcer->GetModelLengths().push_back(resourcer->GetModelTextboxImageModelLength(0)[0]);
+                    resourcer->GetModelLengthsMin().push_back(resourcer->GetModelTextboxImageModelLength(0)[1]);
+                    resourcer->GetModelLengthsMax().push_back(resourcer->GetModelTextboxImageModelLength(0)[2]);
 
-                glm::vec3 v(1,1,1); //text quad length is not important, only placeholder
-                //modelManager.modelLengths.push_back(v);
-                //modelManager.modelLengthsMin.push_back(v);
-                //modelManager.modelLengthsMax.push_back(v);
-                resourcer->GetModelLengths().push_back(v);
-                resourcer->GetModelLengthsMin().push_back(v);
-                resourcer->GetModelLengthsMax().push_back(v);
-            }else if(modelName == "CUSTOM2D0"){
-                //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
-                renderer->CreateVertexBuffer(resourcer->GetModelCustomModel2DData(0), sizeof(Vertex2D), resourcer->GetModelCustomModel2DSize(0)); 
+                }else if(modelName == "TEXTQUAD"){ //TODO: vertexBuffer and indexBuffer has the same index# of CUSTOM3D#, but instance buffer is 0
+                    //appInfo.VertexBufferType = VertexStructureTypes::TextQuad;
+                    //std::cout<<"Application: Load "<<std::endl;
+                    renderer->CreateVertexBuffer(resourcer->GetModelTextQuadModelData(0), sizeof(TextQuadVertex), resourcer->GetModelTextQuadModelSize(0));
+                    //renderer.CreateInstanceBuffer(modelManager.textModels[0].instanceData);
+                    renderer->CreateIndexBuffer(resourcer->GetModelTextQuadModelIndices(0));
 
-                //modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
-                //modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
-                //modelManager.modelLengthsMax.push_back(modelManager.customModels2D[0].lengthMax);
-                resourcer->GetModelLengths().push_back(resourcer->GetModelCustomModel2DLength(0)[0]);
-                resourcer->GetModelLengthsMin().push_back(resourcer->GetModelCustomModel2DLength(0)[1]);
-                resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel2DLength(0)[2]);
-            }else{
-                //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
-                //std::vector<Vertex3D> modelVertices3D;
-                //std::vector<uint32_t> modelIndices3D;
-                modelData.emplace_back();
-                int currentModelIndex = modelData.size() - 1;
-                resourcer->LoadModelObj(modelName,  modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
-                renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
-                renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
-                //std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
+                    //std::cout<<"Application: Created VertexBuffer, size = "<<renderer.vertexDataBuffers.size()<<std::endl;
+                    //std::cout<<"Application: Created InstanceBuffer, size = "<<renderer.instanceDataBuffers.size()<<std::endl;
+                    //std::cout<<"Application: Created IndexBuffer, size = "<<renderer.indexDataBuffers.size()<<std::endl;
+
+                    glm::vec3 v(1,1,1); //text quad length is not important, only placeholder
+                    //modelManager.modelLengths.push_back(v);
+                    //modelManager.modelLengthsMin.push_back(v);
+                    //modelManager.modelLengthsMax.push_back(v);
+                    resourcer->GetModelLengths().push_back(v);
+                    resourcer->GetModelLengthsMin().push_back(v);
+                    resourcer->GetModelLengthsMax().push_back(v);
+                }else if(modelName == "CUSTOM2D0"){
+                    //appInfo.VertexBufferType = VertexStructureTypes::TwoDimension;
+                    renderer->CreateVertexBuffer(resourcer->GetModelCustomModel2DData(0), sizeof(Vertex2D), resourcer->GetModelCustomModel2DSize(0)); 
+
+                    //modelManager.modelLengths.push_back(modelManager.customModels2D[0].length);
+                    //modelManager.modelLengthsMin.push_back(modelManager.customModels2D[0].lengthMin);
+                    //modelManager.modelLengthsMax.push_back(modelManager.customModels2D[0].lengthMax);
+                    resourcer->GetModelLengths().push_back(resourcer->GetModelCustomModel2DLength(0)[0]);
+                    resourcer->GetModelLengthsMin().push_back(resourcer->GetModelCustomModel2DLength(0)[1]);
+                    resourcer->GetModelLengthsMax().push_back(resourcer->GetModelCustomModel2DLength(0)[2]);
+                }else{
+                    //appInfo.VertexBufferType = VertexStructureTypes::ThreeDimension;
+                    //std::vector<Vertex3D> modelVertices3D;
+                    //std::vector<uint32_t> modelIndices3D;
+                    modelData.emplace_back();
+                    int currentModelIndex = modelData.size() - 1;
+                    resourcer->LoadModelObj(modelName,  modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
+                    renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
+                    renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
+                    //std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
+                }
+            }
+
+        }
+
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for resources: model(mesh/geometry)", timePoints[timePoints.size()-2], timePoints.back());
+        }
+
+        if(appInfo->Textures.size() > 0){
+            for(int i = 0; i < appInfo->Textures.size(); i++){
+                //std::cout<<"test Textures:"<<i<<std::endl;
+                std::string textureName = appInfo->Textures[i].texture_name;
+                int textureMipLevel = appInfo->Textures[i].texture_miplevel;
+                bool textureEnableCubemap = appInfo->Textures[i].texture_enableCubemap;
+                int textureSamplerId = appInfo->Textures[i].texture_samplerid;
+                VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                if(textureMipLevel > 1) //mipmap
+                    usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                else 
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+                    else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                //std::cout<<"appInfo->Feature.b_feature_graphics_48pbt="<<appInfo->Feature.b_feature_graphics_48pbt<<std::endl;
+                if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
+                    //std::cout<<"textureSamplerId = "<<textureSamplerId<<std::endl;
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
+                    else resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
+                }else{ //48bpt
+                    //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
+                    resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+                }
+                if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
+                    VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                    //if(textureMipLevel > 1) resourcer->GetTextureImage(resourcer->GetTextureImageSize()-1).generateMipmaps("checkerboard", usage_mipmap);
+                    if(textureMipLevel > 1) resourcer->GenerateMipmaps(resourcer->GetTextureImageSize()-1, "checkerboard", usage_mipmap);
+                }else 
+                    //if(textureMipLevel > 1) resourcer->GetTextureImage(resourcer->GetTextureImageSize()-1).generateMipmaps();
+                    if(textureMipLevel > 1) resourcer->GenerateMipmaps(resourcer->GetTextureImageSize()-1);
+
             }
         }
 
-    }
-
-    if(bVerboseInitialization) {
-        timePoints.push_back(now());
-        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
-        printElapsed("Application: Initialize time for resources: model(mesh/geometry)", timePoints[timePoints.size()-2], timePoints.back());
-    }
-
-    if(appInfo->Textures.size() > 0){
-        for(int i = 0; i < appInfo->Textures.size(); i++){
-            //std::cout<<"test Textures:"<<i<<std::endl;
-            std::string textureName = appInfo->Textures[i].texture_name;
-            int textureMipLevel = appInfo->Textures[i].texture_miplevel;
-            bool textureEnableCubemap = appInfo->Textures[i].texture_enableCubemap;
-            int textureSamplerId = appInfo->Textures[i].texture_samplerid;
-            VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-            if(textureMipLevel > 1) //mipmap
-                usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-            else 
-                if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_TEXTURE) usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
-                else usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-            //std::cout<<"appInfo->Feature.b_feature_graphics_48pbt="<<appInfo->Feature.b_feature_graphics_48pbt<<std::endl;
-            if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
-                //std::cout<<"textureSamplerId = "<<textureSamplerId<<std::endl;
-                if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
-                else resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
-            }else{ //48bpt
-                //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
-            }
-            if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
-                VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-                //if(textureMipLevel > 1) resourcer->GetTextureImage(resourcer->GetTextureImageSize()-1).generateMipmaps("checkerboard", usage_mipmap);
-                if(textureMipLevel > 1) resourcer->GenerateMipmaps(resourcer->GetTextureImageSize()-1, "checkerboard", usage_mipmap);
-            }else 
-                //if(textureMipLevel > 1) resourcer->GetTextureImage(resourcer->GetTextureImageSize()-1).generateMipmaps();
-                if(textureMipLevel > 1) resourcer->GenerateMipmaps(resourcer->GetTextureImageSize()-1);
-
+        if(bVerboseInitialization) {
+            timePoints.push_back(now());
+            //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
+            printElapsed("Application: Initialize time for resources: texture", timePoints[timePoints.size()-2], timePoints.back());
         }
-    }
 
-    if(bVerboseInitialization) {
-        timePoints.push_back(now());
-        //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
-        printElapsed("Application: Initialize time for resources: texture", timePoints[timePoints.size()-2], timePoints.back());
-    }
-
+    }//!bLoadGLB
 
     /****************************
     * 7.5 Command Buffer (move from 9.1)

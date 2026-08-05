@@ -82,6 +82,9 @@ Header-only library for loading image files (PNG, JPG, etc.).
 • tinyobjloader  
 A lightweight library for loading OBJ 3D model files.  
 
+• tiny_gltf  
+A lightweight library for loading glb/gltf files.  
+
 All components are bundled inside the repository under external/, and the CMake build system is already configured to include them.  
 
 ## Mesh

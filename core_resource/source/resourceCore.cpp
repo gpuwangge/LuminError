@@ -26,6 +26,13 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
 }
 
 /**************************
+ * GLB Resource
+ * ***********************/
+void ResourceCore::LoadGLB(IN const std::string glbName, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) {
+    glbManager.LoadGLB(glbName, vertices3D, indices3D);
+}
+
+/**************************
  * Shader Resource
  * ***********************/
 // std::vector<VkShaderModule>& ResourceCore::GetVertexShaderModules() { return shaderManager.vertShaderModules; }

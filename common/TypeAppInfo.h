@@ -447,6 +447,17 @@ struct ModelConfig{
     }
 };
 
+struct GlbConfig{
+    std::string resource_glb_name;
+    //int model_ids;
+
+    void loadFromYaml(const YAML::Node& node) {
+        resource_glb_name                                    = getOrDefault(node, "resource_glb_name", std::string{""});
+        //model_ids                                      = getOrDefault(node, "model_ids", 0);
+    }
+};
+
+
 struct SamplerConfig{
     std::string sampler_name;
     int sampler_miplevels;
@@ -502,6 +513,7 @@ struct AppInfo{
     std::vector<RTLightConfig> RTLights;
 
     FontConfig Font;
+    std::vector<GlbConfig> Glbs;
     std::vector<ModelConfig> Models;
     std::vector<TextureConfig> Textures;
     std::vector<GraphicsPipelineConfig> GraphicsPipelines;

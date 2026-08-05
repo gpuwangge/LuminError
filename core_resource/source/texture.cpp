@@ -1,6 +1,12 @@
 #include "texture.h"
+
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../external/stb_image.h"
+#include <stb_image.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
+
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Foundation.h"
 #include "TypeDataBuffer.h"

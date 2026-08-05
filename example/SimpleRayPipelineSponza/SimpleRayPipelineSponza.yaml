@@ -1,70 +1,16 @@
 Objects:
-  # - object_name: Tree
-  #   object_id: 0
-  #   object_scale: 1
-  #   object_position: [0,0.0,0]
-  #   object_rotation: [0,0,0]
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   object_material_id: 2
-  #   resource_model_id: 0
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
-  # - object_name: Wineglass
-  #   object_id: 0
-  #   object_scale: 0.2
-  #   object_position: [0,0.0,0]
-  #   object_rotation: [0,0,0]
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   object_material_id: 1
-  #   resource_model_id: 3
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
-  # - object_name: Teapot
-  #   object_id: 0
-  #   object_scale: 0.4
-  #   object_position: [0,0.0,0]
-  #   object_rotation: [0,0,0]
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   object_material_id: 2
-  #   resource_model_id: 4
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
-  - object_name: Female
+  - object_name: Sponza
     object_id: 0
-    object_scale: 1
+    object_scale: 0.005
     object_position: [0,0.0,0]
-    object_rotation: [0,180,0]
+    object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
-    object_material_id: 8
+    object_material_id: 0
     resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
-  # - object_name: Skull
-  #   object_id: 0
-  #   object_scale: 0.075
-  #   object_position: [0,0.0,0]
-  #   object_rotation: [-90,0,180]
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   object_material_id: 2
-  #   resource_model_id: 6
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
-  # - object_name: Dragon
-  #   object_id: 0
-  #   object_scale: 10
-  #   object_position: [0,-0.6,0]
-  #   object_rotation: [0,0,0]
-  #   object_velocity: [0,0,0] #no use
-  #   object_angular_velocity: [0,0,0] #no use
-  #   object_material_id: 8
-  #   resource_model_id: 0
-  #   resource_texture_id_list: [1] #no use
-  #   resource_default_graphics_pipeline_id: 2 #no use
+
 
 CustomSpheres:
   - custom_sphere_name: Sphere
@@ -125,6 +71,8 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_angle: 30 #only for spot light, not used yet
 
 Resources:
+  - Glbs:
+      - resource_glb_name: sponza-palace.glb
   - Models:
     # - resource_model_name: low_poly_tree.obj
     # - resource_model_name: cube.obj
