@@ -36,7 +36,7 @@ struct alignas(16) GeometryInfoGPU{
     VkDeviceAddress indexBuf;
 };
 
-static constexpr size_t GEOMETRYINFO_SIZE = 10; //this is the maximum vertex index count for all triangles
+static constexpr size_t GEOMETRYINFO_SIZE = 256; //this is the maximum vertex index count for all triangles
 struct StructStorageBuffer_GeometryInfo{
     GeometryInfoGPU geometryInfos[GEOMETRYINFO_SIZE]; //each triangle has 3 indices
 };

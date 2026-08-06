@@ -257,15 +257,20 @@ void GameEngine::Initialize(){
     std::cout<<appInfo->Glbs.size()<<" GLB Resources to load."<<std::endl;
     for(int i = 0; i < appInfo->Glbs.size(); i++){
         std::string glbName = appInfo->Glbs[i].resource_glb_name;
-        std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<std::endl;
+        //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<std::endl;
 
-        modelData.emplace_back();
-        int currentModelIndex = modelData.size() - 1;
-        resourcer->LoadGLB(glbName, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
-        renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
-        renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
-
+        resourcer->LoadGLB(glbName);
         bLoadGLB = true;
+
+        std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<", mesh size="<<resourcer->GetMeshSize(i)<<std::endl;
+        for(int j = 0; j < resourcer->GetMeshSize(i); j++){    
+            modelData.emplace_back();
+            int currentModelIndex = modelData.size() - 1;
+            resourcer->LoadMesh(j, 0, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
+            renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
+            renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
+        }
+        
     }
 
     if(bVerboseInitialization) {
@@ -478,30 +483,57 @@ void GameEngine::Initialize(){
     * Register object after descriptor layout (texture)
     * But before raytracing descriptor layout (because rt pipeline needs to know object model_id, scale...)
     ****************************/
-    for(int i = 0; i < appInfo->Objects.size(); i++){
-        objects[i].m_object_id = appInfo->Objects[i].object_id;
-        objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
-        objects[i].m_material_id = appInfo->Objects[i].object_material_id;
-        objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
-        objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
-        objects[i].Name = appInfo->Objects[i].object_name;
-        objects[i].bSticker = appInfo->Objects[i].object_bSticker;
-        objects[i].SetPosition(appInfo->Objects[i].object_position[0], appInfo->Objects[i].object_position[1], appInfo->Objects[i].object_position[2]);
-        objects[i].SetRotation(appInfo->Objects[i].object_rotation[0], appInfo->Objects[i].object_rotation[1], appInfo->Objects[i].object_rotation[2]);
-        objects[i].SetVelocity(appInfo->Objects[i].object_velocity[0], appInfo->Objects[i].object_velocity[1], appInfo->Objects[i].object_velocity[2]);
-        objects[i].SetAngularVelocity(appInfo->Objects[i].object_angular_velocity[0], appInfo->Objects[i].object_angular_velocity[1], appInfo->Objects[i].object_angular_velocity[2]);
+    if(!bLoadGLB){
+        for(int i = 0; i < appInfo->Objects.size(); i++){
+            objects[i].m_object_id = appInfo->Objects[i].object_id;
+            objects[i].m_model_id = appInfo->Objects[i].object_resource_model_id;
+            objects[i].m_material_id = appInfo->Objects[i].object_material_id;
+            objects[i].m_texture_ids = appInfo->Objects[i].object_resource_texture_id_list;
+            objects[i].m_default_graphics_pipeline_id = appInfo->Objects[i].object_resource_default_graphics_pipeline_id;
+            objects[i].Name = appInfo->Objects[i].object_name;
+            objects[i].bSticker = appInfo->Objects[i].object_bSticker;
+            objects[i].SetPosition(appInfo->Objects[i].object_position[0], appInfo->Objects[i].object_position[1], appInfo->Objects[i].object_position[2]);
+            objects[i].SetRotation(appInfo->Objects[i].object_rotation[0], appInfo->Objects[i].object_rotation[1], appInfo->Objects[i].object_rotation[2]);
+            objects[i].SetVelocity(appInfo->Objects[i].object_velocity[0], appInfo->Objects[i].object_velocity[1], appInfo->Objects[i].object_velocity[2]);
+            objects[i].SetAngularVelocity(appInfo->Objects[i].object_angular_velocity[0], appInfo->Objects[i].object_angular_velocity[1], appInfo->Objects[i].object_angular_velocity[2]);
 
-        //must load resources before object register
-        if(objects[i].bRegistered) {
-            std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
-            continue;
+            //must load resources before object register
+            if(objects[i].bRegistered) {
+                std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+                continue;
+            }
+            objects[i].Register((GameEngine*)this);
+            if(appInfo->Objects[i].object_scale != 1.0f){
+                objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
+            }else{
+                auto object_scale_3 = appInfo->Objects[i].object_scale_3;
+                objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
+            }
         }
-        objects[i].Register((GameEngine*)this);
-        if(appInfo->Objects[i].object_scale != 1.0f){
-            objects[i].SetScale(appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale, appInfo->Objects[i].object_scale);
-        }else{
-            auto object_scale_3 = appInfo->Objects[i].object_scale_3;
-            objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
+    }else{ //use GLB objects
+        objects.resize(resourcer->GetMeshSize(0) + objectCountControl);
+        std::cout<<"Application: Register "<<objects.size()<<" objects from GLB."<<std::endl;
+        for(int i = 0; i < resourcer->GetMeshSize(0); i++){
+            objects[i].m_object_id = i;
+            objects[i].m_model_id = i;
+            objects[i].m_material_id = 0;
+            objects[i].m_texture_ids = std::vector<int>(0);
+            objects[i].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
+            objects[i].Name = "default";
+            objects[i].bSticker = false;
+            objects[i].SetPosition(0,0,0);
+            objects[i].SetRotation(0,0,0);
+            objects[i].SetVelocity(0,0,0);
+            objects[i].SetAngularVelocity(0,0,0);
+
+            objects[i].SetScale(0.005f, 0.005f, 0.005f);
+
+            //must load resources before object register
+            if(objects[i].bRegistered) {
+                std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+                continue;
+            }
+            objects[i].Register((GameEngine*)this);
         }
     }
 
@@ -532,6 +564,10 @@ void GameEngine::Initialize(){
         //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
         printElapsed("Application: Initialize time for objects register", timePoints[timePoints.size()-2], timePoints.back());
     }
+
+    /****************************
+    * Raytracing related
+    ****************************/
 
     if(b_uniform_raytracing) {
         SetupRayTracing(bVerboseInitialization); //must load models and register objects, before this is called； create multi-object, multi-mesh

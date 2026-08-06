@@ -15,8 +15,10 @@ public:
     std::string warn;
     std::string err;
 
-    void LoadGLB(const std::string& filename, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D);
+    void LoadGLB(const std::string& filename);
+    void LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D);
 
+    int GetMeshSize(IN int glbIndex);
 };
 
 }//namespace

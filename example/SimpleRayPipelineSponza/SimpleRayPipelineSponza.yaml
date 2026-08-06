@@ -15,27 +15,27 @@ Objects:
 CustomSpheres:
   - custom_sphere_name: Sphere
     custom_sphere_id: 0
-    custom_sphere_position: [0, -8.0, 0]
-    custom_sphere_radius: 8.0
-    custom_sphere_material_id: 0
+    custom_sphere_position: [5.6, 0.8, 2]
+    custom_sphere_radius: 0.25
+    custom_sphere_material_id: 5
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 1
-    custom_sphere_position: [3, 0.0, 0]
-    custom_sphere_radius: 0.75
-    custom_sphere_material_id: 3
+    custom_sphere_position: [-6, 0.8, 2]
+    custom_sphere_radius: 0.25
+    custom_sphere_material_id: 6
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 2
-    custom_sphere_position: [-0.95, 0.2, -1.75]
-    custom_sphere_radius: 0.35
-    custom_sphere_material_id: 2
+    custom_sphere_position: [5.6, 0.8, -2.25]
+    custom_sphere_radius: 0.25
+    custom_sphere_material_id: 7
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
     custom_sphere_id: 3
-    custom_sphere_position: [0.5, 0.6, -1.8]
-    custom_sphere_radius: 0.35
-    custom_sphere_material_id: 1
+    custom_sphere_position: [-6, 0.8, -2.25]
+    custom_sphere_radius: 0.25
+    custom_sphere_material_id: 5
     custom_sphere_visibility: true
   # - custom_sphere_name: Sphere
   #   custom_sphere_id: 4
@@ -43,9 +43,9 @@ CustomSpheres:
   #   custom_sphere_radius: 0.2
   #   custom_sphere_material_id: 1
   #   custom_sphere_visibility: true
-  - custom_sphere_name: Sphere
+  - custom_sphere_name: Sun
     custom_sphere_id: 4
-    custom_sphere_position: [0, 3, -1]
+    custom_sphere_position: [0, 8, 0]
     custom_sphere_radius: 1.15
     custom_sphere_material_id: 4
     custom_sphere_visibility: true
@@ -53,8 +53,8 @@ CustomSpheres:
 RTLights: #ray tracing pipeline lights to generate shadow
   - rt_light_name: Light0
     rt_light_id: 0
-    rt_light_position: [0.0, 1.5, -1.0]
-    rt_light_color: [1, 1, 1]
+    rt_light_position: [5.6, 1.15, 2]
+    rt_light_color: [1, 0, 0]
     rt_light_intensity: 6
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
@@ -62,9 +62,36 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_angle: 30 #only for spot light, not used yet
   - rt_light_name: Light1
     rt_light_id: 1
-    rt_light_position: [-1.0, 1.5, -3.0]
+    rt_light_position: [-6, 1.15, 2]
+    rt_light_color: [0, 1, 0]
+    rt_light_intensity: 6
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
+  - rt_light_name: Light2
+    rt_light_id: 2
+    rt_light_position: [5.6, 1.15, -2.25]
+    rt_light_color: [0, 0, 1]
+    rt_light_intensity: 6
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
+  - rt_light_name: Light3
+    rt_light_id: 3
+    rt_light_position: [-6, 1.15, -2.25]
+    rt_light_color: [1, 0, 0]
+    rt_light_intensity: 6
+    rt_light_radius: 0.08 #spot light can use this to create soft shadow
+    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+    rt_light_angle: 30 #only for spot light, not used yet
+  - rt_light_name: Light4
+    rt_light_id: 4
+    rt_light_position: [0.0, 6.5, 0.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 0
+    rt_light_intensity: 6
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -73,13 +100,13 @@ RTLights: #ray tracing pipeline lights to generate shadow
 Resources:
   - Glbs:
       - resource_glb_name: sponza-palace.glb
-  - Models:
+  # - Models:
     # - resource_model_name: low_poly_tree.obj
     # - resource_model_name: cube.obj
     # - resource_model_name: cube_10facet.obj
     # - resource_model_name: wineglass.obj
     # - resource_model_name: teapot.obj
-    - resource_model_name: BaseMesh_Female.obj
+    # - resource_model_name: BaseMesh_Female.obj
     # - resource_model_name: Skull.obj
     # - resource_model_name: CoffeeTable.obj
     # - resource_model_name: dragon.obj
@@ -118,7 +145,7 @@ Features:
   feature_raytracing_pipeline_render_mode: 1 # 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
   feature_raytracing_pipeline_interactive_render_mode: 0 #change to this mode when camera is moving
   feature_raytracing_pipeline_sampler_per_pixel: 1
-  feature_raytracing_pipeline_maximum_bounce: 8
+  feature_raytracing_pipeline_maximum_bounce: 4
   feature_raytracing_pipeline_maximum_path: 4
   feature_raytracing_pipeline_accumulate: true
   feature_raytracing_pipeline_enableNEE: false
@@ -138,9 +165,9 @@ Attachments:
   mainsceneRenderpass_attachment_color_present: false
 
 MainCamera:
-  camera_mode: 0
-  camera_position: [0,2,-3.0]
-  camera_rotation: [0,0,0]
+  camera_mode: 1
+  camera_position: [-5,1,0.0]
+  camera_rotation: [0,90,0]
   object_id_target: 0
   camera_z: [0.1, 256]
   camera_projection_enable_orthographic: false

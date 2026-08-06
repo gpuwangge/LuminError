@@ -11,7 +11,7 @@
 
 namespace LEResource{
 
-void CGLBManager::LoadGLB(const std::string& filename, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
+void CGLBManager::LoadGLB(const std::string& filename){
     bool ok = loader.LoadBinaryFromFile(&model, &err, &warn, GLB_PATH + filename);
 
     if (!warn.empty()) std::cout << warn << std::endl;
@@ -24,22 +24,22 @@ void CGLBManager::LoadGLB(const std::string& filename, OUT std::vector<Vertex3D>
     std::cout<<"GLB Material Size = "<< model.materials.size()<< std::endl;
     std::cout<<"GLB Image Size = "<< model.images.size()<< std::endl;
     std::cout<<"GLB Texture Size = "<< model.textures.size()<< std::endl;
+}
 
-    unsigned int meshIndex = 100;
-    unsigned int primitiveIndex = 0;
+void CGLBManager::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
+    //unsigned int meshIndex = 100;
+    //unsigned int primitiveIndex = 0;
 
     auto& mesh = model.meshes[meshIndex];
     // auto& material = model.materials[0];
     // auto& image = model.images[0];
     // auto& texture = model. textures  [0];
 
-    
-
     if (mesh.primitives.empty()) {
         throw std::runtime_error("Mesh contains no primitives.");
     }
 
-    // 这里只读取第一个 primitive
+    // 这里只读取一个 primitive
     const tinygltf::Primitive& primitive = mesh.primitives[primitiveIndex];
 
     const tinygltf::Accessor* posAccessor = nullptr;
@@ -255,6 +255,9 @@ void CGLBManager::LoadGLB(const std::string& filename, OUT std::vector<Vertex3D>
     }
 }
 
+int CGLBManager::GetMeshSize(IN int glbIndex){
+    return model.meshes.size();//todo: add glbIndex to suppport multiple glb files
+}
 
 
 }//namespace
