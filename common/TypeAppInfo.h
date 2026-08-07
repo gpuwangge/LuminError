@@ -30,7 +30,8 @@ struct FeatureConfig {
     bool feature_graphics_enable_controls = false; //this is not read from yaml
 
     int feature_raytracing_pipeline_render_mode = 0;
-    int feature_raytracing_pipeline_interactive_render_mode = 0;
+    int feature_raytracing_pipeline_interactive_move_mode = 0;
+    int feature_raytracing_pipeline_interactive_still_mode = 0;
     int feature_raytracing_pipeline_sampler_per_pixel = 1;
     int feature_raytracing_pipeline_maximum_bounce = 8;
     int feature_raytracing_pipeline_maximum_path = 4;
@@ -57,7 +58,8 @@ struct FeatureConfig {
         feature_graphics_enable_controls = feature_graphics_show_performance_control || feature_graphics_show_all_metric_controls;
     
         feature_raytracing_pipeline_render_mode     = getOrDefault(node, "feature_raytracing_pipeline_render_mode", 0);
-        feature_raytracing_pipeline_interactive_render_mode     = getOrDefault(node, "feature_raytracing_pipeline_interactive_render_mode", 0);
+        feature_raytracing_pipeline_interactive_move_mode     = getOrDefault(node, "feature_raytracing_pipeline_interactive_move_mode", 0);
+        feature_raytracing_pipeline_interactive_still_mode     = getOrDefault(node, "feature_raytracing_pipeline_interactive_still_mode", 0);
         feature_raytracing_pipeline_sampler_per_pixel     = getOrDefault(node, "feature_raytracing_pipeline_sampler_per_pixel", 1);
         feature_raytracing_pipeline_maximum_bounce     = getOrDefault(node, "feature_raytracing_pipeline_maximum_bounce", 8);
         feature_raytracing_pipeline_maximum_path     = getOrDefault(node, "feature_raytracing_pipeline_maximum_path", 4);

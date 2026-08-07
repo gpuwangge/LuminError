@@ -266,7 +266,8 @@ void GameEngine::Set_feature_graphics_show_all_metric_controls(bool value) {appI
 void GameEngine::Set_feature_graphics_show_performance_control(bool value) {appInfo->Feature.feature_graphics_show_performance_control = value;}
 
 int GameEngine::Get_feature_raytracing_pipeline_render_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_render_mode;}
-int GameEngine::Get_feature_raytracing_pipeline_interactive_render_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_interactive_render_mode;}
+int GameEngine::Get_feature_raytracing_pipeline_interactive_move_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_interactive_move_mode;}
+int GameEngine::Get_feature_raytracing_pipeline_interactive_still_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_interactive_still_mode;}
 int GameEngine::Get_feature_raytracing_pipeline_sampler_per_pixel() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_sampler_per_pixel;}
 int GameEngine::Get_feature_raytracing_pipeline_maximum_bounce() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_bounce;}
 int GameEngine::Get_feature_raytracing_pipeline_maximum_path() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_path;}
@@ -406,22 +407,25 @@ void GameEngine::UploadGraphicsCustomUniformBuffer(uint32_t currentFrame, const 
     renderer->uploadGraphicsCustomUniformBuffer(currentFrame, customUniformBufferObject, dataSize);
 }
 
-void GameEngine::SetMainCameraVelocityX(float value) { mainCamera.Velocity.x = value; }
-void GameEngine::SetMainCameraVelocityY(float value) { mainCamera.Velocity.y = value; }
-void GameEngine::SetMainCameraVelocityZ(float value) { mainCamera.Velocity.z = value; }
-void GameEngine::SetMainCameraAngularVelocityX(float value) { mainCamera.AngularVelocity.x = value; }
-void GameEngine::SetMainCameraAngularVelocityY(float value) { mainCamera.AngularVelocity.y = value; }
-void GameEngine::SetMainCameraAngularVelocityZ(float value) { mainCamera.AngularVelocity.z = value; }
-void GameEngine::SetMainCameraType(int type) { mainCamera.cameraType = (CameraType)type; }
+void GameEngine::SetMainCameraVelocityX(float value) { if(!bRaytracingRenderMode) mainCamera.Velocity.x = value; }
+void GameEngine::SetMainCameraVelocityY(float value) { if(!bRaytracingRenderMode) mainCamera.Velocity.y = value; }
+void GameEngine::SetMainCameraVelocityZ(float value) { if(!bRaytracingRenderMode) mainCamera.Velocity.z = value; }
+void GameEngine::SetMainCameraAngularVelocityX(float value) { if(!bRaytracingRenderMode) mainCamera.AngularVelocity.x = value; }
+void GameEngine::SetMainCameraAngularVelocityY(float value) { if(!bRaytracingRenderMode) mainCamera.AngularVelocity.y = value; }
+void GameEngine::SetMainCameraAngularVelocityZ(float value) { if(!bRaytracingRenderMode) mainCamera.AngularVelocity.z = value; }
+void GameEngine::SetMainCameraType(int type) { if(!bRaytracingRenderMode) mainCamera.cameraType = (CameraType)type; }
 int GameEngine::GetMainCameraType() { return mainCamera.cameraType; }
-void GameEngine::SetMainCameraFocusObjectId(int objectId) { mainCamera.focusObjectId = objectId; }
+void GameEngine::SetMainCameraFocusObjectId(int objectId) { if(!bRaytracingRenderMode) mainCamera.focusObjectId = objectId; }
 int GameEngine::GetMainCameraFocusObjectId() { return mainCamera.focusObjectId; }
-void GameEngine::MoveMainCameraLeft(float distance, float speed) { mainCamera.MoveLeft(distance, speed); }
-void GameEngine::MoveMainCameraRight(float distance, float speed) { mainCamera.MoveRight(distance, speed); }
-void GameEngine::MoveMainCameraForward(float distance, float speed) { mainCamera.MoveForward(distance, speed); }
-void GameEngine::MoveMainCameraBackward(float distance, float speed) { mainCamera.MoveBackward(distance, speed); }
+void GameEngine::MoveMainCameraLeft(float distance, float speed) { if(!bRaytracingRenderMode) mainCamera.MoveLeft(distance, speed); }
+void GameEngine::MoveMainCameraRight(float distance, float speed) { if(!bRaytracingRenderMode) mainCamera.MoveRight(distance, speed); }
+void GameEngine::MoveMainCameraForward(float distance, float speed) { if(!bRaytracingRenderMode) mainCamera.MoveForward(distance, speed); }
+void GameEngine::MoveMainCameraBackward(float distance, float speed) { if(!bRaytracingRenderMode) mainCamera.MoveBackward(distance, speed); }
 glm::vec3 GameEngine::GetMainCameraPosition() { return mainCamera.Position; }
 void GameEngine::SetMainCameraSensitivity(float sensitivity) { mainCamera.SetRotationSensitivity(sensitivity); }
+
+void GameEngine::ToggleRaytracingRenderMode(){bRaytracingRenderMode = !bRaytracingRenderMode; }
+bool GameEngine::GetRaytracingRenderMode() {return bRaytracingRenderMode; }
 
 void GameEngine::SetLightCameraPosition(int lightCameraId, glm::vec3 p) { lightCameras[lightCameraId].SetPosition(p); }
 void GameEngine::SetLightCameraFocusObjectId(int lightCameraId, int objectId) { lightCameras[lightCameraId].focusObjectId = objectId; }

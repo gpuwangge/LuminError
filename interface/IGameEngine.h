@@ -40,7 +40,8 @@ namespace LEGameEngine{
         virtual void Set_feature_graphics_show_performance_control(bool value) = 0;
         
         virtual int Get_feature_raytracing_pipeline_render_mode() = 0;
-        virtual int Get_feature_raytracing_pipeline_interactive_render_mode() = 0;
+        virtual int Get_feature_raytracing_pipeline_interactive_move_mode() = 0;
+        virtual int Get_feature_raytracing_pipeline_interactive_still_mode() = 0;
         virtual int Get_feature_raytracing_pipeline_sampler_per_pixel() = 0;
         virtual int Get_feature_raytracing_pipeline_maximum_bounce() = 0;
         virtual int Get_feature_raytracing_pipeline_maximum_path() = 0;
@@ -71,6 +72,9 @@ namespace LEGameEngine{
         virtual void MoveMainCameraRight(float distance, float speed) = 0;
         virtual void MoveMainCameraForward(float distance, float speed) = 0;
         virtual void MoveMainCameraBackward(float distance, float speed) = 0;
+
+        virtual void ToggleRaytracingRenderMode() = 0;
+        virtual bool GetRaytracingRenderMode() = 0;
         
         //Expose functions for Example(SimpleTriangle) to use
         virtual int GetObjectSize() = 0;

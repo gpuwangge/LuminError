@@ -155,6 +155,7 @@ namespace LESDL{
                         case SDLK_A: game->SetMainCameraVelocityX(0); break;
                         case SDLK_RIGHT:
                         case SDLK_D: game->SetMainCameraVelocityX(0); break;
+                        case SDLK_R: game->ToggleRaytracingRenderMode(); break;
                     }
                     bKeyDown = false;
                     break;

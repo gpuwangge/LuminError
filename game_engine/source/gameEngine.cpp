@@ -242,6 +242,14 @@ void GameEngine::Update(){
         fovY = glm::radians(mainCamera.fov);
         raytracingGlobalUniformBufferObject.tanHalfFovY = tan(fovY / 2.0f);
         renderer->uploadRaytracingStorageBuffer_global(renderer->GetCurrentFrame(), &raytracingGlobalUniformBufferObject, sizeof(StructRaytracingGlobalUniformBuffer));
+    
+        // if(bRaytracingRenderMode){
+
+        // }else{
+            
+        // }
+    
+    
     }
 
     for(int i = 0; i < lights.size(); i++){//lightCameras.size()

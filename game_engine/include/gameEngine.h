@@ -137,7 +137,6 @@ namespace LEGameEngine{
         //VkDeviceAddress GetRaytracingVertexBufferAddress() override { return raytracing_vertex_buffer_address; }
         //VkDeviceAddress GetRaytracingIndexBufferAddress() override { return raytracing_index_buffer_address; }
 
-        
         std::vector<RtMesh> rtMeshes;
         RtMesh& GetRtMesh(int index) override { return rtMeshes[index]; }
         int GetRtMeshSize() override { return rtMeshes.size(); }
@@ -146,6 +145,7 @@ namespace LEGameEngine{
         RtSphere& GetRtSphere(int index) override { return rtSpheres[index]; }
         int GetRtSphereSize() override { return rtSpheres.size(); }
 
+        bool bRaytracingRenderMode = false;
 
         //Module Related
         HMODULE handle_module_yamlcore;
@@ -193,7 +193,8 @@ namespace LEGameEngine{
         void Set_feature_graphics_show_performance_control(bool value) override;
 
         int Get_feature_raytracing_pipeline_render_mode() override;
-        int Get_feature_raytracing_pipeline_interactive_render_mode() override;
+        int Get_feature_raytracing_pipeline_interactive_move_mode() override;
+        int Get_feature_raytracing_pipeline_interactive_still_mode() override;
         int Get_feature_raytracing_pipeline_sampler_per_pixel() override;
         int Get_feature_raytracing_pipeline_maximum_bounce() override;
         int Get_feature_raytracing_pipeline_maximum_path() override;
@@ -294,6 +295,9 @@ namespace LEGameEngine{
         void MoveMainCameraBackward(float distance, float speed) override;
         glm::vec3 GetMainCameraPosition() override;
         void SetMainCameraSensitivity(float sensitivity) override;
+
+        void ToggleRaytracingRenderMode() override;
+        bool GetRaytracingRenderMode() override;
 
         void SetLightCameraPosition(int lightCameraId, glm::vec3 p) override;
         void SetLightCameraFocusObjectId(int lightCameraId, int objectId) override;
