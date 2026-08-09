@@ -19,7 +19,8 @@ void main(){
     if(configUBO.accumulate == 0u){
         imageStore(resultImage, pixel, vec4(frameRadiance, 1.0).bgra);
     }else{ // Running Average
-        float alphaRA = 1.0 / (customUBO.frameCount + 1);
+        //float alphaRA = 1.0 / (customUBO.frameCount + 1);
+        float alphaRA = 1.0 / (customUBO.frameCount); //frameCount start from 1
         vec3 prevColor = imageLoad(accumulationImage, pixel).bgr;
         vec3 accumColor;
         if(customUBO.frameCount == 0) accumColor = frameRadiance;
@@ -27,5 +28,4 @@ void main(){
         imageStore(accumulationImage, pixel, vec4(accumColor, 1.0).bgra);
         imageStore(resultImage,       pixel, vec4(accumColor, 1.0).bgra);
     }
-
 }
