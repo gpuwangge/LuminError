@@ -147,7 +147,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     textManager.m_physicalDevice = renderer->GetPhysicalDevice();
     textManager.m_graphicsQueue = renderer->GetGraphicsQueue();
     //shaderManager.m_logicalDevice = renderer->GetLogicalDevice();
-    resourcer->SetDevice(renderer->GetLogicalDevice(), renderer->GetPhysicalDevice(), renderer->GetGraphicsQueue());
+    resourcer->SetDevice(renderer->GetLogicalDevice(), renderer->GetPhysicalDevice(), renderer->GetGraphicsQueue(), renderer->GetComputeQueue()); //todo: use compute pipeline for raytracing for now
 
     //query basic capabilities of surface
     //VkSurfaceCapabilitiesKHR*                   pSurfaceCapabilities;

@@ -11,7 +11,7 @@ namespace LEResource{
         ResourceCore(){}
         ~ResourceCore(){}
         void SetApplication(LEGameEngine::IGameEngine* pApplication, LELog::ILogCore *logger_) override;
-        void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_) override;
+        void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_, VkQueue raytracingQueue_) override;
 
         /**************************
          * GLB Resource
@@ -76,7 +76,7 @@ namespace LEResource{
         /**************************
          * Texture Resource
          * ***********************/
-        void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+        void CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
             int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false) override;
         void DestroyTextureManager() override;
         //CTextureImage& GetTextureImage(int index) override;
@@ -101,6 +101,7 @@ namespace LEResource{
         VkDevice logicalDevice = NULL;
         VkPhysicalDevice physicalDevice = NULL;
         VkQueue graphicsQueue = NULL;
+        VkQueue raytracingQueue = NULL;
 
         CShaderManager shaderManager;
         CModelManager modelManager;

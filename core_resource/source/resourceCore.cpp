@@ -7,10 +7,11 @@ void ResourceCore::SetApplication(LEGameEngine::IGameEngine* pApplication, LELog
     logger = logger_;
 }
 
-void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_){
+void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_, VkQueue raytracingQueue_) {
     logicalDevice = logicalDevice_;
     physicalDevice = physicalDevice_;
     graphicsQueue = graphicsQueue_;
+    raytracingQueue = raytracingQueue_;
 
     shaderManager.m_logicalDevice = logicalDevice_;
 
@@ -21,6 +22,11 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
     textureManager.m_logicalDevice = logicalDevice_;
     textureManager.m_physicalDevice = physicalDevice_;
     textureManager.m_graphicsQueue = graphicsQueue_;
+
+    glbManager.m_logicalDevice = logicalDevice_;
+    glbManager.m_physicalDevice = physicalDevice_;
+    glbManager.m_raytracingQueue = raytracingQueue_;
+    glbManager.textureManager = &textureManager;
 
     textureManager.logger = logger;
 }
@@ -122,9 +128,12 @@ glm::vec3& ResourceCore::GetModelLengthMin(int index)  { return modelManager.mod
 /**************************
  * Texture Resource
  * ***********************/
-void ResourceCore::CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+void ResourceCore::CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
     int miplevel, int sampler_id, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, bool bCubemap){
-    textureManager.CreateTextureImage(texturePath, usage, commandPool, miplevel, sampler_id, imageFormat, bitPerTexelPerChannel, bCubemap);
+    //textureManager.CreateTextureImage(texturePath, usage, commandPool, miplevel, sampler_id, imageFormat, bitPerTexelPerChannel, bCubemap);
+    int texture_index = textureManager.PushNewTextureImage(commandPool);
+    textureManager.GetTexelFromFile(texture_index, texturePath, usage, miplevel, imageFormat, bitPerTexelPerChannel);
+    textureManager.GenerateTextureImageFromTexel(texture_index, sampler_id, bCubemap);
 }
 void ResourceCore::DestroyTextureManager(){
     textureManager.Destroy();

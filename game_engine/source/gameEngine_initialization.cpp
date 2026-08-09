@@ -254,7 +254,7 @@ void GameEngine::Initialize(){
     * When creating texture resource, need uniform information, so must read uniforms before read resources
     ****************************/
     bool bLoadGLB = false;
-    std::cout<<appInfo->Glbs.size()<<" GLB Resources to load."<<std::endl;
+    //std::cout<<appInfo->Glbs.size()<<" GLB Resources to load."<<std::endl;
     for(int i = 0; i < appInfo->Glbs.size(); i++){
         std::string glbName = appInfo->Glbs[i].resource_glb_name;
         //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<std::endl;
@@ -397,11 +397,11 @@ void GameEngine::Initialize(){
                 //std::cout<<"appInfo->Feature.b_feature_graphics_48pbt="<<appInfo->Feature.b_feature_graphics_48pbt<<std::endl;
                 if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
                     //std::cout<<"textureSamplerId = "<<textureSamplerId<<std::endl;
-                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
-                    else resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
+                    else resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
                 }else{ //48bpt
                     //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                    resourcer->CreateTextureImage(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+                    resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
                 }
                 if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
                     VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;

@@ -15,7 +15,7 @@ namespace LEResource{
     public:
         virtual ~IResourceCore() = default;
         virtual void SetApplication(LEGameEngine::IGameEngine* pApplication, LELog::ILogCore *logger_) = 0;
-        virtual void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_) = 0;
+        virtual void SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalDevice_, VkQueue graphicsQueue_, VkQueue raytracingQueue_) = 0;
 
         /**************************
          * GLB Resource
@@ -80,7 +80,7 @@ namespace LEResource{
         /**************************
          * Texture Resource
          * ***********************/
-        virtual void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+        virtual void CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
             int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false) = 0;
         virtual void DestroyTextureManager() = 0;
         //virtual CTextureImage& GetTextureImage(int index) = 0;

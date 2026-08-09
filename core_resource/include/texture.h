@@ -97,21 +97,23 @@ public:
 class CTextureManager{
 public:
     std::vector<CTextureImage> textureImages;
-    //CLogManager logManager;
-    LELog::ILogCore *logger = NULL;
-    //unsigned int textureImageCount = 0;
+    unsigned int textureImageCount = 0;
+
     CTextureManager() {}
     ~CTextureManager() {}
 
-    void SetLogger(LELog::ILogCore *logger_){
-        logger = logger_;
-    }
+    LELog::ILogCore *logger = NULL;
+    void SetLogger(LELog::ILogCore *logger_){logger = logger_;}
 
     VkDevice m_logicalDevice;
     VkPhysicalDevice m_physicalDevice;
     VkQueue m_graphicsQueue;
-    void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
-        int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false);
+
+    // void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+    //     int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false);
+    int PushNewTextureImage(VkCommandPool &commandPool);
+    void GetTexelFromFile(int imageIndex, const std::string texturePath, VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel);
+    void GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap);
 
     void Destroy();
 };
@@ -131,6 +133,7 @@ public:
     VkDevice m_logicalDevice;
     VkPhysicalDevice m_physicalDevice;
     VkQueue m_graphicsQueue;
+
     void CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId);
 
     void Destroy();

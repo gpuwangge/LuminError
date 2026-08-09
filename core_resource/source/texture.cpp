@@ -6,7 +6,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Foundation.h"
 #include "TypeDataBuffer.h"
@@ -17,6 +16,7 @@ namespace LEResource{
 *	Texture Manager: to manage a vector of CTextureImages
 ********************/
 //The main entrance to create texture image
+/*
 void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
 		int miplevel, int sampler_id, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, bool bCubemap){
 	//auto startTextureTime = std::chrono::high_resolution_clock::now();
@@ -64,6 +64,38 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 	logger->Log("");
 
     //std::cout<<"Load Texture '"<< (*textureNames)[i].first <<"' cost: "<<durationTime<<" milliseconds"<<std::endl;
+}*/
+
+int CTextureManager::PushNewTextureImage(VkCommandPool &commandPool){
+	CTextureImage textureImage;
+	textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
+	textureImage.m_pCommandPool = &commandPool;
+	textureImages.push_back(textureImage);
+	return textureImages.size()-1;
+}
+
+void CTextureManager::GetTexelFromFile(int imageIndex, const std::string texturePath, VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel){
+	textureImages[imageIndex].m_imageFormat = imageFormat;
+	//textureImage.bEnableMipMap = bEnableMipmap; 
+	//textureImage.bEnableCubemap = bCubemap;
+	textureImages[imageIndex].m_mipLevels = miplevel;
+	textureImages[imageIndex].m_usage = usage;
+	assert((bitPerTexelPerChannel == 8) || (bitPerTexelPerChannel == 16)); //bitPerTexelPerChannel is default 8
+	textureImages[imageIndex].m_texBptpc = bitPerTexelPerChannel;
+
+	textureImages[imageIndex].GetTexels(texturePath);
+}
+
+void CTextureManager::GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap){
+	if(!bCubemap){//General texture image
+		textureImages[imageIndex].CreateTextureImage(); 
+		textureImages[imageIndex].CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+	}else{//Cubemap texture image
+		textureImages[imageIndex].CreateTextureImage_cubemap();
+		textureImages[imageIndex].CreateImageView_cubemap(VK_IMAGE_ASPECT_COLOR_BIT);
+	}
+
+	textureImages[imageIndex].m_sampler_id = sampler_id;
 }
 
 void CTextureManager::Destroy(){
