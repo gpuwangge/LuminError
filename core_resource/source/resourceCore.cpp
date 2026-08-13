@@ -41,6 +41,10 @@ void ResourceCore::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::ve
     glbManager.LoadMesh(meshIndex, primitiveIndex, vertices3D, indices3D);
 }
 
+void ResourceCore::LoadTexture(VkCommandPool &commandPool){
+    glbManager.LoadTexture(commandPool);
+}
+
 int ResourceCore::GetMeshSize(IN int glbIndex){
     return glbManager.GetMeshSize(glbIndex);
 }
@@ -130,10 +134,18 @@ glm::vec3& ResourceCore::GetModelLengthMin(int index)  { return modelManager.mod
  * ***********************/
 void ResourceCore::CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
     int miplevel, int sampler_id, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, bool bCubemap){
+    //std::cout<<"CreateNewTextureImageFromFile..."<<std::endl;
     //textureManager.CreateTextureImage(texturePath, usage, commandPool, miplevel, sampler_id, imageFormat, bitPerTexelPerChannel, bCubemap);
     int texture_index = textureManager.PushNewTextureImage(commandPool);
-    textureManager.GetTexelFromFile(texture_index, texturePath, usage, miplevel, imageFormat, bitPerTexelPerChannel);
-    textureManager.GenerateTextureImageFromTexel(texture_index, sampler_id, bCubemap);
+    void *texels = NULL;
+    textureManager.GetTexelFromFile_SetupTextureImage(texture_index, texturePath, usage, miplevel, imageFormat, bitPerTexelPerChannel, texels);
+    //std::cout<< "source texels = " << texels<<std::endl;
+    //std::cout<<"Done GetTexelFromFile."<<std::endl;
+    textureManager.GenerateTextureImageFromTexel(texture_index, sampler_id, bCubemap, texels);
+    //std::cout<<"Done GenerateTextureImageFromTexel."<<std::endl;
+    //std::cout.flush();
+    textureManager.STBI_Free_Image(texels); //when read from file, use stbi so need to free here
+    //std::cout<<"Done CreateNewTextureImageFromFile."<<std::endl;
 }
 void ResourceCore::DestroyTextureManager(){
     textureManager.Destroy();
@@ -153,7 +165,7 @@ void ResourceCore::GenerateMipmaps(int index, std::string rainbowCheckerboardTex
  * Textimage Resource
  * ***********************/
 void ResourceCore::CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
-    textImageManager.CreateTextImage(texels, width, height, commandPool, samplerId);
+    textImageManager.GenerateTextImageFromTexel(texels, width, height, commandPool, samplerId);
 }
 // CTextureImage& ResourceCore::GetTextImage(int index){
 //     return textImageManager.textureImages[index];

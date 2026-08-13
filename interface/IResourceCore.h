@@ -22,6 +22,7 @@ namespace LEResource{
          * ***********************/
         virtual void LoadGLB(IN const std::string glbName) = 0;
         virtual void LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) = 0;
+        virtual void LoadTexture(VkCommandPool &commandPool) = 0;
         virtual int GetMeshSize(IN int glbIndex) = 0;
 
         /**************************

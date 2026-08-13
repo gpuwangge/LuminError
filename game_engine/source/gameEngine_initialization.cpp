@@ -262,7 +262,7 @@ void GameEngine::Initialize(){
         resourcer->LoadGLB(glbName);
         bLoadGLB = true;
 
-        std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<", mesh size="<<resourcer->GetMeshSize(i)<<std::endl;
+        //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<", mesh size="<<resourcer->GetMeshSize(i)<<std::endl;
         for(int j = 0; j < resourcer->GetMeshSize(i); j++){    
             modelData.emplace_back();
             int currentModelIndex = modelData.size() - 1;
@@ -270,6 +270,8 @@ void GameEngine::Initialize(){
             renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
             renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
         }
+
+        resourcer->LoadTexture(renderer->GetCommandPool());
         
     }
 

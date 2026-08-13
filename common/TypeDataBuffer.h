@@ -104,9 +104,14 @@ public:
         //     << std::endl;
 
         if (result != VK_SUCCESS) {
+            //std::cout<<"vkMapMemory failed.";
             return result;
         }
-
+        // std::cout
+        //     << "source data = " << data
+        //     << ", destination mapped = " << pGpuMemory
+        //     << ", copy size = " << m_size
+        //     << std::endl;
         memcpy(pGpuMemory, data, (size_t)m_size);
         vkUnmapMemory(logicalDevice, IN deviceMemory);
         return VK_SUCCESS;

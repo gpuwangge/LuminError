@@ -67,14 +67,21 @@ void CTextureManager::CreateTextureImage(const std::string texturePath, VkImageU
 }*/
 
 int CTextureManager::PushNewTextureImage(VkCommandPool &commandPool){
-	CTextureImage textureImage;
-	textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
-	textureImage.m_pCommandPool = &commandPool;
-	textureImages.push_back(textureImage);
-	return textureImages.size()-1;
+	// CTextureImage textureImage;
+	// textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
+	// textureImage.m_pCommandPool = &commandPool;
+	// textureImages.push_back(textureImage);
+	// return textureImages.size()-1;
+
+	textureImages.emplace_back();
+    auto& texture = textureImages.back();
+    texture.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
+    texture.m_pCommandPool = &commandPool;
+    return static_cast<int>(textureImages.size() - 1);
 }
 
-void CTextureManager::GetTexelFromFile(int imageIndex, const std::string texturePath, VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel){
+void CTextureManager::GetTexelFromFile_SetupTextureImage(int imageIndex, const std::string texturePath, VkImageUsageFlags usage, int miplevel, 
+	VkFormat imageFormat, unsigned short bitPerTexelPerChannel, void *&texels){
 	textureImages[imageIndex].m_imageFormat = imageFormat;
 	//textureImage.bEnableMipMap = bEnableMipmap; 
 	//textureImage.bEnableCubemap = bCubemap;
@@ -83,15 +90,33 @@ void CTextureManager::GetTexelFromFile(int imageIndex, const std::string texture
 	assert((bitPerTexelPerChannel == 8) || (bitPerTexelPerChannel == 16)); //bitPerTexelPerChannel is default 8
 	textureImages[imageIndex].m_texBptpc = bitPerTexelPerChannel;
 
-	textureImages[imageIndex].GetTexels(texturePath);
+	textureImages[imageIndex].GetTexelsFromFile(texturePath, texels);
 }
 
-void CTextureManager::GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap){
+void CTextureManager::SetupTextureImage(int imageIndex, uint32_t width, uint32_t height, 
+        VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel){
+	textureImages[imageIndex].m_imageFormat = imageFormat;
+	textureImages[imageIndex].m_mipLevels = miplevel;
+	textureImages[imageIndex].m_usage = usage;
+	assert((bitPerTexelPerChannel == 8) || (bitPerTexelPerChannel == 16)); //bitPerTexelPerChannel is default 8
+	textureImages[imageIndex].m_texBptpc = bitPerTexelPerChannel;
+	textureImages[imageIndex].m_texChannels = 4;
+
+	textureImages[imageIndex].m_texHeight = height;
+	textureImages[imageIndex].m_texWidth = width;
+
+	//textureImages[imageIndex].GetTexelsFromMemory(texels);
+}
+
+void CTextureManager::GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap, void *texels){
+	//std::cout<<"GenerateTextureImageFromTexel..."<<std::endl;
 	if(!bCubemap){//General texture image
-		textureImages[imageIndex].CreateTextureImage(); 
+		textureImages[imageIndex].CreateTextureImage(texels); 
+		//std::cout<<"created texture image."<<std::endl;
 		textureImages[imageIndex].CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+		//std::cout<<"created image view."<<std::endl;
 	}else{//Cubemap texture image
-		textureImages[imageIndex].CreateTextureImage_cubemap();
+		textureImages[imageIndex].CreateTextureImage_cubemap(texels);
 		textureImages[imageIndex].CreateImageView_cubemap(VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 
@@ -99,15 +124,17 @@ void CTextureManager::GenerateTextureImageFromTexel(int imageIndex, int sampler_
 }
 
 void CTextureManager::Destroy(){
-	//std::cout<<"CTextureManager::Destroy()"<<std::endl;
+	//std::cout<<"CTextureManager::Destroy(), textureImages.size() = "<<textureImages.size()<<std::endl;
 	for(int i = 0; i < textureImages.size(); i++) textureImages[i].Destroy();
 }
+
+void CTextureManager::STBI_Free_Image(void *texels){ stbi_image_free(texels); }
 
 
 /*******************
 *	Text Manager: to manage a vector of CTextureImages
 ********************/
-void CTextImageManager::CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
+void CTextImageManager::GenerateTextImageFromTexel(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
 	CTextureImage textureImage;
     textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
     textureImage.m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R8G8B8A8_SRGB;
@@ -117,13 +144,14 @@ void CTextImageManager::CreateTextImage(void* texels, int width, int height, VkC
     textureImage.m_pCommandPool = &commandPool;
 
     //textureImage.GetTexels(texturePath);
-    textureImage.m_pTexels = texels;
+    //textureImage.m_pTexels = texels;
     textureImage.m_texWidth = width;
     textureImage.m_texHeight = height;
     textureImage.m_texChannels = 4;// STBI_rgb_alpha, RGBA
     textureImage.m_texBptpc = 8;
 
-    textureImage.CreateTextureImage(false); //false: not use STBI to free pixels
+	std::cout<<"CreateTextImage: CreateTextureImage..."<<std::endl;
+    textureImage.CreateTextureImage(texels); //text: not use STBI, so no need to free pixels
 
     textureImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
 
@@ -158,7 +186,7 @@ void CTextureImage::Destroy(){
 /*******************
 *	Texture Image: Load
 ********************/
-void CTextureImage::GetTexels(const std::string texturePath) {
+void CTextureImage::GetTexelsFromFile(const std::string texturePath, void *&texel) {
 	//m_pCommandPool = &commandPool;
 	//m_usage = usage;
 	//Step 1: prepare staging buffer with texture pixels inside
@@ -168,22 +196,25 @@ void CTextureImage::GetTexels(const std::string texturePath) {
 	std::string fullTexturePath = TEXTURE_PATH + texturePath;
 	for(short i = 0; i < 2; i++){ //look for texture in 2 locations
 		if(m_texBptpc == 16){
-			m_pTexels = stbi_load_16(fullTexturePath.c_str(), &m_texWidth, &m_texHeight, &inputTexChannels, m_dstTexChannels);
+			texel = stbi_load_16(fullTexturePath.c_str(), &m_texWidth, &m_texHeight, &inputTexChannels, m_dstTexChannels);
 			//std::cout<<"Load 48bpt texture."<<std::endl;
 			//std::cout<<"texWidth = "<<texWidth<<", texHeight = "<<texHeight<<std::endl;
 		}else{
-			m_pTexels = stbi_load(fullTexturePath.c_str(), &m_texWidth, &m_texHeight, &inputTexChannels, m_dstTexChannels);
+			texel = stbi_load(fullTexturePath.c_str(), &m_texWidth, &m_texHeight, &inputTexChannels, m_dstTexChannels);
 			//std::cout<<"Load 24bpt texture."<<std::endl;
 			//std::cout<<"texWidth = "<<texWidth<<", texHeight = "<<texHeight<<std::endl;
-		}if(m_pTexels) break;
+		}if(texel) break;
 		fullTexturePath = "textures/" + texturePath; 
 	}
-	if (!m_pTexels) throw std::runtime_error("failed to load texture image!");
+	if (!texel) throw std::runtime_error("failed to load texture image!");
 	//std::cout<<"texWidth: "<<texWidth<<", texHeight: "<<texHeight<<", texChannels: "<<texChannels<<std::endl;
 
 	//PRINT("CreateTextureImage: Load texels as %d bits per texel per channel", m_texBptpc);
 	//CreateTextureImage(texels, usage, textureImageBuffer, dstTexChannels, bitPerTexelPerChannel); 
 }
+// void CTextureImage::GetTexelsFromMemory(void *texel) {
+// 	m_pTexels = texel;
+// }
 
 /*******************
 *	Texture Image: Create
@@ -209,9 +240,10 @@ static unsigned short frac_float16(unsigned short fp16){
  	
 }
 
-void CTextureImage::CreateTextureImage(bool useSTBI) {
+void CTextureImage::CreateTextureImage(void* texels) {
 	//texWidth/=6;//test
 	VkDeviceSize imageSize = m_texWidth * m_texHeight * m_texChannels * m_texBptpc/8; 
+	//std::cout<<"imageSize = "<<m_texWidth<<"x"<<m_texHeight<<"x"<<m_texChannels<<"x"<<m_texBptpc/8<<"="<<imageSize<<std::endl;
 // #ifndef ANDROID	
 	// std::cout<<"m_texWidth: "<<m_texWidth<<" texels"<<std::endl;
 	// std::cout<<"m_texHeight: "<<m_texHeight<<" texels"<<std::endl;
@@ -233,7 +265,7 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 // #endif	
 		//PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
 		int texelNumber = m_texWidth * m_texHeight * m_texChannels;
-		for(int i = 0; i < texelNumber; i++) ((uint16_t*)m_pTexels)[i] = frac_float16(((uint16_t*)m_pTexels)[i]);
+		for(int i = 0; i < texelNumber; i++) ((uint16_t*)texels)[i] = frac_float16(((uint16_t*)texels)[i]);
 	}
 
 	//mipLevels = bEnableMipMap ? (static_cast<uint32_t>(std::floor(std::log2(std::max(m_texWidth, m_texHeight)))) + 1) : 1;
@@ -241,9 +273,14 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 
 	CWxjBuffer stagingBuffer;
 	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, m_textureImageBuffer.logicalDevice, m_textureImageBuffer.physicalDevice);
-	stagingBuffer.fill(m_pTexels, m_textureImageBuffer.logicalDevice);
-
-	if(useSTBI) stbi_image_free(m_pTexels);
+	//std::cout<<"staging buffer initialized."<<std::endl;
+	stagingBuffer.fill(texels, m_textureImageBuffer.logicalDevice);
+	//std::cout<<"staging buffer filled."<<std::endl;
+	//if(useSTBI) {
+		//stbi_image_free() 的使用前提是该指针确实由 stbi_load 一类 stb API 分配；分配和释放必须匹配同一套 allocator。
+		//stbi_image_free(m_pTexels);//这一句会有问题，一位内m_pTexels可能由stbi产生(from file)，也可能由gltf产生(from memory)
+		//std::cout<<"stbi_image_free(m_pTexels);"<<std::endl;
+	//}
 
 	//Step 2: create(allocate) image buffer
 	//std::cout<<"Creating texture imagebuffer..."<<std::endl;
@@ -264,7 +301,23 @@ void CTextureImage::CreateTextureImage(bool useSTBI) {
 		copyBufferToImage(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
 	}
 
+	// std::cout<<"Test: vkQueueWaitIdle(m_graphicsQueue);"<<std::endl;
+	// vkQueueWaitIdle(m_graphicsQueue);
+	
+	// stagingBuffer.DestroyAndFree(m_textureImageBuffer.logicalDevice);
+
+	// auto t0 = std::chrono::steady_clock::now();
+	// std::cout << "[upload] before vkQueueWaitIdle" << std::endl;
+	// VkResult r = vkQueueWaitIdle(m_graphicsQueue);
+	// std::cout << "[upload] after vkQueueWaitIdle, result = " << r
+	// 		<< ", ms = "
+	// 		<< std::chrono::duration_cast<std::chrono::milliseconds>(
+	// 				std::chrono::steady_clock::now() - t0).count()
+	// 		<< std::endl;
+
+	//std::cout << "[upload] before stagingBuffer.DestroyAndFree" << std::endl;
 	stagingBuffer.DestroyAndFree(m_textureImageBuffer.logicalDevice);
+	//std::cout << "[upload] after stagingBuffer.DestroyAndFree" << std::endl;	
 }
 
 void CTextureImage::CreateImageView(VkImageAspectFlags aspectFlags){
@@ -359,7 +412,7 @@ void CTextureImage::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
 /*******************
 *	Texture Image: Create(Cubemap)
 ********************/
-void CTextureImage::CreateTextureImage_cubemap() {
+void CTextureImage::CreateTextureImage_cubemap(void* texels) {
 	//texWidth/=6;//test
 	VkDeviceSize imageSize = m_texWidth * m_texHeight * m_texChannels * m_texBptpc/8; 
 // #ifndef ANDROID	
@@ -379,16 +432,16 @@ void CTextureImage::CreateTextureImage_cubemap() {
 // #endif	
 		//PRINT("CreateTextureImage: imageFormat: VK_FORMAT_R16G16B16A16_SFLOAT");		
 		int texelNumber = m_texWidth * m_texHeight * m_texChannels;
-		for(int i = 0; i < texelNumber; i++) ((uint16_t*)m_pTexels)[i] = frac_float16(((uint16_t*)m_pTexels)[i]);
+		for(int i = 0; i < texelNumber; i++) ((uint16_t*)texels)[i] = frac_float16(((uint16_t*)texels)[i]);
 	}
 
 	//mipLevels = bEnableMipMap ? (static_cast<uint32_t>(std::floor(std::log2(std::max(m_texWidth, m_texHeight)))) + 1) : 1;
 
 	CWxjBuffer stagingBuffer;
 	VkResult result = stagingBuffer.init(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, m_textureImageBuffer.logicalDevice, m_textureImageBuffer.physicalDevice);
-	stagingBuffer.fill(m_pTexels, m_textureImageBuffer.logicalDevice);
+	stagingBuffer.fill(texels, m_textureImageBuffer.logicalDevice);
 
-	stbi_image_free(m_pTexels);
+	//stbi_image_free(m_pTexels);
 
 	//Step 2: create(allocate) image buffer
 	//std::cout<<"Creating texture image(cubemap)..."<<std::endl;

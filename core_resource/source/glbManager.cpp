@@ -26,6 +26,7 @@ void CGLBManager::LoadGLB(const std::string& filename){
     std::cout<<"GLB Material Size = "<< gltfModel.materials.size()<< std::endl;
     std::cout<<"GLB Image Size = "<< gltfModel.images.size()<< std::endl;
     std::cout<<"GLB Texture Size = "<< gltfModel.textures.size()<< std::endl;
+    std::cout<<"GLB Sampler Size = "<<gltfModel.samplers.size()<<std::endl;
 }
 
 void CGLBManager::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
@@ -151,7 +152,7 @@ int CGLBManager::GetMeshSize(IN int glbIndex){
     return gltfModel.meshes.size();//todo: add glbIndex to suppport multiple glb files
 }
 
-void CGLBManager::LoadTexture(){
+void CGLBManager::LoadTexture(VkCommandPool &commandPool){
     // -----------------------------------------------------------
     // 1) Load glTF
     // -----------------------------------------------------------
@@ -165,29 +166,32 @@ void CGLBManager::LoadTexture(){
     // -----------------------------------------------------------
     // 2) 创建所有 VkImage（对应 model.images）
     // -----------------------------------------------------------
-    std::vector<VkImage> vkImages(gltfModel.images.size());
-    std::vector<VkImageView> vkImageViews(gltfModel.images.size());
-    std::vector<VkDeviceMemory> vkImageMems(gltfModel.images.size());
+    // std::vector<VkImage> vkImages(gltfModel.images.size());
+    // std::vector<VkImageView> vkImageViews(gltfModel.images.size());
+    // std::vector<VkDeviceMemory> vkImageMems(gltfModel.images.size());
+
+    // textureManager->textureImages[0].m_textureImageBuffer.image;
+    // textureManager->textureImages[0].m_textureImageBuffer.view;
+    // textureManager->textureImages[0].m_textureImageBuffer.deviceMemory;
 
     for (size_t i = 0; i < gltfModel.images.size(); ++i) {
-    const tinygltf::Image &img = gltfModel.images[i];
+        const tinygltf::Image &img = gltfModel.images[i];
 
-    createVkImageFromMemory(
-        m_logicalDevice,
-        m_physicalDevice,
-        img.width,
-        img.height,
-        img.component, // 1,2,3,4（通道数）
-        img.image.data(),
-        img.image.size(),
-        (img.component == 4)
-        ? VK_FORMAT_R8G8B8A8_SRGB
-        : VK_FORMAT_R8G8B8_UNORM, // 简化处理
-        vkImages[i],
-        vkImageViews[i],
-        vkImageMems[i]
-        );
+        int texture_index = textureManager->PushNewTextureImage(commandPool);//todo: use raytracing(compute) queue family? 
+        VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        textureManager->SetupTextureImage(texture_index, img.width, img.height, usage, 1, VK_FORMAT_R8G8B8A8_SRGB, 8);
+        textureManager->GenerateTextureImageFromTexel(texture_index, 0, false, (void *)img.image.data()); //put sampler_id to 0 here, can change later
+
+        //const VkDeviceSize sourceSize = img.image.size();
+        //std::cout<<"sourceSize = "<<sourceSize<<std::endl;
+        //const VkDeviceSize expectedSize = VkDeviceSize(img.width) * img.height * img.component * (img.bits / 8);
+        //std::cout<<"expectedSize = "<<expectedSize<<std::endl;
+        //return;
     }
+
+    std::cout<<"textureManager->textureImages.size() = "<<textureManager->textureImages.size()<<std::endl;
+    return;
+    
 
     // -----------------------------------------------------------
     // 3) 创建 VkSampler（对应 model.textures 中的 sampler）
@@ -244,7 +248,7 @@ void CGLBManager::LoadTexture(){
     uint32_t imgIdx = static_cast<uint32_t>(tex.source); // source → images[idx]
 
     VkDescriptorImageInfo info{};
-    info.imageView = vkImageViews[imgIdx];
+    info.imageView = textureManager->textureImages[imgIdx].m_textureImageBuffer.view;// vkImageViews[imgIdx];
     info.sampler = vkSamplers[t];
     info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     texDescInfos[t] = info;
@@ -263,7 +267,7 @@ void CGLBManager::LoadTexture(){
     vkUpdateDescriptorSets(m_logicalDevice, 1, &write, 0, nullptr);
 }
 
-
+/*
 void CGLBManager::createVkImageFromMemory(
     VkDevice device,
     VkPhysicalDevice physicalDevice,
@@ -284,15 +288,7 @@ void CGLBManager::createVkImageFromMemory(
     VkBuffer stagingBuffer = VK_NULL_HANDLE;
     VkDeviceMemory stagingMemory = VK_NULL_HANDLE;
 
-    /****************** */
-    // CTextureImage textureImage;
-	// textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
-
-    //textureManager->CreateTextureImage();
-
-    /******************** */
-
-    /*
+    
     try {
         // 1. 创建并填充 host-visible staging buffer。
         CreateBuffer(device,physicalDevice,static_cast<VkDeviceSize>(pixelByteSize),
@@ -398,8 +394,8 @@ void CGLBManager::createVkImageFromMemory(
             outImageMemory = VK_NULL_HANDLE;
         }
         throw;
-    }*/
-}
+    }
+}*/
 
 VkSamplerAddressMode CGLBManager::gltfWrapToVk(int gltfWrap){
     switch (gltfWrap) {

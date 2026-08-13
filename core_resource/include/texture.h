@@ -29,12 +29,13 @@ public:
     /*******************
     *	Texture Image: Load
     ********************/
-    void GetTexels(const std::string texturePath); //, VkImageUsageFlags usage, VkCommandPool &commandPool, unsigned short bitPerTexelPerChannel = 8
+    void GetTexelsFromFile(const std::string texturePath, void *&texel); //, VkImageUsageFlags usage, VkCommandPool &commandPool, unsigned short bitPerTexelPerChannel = 8
+    //void GetTexelsFromMemory(void *texel);
 
     /*******************
     *	Texture Image: Create
     ********************/
-    void CreateTextureImage(bool useSTBI = true);
+    void CreateTextureImage(void* texels);
     void CreateImageView(VkImageAspectFlags aspectFlags);
     
     /*******************
@@ -46,7 +47,7 @@ public:
     /*******************
     *	Texture Image: Create(Cubemap)
     ********************/
-    void CreateTextureImage_cubemap();
+    void CreateTextureImage_cubemap(void* texels);
     void CreateImageView_cubemap(VkImageAspectFlags aspectFlags);
 
     /*******************
@@ -82,7 +83,7 @@ public:
 	//VkImageView textureImageView;
 
     VkCommandPool *m_pCommandPool;
-    void* m_pTexels;
+    //void* m_pTexels;
     VkImageUsageFlags m_usage;
     int m_texChannels; //8 or 16
     unsigned short m_texBptpc; //bit per texel per channel
@@ -112,9 +113,13 @@ public:
     // void CreateTextureImage(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
     //     int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false);
     int PushNewTextureImage(VkCommandPool &commandPool);
-    void GetTexelFromFile(int imageIndex, const std::string texturePath, VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel);
-    void GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap);
+    void GetTexelFromFile_SetupTextureImage(int imageIndex, const std::string texturePath, 
+        VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, void *&texels);
+    void SetupTextureImage(int imageIndex, uint32_t width, uint32_t height, 
+        VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel);
+    void GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap, void *texels);
 
+    void STBI_Free_Image(void *texels);
     void Destroy();
 };
 
@@ -134,7 +139,7 @@ public:
     VkPhysicalDevice m_physicalDevice;
     VkQueue m_graphicsQueue;
 
-    void CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId);
+    void GenerateTextImageFromTexel(void* texels, int width, int height, VkCommandPool commandPool, int samplerId);
 
     void Destroy();
 };

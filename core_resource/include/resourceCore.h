@@ -18,6 +18,7 @@ namespace LEResource{
          * ***********************/
         void LoadGLB(IN const std::string glbName) override;
         void LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
+        void LoadTexture(VkCommandPool &commandPool) override;
         int GetMeshSize(IN int glbIndex) override;
 
         /**************************
