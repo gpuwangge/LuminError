@@ -271,7 +271,7 @@ void GameEngine::Initialize(){
             renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
         }
 
-        resourcer->LoadTexture(renderer->GetCommandPool());
+        resourcer->LoadTexture(renderer->GetCommandPool(), renderer->GetGLBSampelrs());
         
     }
 
@@ -388,6 +388,7 @@ void GameEngine::Initialize(){
                 //std::cout<<"test Textures:"<<i<<std::endl;
                 std::string textureName = appInfo->Textures[i].texture_name;
                 int textureMipLevel = appInfo->Textures[i].texture_miplevel;
+                int textureLayoutType = appInfo->Textures[i].texture_layout_type;
                 bool textureEnableCubemap = appInfo->Textures[i].texture_enableCubemap;
                 int textureSamplerId = appInfo->Textures[i].texture_samplerid;
                 VkImageUsageFlags usage;// = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -399,11 +400,11 @@ void GameEngine::Initialize(){
                 //std::cout<<"appInfo->Feature.b_feature_graphics_48pbt="<<appInfo->Feature.b_feature_graphics_48pbt<<std::endl;
                 if(!appInfo->Feature.b_feature_graphics_48pbt){ //24bpt
                     //std::cout<<"textureSamplerId = "<<textureSamplerId<<std::endl;
-                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
-                    else resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
+                    if(renderer->GetComputeUniformTypes() & COMPUTE_STORAGEIMAGE_SWAPCHAIN) resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureLayoutType, textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_UNORM); //renderer->GetSwapchainImageFormat()
+                    else resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureLayoutType, textureMipLevel, textureSamplerId, VK_FORMAT_R8G8B8A8_SRGB, 8, textureEnableCubemap);
                 }else{ //48bpt
                     //textureManager.CreateTextureImage(name, usage, renderer.commandPool, miplevel, samplerid, VK_FORMAT_R16G16B16A16_UNORM, 16, enableCubemap); 
-                    resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
+                    resourcer->CreateNewTextureImageFromFile(textureName, usage, renderer->GetCommandPool(), textureLayoutType, textureMipLevel, textureSamplerId, VK_FORMAT_R16G16B16A16_SFLOAT, 16, textureEnableCubemap); 
                 }
                 if(appInfo->Feature.b_feature_graphics_rainbow_mipmap){
                     VkImageUsageFlags usage_mipmap = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -638,7 +639,7 @@ void GameEngine::Initialize(){
     if(b_uniform_raytracing) {
         //if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->createRaytracingDescriptorSets(NULL);
         //else renderer->createRaytracingDescriptorSets();
-        renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas());
+        renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas(), resourcer->GetTextureImageViews());
     }
 
     if(bVerboseInitialization) {

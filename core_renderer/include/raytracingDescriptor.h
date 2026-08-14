@@ -37,7 +37,7 @@ public:
      * Set
      ************/
     std::vector<VkDescriptorSet> descriptorSets; //one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
-    void createDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas);
+    void createDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas, const std::vector<VkImageView>& glbTextureImageViews);
 
     /************
      * 0 image
@@ -111,6 +111,11 @@ public:
      ************/
 
     /************
+     * 10 Sampler for GLTF Textures
+     ************/
+    std::vector<VkSampler> glbSamplers;
+
+    /************
      *  COMPUTE_STORAGEIMAGE_TEXTURE
      *  COMPUTE_STORAGEIMAGE_SWAPCHAIN
      ************/
@@ -121,9 +126,9 @@ public:
      * Helper Functions
      ************/
     bool bVerbose = false;
-    static int getPoolSize();
-    static int getLayoutSize();
-    static int getSetSize();
+    static int getPoolSize(int glbSamplerSize);
+    static int getLayoutSize(int glbSamplerSize);
+    static int getSetSize(int glbSamplerSize);
     void DestroyAndFree();
 };
 

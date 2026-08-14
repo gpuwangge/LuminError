@@ -78,7 +78,7 @@ void CObject::CreateDescriptorSets_TextureImageSampler(VkDescriptorPool &descrip
         imageInfo.resize(samplers.size());
         for(int j = 0; j < samplers.size(); j++){
             //std::cout<<"CreateTextureDescriptorSets::samplers:"<<j<<std::endl;
-            imageInfo[j].imageLayout = VK_IMAGE_LAYOUT_GENERAL; //test compute storage image: ?need figure this out. VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+            imageInfo[j].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; //test compute storage image: ?need figure this out. VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
             //imageInfo[j].imageView = textureImages[j].m_textureImageBuffer.view;
             //imageInfo[j].sampler = samplers[j];
 

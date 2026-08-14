@@ -1,5 +1,5 @@
 #version 460
-#define ENABLE_TEXTURE
+//#define ENABLE_TEXTURE
 #include "../CommonShaders/rayPipelineCommonStruct.glsl"
 #include "../CommonShaders/rayPipelineCommonHit.glsl"
 hitAttributeEXT vec2 attribs;

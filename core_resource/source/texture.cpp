@@ -108,10 +108,10 @@ void CTextureManager::SetupTextureImage(int imageIndex, uint32_t width, uint32_t
 	//textureImages[imageIndex].GetTexelsFromMemory(texels);
 }
 
-void CTextureManager::GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap, void *texels){
+void CTextureManager::GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap, void *texels, VkImageLayout dstImageLayout){
 	//std::cout<<"GenerateTextureImageFromTexel..."<<std::endl;
 	if(!bCubemap){//General texture image
-		textureImages[imageIndex].CreateTextureImage(texels); 
+		textureImages[imageIndex].CreateTextureImage(texels, dstImageLayout); 
 		//std::cout<<"created texture image."<<std::endl;
 		textureImages[imageIndex].CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
 		//std::cout<<"created image view."<<std::endl;
@@ -134,7 +134,7 @@ void CTextureManager::STBI_Free_Image(void *texels){ stbi_image_free(texels); }
 /*******************
 *	Text Manager: to manage a vector of CTextureImages
 ********************/
-void CTextImageManager::GenerateTextImageFromTexel(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
+void CTextImageManager::GenerateTextImageFromTexel(void* texels, int width, int height, VkCommandPool commandPool, int samplerId, VkImageLayout dstImageLayout){
 	CTextureImage textureImage;
     textureImage.SetDevice(m_logicalDevice, m_physicalDevice, m_graphicsQueue);
     textureImage.m_imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R8G8B8A8_SRGB;
@@ -150,8 +150,8 @@ void CTextImageManager::GenerateTextImageFromTexel(void* texels, int width, int 
     textureImage.m_texChannels = 4;// STBI_rgb_alpha, RGBA
     textureImage.m_texBptpc = 8;
 
-	std::cout<<"CreateTextImage: CreateTextureImage..."<<std::endl;
-    textureImage.CreateTextureImage(texels); //text: not use STBI, so no need to free pixels
+	//std::cout<<"CreateTextImage: CreateTextureImage..."<<std::endl;
+    textureImage.CreateTextureImage(texels, dstImageLayout); //text: not use STBI, so no need to free pixels
 
     textureImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
 
@@ -240,7 +240,7 @@ static unsigned short frac_float16(unsigned short fp16){
  	
 }
 
-void CTextureImage::CreateTextureImage(void* texels) {
+void CTextureImage::CreateTextureImage(void* texels, VkImageLayout dstImageLayout) {
 	//texWidth/=6;//test
 	VkDeviceSize imageSize = m_texWidth * m_texHeight * m_texChannels * m_texBptpc/8; 
 	//std::cout<<"imageSize = "<<m_texWidth<<"x"<<m_texHeight<<"x"<<m_texChannels<<"x"<<m_texBptpc/8<<"="<<imageSize<<std::endl;
@@ -295,7 +295,7 @@ void CTextureImage::CreateTextureImage(void* texels) {
 	if(m_mipLevels == 1){
 		transitionImageLayout(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
  		copyBufferToImage(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
-      	transitionImageLayout(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ///!!!!
+      	transitionImageLayout(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dstImageLayout);//VK_IMAGE_LAYOUT_GENERAL or VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ///!!!!
 	}else{
 		transitionImageLayout(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		copyBufferToImage(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
@@ -455,7 +455,7 @@ void CTextureImage::CreateTextureImage_cubemap(void* texels) {
 	if(m_mipLevels == 1){
 		transitionImageLayout_cubemap(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
  		copyBufferToImage_cubemap(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
-      	transitionImageLayout_cubemap(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ///!!!!
+      	transitionImageLayout_cubemap(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ///!!!!
 	}else{
 		transitionImageLayout_cubemap(m_textureImageBuffer.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		copyBufferToImage_cubemap(stagingBuffer.buffer, m_textureImageBuffer.image, static_cast<uint32_t>(m_texWidth), static_cast<uint32_t>(m_texHeight));
@@ -707,7 +707,7 @@ void CTextureImage::generateMipmapsCore(VkImage image, bool bCreateTempTexture, 
 
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 		if(bCreateTempTexture) barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		else barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+		else barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;//VK_IMAGE_LAYOUT_GENERAL
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
@@ -724,7 +724,7 @@ void CTextureImage::generateMipmapsCore(VkImage image, bool bCreateTempTexture, 
 	barrier.subresourceRange.baseMipLevel = m_mipLevels - 1;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	if(bCreateTempTexture) barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	else barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	else barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;//VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 

@@ -473,7 +473,7 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
         //std::cout<<"UNIFORM_IMAGE_STORAGE_TEXTURE_BIT"<<std::endl;
         if(computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE){
             VkDescriptorImageInfo storageImageInfo{};
-            storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;//VK_IMAGE_LAYOUT_GENERAL;
             storageImageInfo.imageView = textureImageView;
             storageImageInfo.sampler = VK_NULL_HANDLE; //textureSamplers[0];
 
@@ -490,7 +490,7 @@ void CComputeDescriptorManager::createDescriptorSets(VkImageView textureImageVie
         //std::cout<<"UNIFORM_IMAGE_STORAGE_SWAPCHAIN_BIT"<<std::endl;
         if(computeUniformTypes & COMPUTE_STORAGEIMAGE_SWAPCHAIN){
             VkDescriptorImageInfo storageImageInfo{};
-            storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            storageImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;// VK_IMAGE_LAYOUT_GENERAL;
             //storageImageInfo.imageView = (*swapchainImageViews)[i];
             storageImageInfo.imageView = p_swapchain->intermediaColor[i].view;
             storageImageInfo.sampler = VK_NULL_HANDLE; //textureSamplers[0];

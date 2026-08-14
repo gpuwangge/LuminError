@@ -24,6 +24,12 @@ layout(set = 0, binding = 7) uniform InstanceUniformInfo {
    InstanceStruct instances[INSTANCE_SIZE];
 } instanceUBO;
 
+#ifdef ENABLE_TEXTURE
+const uint MAX_GLOBAL_TEXTURES = 69u;
+layout(set = 0, binding = 10) uniform sampler2D texarray[MAX_GLOBAL_TEXTURES];
+//texture(texarray[texId], uv);
+#endif
+
 struct HitInfoStruct{
     vec3 hitPos;
     vec3 V; //视向向量，观察方向
@@ -190,6 +196,16 @@ vec3 SampleSky(vec3 dir){
     // sky += sun * vec3(20.0);
     // return sky;
 }
+
+/**************
+Texture function
+**************/
+#ifdef ENABLE_TEXTURE
+vec4 SampleTexture(uint texId, vec2 uv){
+    texId = min(texId, MAX_GLOBAL_TEXTURES - 1u);
+    return texture(texarray[texId], uv);
+}
+#endif
 
 /**************
 Shadow functions
@@ -646,18 +662,29 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
     }
 }
 
-void updatePayload(in MaterialStruct mat, vec3 Ngeom){
+void updatePayload(in MaterialStruct mat, vec3 Ngeom, vec2 uv){
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;
+
     hitInfo.albedo = mat.albedo;
+    hitInfo.alpha = mat.alpha;
+#ifdef ENABLE_TEXTURE
+    //if (mat.baseColorTextureIndex != INVALID_TEXTURE_INDEX) {//add texture
+        //vec4 baseColor = SampleTexture(mat.baseColorTextureIndex, uv);
+        vec4 baseColor = SampleTexture(0, uv); //todo: use real tex id
+        hitInfo.albedo *= baseColor.rgb;
+        hitInfo.alpha *= baseColor.a;
+    //}
+#endif
+
     hitInfo.emission = mat.emissionColor * mat.emissionStrength;
     hitInfo.metallic = clamp(mat.metallic, 0.0, 1.0);
     hitInfo.roughness = clamp(mat.roughness, 0.02, 1.0);
     hitInfo.transmission = clamp(mat.transmission, 0.0, 1.0);
     hitInfo.specular = clamp(mat.specular, 0.0, 1.0);
     hitInfo.ior = max(mat.ior, 1.01);
-    hitInfo.alpha = mat.alpha;
+    
     hitInfo.transmissionColor = mat.transmissionColor;
 
     hitInfo.hitPos = getWorldHitPos();

@@ -235,7 +235,7 @@ namespace LERenderer{
 
         virtual void createRaytracingDescriptorPool() = 0;
         virtual void createRaytracingDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
-        virtual void createRaytracingDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas) = 0;
+        virtual void createRaytracingDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas, const std::vector<VkImageView>& glbTextureImageViews) = 0;
 
         virtual void addComputeGlobalUniformBuffer() = 0;
         virtual void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) = 0;
@@ -286,6 +286,7 @@ namespace LERenderer{
         virtual void RaytracingDescriptorManagerDestroyAndFree() = 0;
 
         virtual VkAccelerationStructureKHR GetTlas() = 0;
+        virtual std::vector<VkSampler>& GetGLBSampelrs() = 0;
 
         /**************************
          * Swapchain

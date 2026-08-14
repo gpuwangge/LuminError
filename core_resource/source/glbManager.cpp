@@ -152,7 +152,7 @@ int CGLBManager::GetMeshSize(IN int glbIndex){
     return gltfModel.meshes.size();//todo: add glbIndex to suppport multiple glb files
 }
 
-void CGLBManager::LoadTexture(VkCommandPool &commandPool){
+void CGLBManager::LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
     // -----------------------------------------------------------
     // 1) Load glTF
     // -----------------------------------------------------------
@@ -180,7 +180,7 @@ void CGLBManager::LoadTexture(VkCommandPool &commandPool){
         int texture_index = textureManager->PushNewTextureImage(commandPool);//todo: use raytracing(compute) queue family? 
         VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         textureManager->SetupTextureImage(texture_index, img.width, img.height, usage, 1, VK_FORMAT_R8G8B8A8_SRGB, 8);
-        textureManager->GenerateTextureImageFromTexel(texture_index, 0, false, (void *)img.image.data()); //put sampler_id to 0 here, can change later
+        textureManager->GenerateTextureImageFromTexel(texture_index, 0, false, (void *)img.image.data(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL); //put sampler_id to 0 here, can change later
 
         //const VkDeviceSize sourceSize = img.image.size();
         //std::cout<<"sourceSize = "<<sourceSize<<std::endl;
@@ -190,13 +190,12 @@ void CGLBManager::LoadTexture(VkCommandPool &commandPool){
     }
 
     std::cout<<"textureManager->textureImages.size() = "<<textureManager->textureImages.size()<<std::endl;
-    return;
     
-
     // -----------------------------------------------------------
     // 3) 创建 VkSampler（对应 model.textures 中的 sampler）
     // -----------------------------------------------------------
-    std::vector<VkSampler> vkSamplers(gltfModel.textures.size());
+    //std::vector<VkSampler> vkSamplers(gltfModel.textures.size());
+    glbSamplers.resize(gltfModel.textures.size());
 
     for (size_t t = 0; t < gltfModel.textures.size(); ++t) {
         const tinygltf::Texture &tex = gltfModel.textures[t];
@@ -235,8 +234,12 @@ void CGLBManager::LoadTexture(VkCommandPool &commandPool){
         constexpr uint32_t imgMipLevels = 1; //assume no mipmap for now
         samplerInfo.maxLod = static_cast<float>(imgMipLevels - 1);
 
-        vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &vkSamplers[t]);
+        vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &glbSamplers[t]); //need destroy with vkDestroySampler
     }
+
+    std::cout<<"Read from gltfModel.textures: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
+
+    return;
 
     // --------------------------------------------------------------------
     // 4) 把 “image + sampler” 绑定到 descriptor set（binding 2）
@@ -249,7 +252,7 @@ void CGLBManager::LoadTexture(VkCommandPool &commandPool){
 
     VkDescriptorImageInfo info{};
     info.imageView = textureManager->textureImages[imgIdx].m_textureImageBuffer.view;// vkImageViews[imgIdx];
-    info.sampler = vkSamplers[t];
+    info.sampler = glbSamplers[t];
     info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     texDescInfos[t] = info;
     }

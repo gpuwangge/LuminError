@@ -41,8 +41,8 @@ void ResourceCore::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::ve
     glbManager.LoadMesh(meshIndex, primitiveIndex, vertices3D, indices3D);
 }
 
-void ResourceCore::LoadTexture(VkCommandPool &commandPool){
-    glbManager.LoadTexture(commandPool);
+void ResourceCore::LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
+    glbManager.LoadTexture(commandPool, glbSamplers);
 }
 
 int ResourceCore::GetMeshSize(IN int glbIndex){
@@ -132,7 +132,7 @@ glm::vec3& ResourceCore::GetModelLengthMin(int index)  { return modelManager.mod
 /**************************
  * Texture Resource
  * ***********************/
-void ResourceCore::CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+void ResourceCore::CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, int layoutType, 
     int miplevel, int sampler_id, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, bool bCubemap){
     //std::cout<<"CreateNewTextureImageFromFile..."<<std::endl;
     //textureManager.CreateTextureImage(texturePath, usage, commandPool, miplevel, sampler_id, imageFormat, bitPerTexelPerChannel, bCubemap);
@@ -141,7 +141,10 @@ void ResourceCore::CreateNewTextureImageFromFile(const std::string texturePath, 
     textureManager.GetTexelFromFile_SetupTextureImage(texture_index, texturePath, usage, miplevel, imageFormat, bitPerTexelPerChannel, texels);
     //std::cout<< "source texels = " << texels<<std::endl;
     //std::cout<<"Done GetTexelFromFile."<<std::endl;
-    textureManager.GenerateTextureImageFromTexel(texture_index, sampler_id, bCubemap, texels);
+    if(layoutType == 0)
+        textureManager.GenerateTextureImageFromTexel(texture_index, sampler_id, bCubemap, texels, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    else if(layoutType == 1)
+        textureManager.GenerateTextureImageFromTexel(texture_index, sampler_id, bCubemap, texels, VK_IMAGE_LAYOUT_GENERAL);
     //std::cout<<"Done GenerateTextureImageFromTexel."<<std::endl;
     //std::cout.flush();
     textureManager.STBI_Free_Image(texels); //when read from file, use stbi so need to free here
@@ -155,6 +158,15 @@ void ResourceCore::DestroyTextureManager(){
 // }
 int ResourceCore::GetTextureImageSize() { return textureManager.textureImages.size(); }
 VkImageView ResourceCore::GetTextureImageView(int index) { return textureManager.textureImages[index].m_textureImageBuffer.view; }
+std::vector<VkImageView> ResourceCore::GetTextureImageViews() { //这里不要返回引用
+    std::vector<VkImageView> views;
+    views.reserve(textureManager.textureImages.size());
+    for(int i = 0; i < textureManager.textureImages.size(); i++ ){
+        views.push_back(textureManager.textureImages[i].m_textureImageBuffer.view);
+    }
+
+    return views;
+}
 int ResourceCore::GetTextureImageSamplerId(int index) { return textureManager.textureImages[index].m_sampler_id; }
 void ResourceCore::GenerateMipmaps(int index) { textureManager.textureImages[index].generateMipmaps(); }
 void ResourceCore::GenerateMipmaps(int index, std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage) {
@@ -165,7 +177,7 @@ void ResourceCore::GenerateMipmaps(int index, std::string rainbowCheckerboardTex
  * Textimage Resource
  * ***********************/
 void ResourceCore::CreateTextImage(void* texels, int width, int height, VkCommandPool commandPool, int samplerId){
-    textImageManager.GenerateTextImageFromTexel(texels, width, height, commandPool, samplerId);
+    textImageManager.GenerateTextImageFromTexel(texels, width, height, commandPool, samplerId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 // CTextureImage& ResourceCore::GetTextImage(int index){
 //     return textImageManager.textureImages[index];

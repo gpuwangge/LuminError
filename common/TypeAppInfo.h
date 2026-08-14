@@ -430,12 +430,14 @@ struct TextureConfig{
     int texture_miplevel = 1;
     bool texture_enableCubemap = false;
     int texture_samplerid = 0;
+    int texture_layout_type = 0;
 
     void loadFromYaml(const YAML::Node& node) {
         texture_name                                   = getOrDefault(node, "resource_texture_name", std::string{"Default"});
         texture_miplevel                               = getOrDefault(node, "resource_texture_miplevels", 1);
         texture_enableCubemap                          = getOrDefault(node, "resource_texture_cubemap", false);
         texture_samplerid                              = getOrDefault(node, "uniform_sampler_id", 0);
+        texture_layout_type                              = getOrDefault(node, "resource_texture_layout_type", 0);
     }
 };
 

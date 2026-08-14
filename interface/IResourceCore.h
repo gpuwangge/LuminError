@@ -22,7 +22,7 @@ namespace LEResource{
          * ***********************/
         virtual void LoadGLB(IN const std::string glbName) = 0;
         virtual void LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) = 0;
-        virtual void LoadTexture(VkCommandPool &commandPool) = 0;
+        virtual void LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) = 0;
         virtual int GetMeshSize(IN int glbIndex) = 0;
 
         /**************************
@@ -81,12 +81,13 @@ namespace LEResource{
         /**************************
          * Texture Resource
          * ***********************/
-        virtual void CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+        virtual void CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, int layoutType, 
             int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false) = 0;
         virtual void DestroyTextureManager() = 0;
         //virtual CTextureImage& GetTextureImage(int index) = 0;
         virtual int GetTextureImageSize() = 0;
         virtual VkImageView GetTextureImageView(int index) = 0;
+        virtual std::vector<VkImageView> GetTextureImageViews() = 0;
         virtual int GetTextureImageSamplerId(int index) = 0;
         virtual void GenerateMipmaps(int index) = 0; //create normal mipmap
         virtual void GenerateMipmaps(int index, std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage) = 0; //create mix mipmaps

@@ -140,12 +140,12 @@ Resources:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
       resource_raytracing_pipeline_primary_miss_shader_name: simpleRayPipeline/primary.rmiss.spv
       resource_raytracing_pipeline_shadow_miss_shader_name: simpleRayPipeline/shadow.rmiss.spv
-      resource_raytracing_pipeline_primary_closesthit_shader_name: simpleRayPipeline/primary.rchit.spv
+      resource_raytracing_pipeline_primary_closesthit_shader_name: simpleRayPipeline_noTexture/primary.rchit.spv
       resource_raytracing_pipeline_shadow_closesthit_shader_name: simpleRayPipeline/shadow.rchit.spv
       resource_raytracing_pipeline_primary_anyhit_shader_name: simpleRayPipeline/primary.rahit.spv
       resource_raytracing_pipeline_shadow_anyhit_shader_name: simpleRayPipeline/shadow.rahit.spv
       resource_raytracing_pipeline_sphere_intersection_shader_name: simpleRayPipeline/sphere.rint.spv
-      resource_raytracing_pipeline_sphere_primary_closesthit_shader_name: simpleRayPipeline/sphere_primary.rchit.spv
+      resource_raytracing_pipeline_sphere_primary_closesthit_shader_name: simpleRayPipeline_noTexture/sphere_primary.rchit.spv
       resource_raytracing_pipeline_sphere_shadow_closesthit_shader_name: simpleRayPipeline/sphere_shadow.rchit.spv
       resource_raytracing_pipeline_callable_shader_name: none
 

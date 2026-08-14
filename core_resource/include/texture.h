@@ -35,7 +35,7 @@ public:
     /*******************
     *	Texture Image: Create
     ********************/
-    void CreateTextureImage(void* texels);
+    void CreateTextureImage(void* texels, VkImageLayout dstImageLayout);
     void CreateImageView(VkImageAspectFlags aspectFlags);
     
     /*******************
@@ -117,7 +117,7 @@ public:
         VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel, void *&texels);
     void SetupTextureImage(int imageIndex, uint32_t width, uint32_t height, 
         VkImageUsageFlags usage, int miplevel, VkFormat imageFormat, unsigned short bitPerTexelPerChannel);
-    void GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap, void *texels);
+    void GenerateTextureImageFromTexel(int imageIndex, int sampler_id, bool bCubemap, void *texels, VkImageLayout dstImageLayout);
 
     void STBI_Free_Image(void *texels);
     void Destroy();
@@ -139,7 +139,7 @@ public:
     VkPhysicalDevice m_physicalDevice;
     VkQueue m_graphicsQueue;
 
-    void GenerateTextImageFromTexel(void* texels, int width, int height, VkCommandPool commandPool, int samplerId);
+    void GenerateTextImageFromTexel(void* texels, int width, int height, VkCommandPool commandPool, int samplerId, VkImageLayout dstImageLayout);
 
     void Destroy();
 };

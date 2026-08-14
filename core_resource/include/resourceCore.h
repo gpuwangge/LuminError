@@ -18,7 +18,7 @@ namespace LEResource{
          * ***********************/
         void LoadGLB(IN const std::string glbName) override;
         void LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
-        void LoadTexture(VkCommandPool &commandPool) override;
+        void LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) override;
         int GetMeshSize(IN int glbIndex) override;
 
         /**************************
@@ -77,12 +77,13 @@ namespace LEResource{
         /**************************
          * Texture Resource
          * ***********************/
-        void CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, 
+        void CreateNewTextureImageFromFile(const std::string texturePath, VkImageUsageFlags usage, VkCommandPool &commandPool, int layoutType,
             int miplevel, int sampler_id, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, unsigned short bitPerTexelPerChannel = 8, bool bCubemap = false) override;
         void DestroyTextureManager() override;
         //CTextureImage& GetTextureImage(int index) override;
         int GetTextureImageSize() override;
         VkImageView GetTextureImageView(int index) override;
+        std::vector<VkImageView> GetTextureImageViews() override;
         int GetTextureImageSamplerId(int index) override;
         void GenerateMipmaps(int index) override;
         void GenerateMipmaps(int index, std::string rainbowCheckerboardTexturePath, VkImageUsageFlags usage) override;

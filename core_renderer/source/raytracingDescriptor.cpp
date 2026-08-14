@@ -15,10 +15,10 @@ std::vector<VkDescriptorPoolSize> CRaytracingDescriptorManager::raytracingDescri
 void CRaytracingDescriptorManager::createDescriptorPool(){
     //Descriptor Step 1/3
 
-	raytracingDescriptorPoolSizes.resize(getPoolSize());
+	raytracingDescriptorPoolSizes.resize(getPoolSize(glbSamplers.size()));
 	int counter = 0;
     //std::cout<<"createDescriptorPool::textureSamplers.size() = " << textureSamplers.size()<<std::endl;
-    if(bVerbose) std::cout<<"Raytracing Pool size = " << getPoolSize()<<std::endl;
+    if(bVerbose) std::cout<<"Raytracing Pool size = " << getPoolSize(glbSamplers.size())<<std::endl;
 
     //Note: 
     //VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER UBO，少量常量数据,只读
@@ -65,6 +65,22 @@ void CRaytracingDescriptorManager::createDescriptorPool(){
         raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;//accumulated image
 	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT); ///!!!
         counter++;
+
+        std::cout<<"RT Descriptor: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
+        // for(int i = 0; i < glbSamplers.size(); i++){
+        //     raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	 	//     raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		//     counter++;
+        // }
+
+        const uint32_t samplerCount = static_cast<uint32_t>(glbSamplers.size());
+        if (samplerCount > 0) {
+            raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            // 每一帧对应一个 descriptor set；
+            // 每个 set 的该 binding 有 samplerCount 个元素。
+            raytracingDescriptorPoolSizes[counter].descriptorCount = samplerCount * MAX_FRAMES_IN_FLIGHT;
+            counter++;
+        }
     }
     //std::cout<<std::endl;
 
@@ -88,9 +104,9 @@ VkDescriptorSetLayout CRaytracingDescriptorManager::descriptorSetLayout;
 void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding){
     //Descriptor Step 2/3
 
-    raytracingBindings.resize(getLayoutSize());
+    raytracingBindings.resize(getLayoutSize(glbSamplers.size()));
 	int counter = 0;
-    if(bVerbose) std::cout<<"Layout(Raytracing) size = " << getLayoutSize()<<std::endl;
+    if(bVerbose) std::cout<<"Layout(Raytracing) size = " << getLayoutSize(glbSamplers.size())<<std::endl;
 
     if(raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN){
         raytracingBindings[counter].binding = counter;
@@ -163,6 +179,28 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].pImmutableSamplers = nullptr;
         raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
         counter++;
+
+        // for(int i = 0; i < glbSamplers.size(); i++){
+        //     raytracingBindings[counter].binding = counter;
+        //     raytracingBindings[counter].descriptorCount = 1;
+        //     raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        //     raytracingBindings[counter].pImmutableSamplers = nullptr;
+        //     raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        //     counter++;
+        // }
+
+        const uint32_t samplerCount = static_cast<uint32_t>(glbSamplers.size());
+        if (samplerCount > 0) {
+            auto& samplerBinding = raytracingBindings[counter];
+            samplerBinding.binding = counter;
+            samplerBinding.descriptorCount = samplerCount;
+            samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            samplerBinding.pImmutableSamplers = nullptr;
+            // 你的 sampler 若由 closest-hit shader 使用，应当包含 CLOSEST_HIT。
+            // 若 raygen / miss / any-hit 也访问，也要加入对应 stage bit。
+            samplerBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+            counter++;
+        }
     }
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -178,12 +216,13 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
 /************
  * Set
  ************/
-void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas){
+void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas,
+        const std::vector<VkImageView>& glbTextureImageViews){
     //Descriptor Step 3/3
     //HERE_I_AM("wxjCreateDescriptorSets");
 
-    int descriptorSize = getSetSize();
-    if(bVerbose) std::cout<<"Set(Raytracing) size = "<<getSetSize()<<std::endl;
+    int descriptorSize = getSetSize(glbSamplers.size());
+    if(bVerbose) std::cout<<"Set(Raytracing) size = "<<getSetSize(glbSamplers.size())<<std::endl;
 
     VkResult result = VK_SUCCESS;
 
@@ -204,6 +243,8 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         std::vector<VkWriteDescriptorSet> descriptorWrites;
+
+        std::vector<VkDescriptorImageInfo> samplerInfos;
 
         descriptorWrites.resize(descriptorSize);
         int counter = 0;
@@ -355,6 +396,45 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
             descriptorWrites[counter].descriptorCount = 1;
             descriptorWrites[counter].pImageInfo = &storageImageInfo2;
             counter++;
+
+            
+            if (!glbSamplers.empty()) {
+                std::cout<<"RT Descriptor: textureImageViews.size() = "<<glbTextureImageViews.size()<<std::endl;
+                // std::cout << "glbSamplers.size() = "
+                //         << glbSamplers.size()
+                //         << ", glbTextureImageViews.size() = "
+                //         << glbTextureImageViews.size()
+                //         << std::endl;
+                // for (size_t textureIndex = 0; textureIndex < glbSamplers.size(); ++textureIndex) {
+                //     std::cout << "texture[" << textureIndex << "]"
+                //             << ", sampler = " << glbSamplers[textureIndex]
+                //             << ", imageView = " << glbTextureImageViews[textureIndex]
+                //             << std::endl;
+                // }
+                
+                samplerInfos.resize(glbSamplers.size());
+
+                if (glbTextureImageViews.size() != glbSamplers.size()) 
+                    throw std::runtime_error("glbTextureImageViews.size() must equal glbSamplers.size()");
+
+                for (size_t textureIndex = 0; textureIndex < glbSamplers.size(); ++textureIndex) {
+                    samplerInfos[textureIndex].sampler = glbSamplers[textureIndex];
+                    samplerInfos[textureIndex].imageView = glbTextureImageViews[textureIndex];
+                    samplerInfos[textureIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                }
+
+                VkWriteDescriptorSet& samplerWrite = descriptorWrites[counter];
+                samplerWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                samplerWrite.dstSet = descriptorSets[i];
+                samplerWrite.dstBinding = counter;
+                samplerWrite.dstArrayElement = 0;
+                samplerWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                samplerWrite.descriptorCount = static_cast<uint32_t>(samplerInfos.size());
+                samplerWrite.pImageInfo = samplerInfos.data();
+
+                counter++;
+            }
+
         }
         
         //Step 4
@@ -557,7 +637,7 @@ void CRaytracingDescriptorManager::addStorageImage(VkBufferUsageFlags usage){
 /************
  * Helper Functions
  ************/
-int CRaytracingDescriptorManager::getPoolSize(){
+int CRaytracingDescriptorManager::getPoolSize(int glbSamplerSize){
     //std::cout<<"getPoolSize::uniformBufferUsageFlags = " << uniformBufferUsageFlags<<std::endl;
 	int descriptorPoolSize = 0;
     // descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_GLOBAL ? 1:0;
@@ -571,16 +651,18 @@ int CRaytracingDescriptorManager::getPoolSize(){
     // descriptorPoolSize += computeUniformTypes & COMPUTE_UNIFORMBUFFER_CUSTOM ? 1:0;
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEBUFFER_CUSTOMSWAP ? 2:0; 
     // descriptorPoolSize += computeUniformTypes & COMPUTE_STORAGEIMAGE_TEXTURE ? 1:0;
-    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 10:0; 
+    int samplerCount = glbSamplerSize > 0? 1: 0;
+    descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 10+samplerCount:0; 
+    //descriptorPoolSize += raytracingUniformTypes & RAYTRACING_STORAGEIMAGE_SWAPCHAIN ? 11:0; 
     //TODO: currently combine image and tlas, geometry Info, material, global, custom, rtlight, instance, config, accumulated image
 	return descriptorPoolSize;
 }
-int CRaytracingDescriptorManager::getLayoutSize(){
-	return getPoolSize();
+int CRaytracingDescriptorManager::getLayoutSize(int glbSamplerSize){
+	return getPoolSize(glbSamplerSize);
 }
 
-int CRaytracingDescriptorManager::getSetSize(){
-    return getLayoutSize();
+int CRaytracingDescriptorManager::getSetSize(int glbSamplerSize){
+    return getLayoutSize(glbSamplerSize);
 }
 
 void CRaytracingDescriptorManager::DestroyAndFree(){
@@ -604,6 +686,9 @@ void CRaytracingDescriptorManager::DestroyAndFree(){
     for (size_t i = 0; i < m_uniformBuffers_config.size(); i++) {
         m_uniformBuffers_config[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     }
+
+    for(int i = 0; i < glbSamplers.size(); i++)
+        vkDestroySampler(CContext::GetHandle().GetLogicalDevice(), glbSamplers[i], nullptr);
 
     vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), raytracingDescriptorPool, nullptr);
     vkDestroyDescriptorSetLayout(CContext::GetHandle().GetLogicalDevice(), descriptorSetLayout, nullptr);
