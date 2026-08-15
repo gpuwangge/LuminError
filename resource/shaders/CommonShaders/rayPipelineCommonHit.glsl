@@ -24,7 +24,7 @@ layout(set = 0, binding = 7) uniform InstanceUniformInfo {
    InstanceStruct instances[INSTANCE_SIZE];
 } instanceUBO;
 
-#ifdef ENABLE_TEXTURE
+#ifndef DISABLE_TEXTURE
 const uint MAX_GLOBAL_TEXTURES = 69u;
 layout(set = 0, binding = 10) uniform sampler2D texarray[MAX_GLOBAL_TEXTURES];
 //texture(texarray[texId], uv);
@@ -200,7 +200,7 @@ vec3 SampleSky(vec3 dir){
 /**************
 Texture function
 **************/
-#ifdef ENABLE_TEXTURE
+#ifndef DISABLE_TEXTURE
 vec4 SampleTexture(uint texId, vec2 uv){
     texId = min(texId, MAX_GLOBAL_TEXTURES - 1u);
     return texture(texarray[texId], uv);
@@ -669,7 +669,7 @@ void updatePayload(in MaterialStruct mat, vec3 Ngeom, vec2 uv){
 
     hitInfo.albedo = mat.albedo;
     hitInfo.alpha = mat.alpha;
-#ifdef ENABLE_TEXTURE
+#ifndef DISABLE_TEXTURE
     //if (mat.baseColorTextureIndex != INVALID_TEXTURE_INDEX) {//add texture
         //vec4 baseColor = SampleTexture(mat.baseColorTextureIndex, uv);
         vec4 baseColor = SampleTexture(0, uv); //todo: use real tex id
