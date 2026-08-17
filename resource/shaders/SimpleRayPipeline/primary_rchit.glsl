@@ -36,6 +36,8 @@ layout(buffer_reference, scalar, buffer_reference_align = 4) readonly buffer Ind
 struct GeometryInfo {
     VertexBufferRef vertexBuf;
     IndexBufferRef  indexBuf;
+    //uint materialIndex;
+    //uint _pad0;
 };
 
 layout(set = 0, binding = 2, scalar) readonly buffer SBOGeometryInfoBuffer {
@@ -87,30 +89,31 @@ vec2 getTriangleUV(uint geometryIndex){
     uint i1 = geo.indexBuf.indices[baseIndex + 1u];
     uint i2 = geo.indexBuf.indices[baseIndex + 2u];
 
-    TriangleVertexInfo v0 = geo.vertexBuf.vertices[i0];
-    TriangleVertexInfo v1 = geo.vertexBuf.vertices[i1];
-    TriangleVertexInfo v2 = geo.vertexBuf.vertices[i2];
+    vec2 uv0 = geo.vertexBuf.vertices[i0].uv;
+    vec2 uv1 = geo.vertexBuf.vertices[i1].uv;
+    vec2 uv2 = geo.vertexBuf.vertices[i2].uv;
 
-    vec3 bc = vec3(
-        1.0 - bary.x - bary.y,
-        bary.x,
-        bary.y
-    );
+    float w0 = 1.0 - bary.x - bary.y;
+    return uv0 * w0 + uv1 * bary.x + uv2 * bary.y;
 
-    return v0.uv * bc.x +
-           v1.uv * bc.y +
-           v2.uv * bc.z;
+    // TriangleVertexInfo v0 = geo.vertexBuf.vertices[i0];
+    // TriangleVertexInfo v1 = geo.vertexBuf.vertices[i1];
+    // TriangleVertexInfo v2 = geo.vertexBuf.vertices[i2];
+
+    // vec3 bc = vec3(1.0 - bary.x - bary.y,bary.x,bary.y);
+    // return v0.uv * bc.x +v1.uv * bc.y +v2.uv * bc.z;
 }
 
 void main(){
     uint instanceIndex = uint(gl_InstanceCustomIndexEXT);
     uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
     uint geometryIndex = instanceUBO.instances[instanceIndex].geometryIndex; //thats the model
+    uint textureIndex_baseColor = instanceUBO.instances[instanceIndex].textureIndex_baseColor;
 
     MaterialStruct mat = materialUBO.materials[materialIndex];
     
     //Core
     vec3 Ntri = getTriangleWorldNormal(geometryIndex);
     vec2 uv = getTriangleUV(geometryIndex);
-    updatePayload(mat, Ntri, uv);
+    updatePayload(mat, Ntri, textureIndex_baseColor, uv);
 }

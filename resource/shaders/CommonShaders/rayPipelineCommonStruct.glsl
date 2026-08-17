@@ -41,11 +41,13 @@ struct MaterialStruct {
     float specular;
     float ior;
     float transmission;
+    //int  baseColorTextureIndex;      // -1 = 无贴图
 };
 
 struct InstanceStruct {
     uint geometryIndex;
     uint materialIndex;
+    uint textureIndex_baseColor;
 };
 
 /*************

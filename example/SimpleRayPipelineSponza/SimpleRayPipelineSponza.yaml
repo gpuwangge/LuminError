@@ -55,7 +55,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 0
     rt_light_position: [5.6, 1.15, 2]
     rt_light_color: [1, 0, 0]
-    rt_light_intensity: 6
+    rt_light_intensity: 16
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -64,7 +64,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 1
     rt_light_position: [-6, 1.15, 2]
     rt_light_color: [0, 1, 0]
-    rt_light_intensity: 6
+    rt_light_intensity: 16
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -73,7 +73,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 2
     rt_light_position: [5.6, 1.15, -2.25]
     rt_light_color: [0, 0, 1]
-    rt_light_intensity: 6
+    rt_light_intensity: 16
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -82,7 +82,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 3
     rt_light_position: [-6, 1.15, -2.25]
     rt_light_color: [1, 0, 0]
-    rt_light_intensity: 6
+    rt_light_intensity: 16
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -91,7 +91,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 4
     rt_light_position: [0.0, 6.5, 0.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 6
+    rt_light_intensity: 100
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet

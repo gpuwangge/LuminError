@@ -226,6 +226,7 @@ namespace LEGameEngine{
         int GetObjectModelID(int objectId) override;
         int GetObjectMaterialID(int objectId) override;
         glm::vec3 GetObjectRotation(int objectId) override;
+        int GetObjectTextureID_BaseColor(int objectId) override;
 
         int GetLightSize() override;
         glm::vec3 GetLightPosition(int lightId) override;

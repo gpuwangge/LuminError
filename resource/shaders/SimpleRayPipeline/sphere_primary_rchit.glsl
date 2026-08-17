@@ -35,5 +35,5 @@ void main(){
     //Core
     vec3 Ngeom = getSphereWorldNormal(); //Normal for Geometry
     vec2 uv = getSphereUV();
-    updatePayload(mat, Ngeom, uv);
+    updatePayload(mat, Ngeom, 0, uv); 
 }

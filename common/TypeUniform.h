@@ -117,6 +117,7 @@ struct alignas(16) MaterialInfo{
     alignas(4) float specular;
     alignas(4) float ior;
     alignas(4) float transmission;
+    //alignas(4) int  baseColorTextureIndex;
     //alignas(4) float padding[44]; //44*4=176 bytes 
 }; //total size: 16*3+4*8=80, need+176=256 bytes but no need?
 
@@ -175,7 +176,8 @@ struct StructUniformBuffer_RtLight{
 struct InstanceInfo{ //alignas(4)没必要
     alignas(4) uint32_t geometryIndex;   // GeometryInfo 的下标 4 bytes
     alignas(4) uint32_t materialIndex;   // Material 的下标  4 bytes
-    alignas(4) float padding[2];  //8 bytes
+    alignas(4) uint32_t textureIndex_baseColor;
+    alignas(4) float padding[1];  //8 bytes
 };  // 总共16 bytes,符合 std140 中一个 struct 元素通常需要 16-byte 对齐的要求。
 static constexpr size_t INSTANCE_SIZE = 256;//assume max 256 instances for now
 struct StructUniformBuffer_Instance{

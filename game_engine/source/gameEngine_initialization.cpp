@@ -259,19 +259,19 @@ void GameEngine::Initialize(){
         std::string glbName = appInfo->Glbs[i].resource_glb_name;
         //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<std::endl;
 
-        resourcer->LoadGLB(glbName);
+        resourcer->LoadGLBFromFile(glbName);
         bLoadGLB = true;
 
+        resourcer->LoadGLBMaterial();
         //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<", mesh size="<<resourcer->GetMeshSize(i)<<std::endl;
-        for(int j = 0; j < resourcer->GetMeshSize(i); j++){    
+        for(int j = 0; j < resourcer->GetGLBMeshSize(i); j++){    
             modelData.emplace_back();
             int currentModelIndex = modelData.size() - 1;
-            resourcer->LoadMesh(j, 0, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
+            resourcer->LoadGLBMesh(j, 0, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
             renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
             renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
         }
-
-        resourcer->LoadTexture(renderer->GetCommandPool(), renderer->GetGLBSampelrs());
+        resourcer->LoadGLBTexture(renderer->GetCommandPool(), renderer->GetGLBSampelrs());
         
     }
 
@@ -513,14 +513,14 @@ void GameEngine::Initialize(){
                 objects[i].SetScale(object_scale_3[0], object_scale_3[1], object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
             }
         }
-    }else{ //use GLB objects
-        objects.resize(resourcer->GetMeshSize(0) + objectCountControl);
+    }else{ //use GLB objects:对RT Pipeline来说，GLB Mesh之前读进了buffer，现在mesh注册，之后再rendererCore里面把这里注册的信息放入instance buffer
+        objects.resize(resourcer->GetGLBMeshSize(0) + objectCountControl);
         std::cout<<"Application: Register "<<objects.size()<<" objects from GLB."<<std::endl;
-        for(int i = 0; i < resourcer->GetMeshSize(0); i++){
+        for(int i = 0; i < resourcer->GetGLBMeshSize(0); i++){
             objects[i].m_object_id = i;
             objects[i].m_model_id = i;
             objects[i].m_material_id = 0;
-            objects[i].m_texture_ids = std::vector<int>(0);
+            objects[i].m_texture_ids = std::vector<int>(1, resourcer->GetGLBTextureIndexBaseColor(i)); //only one element, it is assumed to be textureIndex_baseColor
             objects[i].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
             objects[i].Name = "default";
             objects[i].bSticker = false;

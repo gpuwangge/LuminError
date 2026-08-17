@@ -662,7 +662,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
     }
 }
 
-void updatePayload(in MaterialStruct mat, vec3 Ngeom, vec2 uv){
+void updatePayload(in MaterialStruct mat, vec3 Ngeom, uint texId, vec2 uv){
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;
@@ -672,7 +672,7 @@ void updatePayload(in MaterialStruct mat, vec3 Ngeom, vec2 uv){
 #ifndef DISABLE_TEXTURE
     //if (mat.baseColorTextureIndex != INVALID_TEXTURE_INDEX) {//add texture
         //vec4 baseColor = SampleTexture(mat.baseColorTextureIndex, uv);
-        vec4 baseColor = SampleTexture(0, uv); //todo: use real tex id
+        vec4 baseColor = SampleTexture(texId, uv); //todo: use real tex id
         hitInfo.albedo *= baseColor.rgb;
         hitInfo.alpha *= baseColor.a;
     //}

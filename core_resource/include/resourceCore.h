@@ -16,10 +16,12 @@ namespace LEResource{
         /**************************
          * GLB Resource
          * ***********************/
-        void LoadGLB(IN const std::string glbName) override;
-        void LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
-        void LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) override;
-        int GetMeshSize(IN int glbIndex) override;
+        void LoadGLBFromFile(IN const std::string glbName) override;
+        void LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
+        void LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) override;
+        void LoadGLBMaterial() override;
+        int GetGLBMeshSize(IN int glbIndex) override;
+        int GetGLBTextureIndexBaseColor(int meshIndex) override;
 
         /**************************
          * Shader Resource

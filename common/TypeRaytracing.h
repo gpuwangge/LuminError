@@ -31,9 +31,11 @@ struct RtSphere{
     // VkDeviceAddress blasAddress = 0;//blasDeviceAddress
 };
 
-struct alignas(16) GeometryInfoGPU{
+struct GeometryInfoGPU{//remove alignas(16), because shader use scalar(which is 24byte stride)
     VkDeviceAddress vertexBuf;
     VkDeviceAddress indexBuf;
+    //  uint32_t materialIndex;//new
+    //  uint32_t _pad0;//new
 };
 
 static constexpr size_t GEOMETRYINFO_SIZE = 256; //this is the maximum vertex index count for all triangles

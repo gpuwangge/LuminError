@@ -268,6 +268,10 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
         storageBufferObject_GeometryInfo.geometryInfos[i].vertexBuf = rtMeshes[i].vertexAddress;
         storageBufferObject_GeometryInfo.geometryInfos[i].indexBuf = rtMeshes[i].indexAddress;
 
+        //int textureIndex = i%69;
+        //std::cout<<"assign "<<i<<" to storageBufferObject_GeometryInfo.geometryInfos[i].materialIndex"<<std::endl;
+        //storageBufferObject_GeometryInfo.geometryInfos[i].materialIndex = i; //todo
+
         // std::cout<<"rtMeshes["<<i<<"].vertexAddress = "<<rtMeshes[i].vertexAddress<<std::endl;
         // std::cout<<"rtMeshes["<<i<<"].indexAddress = "<<rtMeshes[i].indexAddress<<std::endl;
         // std::cout<<"rtMeshes["<<i<<"].vertexCount = "<<rtMeshes[i].vertexCount<<std::endl;
@@ -295,6 +299,14 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
     UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame(), &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
     UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame()+1, &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
     //if(bVerboseRaytracing) std::cout<<"Done upload geometry info to device."<<std::endl;
+
+    // static_assert(sizeof(VkDeviceAddress) == 8);
+    // static_assert(alignof(GeometryInfoGPU) == 16);
+    // static_assert(offsetof(GeometryInfoGPU, vertexBuf) == 0);
+    // static_assert(offsetof(GeometryInfoGPU, indexBuf) == 8);
+    // static_assert(offsetof(GeometryInfoGPU, materialIndex) == 16);
+    // static_assert(offsetof(GeometryInfoGPU, _pad0) == 20);
+    // static_assert(sizeof(GeometryInfoGPU) == 32);
 
     /****************
     * BLAS for Spheres

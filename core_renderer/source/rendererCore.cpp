@@ -1518,11 +1518,12 @@ void RendererCore::CreateInstanceBuffer(){
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
         instances[i].accelerationStructureReference = game->GetRtMesh(model_id).blasAddress;
-        //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
+        //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use material_id = "<<material_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
         count++;
 
         storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id;
         storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id;
+        storageBufferObject_instance.instances[instanceIndex].textureIndex_baseColor = game->GetObjectTextureID_BaseColor(i);
         instanceIndex++;
     }
     //step2 for sphere

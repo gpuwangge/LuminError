@@ -13,7 +13,7 @@
 
 namespace LEResource{
 
-void CGLBManager::LoadGLB(const std::string& filename){
+void CGLBManager::LoadGLBFromFile(const std::string& filename){
     bool ok = loader.LoadBinaryFromFile(&gltfModel, &err, &warn, GLB_PATH + filename);
 
     if (!warn.empty()) std::cout << warn << std::endl;
@@ -29,7 +29,7 @@ void CGLBManager::LoadGLB(const std::string& filename){
     std::cout<<"GLB Sampler Size = "<<gltfModel.samplers.size()<<std::endl;
 }
 
-void CGLBManager::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
+void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
     //unsigned int meshIndex = 100;
     //unsigned int primitiveIndex = 0;
 
@@ -48,6 +48,23 @@ void CGLBManager::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vec
     const tinygltf::Accessor* posAccessor = nullptr;
     const tinygltf::Accessor* normalAccessor = nullptr;
     const tinygltf::Accessor* texAccessor = nullptr;
+
+    // MATERIAL
+    // primitive.material < 0 表示该 primitive 没有显式材质，
+    // 应使用 glTF 默认材质。
+    int materialId = primitive.material;
+    int textureIndex_BaseColor = myGlbMaterials[materialId].baseColorTextureIndex;
+    std::cout << "meshIndex = " << meshIndex << ", materialId = " << materialId << ", textureIndex_BaseColor = " << textureIndex_BaseColor<< "\n";
+    textureIds_baseColor.push_back(textureIndex_BaseColor);
+
+    //std::cout << "primitiveIndex = " << primitiveIndex << "\n";
+    //std::cout << "materialId     = " << materialId << "\n";
+    // if (materialId >= 0){
+    //     const tinygltf::Material& material = gltfModel.materials[materialId];
+    //     std::cout << "material name  = " << material.name << "\n";
+    // }
+    // else std::cout << "material       = default glTF material\n";
+    
 
     // POSITION
     auto it = primitive.attributes.find("POSITION");
@@ -148,32 +165,11 @@ void CGLBManager::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vec
     }
 }
 
-int CGLBManager::GetMeshSize(IN int glbIndex){
+int CGLBManager::GetGLBMeshSize(IN int glbIndex){
     return gltfModel.meshes.size();//todo: add glbIndex to suppport multiple glb files
 }
 
-void CGLBManager::LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
-    // -----------------------------------------------------------
-    // 1) Load glTF
-    // -----------------------------------------------------------
-    // tinygltf::Model gltfModel;
-    // tinygltf::TinyGLTF loader;
-    // std::string err, warn;
-
-    // bool ok = loader.LoadBinaryFromFile(&gltfModel, &err, &warn, "scene.glb");
-    // if (!ok) { /* 处理错误 */ }
-
-    // -----------------------------------------------------------
-    // 2) 创建所有 VkImage（对应 model.images）
-    // -----------------------------------------------------------
-    // std::vector<VkImage> vkImages(gltfModel.images.size());
-    // std::vector<VkImageView> vkImageViews(gltfModel.images.size());
-    // std::vector<VkDeviceMemory> vkImageMems(gltfModel.images.size());
-
-    // textureManager->textureImages[0].m_textureImageBuffer.image;
-    // textureManager->textureImages[0].m_textureImageBuffer.view;
-    // textureManager->textureImages[0].m_textureImageBuffer.deviceMemory;
-
+void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
     for (size_t i = 0; i < gltfModel.images.size(); ++i) {
         const tinygltf::Image &img = gltfModel.images[i];
 
@@ -192,7 +188,7 @@ void CGLBManager::LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler>
     std::cout<<"textureManager->textureImages.size() = "<<textureManager->textureImages.size()<<std::endl;
     
     // -----------------------------------------------------------
-    // 3) 创建 VkSampler（对应 model.textures 中的 sampler）
+    // 创建 VkSampler（对应 model.textures 中的 sampler）
     // -----------------------------------------------------------
     //std::vector<VkSampler> vkSamplers(gltfModel.textures.size());
     glbSamplers.resize(gltfModel.textures.size());
@@ -238,167 +234,189 @@ void CGLBManager::LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler>
     }
 
     std::cout<<"Read from gltfModel.textures: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
-
-    return;
-
-    // --------------------------------------------------------------------
-    // 4) 把 “image + sampler” 绑定到 descriptor set（binding 2）
-    // --------------------------------------------------------------------
-    std::vector<VkDescriptorImageInfo> texDescInfos(gltfModel.textures.size());
-
-    for (size_t t = 0; t < gltfModel.textures.size(); ++t) {
-    const tinygltf::Texture &tex = gltfModel.textures[t];
-    uint32_t imgIdx = static_cast<uint32_t>(tex.source); // source → images[idx]
-
-    VkDescriptorImageInfo info{};
-    info.imageView = textureManager->textureImages[imgIdx].m_textureImageBuffer.view;// vkImageViews[imgIdx];
-    info.sampler = glbSamplers[t];
-    info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    texDescInfos[t] = info;
-    }
-
-    // 假设已有 descriptorSet 已经预先分配好了
-    VkWriteDescriptorSet write{};
-    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    //write.dstSet = raytraceDescSet; //todo: 这里需要传入 descriptorSet
-    write.dstBinding = 2; // 与 shader 中 binding 对齐
-    write.dstArrayElement = 0;
-    write.descriptorCount = static_cast<uint32_t>(texDescInfos.size());
-    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    write.pImageInfo = texDescInfos.data();
-
-    vkUpdateDescriptorSets(m_logicalDevice, 1, &write, 0, nullptr);
 }
 
-/*
-void CGLBManager::createVkImageFromMemory(
-    VkDevice device,
-    VkPhysicalDevice physicalDevice,
-    uint32_t width,
-    uint32_t height,
-    int component,
-    const unsigned char* pixels,
-    size_t pixelByteSize,
-    VkFormat format,
-    VkImage& outImage,
-    VkImageView& outImageView,
-    VkDeviceMemory& outImageMemory){
-    if (width == 0 || height == 0 || pixels == nullptr || pixelByteSize == 0) 
-        throw std::runtime_error("Invalid texture image data");
-    
-    constexpr uint32_t mipLevels = 1; // 此实现只有一个 mip level。
+void CGLBManager::LoadGLBMaterial(){
+    bool bGLBMaterialVerbose = false;
 
-    VkBuffer stagingBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory stagingMemory = VK_NULL_HANDLE;
+    myGlbMaterials.clear();
+    myGlbMaterials.resize(gltfModel.materials.size());
 
-    
-    try {
-        // 1. 创建并填充 host-visible staging buffer。
-        CreateBuffer(device,physicalDevice,static_cast<VkDeviceSize>(pixelByteSize),
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            stagingBuffer,stagingMemory);
+    for (int materialIndex = 0; materialIndex < static_cast<int>(gltfModel.materials.size()); ++materialIndex){
+        if (materialIndex < 0 || materialIndex >= static_cast<int>(gltfModel.materials.size())) throw std::runtime_error("Invalid material index.");
 
-        void* mapped = nullptr;
-        if (vkMapMemory(device,stagingMemory,0,static_cast<VkDeviceSize>(pixelByteSize),0,&mapped) != VK_SUCCESS)
-            throw std::runtime_error("Failed to map staging-buffer memory");
-        
-        std::memcpy(mapped, pixels, pixelByteSize);
-        vkUnmapMemory(device, stagingMemory);
+        const tinygltf::Material& material = gltfModel.materials[materialIndex];
+        const tinygltf::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
-        // 2. 创建 GPU-local image。
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = width;
-        imageInfo.extent.height = height;
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = mipLevels;
-        imageInfo.arrayLayers = 1;
-        imageInfo.format = format;
-        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.usage =
-            VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-            VK_IMAGE_USAGE_SAMPLED_BIT;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        //------------------------------------------------------
+        // Basic info
+        //------------------------------------------------------
+        myGlbMaterials[materialIndex].name = material.name;
 
-        if (vkCreateImage(device, &imageInfo, nullptr, &outImage) != VK_SUCCESS) 
-            throw std::runtime_error("Failed to create texture VkImage");
-
-        VkMemoryRequirements imageMemoryRequirements{};
-        vkGetImageMemoryRequirements(device,outImage,&imageMemoryRequirements);
-
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = imageMemoryRequirements.size;
-        allocInfo.memoryTypeIndex = FindMemoryType(
-            physicalDevice,
-            imageMemoryRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-        if (vkAllocateMemory(device, &allocInfo, nullptr, &outImageMemory) != VK_SUCCESS) 
-            throw std::runtime_error("Failed to allocate texture image memory");
-
-        if (vkBindImageMemory(device, outImage, outImageMemory, 0) != VK_SUCCESS) 
-            throw std::runtime_error("Failed to bind texture image memory");
-
-        // 3. 录制上传命令。
-        VkCommandBuffer cmd = BeginSingleTimeCommands(device,m_commandPool);
-        TransitionImageLayout(cmd,outImage,VK_IMAGE_LAYOUT_UNDEFINED,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,mipLevels);
-        CopyBufferToImage(cmd,stagingBuffer,outImage,width,height);
-        TransitionImageLayout(cmd,outImage,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,mipLevels);
-        EndSingleTimeCommands(device,m_commandPool,m_graphicsQueue,cmd);
-
-        // 4. 创建 image view。
-        VkImageViewCreateInfo viewInfo{};
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = outImage;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = format;
-
-        viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = mipLevels;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(device, &viewInfo, nullptr, &outImageView) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create texture image view");
+        //------------------------------------------------------
+        // PBR metallic-roughness
+        //------------------------------------------------------
+        if (pbr.baseColorFactor.size() == 4){
+            myGlbMaterials[materialIndex].baseColorFactor = glm::vec4(
+                static_cast<float>(pbr.baseColorFactor[0]),
+                static_cast<float>(pbr.baseColorFactor[1]),
+                static_cast<float>(pbr.baseColorFactor[2]),
+                static_cast<float>(pbr.baseColorFactor[3])
+            );
         }
 
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingMemory, nullptr);
+        myGlbMaterials[materialIndex].metallicFactor = static_cast<float>(pbr.metallicFactor);
+        myGlbMaterials[materialIndex].roughnessFactor = static_cast<float>(pbr.roughnessFactor);
+        myGlbMaterials[materialIndex].baseColorTextureIndex = pbr.baseColorTexture.index;
+        myGlbMaterials[materialIndex].baseColorTexCoord = pbr.baseColorTexture.texCoord;
+        myGlbMaterials[materialIndex].metallicRoughnessTextureIndex = pbr.metallicRoughnessTexture.index;
+        myGlbMaterials[materialIndex].metallicRoughnessTexCoord = pbr.metallicRoughnessTexture.texCoord;
+
+        //------------------------------------------------------
+        // Normal
+        //------------------------------------------------------
+        myGlbMaterials[materialIndex].normalTextureIndex = material.normalTexture.index;
+        myGlbMaterials[materialIndex].normalTexCoord = material.normalTexture.texCoord;
+        myGlbMaterials[materialIndex].normalScale = static_cast<float>(material.normalTexture.scale);
+
+        //------------------------------------------------------
+        // Occlusion
+        //------------------------------------------------------
+        myGlbMaterials[materialIndex].occlusionTextureIndex = material.occlusionTexture.index;
+        myGlbMaterials[materialIndex].occlusionTexCoord = material.occlusionTexture.texCoord;
+        myGlbMaterials[materialIndex].occlusionStrength = static_cast<float>(material.occlusionTexture.strength);
+
+        //------------------------------------------------------
+        // Emissive
+        //------------------------------------------------------
+        if (material.emissiveFactor.size() == 3){
+            myGlbMaterials[materialIndex].emissiveFactor = glm::vec3(
+                static_cast<float>(material.emissiveFactor[0]),
+                static_cast<float>(material.emissiveFactor[1]),
+                static_cast<float>(material.emissiveFactor[2])
+            );
+        }
+        myGlbMaterials[materialIndex].emissiveTextureIndex = material.emissiveTexture.index;
+        myGlbMaterials[materialIndex].emissiveTexCoord = material.emissiveTexture.texCoord;
+
+        //------------------------------------------------------
+        // Alpha / raster state
+        //------------------------------------------------------
+        myGlbMaterials[materialIndex].alphaMode = material.alphaMode;
+        myGlbMaterials[materialIndex].alphaCutoff = static_cast<float>(material.alphaCutoff);
+        myGlbMaterials[materialIndex].doubleSided = material.doubleSided;
+
+        std::cout
+            << "Load Material [" << materialIndex << "] "
+            << "name = " << myGlbMaterials[materialIndex].name
+            << ", baseColorTex = "
+            << myGlbMaterials[materialIndex].baseColorTextureIndex
+            << ", metallicRoughnessTex = "
+            << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
+            << ", normalTex = "
+            << myGlbMaterials[materialIndex].normalTextureIndex
+            << std::endl;
     }
-    catch (...) {
-        if (stagingBuffer != VK_NULL_HANDLE) {
-            vkDestroyBuffer(device, stagingBuffer, nullptr);
+    std::cout << "Loaded material count = " << myGlbMaterials.size() << std::endl;
+
+        /*
+        const tinygltf::Material& material = gltfModel.materials[materialIndex];
+        const tinygltf::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
+
+        auto PrintTextureInfo = [](const char* name, const tinygltf::TextureInfo& textureInfo){
+            std::cout << "  " << name << ":\n";
+
+            if (textureInfo.index >= 0){
+                std::cout << "    texture index = " << textureInfo.index << "\n";
+                std::cout << "    texCoord set = " << textureInfo.texCoord << "\n";
+            }
+            else
+                std::cout << "    none\n";
+        };
+
+        if(bGLBMaterialVerbose){
+            std::cout << "========================================\n";
+            std::cout << "Material Index = " << materialIndex << "\n";
+            std::cout << "Material Name  = " << material.name << "\n";
         }
-        if (stagingMemory != VK_NULL_HANDLE) {
-            vkFreeMemory(device, stagingMemory, nullptr);
+
+        //----------------------------------------------------------
+        // PBR Metallic-Roughness
+        //----------------------------------------------------------
+        if(bGLBMaterialVerbose) std::cout << "[PBR Metallic-Roughness]\n";
+
+        if(bGLBMaterialVerbose){
+            const std::vector<double>& baseColor = pbr.baseColorFactor;
+            std::cout << "  baseColorFactor = ("
+                    << baseColor[0] << ", "
+                    << baseColor[1] << ", "
+                    << baseColor[2] << ", "
+                    << baseColor[3] << ")\n";
+
+            std::cout << "  metallicFactor  = " << pbr.metallicFactor << "\n";
+            std::cout << "  roughnessFactor = " << pbr.roughnessFactor << "\n";
+
+            PrintTextureInfo("baseColorTexture", pbr.baseColorTexture);
+            PrintTextureInfo("metallicRoughnessTexture",
+                            pbr.metallicRoughnessTexture);
         }
-        if (outImageView != VK_NULL_HANDLE) {
-            vkDestroyImageView(device, outImageView, nullptr);
-            outImageView = VK_NULL_HANDLE;
+
+        //----------------------------------------------------------
+        // Normal texture
+        //----------------------------------------------------------
+        if(bGLBMaterialVerbose){
+            std::cout << "[Normal]\n";
+            if (material.normalTexture.index >= 0){
+                std::cout << "  normalTexture index      = " << material.normalTexture.index << "\n";
+                std::cout << "  normalTexture texCoord   = "  << material.normalTexture.texCoord << "\n";
+                std::cout << "  normalTexture scale      = "  << material.normalTexture.scale << "\n";
+            }
+            else
+                std::cout << "  normalTexture = none\n";
         }
-        if (outImage != VK_NULL_HANDLE) {
-            vkDestroyImage(device, outImage, nullptr);
-            outImage = VK_NULL_HANDLE;
+            
+
+        //----------------------------------------------------------
+        // Occlusion texture
+        //----------------------------------------------------------
+        if(bGLBMaterialVerbose){
+            std::cout << "[Occlusion]\n";
+            if (material.occlusionTexture.index >= 0){
+                std::cout << "  occlusionTexture index   = " << material.occlusionTexture.index << "\n";
+                std::cout << "  occlusionTexture texCoord= "  << material.occlusionTexture.texCoord << "\n";
+                std::cout << "  occlusionTexture strength= "  << material.occlusionTexture.strength << "\n";
+            }
+            else
+                std::cout << "  occlusionTexture = none\n";
         }
-        if (outImageMemory != VK_NULL_HANDLE) {
-            vkFreeMemory(device, outImageMemory, nullptr);
-            outImageMemory = VK_NULL_HANDLE;
+
+        //----------------------------------------------------------
+        // Emissive
+        //----------------------------------------------------------
+        if(bGLBMaterialVerbose){
+            std::cout << "[Emissive]\n";
+            std::cout << "  emissiveFactor = ("
+                    << material.emissiveFactor[0] << ", "
+                    << material.emissiveFactor[1] << ", "
+                    << material.emissiveFactor[2] << ")\n";
+
+            PrintTextureInfo("emissiveTexture", material.emissiveTexture);
         }
-        throw;
-    }
-}*/
+
+        //----------------------------------------------------------
+        // Rasterization / alpha mode
+        //----------------------------------------------------------
+        if(bGLBMaterialVerbose){
+            std::cout << "[Render State]\n";
+            std::cout << "  alphaMode  = " << material.alphaMode << "\n";
+            std::cout << "  alphaCutoff= " << material.alphaCutoff << "\n";
+            std::cout << "  doubleSided= "
+                    << (material.doubleSided ? "true" : "false") << "\n";
+
+            std::cout << "========================================\n";
+        }
+    }*/
+}
 
 VkSamplerAddressMode CGLBManager::gltfWrapToVk(int gltfWrap){
     switch (gltfWrap) {

@@ -34,19 +34,26 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
 /**************************
  * GLB Resource
  * ***********************/
-void ResourceCore::LoadGLB(IN const std::string glbName) {
-    glbManager.LoadGLB(glbName);
+void ResourceCore::LoadGLBFromFile(IN const std::string glbName) {
+    glbManager.LoadGLBFromFile(glbName);
 }
-void ResourceCore::LoadMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) {
-    glbManager.LoadMesh(meshIndex, primitiveIndex, vertices3D, indices3D);
-}
-
-void ResourceCore::LoadTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
-    glbManager.LoadTexture(commandPool, glbSamplers);
+void ResourceCore::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) {
+    glbManager.LoadGLBMesh(meshIndex, primitiveIndex, vertices3D, indices3D);
 }
 
-int ResourceCore::GetMeshSize(IN int glbIndex){
-    return glbManager.GetMeshSize(glbIndex);
+void ResourceCore::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
+    glbManager.LoadGLBTexture(commandPool, glbSamplers);
+}
+void ResourceCore::LoadGLBMaterial(){
+    glbManager.LoadGLBMaterial();
+}
+
+int ResourceCore::GetGLBMeshSize(IN int glbIndex){
+    return glbManager.GetGLBMeshSize(glbIndex);
+}
+
+int ResourceCore::GetGLBTextureIndexBaseColor(int meshIndex){
+    return glbManager.textureIds_baseColor[meshIndex];
 }
 
 /**************************
