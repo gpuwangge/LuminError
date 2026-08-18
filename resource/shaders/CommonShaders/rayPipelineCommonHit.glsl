@@ -116,19 +116,108 @@ Light functions
 **************/
 bool isDirectionalLight(RtLightStruct light){
     return false; //disable this function for now
-    return light.type < 0.5;
+    //return light.type < 0.5;
 }
 
 bool isPointLight(RtLightStruct light){
     return true; //only implemented point light
-    return light.type >= 0.5 && light.type < 1.5;
+    //return light.type >= 0.5 && light.type < 1.5;
 }
 
 bool isSpotLight(RtLightStruct light){
     return false; //disable this function for now
-    return light.type >= 1.5 && light.type < 2.5;
+    //return light.type >= 1.5 && light.type < 2.5;
 }
 
+vec3 getLightDirAndRadiance(RtLightStruct light, vec3 hitPos, out float maxT, out vec3 radiance){
+    const float EPS = 1e-6;
+
+    float intensity       = light.params.x;
+    float sourceRadius    = max(light.params.y, 0.001);
+    float range           = light.params.z;
+    float falloffExponent = max(light.attenuation.x, 0.01);
+
+    if (isDirectionalLight(light)) {
+        vec3 L = safeNormalize(-light.direction.xyz);
+        maxT = 1e32;
+        radiance = light.color.rgb * intensity;
+        return L;
+    }
+
+    vec3 toLight = light.position.xyz - hitPos;
+
+    float dist2 = max(dot(toLight, toLight), EPS);
+    float dist = sqrt(dist2);
+    vec3 L = toLight / dist;
+
+    // Shadow ray 的 tMax 必须仍是灯中心的几何距离。
+    maxT = max(dist - SHADOW_BIAS, SHADOW_BIAS);
+
+    // range <= 0：不截断，仅使用艺术距离衰减。
+    // range > 0：range 外保证为 0。
+    float attenuation = 1.0;
+
+    if (range > EPS) {
+        float s = dist / range;
+
+        if (s >= 1.0) {
+            radiance = vec3(0.0);
+            return L;
+        }
+
+        // 在中心是 1，到 range 连续降至 0。
+        // p 小 -> 更平坦、打得更远
+        // p 大 -> 更集中于灯附近
+        float rangeFade = max(1.0 - s * s, 0.0);
+        attenuation *= pow(rangeFade, falloffExponent);
+    }
+
+    // 有限近场衰减，消除 r=0 处的无限亮。
+    //
+    // sourceRadius 是“半亮距离”：
+    // dist == sourceRadius 时，这一项为 0.5。
+    //
+    // 注意：这里 exponent 使用一半，因为距离项是 r²。
+    // falloff=2 时效果约为 1/(1+(d/R)^2)。
+    float normalizedDistance = dist / sourceRadius;
+    float nearFieldExponent = 0.5 * falloffExponent;
+
+    attenuation *= 1.0 /
+        (1.0 + pow(normalizedDistance, nearFieldExponent));
+
+    if (isSpotLight(light)) {
+        // 你当前 struct 中没有独立的 inner/outer angle 字段。
+        // 暂时复用：
+        // position.w  = outer half-angle, radians
+        // direction.w = inner half-angle, radians
+        float outerAngle = light.position.w;
+        float innerAngle = light.direction.w;
+
+        // 兜底：若 CPU 尚未填 direction.w，就自动取 80% outer。
+        if (innerAngle <= 0.0 || innerAngle >= outerAngle) {
+            innerAngle = outerAngle * 0.80;
+        }
+
+        // direction.xyz 的约定：从灯射向场景的方向。
+        vec3 spotDir = safeNormalize(light.direction.xyz);
+
+        // L 是 hitPos -> light；-L 才是 light -> hitPos。
+        float cosTheta = dot(-L, spotDir);
+
+        float cosOuter = cos(outerAngle);
+        float cosInner = cos(innerAngle);
+
+        // 内锥 1，外锥外 0，中间平滑过渡。
+        float spotFactor = smoothstep(cosOuter, cosInner, cosTheta);
+
+        attenuation *= spotFactor;
+    }
+
+    radiance = light.color.rgb * intensity * attenuation;
+    return L;
+}
+
+/*
 vec3 getLightDirAndRadiance(RtLightStruct light, vec3 hitPos, out float maxT, out vec3 radiance){
     vec3 L;
 
@@ -157,7 +246,7 @@ vec3 getLightDirAndRadiance(RtLightStruct light, vec3 hitPos, out float maxT, ou
 
     radiance = light.color.rgb * light.intensity * attenuation;
     return L;
-}
+}*/
 
 vec3 SampleDiskLight(RtLightStruct light, vec3 shadingPos, inout uint state){ //for path tracing NEE
     // 光源法线（与你 Whitted 保持一致）
@@ -167,7 +256,9 @@ vec3 SampleDiskLight(RtLightStruct light, vec3 shadingPos, inout uint state){ //
     buildOrthonormalBasis(lightNormal, T, B);
 
     // 在单位圆盘随机采样
-    vec2 d = sampleDisk(state) * light.radius;
+    //vec2 d = sampleDisk(state) * light.radius;
+    vec2 d = sampleDisk(state) * light.params.y;
+    
 
     // 返回圆盘上的一点
     return light.position.xyz +
@@ -542,7 +633,8 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
             visibility = traceSoftShadowVisibility(
                 shadowOrigin, hitInfo.hitPos, hitInfo.N,
                 vec3(rtLightUBO.lights[i].position),
-                rtLightUBO.lights[i].radius,
+                rtLightUBO.lights[i].params.y,
+                //rtLightUBO.lights[i].radius,
                 configUBO.softShadowSampleNumber,
                 hitInfo.state
             );

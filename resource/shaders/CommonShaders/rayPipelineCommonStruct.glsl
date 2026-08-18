@@ -19,14 +19,22 @@ const uint MATERIAL_JADE    = 5u;
 SBO Structure
 **************/
 struct RtLightStruct{
-    vec4 position;
-    vec4 color;
-    vec4 direction;
-    float intensity;
-    float radius;
-    float angle;
-    float type;
-};  //total size: 16+16+16+4*4=64 bytes
+    vec4 position;      // xyz: world position
+    vec4 color;         // rgb: linear HDR color
+    vec4 direction;     // xyz: light emission direction
+    vec4 params;        // x: intensity
+                        // y: sourceRadius
+                        // z: range
+                        // w: type
+    vec4 attenuation; // x: falloffExponent, yzw reserved
+    // vec4 position;
+    // vec4 color;
+    // vec4 direction;
+    // float intensity;
+    // float radius;
+    // float angle;
+    // float type;
+};
 
 struct MaterialStruct {
     vec3 albedo;

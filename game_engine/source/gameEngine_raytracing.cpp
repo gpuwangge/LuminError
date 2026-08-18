@@ -352,10 +352,13 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
         uniformBufferObject_rtLight.lights[i].position = glm::vec4(appInfo->RTLights[i].rt_light_position[0], appInfo->RTLights[i].rt_light_position[1], appInfo->RTLights[i].rt_light_position[2], 1.0f);
         uniformBufferObject_rtLight.lights[i].color = glm::vec4(appInfo->RTLights[i].rt_light_color[0], appInfo->RTLights[i].rt_light_color[1], appInfo->RTLights[i].rt_light_color[2], 1.0f);
         uniformBufferObject_rtLight.lights[i].direction = glm::vec4(appInfo->RTLights[i].rt_light_direction[0], appInfo->RTLights[i].rt_light_direction[1], appInfo->RTLights[i].rt_light_direction[2], 1.0f);
-        uniformBufferObject_rtLight.lights[i].intensity = appInfo->RTLights[i].rt_light_intensity;
-        uniformBufferObject_rtLight.lights[i].radius = appInfo->RTLights[i].rt_light_radius;
-        uniformBufferObject_rtLight.lights[i].angle = appInfo->RTLights[i].rt_light_angle;
-        uniformBufferObject_rtLight.lights[i].type = appInfo->RTLights[i].rt_light_type;
+        uniformBufferObject_rtLight.lights[i].lightParams[0] = appInfo->RTLights[i].rt_light_intensity;
+        uniformBufferObject_rtLight.lights[i].lightParams[1] = appInfo->RTLights[i].rt_light_radius;
+        uniformBufferObject_rtLight.lights[i].lightParams[2] = appInfo->RTLights[i].rt_light_range;
+        uniformBufferObject_rtLight.lights[i].lightParams[3] = appInfo->RTLights[i].rt_light_type;
+        uniformBufferObject_rtLight.lights[i].attenuation[0] = appInfo->RTLights[i].rt_light_falloff;
+        //uniformBufferObject_rtLight.lights[i].angle = appInfo->RTLights[i].rt_light_angle;
+        //uniformBufferObject_rtLight.lights[i].type = appInfo->RTLights[i].rt_light_type;
         //storageBufferObject_rtLight.lights[i].rt_light_id = appInfo->RTLights[i].rt_light_id;
     }
 

@@ -159,14 +159,25 @@ struct StructConfigUniformBuffer {
  * Ray Tracing Light
  *******/
 struct alignas(16) RtLightInfo{
-    alignas(16) glm::vec4 position;
-    alignas(16) glm::vec4 color;
-    alignas(16) glm::vec4 direction;
-    alignas(4) float intensity;
-    alignas(4) float radius;
-    alignas(4) float angle;
-    alignas(4) float type;
-};  //total size: 16+16+16+4*4=64 bytes
+    glm::vec4 position;    // xyz: world position
+                           // w: spot outerAngle, radians
+    glm::vec4 color;       // rgb: linear light color
+                           // w: reserved，建议写 0.0f
+    glm::vec4 direction;   // xyz: light emission direction, normalized
+                           // w: spot innerAngle, radians
+    glm::vec4 lightParams; // x: intensity
+                           // y: sourceRadius
+                           // z: range
+                           // w: type
+    glm::vec4 attenuation; // x falloffExponent, yzw reserved
+    // alignas(16) glm::vec4 position;
+    // alignas(16) glm::vec4 color;
+    // alignas(16) glm::vec4 direction;
+    // alignas(4) float intensity;
+    // alignas(4) float radius;
+    // alignas(4) float angle;
+    // alignas(4) float type;
+};
 static constexpr size_t RTLIGHT_SIZE = 64;//assume max 64 materials for now
 struct StructUniformBuffer_RtLight{
     RtLightInfo lights[RTLIGHT_SIZE];
