@@ -280,6 +280,7 @@ bool GameEngine::Get_feature_raytracing_pipeline_softShadowEnable() {return yaml
 int GameEngine::Get_feature_raytracing_pipeline_softShadowSampleNumber() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_softShadowSampleNumber; }
 int GameEngine::Get_feature_raytracing_pipeline_maxReflectionDepth() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maxReflectionDepth;}
 int GameEngine::Get_feature_raytracing_pipeline_maxRefractionDepth() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maxRefractionDepth;}
+bool GameEngine::Get_feature_raytracing_pipeline_shadowRayIgnoreSphere() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_shadow_ray_ignore_sphere;}
 
 int GameEngine::GetControlNodeSize() { return controlNodes.size();}
 void GameEngine::SetControlNodeVisible(int nodeId, bool value) { controlNodes[nodeId]->bVisible = value;}

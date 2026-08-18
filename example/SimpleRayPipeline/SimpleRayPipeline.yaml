@@ -182,6 +182,7 @@ Features:
   feature_raytracing_pipeline_softShadowSampleNumber: 4
   feature_raytracing_pipeline_maxReflectionDepth: 2 #优化方法(reflect=1,refract=3)：depth 0：折射 + 反射；depth 1~2：只有折射(这样就防止指数分裂)；depth >= 3：停止
   feature_raytracing_pipeline_maxRefractionDepth: 3
+  feature_raytracing_pipeline_shadow_ray_ignore_sphere: false
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false

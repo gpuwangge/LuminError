@@ -145,6 +145,7 @@ void GameEngine::Initialize(){
         configUniformBufferObject.softShadowSampleNumber = Get_feature_raytracing_pipeline_softShadowSampleNumber();
         configUniformBufferObject.maxReflectionDepth = Get_feature_raytracing_pipeline_maxReflectionDepth();
         configUniformBufferObject.maxRefractionDepth = Get_feature_raytracing_pipeline_maxRefractionDepth();
+        configUniformBufferObject.shadowRayIgnoreSphere = Get_feature_raytracing_pipeline_shadowRayIgnoreSphere();
 
         for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
             renderer->SetCurrentFrame(i);

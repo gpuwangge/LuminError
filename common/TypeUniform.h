@@ -151,6 +151,8 @@ struct StructConfigUniformBuffer {
 
     alignas(4) unsigned int maxReflectionDepth;
     alignas(4) unsigned int maxRefractionDepth;
+
+    alignas(4) unsigned int shadowRayIgnoreSphere;
 };
 
 /*********

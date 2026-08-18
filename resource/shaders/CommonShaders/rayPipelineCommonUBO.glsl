@@ -28,6 +28,8 @@ layout(set = 0, binding = 8) uniform ConfigUniformInfo {
 
     uint maxReflectionDepth;
     uint maxRefractionDepth;
+
+    uint shadowRayIgnoreSphere;
 } configUBO;
 
 #endif

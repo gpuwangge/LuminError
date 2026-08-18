@@ -218,10 +218,14 @@ float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){ //inout ShadowPa
         //gl_RayFlagsOpaqueEXT | //临时去掉
         gl_RayFlagsSkipClosestHitShaderEXT;
 
+    uint cullmask = 0xFF;
+    if(configUBO.shadowRayIgnoreSphere == 1) 
+        cullmask = 0x01; //01是三角形,02是球体。这样设置的时候，shadow ray在寻找whitted点光源的时候会忽略(穿透)所有球体。点光源就可以放在球体内部。
+
     traceRayEXT(
         topLevelAS,
         flags,
-        0xFF,
+        cullmask, 
         0, 0, 1,   // missIndex = 1，假设你的 shadow miss 在 index 1
         origin,
         SHADOW_BIAS,
@@ -262,11 +266,15 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
 
         const float EPS = 0.001;
 
+        uint cullmask = 0xFF;
+        if(configUBO.shadowRayIgnoreSphere == 1) 
+            cullmask = 0x01; //01是三角形,02是球体。这样设置的时候，shadow ray在寻找whitted点光源的时候会忽略(穿透)所有球体。点光源就可以放在球体内部。
+            
         traceRayEXT(
             topLevelAS,
             gl_RayFlagsTerminateOnFirstHitEXT |
             gl_RayFlagsSkipClosestHitShaderEXT,
-            0xFF,
+            cullmask,
             1,   // sbtRecordOffset
             1,   // sbtRecordStride
             1,   // missIndex
