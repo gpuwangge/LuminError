@@ -22,6 +22,8 @@ namespace LEResource{
         void LoadGLBMaterial() override;
         int GetGLBMeshSize(IN int glbIndex) override;
         int GetGLBTextureIndexBaseColor(int meshIndex) override;
+        int GetGLBTextureIndexNormal(int meshIndex) override;
+        int GetGLBTextureIndexMetallic(int meshIndex) override;
 
         /**************************
          * Shader Resource

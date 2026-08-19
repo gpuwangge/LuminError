@@ -53,9 +53,18 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     // primitive.material < 0 表示该 primitive 没有显式材质，
     // 应使用 glTF 默认材质。
     int materialId = primitive.material;
-    int textureIndex_BaseColor = myGlbMaterials[materialId].baseColorTextureIndex;
-    std::cout << "meshIndex = " << meshIndex << ", materialId = " << materialId << ", textureIndex_BaseColor = " << textureIndex_BaseColor<< "\n";
-    textureIds_baseColor.push_back(textureIndex_BaseColor);
+    int textureIndex_baseColor = myGlbMaterials[materialId].baseColorTextureIndex;
+    int coordIndex_baseColor = myGlbMaterials[materialId].baseColorTexCoord;
+    int textureIndex_normal = myGlbMaterials[materialId].normalTextureIndex;
+    int coordIndex_normal = myGlbMaterials[materialId].normalTexCoord;
+    int textureIndex_metalicRoughness = myGlbMaterials[materialId].metallicRoughnessTextureIndex;
+    int coordIndex_metalicRoughness = myGlbMaterials[materialId].metallicRoughnessTexCoord;
+    std::cout << "meshIndex = " << meshIndex << ", materialId = " << materialId 
+        << ", textureIndex_BaseColor = " << textureIndex_baseColor << ", coordIndex = " << coordIndex_baseColor
+        << ", textureIndex_normal = " << textureIndex_normal << ", coordIndex = " << coordIndex_normal
+        << ", textureIndex_metalicRoughness = " << textureIndex_metalicRoughness << ", coordIndex = " << coordIndex_metalicRoughness
+        << "\n";
+    textureIds.push_back(std::vector<int>{textureIndex_baseColor,textureIndex_normal,textureIndex_metalicRoughness});
 
     //std::cout << "primitiveIndex = " << primitiveIndex << "\n";
     //std::cout << "materialId     = " << materialId << "\n";
@@ -309,12 +318,10 @@ void CGLBManager::LoadGLBMaterial(){
         std::cout
             << "Load Material [" << materialIndex << "] "
             << "name = " << myGlbMaterials[materialIndex].name
-            << ", baseColorTex = "
-            << myGlbMaterials[materialIndex].baseColorTextureIndex
-            << ", metallicRoughnessTex = "
-            << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
-            << ", normalTex = "
-            << myGlbMaterials[materialIndex].normalTextureIndex
+            << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
+            << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
+            << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
+            << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
             << std::endl;
     }
     std::cout << "Loaded material count = " << myGlbMaterials.size() << std::endl;

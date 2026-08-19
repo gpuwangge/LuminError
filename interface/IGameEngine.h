@@ -177,6 +177,8 @@ namespace LEGameEngine{
         virtual int GetObjectMaterialID(int objectId) = 0;
         virtual glm::vec3 GetObjectRotation(int objectId) = 0;
         virtual int GetObjectTextureID_BaseColor(int objectId) = 0;
+        virtual int GetObjectTextureID_Normal(int objectId) = 0;
+        virtual int GetObjectTextureID_MetallicRoughness(int objectId) = 0;
 
         //Expose functions for Example(SimpleParticles) to use
         virtual double GetDeltaTime() = 0;

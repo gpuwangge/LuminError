@@ -26,6 +26,8 @@ namespace LEResource{
         virtual void LoadGLBMaterial() = 0;
         virtual int GetGLBMeshSize(IN int glbIndex) = 0;
         virtual int GetGLBTextureIndexBaseColor(int meshIndex) = 0;
+        virtual int GetGLBTextureIndexNormal(int meshIndex) = 0;
+        virtual int GetGLBTextureIndexMetallic(int meshIndex) = 0;
 
         /**************************
          * Shader Resource

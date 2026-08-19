@@ -24,7 +24,8 @@ public:
 
     void LoadGLBFromFile(const std::string& filename);
 
-    std::vector<int> textureIds_baseColor;
+    //std::vector<int> textureIds_baseColor;
+    std::vector<std::vector<int>> textureIds; //baseColor, normal, metallicRoughness
     void LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D);
 
     VkSamplerAddressMode gltfWrapToVk(int gltfWrap);

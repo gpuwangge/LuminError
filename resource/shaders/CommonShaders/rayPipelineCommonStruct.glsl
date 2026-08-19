@@ -56,6 +56,8 @@ struct InstanceStruct {
     uint geometryIndex;
     uint materialIndex;
     uint textureIndex_baseColor;
+    uint textureIndex_normal;
+    uint textureIndex_metallicRoughness;
 };
 
 /*************

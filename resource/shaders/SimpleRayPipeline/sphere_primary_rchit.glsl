@@ -35,5 +35,5 @@ void main(){
     //Core
     vec3 Ngeom = getSphereWorldNormal(); //Normal for Geometry
     vec2 uv = getSphereUV();
-    updatePayload(mat, Ngeom, 0, uv); 
+    updatePayload(mat, Ngeom, 0, 0, 0, uv); //all sphere use 0 texture for now
 }

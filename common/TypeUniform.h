@@ -190,8 +190,10 @@ struct InstanceInfo{ //alignas(4)没必要
     alignas(4) uint32_t geometryIndex;   // GeometryInfo 的下标 4 bytes
     alignas(4) uint32_t materialIndex;   // Material 的下标  4 bytes
     alignas(4) uint32_t textureIndex_baseColor;
-    alignas(4) float padding[1];  //8 bytes
-};  // 总共16 bytes,符合 std140 中一个 struct 元素通常需要 16-byte 对齐的要求。
+    alignas(4) uint32_t textureIndex_normal;
+    alignas(4) uint32_t textureIndex_metallicRoughness;
+    alignas(4) float padding[3];
+};  // 总共4*5+4*3 bytes,符合 std140 中一个 struct 元素通常需要 16-byte 对齐的要求。
 static constexpr size_t INSTANCE_SIZE = 256;//assume max 256 instances for now
 struct StructUniformBuffer_Instance{
     InstanceInfo instances[INSTANCE_SIZE];

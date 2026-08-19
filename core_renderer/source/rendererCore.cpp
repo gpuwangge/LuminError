@@ -1524,6 +1524,8 @@ void RendererCore::CreateInstanceBuffer(){
         storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id;
         storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id;
         storageBufferObject_instance.instances[instanceIndex].textureIndex_baseColor = game->GetObjectTextureID_BaseColor(i);
+        storageBufferObject_instance.instances[instanceIndex].textureIndex_normal = game->GetObjectTextureID_Normal(i);
+        storageBufferObject_instance.instances[instanceIndex].textureIndex_metallicRoughness = game->GetObjectTextureID_MetallicRoughness(i);
         instanceIndex++;
     }
     //step2 for sphere

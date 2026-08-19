@@ -53,7 +53,14 @@ int ResourceCore::GetGLBMeshSize(IN int glbIndex){
 }
 
 int ResourceCore::GetGLBTextureIndexBaseColor(int meshIndex){
-    return glbManager.textureIds_baseColor[meshIndex];
+    return glbManager.textureIds[meshIndex][0];
+}
+
+int ResourceCore::GetGLBTextureIndexNormal(int meshIndex){
+    return glbManager.textureIds[meshIndex][1];
+}
+int ResourceCore::GetGLBTextureIndexMetallic(int meshIndex){
+    return glbManager.textureIds[meshIndex][2];
 }
 
 /**************************

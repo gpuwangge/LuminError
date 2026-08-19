@@ -109,11 +109,13 @@ void main(){
     uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
     uint geometryIndex = instanceUBO.instances[instanceIndex].geometryIndex; //thats the model
     uint textureIndex_baseColor = instanceUBO.instances[instanceIndex].textureIndex_baseColor;
+    uint textureIndex_normal = instanceUBO.instances[instanceIndex].textureIndex_normal;
+    uint textureIndex_metallicRoughness = instanceUBO.instances[instanceIndex].textureIndex_metallicRoughness;
 
     MaterialStruct mat = materialUBO.materials[materialIndex];
     
     //Core
     vec3 Ntri = getTriangleWorldNormal(geometryIndex);
     vec2 uv = getTriangleUV(geometryIndex);
-    updatePayload(mat, Ntri, textureIndex_baseColor, uv);
+    updatePayload(mat, Ntri, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, uv);
 }
