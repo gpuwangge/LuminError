@@ -61,14 +61,14 @@ struct StructStorageBuffer_BVHNode {
 struct alignas(16) TriangleVertexInfo{
     alignas(16) glm::vec3 position;
     alignas(16) glm::vec3 normal;
-    alignas(16) glm::vec3 tangent;
+    alignas(16) glm::vec4 tangent;
     alignas(16) glm::vec3 color;
     alignas(16) glm::vec2 uv;
     alignas(4) int material_id;
     alignas(4) float padding[15]; //60 bytes
     //total size: 16*4+4+60=128 bytes
 };
-static constexpr size_t TriangleVertex_SIZE = 500;
+static constexpr size_t TriangleVertex_SIZE = 1024;
 struct StructStorageBuffer_TriangleVertexAttribute{
     TriangleVertexInfo vertices[TriangleVertex_SIZE];
 };

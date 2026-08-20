@@ -210,6 +210,8 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
             modelVertexAttribute[j].normal = modelData[i].modelVertices3D[j].normal;
             modelVertexAttribute[j].position = modelData[i].modelVertices3D[j].pos;
             modelVertexAttribute[j].color = modelData[i].modelVertices3D[j].color;
+            modelVertexAttribute[j].uv = modelData[i].modelVertices3D[j].texCoord;
+            modelVertexAttribute[j].tangent = modelData[i].modelVertices3D[j].tangent;
         }
         //std::cout<<"test1"<<std::endl;
         //std::cout.flush();

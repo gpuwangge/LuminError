@@ -48,6 +48,7 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     const tinygltf::Accessor* posAccessor = nullptr;
     const tinygltf::Accessor* normalAccessor = nullptr;
     const tinygltf::Accessor* texAccessor = nullptr;
+    const tinygltf::Accessor* tangentAccessor = nullptr;
 
     // MATERIAL
     // primitive.material < 0 表示该 primitive 没有显式材质，
@@ -59,11 +60,11 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     int coordIndex_normal = myGlbMaterials[materialId].normalTexCoord;
     int textureIndex_metalicRoughness = myGlbMaterials[materialId].metallicRoughnessTextureIndex;
     int coordIndex_metalicRoughness = myGlbMaterials[materialId].metallicRoughnessTexCoord;
-    std::cout << "meshIndex = " << meshIndex << ", materialId = " << materialId 
-        << ", textureIndex_BaseColor = " << textureIndex_baseColor << ", coordIndex = " << coordIndex_baseColor
-        << ", textureIndex_normal = " << textureIndex_normal << ", coordIndex = " << coordIndex_normal
-        << ", textureIndex_metalicRoughness = " << textureIndex_metalicRoughness << ", coordIndex = " << coordIndex_metalicRoughness
-        << "\n";
+    // std::cout << "meshIndex = " << meshIndex << ", materialId = " << materialId 
+    //     << ", textureIndex_BaseColor = " << textureIndex_baseColor << ", coordIndex = " << coordIndex_baseColor
+    //     << ", textureIndex_normal = " << textureIndex_normal << ", coordIndex = " << coordIndex_normal
+    //     << ", textureIndex_metalicRoughness = " << textureIndex_metalicRoughness << ", coordIndex = " << coordIndex_metalicRoughness
+    //     << "\n";
     textureIds.push_back(std::vector<int>{textureIndex_baseColor,textureIndex_normal,textureIndex_metalicRoughness});
 
     //std::cout << "primitiveIndex = " << primitiveIndex << "\n";
@@ -88,6 +89,11 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     // TEXCOORD_0
     it = primitive.attributes.find("TEXCOORD_0");
     if (it != primitive.attributes.end()) texAccessor = &gltfModel.accessors[it->second];
+
+    // TANGENT
+    it = primitive.attributes.find("TANGENT");
+    if (it != primitive.attributes.end()) tangentAccessor = &gltfModel.accessors[it->second];
+    
 
     //-----------------------------
     // POSITION
@@ -118,6 +124,27 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     }
 
     //-----------------------------
+    // TANGENT
+    //-----------------------------
+    const float* tangents = nullptr;
+    size_t tangentStride = sizeof(float) * 4;
+
+    if (tangentAccessor){
+        if (tangentAccessor->componentType != TINYGLTF_COMPONENT_TYPE_FLOAT || tangentAccessor->type != TINYGLTF_TYPE_VEC4)
+            throw std::runtime_error("TANGENT accessor must be FLOAT VEC4.");
+        
+        if (tangentAccessor->count != posAccessor->count) throw std::runtime_error("TANGENT count does not match POSITION count.");
+        
+        const tinygltf::BufferView& tangentView = gltfModel.bufferViews[tangentAccessor->bufferView];
+        const tinygltf::Buffer& tangentBuffer = gltfModel.buffers[tangentView.buffer];
+
+        tangents = reinterpret_cast<const float*>(tangentBuffer.data.data() + tangentView.byteOffset + tangentAccessor->byteOffset);
+
+        // byteStride == 0 means tightly packed.
+        tangentStride = tangentView.byteStride != 0 ? tangentView.byteStride : sizeof(float) * 4;
+    }
+
+    //-----------------------------
     // Vertex
     //-----------------------------
     vertices3D.clear();
@@ -132,6 +159,24 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
         
         if (texcoords) vertex.texCoord = glm::vec2(texcoords[i * 2 + 0], 1.0f - texcoords[i * 2 + 1]);
         else vertex.texCoord = glm::vec2(0);
+
+
+         if (tangents){
+            const uint8_t* tangentElement = reinterpret_cast<const uint8_t*>(tangents) + i * tangentStride;
+            const float* tangent = reinterpret_cast<const float*>(tangentElement);
+
+            //std::cout<<"vertex "<<i<<" tangent = "<<tangent[0]<<", "<<tangent[1]<<", "<<tangent[2]<<", "<<tangent[3]<<std::endl;
+
+            vertex.tangent = glm::vec4(tangent[0], tangent[1], tangent[2], tangent[3]);
+
+            // 可选：防止导出数据因精度问题出现非单位长度
+            vertex.tangent = glm::vec4(glm::normalize(glm::vec3(vertex.tangent)), vertex.tangent.w < 0.0f ? -1.0f : 1.0f);
+        }
+        else{
+            // 若模型未提供 tangent，不能安全地默认给任意固定方向。
+            // 后续应该根据 POSITION + NORMAL + TEXCOORD_0 生成。
+            vertex.tangent = glm::vec4(0.0f);
+        }
 
         vertices3D.push_back(vertex);
     }
@@ -315,14 +360,14 @@ void CGLBManager::LoadGLBMaterial(){
         myGlbMaterials[materialIndex].alphaCutoff = static_cast<float>(material.alphaCutoff);
         myGlbMaterials[materialIndex].doubleSided = material.doubleSided;
 
-        std::cout
-            << "Load Material [" << materialIndex << "] "
-            << "name = " << myGlbMaterials[materialIndex].name
-            << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
-            << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
-            << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
-            << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
-            << std::endl;
+        // std::cout
+        //     << "Load Material [" << materialIndex << "] "
+        //     << "name = " << myGlbMaterials[materialIndex].name
+        //     << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
+        //     << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
+        //     << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
+        //     << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
+        //     << std::endl;
     }
     std::cout << "Loaded material count = " << myGlbMaterials.size() << std::endl;
 

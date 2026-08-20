@@ -9,6 +9,10 @@ struct Vertex3D {
     glm::vec2 texCoord;
     glm::vec3 normal;
 
+    // xyz = tangent direction
+    // w   = tangent-space handedness (+1 or -1)
+    glm::vec4 tangent; //added for rt pipeline, glb resources
+
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = 0; 
@@ -44,6 +48,12 @@ struct Vertex3D {
         attributeDescriptions[3].location = 3;
         attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[3].offset = offsetof(Vertex3D, normal);
+
+        attributeDescriptions.push_back({});
+        attributeDescriptions[4].binding = 0;
+        attributeDescriptions[4].location = 4;
+        attributeDescriptions[4].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attributeDescriptions[4].offset = offsetof(Vertex3D, tangent);
 
         return attributeDescriptions;
     }

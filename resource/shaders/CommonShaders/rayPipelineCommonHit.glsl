@@ -34,8 +34,8 @@ struct HitInfoStruct{
     vec3 hitPos;
     vec3 V; //视向向量，观察方向
     vec3 I; // 入射方向：射线前进方向
-    vec3 N; // N 始终朝向入射光
-    vec3 Ngeom;
+    vec3 N_shade; // N 始终朝向入射光
+    vec3 N_geom;
     float cosTheta;
 
     bool airToMedium;
@@ -428,11 +428,11 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //fo
 
         
 
-        float NdotL = max(dot(hitInfo.N, L), 0.0);
+        float NdotL = max(dot(hitInfo.N_shade, L), 0.0);
         if(NdotL <= 0.0) continue;//return vec3(0.0);
 
         // 发射 shadow ray，判断采样到的光源是否可见
-        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * SHADOW_BIAS;
 
         float visibility = traceShadowVisibility(shadowOrigin,L,maxT);
 
@@ -514,10 +514,10 @@ void UploadNextRays(in HitInfoStruct hitInfo){
 
     if(hitInfo.material_type == MATERIAL_GOLD){
     //if(hasReflection && hitInfo.transmission < 0.01){ //金属
-        vec3 R = normalize(reflect(hitInfo.I, hitInfo.N));
+        vec3 R = normalize(reflect(hitInfo.I, hitInfo.N_geom));
 
-        primaryPayload.nextRay[0].origin = hitInfo.hitPos + hitInfo.N * EPSILON;
-        primaryPayload.nextRay[0].dir = normalize(mix(R, RandomDirectionInHemisphere(hitInfo.N, hitInfo.state), hitInfo.roughness * hitInfo.roughness));
+        primaryPayload.nextRay[0].origin = hitInfo.hitPos + hitInfo.N_geom * EPSILON;
+        primaryPayload.nextRay[0].dir = normalize(mix(R, RandomDirectionInHemisphere(hitInfo.N_geom, hitInfo.state), hitInfo.roughness * hitInfo.roughness));
         primaryPayload.nextRay[0].throughputMul = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
 
         primaryPayload.spawnRayCount = 1u;
@@ -530,8 +530,8 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         float n2 = primaryPayload.insideMedium == 1u ? 1.0    : hitInfo.ior;
         float eta = n1 / n2;
 
-        vec3 R = safeNormalize(reflect(hitInfo.I, hitInfo.N));
-        vec3 T = refract(hitInfo.I, hitInfo.N, eta);
+        vec3 R = safeNormalize(reflect(hitInfo.I, hitInfo.N_geom));
+        vec3 T = refract(hitInfo.I, hitInfo.N_geom, eta);
 
         bool tir = dot(T, T) < 1e-8;
 
@@ -543,7 +543,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         primaryPayload.nextRay[1].mediumEntryPos = primaryPayload.mediumEntryPos;
         if(tir){ // 全反射
             //primaryPayload.nextRayOrigin0 = hitPos + R * EPSILON;
-            vec3 Roff = dot(R, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom : -hitInfo.Ngeom;
+            vec3 Roff = dot(R, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom : -hitInfo.N_geom;
             primaryPayload.nextRay[0].origin = hitInfo.hitPos + Roff * EPSILON;
             primaryPayload.nextRay[0].dir = R;
             primaryPayload.nextRay[0].throughputMul = vec3(1.0);
@@ -551,8 +551,8 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         }
         else{ //有反射和折射
             T = safeNormalize(T);
-            vec3 Toff = dot(T, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom : -hitInfo.Ngeom;
-            vec3 Roff = dot(R, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom : -hitInfo.Ngeom;
+            vec3 Toff = dot(T, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom : -hitInfo.N_geom;
+            vec3 Roff = dot(R, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom : -hitInfo.N_geom;
             float F2 = pow(fresnelScalar,0.5);
 
             uint rayIndex = 0; //第一条射线，查询折射
@@ -621,17 +621,17 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         vec3 lightRadiance;
         vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
 
-        float NdotL = max(dot(hitInfo.N, L), 0.0);
+        float NdotL = max(dot(hitInfo.N_geom, L), 0.0);
         if(NdotL <= 0.0) continue;
 
         //给每一个light发射一根shadowray
-        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N * SHADOW_BIAS;
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * SHADOW_BIAS;
         float visibility = 1.0f; //default is disable shadow
         if(configUBO.softShadowEnable == 0){
             visibility = traceShadowVisibility(shadowOrigin, L, maxT);
         }else{
             visibility = traceSoftShadowVisibility(
-                shadowOrigin, hitInfo.hitPos, hitInfo.N,
+                shadowOrigin, hitInfo.hitPos, hitInfo.N_geom,
                 vec3(rtLightUBO.lights[i].position),
                 rtLightUBO.lights[i].params.y,
                 //rtLightUBO.lights[i].radius,
@@ -642,7 +642,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         if(visibility <= 0.0) continue;
 
         vec3 H = safeNormalize(L + hitInfo.V);
-        float NdotH = max(dot(hitInfo.N, H), 0.0);
+        float NdotH = max(dot(hitInfo.N_geom, H), 0.0);
         float VdotH = max(dot(hitInfo.V, H), 0.0);
 
         vec3 F1 = fresnelSchlick(VdotH, hitInfo.F0);
@@ -673,7 +673,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         localRadiance += directSpecular;
     }
     float ambientIntensity = 0.2;
-    vec3 ambient = diffuseBRDF * SampleSky(hitInfo.N) * PI * ambientIntensity; //增加天空漫反射
+    vec3 ambient = diffuseBRDF * SampleSky(hitInfo.N_shade) * PI * ambientIntensity; //增加天空漫反射
     localRadiance += ambient;
 
     primaryPayload.radiance = localRadiance;
@@ -693,11 +693,11 @@ ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
     ScatterResult result;
 
     // 金属材质主要进行镜面反射
-    vec3 reflectedDir = reflect(hitInfo.I, hitInfo.Ngeom);
+    vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_geom);
     
     // 根据粗糙度添加随机性
     if (hitInfo.roughness > 0.0) {
-        reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.Ngeom, hitInfo.state), hitInfo.roughness));
+        reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness));
     }
 
     result.valid = 1u;
@@ -715,17 +715,17 @@ ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/�
     
     if (Rand(hitInfo.state) < reflectionProbability) {
         // 镜面反射
-        vec3 reflectedDir = reflect(hitInfo.I, hitInfo.Ngeom);
+        vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_geom);
         
         // 根据粗糙度添加随机性
         if (hitInfo.roughness > 0.0) {
-            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.Ngeom, hitInfo.state), hitInfo.roughness));
+            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_geom, hitInfo.state), hitInfo.roughness));
         }
 
         result.direction = reflectedDir;
         result.throughputMul = hitInfo.F / reflectionProbability;
     } else {
-        result.direction = RandomDirectionInHemisphere(hitInfo.Ngeom, hitInfo.state);// 漫反射 
+        result.direction = RandomDirectionInHemisphere(hitInfo.N_geom, hitInfo.state);// 漫反射 
 
         vec3 kD = (1.0 - hitInfo.F) * (1.0 - hitInfo.metallic); // 能量守恒：漫反射部分 = (1 - F) * 漫反射颜色
         result.throughputMul = kD * hitInfo.albedo / (1.0 - reflectionProbability);
@@ -748,12 +748,12 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
             scatter = ScatterMetal(hitInfo);
         else if(hitInfo.material_type == MATERIAL_PLASTIC || hitInfo.material_type == MATERIAL_CERAMIC || hitInfo.material_type == MATERIAL_LIGHT) 
             scatter = ScatterDiffuse(hitInfo);// 处理电介质材质（混合漫反射和镜面反射）
-        vec3 offsetDir = dot(scatter.direction, hitInfo.Ngeom) > 0.0 ? hitInfo.Ngeom: -hitInfo.Ngeom;
+        vec3 offsetDir = dot(scatter.direction, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom: -hitInfo.N_geom;
         primaryPayload.spawnRayCount = scatter.valid;
         //primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
         primaryPayload.radiance = localRadiance; //NEE
         vec3 origin=hitInfo.hitPos+offsetDir*0.001;
-        primaryPayload.nextRay[0].origin = origin; //hitPos + Ngeom * 0.001;
+        primaryPayload.nextRay[0].origin = origin; //hitPos + N_geom * 0.001;
         primaryPayload.nextRay[0].dir = scatter.direction;
         primaryPayload.nextRay[0].throughputMul = scatter.throughputMul;
         primaryPayload.done = scatter.valid == 0u ? 1u : 0u;
@@ -762,7 +762,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
     }
 }
 
-void updatePayload(in MaterialStruct mat, vec3 Ngeom, uint textureIndex_baseColor, uint textureIndex_normal, uint textureIndex_metallicRoughness, vec2 uv){
+void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_baseColor, uint textureIndex_normal, uint textureIndex_metallicRoughness, vec2 uv){
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;
@@ -790,10 +790,11 @@ void updatePayload(in MaterialStruct mat, vec3 Ngeom, uint textureIndex_baseColo
     hitInfo.hitPos = getWorldHitPos();
     hitInfo.I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
     hitInfo.V = -hitInfo.I; //视向向量，观察方向
-    bool frontFace = dot(hitInfo.I, Ngeom) < 0.0; //入射光线落在表面的哪一侧（正面还是背面）
-    vec3 N = frontFace ? Ngeom : -Ngeom; // N 始终朝向入射光
-    hitInfo.N = N;
-    hitInfo.Ngeom = Ngeom;
+    bool frontFace = dot(hitInfo.I, Ng) < 0.0; //入射光线落在表面的哪一侧（正面还是背面）
+    Ng = frontFace ? Ng : -Ng; // N 始终朝向入射光
+    Ns = frontFace ? Ns : -Ns; // N 始终朝向入射光
+    hitInfo.N_shade = Ns;// Ns 用于光照、BRDF、Fresnel 和 normal map 外观。
+    hitInfo.N_geom = Ng;// 保留 mesh winding 的 geometric normal。
 
     hitInfo.airToMedium = (primaryPayload.insideMedium == 0u) && !frontFace;
     hitInfo.mediumToAir = (primaryPayload.insideMedium == 1u) && frontFace;
@@ -805,9 +806,9 @@ void updatePayload(in MaterialStruct mat, vec3 Ngeom, uint textureIndex_baseColo
     vec3 dielectricF0 = vec3(f0Scalar);
     hitInfo.F0 = mix(dielectricF0, mat.albedo, mat.metallic);
     // 计算菲涅尔项
-    //float cosTheta = abs(dot(Ngeom, -I));
+    //float cosTheta = abs(dot(N_geom, -I));
     //float cosTheta = abs(dot(N, -I));
-    hitInfo.cosTheta = clamp(dot(hitInfo.N,-hitInfo.I),0.0,1.0);
+    hitInfo.cosTheta = clamp(dot(hitInfo.N_shade,-hitInfo.I),0.0,1.0);
     hitInfo.F = hitInfo.F0 + (1.0 - hitInfo.F0) * pow(1.0 - hitInfo.cosTheta, 5.0);
 
     // if (isGlass(hitInfo.transmission, hitInfo.alpha)) {}
