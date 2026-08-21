@@ -90,7 +90,8 @@ struct SurfaceFrame{
     vec3 B;
     vec2 uv;
 };
-SurfaceFrame getTriangleSurfaceFrame(uint geometryIndex){
+SurfaceFrame getTriangleSurfaceFrame(uint geometryIndex){ //根据vertex attribute，计算每个三角形的uv, normal, TBN。不翻转。
+    //第一步：读取数据，计算重心
     GeometryInfo geo = sboGeometryInfos.infos[geometryIndex];
 
     uint baseIndex = gl_PrimitiveID * 3u;
@@ -107,52 +108,48 @@ SurfaceFrame getTriangleSurfaceFrame(uint geometryIndex){
 
     SurfaceFrame frame;
 
+    //第二步：计算uv
+    frame.uv = v0.uv * bc.x + v1.uv * bc.y + v2.uv * bc.z;
+
+    //第三步：object position插值
     // Object space interpolated position / UV
-    vec3 Pobj =
-        v0.position * bc.x +
-        v1.position * bc.y +
-        v2.position * bc.z;
+    vec3 Pobj = v0.position * bc.x + v1.position * bc.y + v2.position * bc.z;
+    frame.P = vec3(gl_ObjectToWorldEXT * vec4(Pobj, 1.0)); // position: point transform
 
-    frame.uv =
-        v0.uv * bc.x +
-        v1.uv * bc.y +
-        v2.uv * bc.z;
-
+    //第四步：shade normal插值
     // 不要过早 normalize；先插值，之后再 normalize。
-    vec3 Nobj =
-        v0.normal * bc.x +
-        v1.normal * bc.y +
-        v2.normal * bc.z;
+    vec3 Nobj = v0.normal * bc.x + v1.normal * bc.y + v2.normal * bc.z;
+    mat3 normalMatrix = transpose(mat3(gl_WorldToObjectEXT));
+    frame.N_interpolate = safeNormalize(normalMatrix * Nobj);
 
-    vec3 e1Obj = v1.position - v0.position;
-    vec3 e2Obj = v2.position - v0.position;
-    vec3 NgObj = safeNormalize(cross(e1Obj, e2Obj));
-
-    vec3 Tobj =
-        v0.tangent.xyz * bc.x +
-        v1.tangent.xyz * bc.y +
-        v2.tangent.xyz * bc.z;
-
-    // .w 只是 +/-1，但对 interpolation 做符号选择更稳妥。
-    float handedness =
-        v0.tangent.w * bc.x +
-        v1.tangent.w * bc.y +
-        v2.tangent.w * bc.z;
-
-    handedness = handedness < 0.0 ? -1.0 : 1.0;
-
-    // position: point transform
-    frame.P = vec3(gl_ObjectToWorldEXT * vec4(Pobj, 1.0));
-
+    //Notes:
     // normal: inverse-transpose(model)。
     // 对 Vulkan ray tracing builtin，Nobj * mat3(gl_WorldToObjectEXT)
     // 是 row-vector 写法，与 transpose(mat3(gl_WorldToObjectEXT)) * Nobj 等价。
-    mat3 normalMatrix = transpose(mat3(gl_WorldToObjectEXT));
+    
+    //第五步：geometric normal计算，每个三角形上的geometric normal都一样，跟hit position无关
+    vec3 e1Obj = v1.position - v0.position;
+    vec3 e2Obj = v2.position - v0.position;
+    vec3 NgObj = safeNormalize(cross(e1Obj, e2Obj));
     frame.N_geometric = normalize(normalMatrix * NgObj);
-    frame.N_interpolate = safeNormalize(normalMatrix * Nobj);
+    
 
+    // 防止 authored vertex normals 落在真实 face normal 的反半球。
+    // if (dot(frame.N_interpolate, frame.N_geometric) < 0.0) {
+    //     frame.N_interpolate = -frame.N_interpolate;
+    // }
+
+    // 用几何法线决定 hit side。
+    // vec3 V = safeNormalize(-gl_WorldRayDirectionEXT);
+    // if (dot(frame.N_geometric, V) < 0.0) {
+    //     frame.N_geometric = -frame.N_geometric;
+    //     frame.N_interpolate = -frame.N_interpolate;
+    // }
+
+    //第六步：计算tangent vector
     // tangent: direction 走 object-to-world 的线性部分。
     // 不能把 tangent 当作 normal 一样直接走 normalMatrix。
+    vec3 Tobj = v0.tangent.xyz * bc.x + v1.tangent.xyz * bc.y + v2.tangent.xyz * bc.z;
     mat3 objectToWorld3x3 = mat3(gl_ObjectToWorldEXT);
     frame.T = objectToWorld3x3 * Tobj;
 
@@ -160,8 +157,14 @@ SurfaceFrame getTriangleSurfaceFrame(uint geometryIndex){
     // Gram-Schmidt 修正后再 normalize。
     frame.T = safeNormalize(frame.T - frame.N_interpolate * dot(frame.N_interpolate, frame.T));
 
+
+    //第七步：计算Bi tangent
+    // .w 只是 +/-1，但对 interpolation 做符号选择更稳妥。
+    float handedness = v0.tangent.w * bc.x + v1.tangent.w * bc.y + v2.tangent.w * bc.z;
+    handedness = handedness < 0.0 ? -1.0 : 1.0;
     // glTF tangent.w 保留 UV mirror 的 handedness。
-    frame.B = safeNormalize(cross(frame.N_interpolate, frame.T)) * handedness;
+    //frame.B = safeNormalize(cross(frame.N_interpolate, frame.T)) * handedness;
+    frame.B = cross(frame.N_interpolate, frame.T) * handedness;
 
     // 保持你当前的 two-sided hit normal 行为。
     // vec3 V = normalize(-gl_WorldRayDirectionEXT);
@@ -227,8 +230,17 @@ void main(){
     //vec2 uv = getTriangleUV(geometryIndex); //legacy
     SurfaceFrame frame = getTriangleSurfaceFrame(geometryIndex);
 
-    //TODO：这段代码看起来跟triangle无关，需要放在updatePayload?
-    //vec3 N = frame.N;
+    //翻转
+    vec3 I = safeNormalize(gl_WorldRayDirectionEXT);
+    bool frontFace = dot(I, frame.N_geometric) < 0.0;
+    // 让最终使用的 normal 指向 ray origin / view side。
+    if (!frontFace) {//背面命中
+        frame.N_geometric   = -frame.N_geometric;
+        frame.N_interpolate = -frame.N_interpolate;
+        frame.T = -frame.T;
+    }
+
+    //TODO：这段代码看起来跟triangle无关，需放在updatePayload?
     vec3 Ns = frame.N_interpolate;
     vec3 Ng = frame.N_geometric;
     //从 normal map 取出一个切线空间法线，
@@ -245,7 +257,11 @@ void main(){
         //这一步把 texture 的 [0, 1] 范围还原到 normal vector 的 [-1, 1] 范围：
         vec3 Nts = decodeNormalMap(encodedNormal);
 
-        //test A
+        // Test: 临时夸张强度，正常通常为 1
+        // Nts.xy *= 8.0;
+        // Nts = normalize(Nts);
+
+        //Test: 固定一个Nts
         //Nts = vec3(0.0, 0.0, 1.0);
         //vec3 Ns = normalize(mat3(frame.T, frame.B, frame.N) * Nts);
 
@@ -263,13 +279,23 @@ void main(){
         //实现一个 two-sided shading normal：
         //无论射线从三角形正面还是反面命中，
         //都让最终 shading normal 朝向射线来处。
-        vec3 V = normalize(-gl_WorldRayDirectionEXT);
-        if (dot(Ng, V) < 0.0) Ng = -Ng;
-        if (dot(Ns, V) < 0.0) Ns = -Ns;
+        // vec3 V = normalize(-gl_WorldRayDirectionEXT);
+        // if (dot(Ng, V) < 0.0) Ng = -Ng;
+        // if (dot(Ns, V) < 0.0) Ns = -Ns;
 
     }
 #endif
 
-    //todo: debug Ns and Ng
-    updatePayload(mat, Ntri, Ntri, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
+    //Test 
+    //updatePayload(mat, Ntri, Ntri, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
+    //updatePayload(mat, Ns, Ns, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
+    //updatePayload(mat, Ng, Ng, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
+
+    updatePayload(mat, Ng, Ns, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
+
+    //Notes
+    //例如一个 low-poly sphere：
+    //N_geometric 会让每个三角形呈现平面块状光照。
+    //Ntri / N_interpolate 通过共享顶点 normal 伪造平滑球面光照。
 }
+

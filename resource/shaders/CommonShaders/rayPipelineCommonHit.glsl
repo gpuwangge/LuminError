@@ -432,7 +432,7 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //fo
         if(NdotL <= 0.0) continue;//return vec3(0.0);
 
         // 发射 shadow ray，判断采样到的光源是否可见
-        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * SHADOW_BIAS;
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * SHADOW_BIAS; //这里(NEE)必须用N_geom。如果用N_shade的话阴影边缘会出问题
 
         float visibility = traceShadowVisibility(shadowOrigin,L,maxT);
 
@@ -497,6 +497,7 @@ inout是可读写，	相当于T&
 //     return false;
 // }
 
+//whitted style在结束的时候一定会发射二次光线，MPT在遇到glass/jade等材质的时候发射二次光线
 void UploadNextRays(in HitInfoStruct hitInfo){
     vec3 nextOrigin = vec3(0.0);
     vec3 nextDir = vec3(0.0);
@@ -514,10 +515,10 @@ void UploadNextRays(in HitInfoStruct hitInfo){
 
     if(hitInfo.material_type == MATERIAL_GOLD){
     //if(hasReflection && hitInfo.transmission < 0.01){ //金属
-        vec3 R = normalize(reflect(hitInfo.I, hitInfo.N_geom));
+        vec3 R = normalize(reflect(hitInfo.I, hitInfo.N_shade));
 
-        primaryPayload.nextRay[0].origin = hitInfo.hitPos + hitInfo.N_geom * EPSILON;
-        primaryPayload.nextRay[0].dir = normalize(mix(R, RandomDirectionInHemisphere(hitInfo.N_geom, hitInfo.state), hitInfo.roughness * hitInfo.roughness));
+        primaryPayload.nextRay[0].origin = hitInfo.hitPos + hitInfo.N_shade * EPSILON;
+        primaryPayload.nextRay[0].dir = normalize(mix(R, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness * hitInfo.roughness));
         primaryPayload.nextRay[0].throughputMul = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
 
         primaryPayload.spawnRayCount = 1u;
@@ -530,8 +531,11 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         float n2 = primaryPayload.insideMedium == 1u ? 1.0    : hitInfo.ior;
         float eta = n1 / n2;
 
-        vec3 R = safeNormalize(reflect(hitInfo.I, hitInfo.N_geom));
-        vec3 T = refract(hitInfo.I, hitInfo.N_geom, eta);
+        vec3 normal = hitInfo.N_geom;
+        normal = hitInfo.N_shade; //test：应该用N_geom的，但是Dragon Test里面N_geom效果不好，先暂时用N_shade
+
+        vec3 R = safeNormalize(reflect(hitInfo.I, normal));
+        vec3 T = refract(hitInfo.I, normal, eta);
 
         bool tir = dot(T, T) < 1e-8;
 
@@ -543,7 +547,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         primaryPayload.nextRay[1].mediumEntryPos = primaryPayload.mediumEntryPos;
         if(tir){ // 全反射
             //primaryPayload.nextRayOrigin0 = hitPos + R * EPSILON;
-            vec3 Roff = dot(R, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom : -hitInfo.N_geom;
+            vec3 Roff = dot(R, normal) > 0.0 ? normal : -normal;
             primaryPayload.nextRay[0].origin = hitInfo.hitPos + Roff * EPSILON;
             primaryPayload.nextRay[0].dir = R;
             primaryPayload.nextRay[0].throughputMul = vec3(1.0);
@@ -551,8 +555,8 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         }
         else{ //有反射和折射
             T = safeNormalize(T);
-            vec3 Toff = dot(T, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom : -hitInfo.N_geom;
-            vec3 Roff = dot(R, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom : -hitInfo.N_geom;
+            vec3 Toff = dot(T, normal) > 0.0 ? normal : -normal;
+            vec3 Roff = dot(R, normal) > 0.0 ? normal : -normal;
             float F2 = pow(fresnelScalar,0.5);
 
             uint rayIndex = 0; //第一条射线，查询折射
@@ -621,7 +625,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         vec3 lightRadiance;
         vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
 
-        float NdotL = max(dot(hitInfo.N_geom, L), 0.0);
+        float NdotL = max(dot(hitInfo.N_shade, L), 0.0);
         if(NdotL <= 0.0) continue;
 
         //给每一个light发射一根shadowray
@@ -642,7 +646,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         if(visibility <= 0.0) continue;
 
         vec3 H = safeNormalize(L + hitInfo.V);
-        float NdotH = max(dot(hitInfo.N_geom, H), 0.0);
+        float NdotH = max(dot(hitInfo.N_shade, H), 0.0);
         float VdotH = max(dot(hitInfo.V, H), 0.0);
 
         vec3 F1 = fresnelSchlick(VdotH, hitInfo.F0);
@@ -693,7 +697,7 @@ ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
     ScatterResult result;
 
     // 金属材质主要进行镜面反射
-    vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_geom);
+    vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_shade);
     
     // 根据粗糙度添加随机性
     if (hitInfo.roughness > 0.0) {
@@ -715,17 +719,17 @@ ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/�
     
     if (Rand(hitInfo.state) < reflectionProbability) {
         // 镜面反射
-        vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_geom);
+        vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_shade);
         
         // 根据粗糙度添加随机性
         if (hitInfo.roughness > 0.0) {
-            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_geom, hitInfo.state), hitInfo.roughness));
+            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness));
         }
 
         result.direction = reflectedDir;
         result.throughputMul = hitInfo.F / reflectionProbability;
     } else {
-        result.direction = RandomDirectionInHemisphere(hitInfo.N_geom, hitInfo.state);// 漫反射 
+        result.direction = RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state);// 漫反射 
 
         vec3 kD = (1.0 - hitInfo.F) * (1.0 - hitInfo.metallic); // 能量守恒：漫反射部分 = (1 - F) * 漫反射颜色
         result.throughputMul = kD * hitInfo.albedo / (1.0 - reflectionProbability);
@@ -763,6 +767,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
 }
 
 void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_baseColor, uint textureIndex_normal, uint textureIndex_metallicRoughness, vec2 uv){
+    
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;
@@ -776,6 +781,23 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
         hitInfo.albedo *= baseColor.rgb;
         hitInfo.alpha *= baseColor.a;
     //}
+
+    //test: draw normal texture。可以用来证明切线空间贴图采样正确
+    // vec3 n = SampleTexture(textureIndex_normal, uv).xyz * 2.0 - 1.0; 
+    // vec3 debugColor = n * 0.5 + 0.5;
+    // primaryPayload.radiance = debugColor;
+
+    // primaryPayload.radiance = Ns;
+    //不完全正确。它说明你现在确实在显示经过某种变换后的法线，但这张图存在很强的全局性异常：地面几乎纯绿、右墙近乎纯蓝、左墙大量黑/红，这不像正常、连续的 world-space shading normal 可视化。
+
+    //vec3 dN = Ns - Ng;// 放大 8 倍，并把零差映射为中灰
+    //primaryPayload.radiance = clamp(dN * 8.0 + 0.5, 0.0, 1.0);
+
+    //primaryPayload.radiance = 0.5 * Ns + 0.5; //用了texture normal的话，边界比较smooth
+    //primaryPayload.radiance = 0.5 * Ng + 0.5;//完全用geometry算的normal，在非平面部分转换比较生硬
+
+    //return;
+
 #endif
 
     hitInfo.emission = mat.emissionColor * mat.emissionStrength;
@@ -787,15 +809,20 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
     
     hitInfo.transmissionColor = mat.transmissionColor;
 
+    //Ng = Ns;//test good
     hitInfo.hitPos = getWorldHitPos();
     hitInfo.I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
     hitInfo.V = -hitInfo.I; //视向向量，观察方向
     bool frontFace = dot(hitInfo.I, Ng) < 0.0; //入射光线落在表面的哪一侧（正面还是背面）
     Ng = frontFace ? Ng : -Ng; // N 始终朝向入射光
     Ns = frontFace ? Ns : -Ns; // N 始终朝向入射光
+    if (dot(Ns, Ng) < 0.0) Ns = -Ns; // 使 shading normal 留在 face-forward geometric normal 所在半球。
+    
+   // Ng = Ns;//test bad
     hitInfo.N_shade = Ns;// Ns 用于光照、BRDF、Fresnel 和 normal map 外观。
     hitInfo.N_geom = Ng;// 保留 mesh winding 的 geometric normal。
 
+    //todo: ai说这里frontFace写反了。但是反过来后dragon看起来怪怪的，需要验证
     hitInfo.airToMedium = (primaryPayload.insideMedium == 0u) && !frontFace;
     hitInfo.mediumToAir = (primaryPayload.insideMedium == 1u) && frontFace;
     //bool invalid1 = (primaryPayload.insideMedium == 1u && !frontFace);

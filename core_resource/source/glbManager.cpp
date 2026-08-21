@@ -227,9 +227,13 @@ void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampl
     for (size_t i = 0; i < gltfModel.images.size(); ++i) {
         const tinygltf::Image &img = gltfModel.images[i];
 
+        const uint32_t imageUsage = imageUsages[i];
+        const bool isSRGB = (imageUsage & TextureUsage_BaseColor) != 0 || (imageUsage & TextureUsage_Emissive) != 0;
+        const VkFormat format = isSRGB? VK_FORMAT_R8G8B8A8_SRGB: VK_FORMAT_R8G8B8A8_UNORM;
+
         int texture_index = textureManager->PushNewTextureImage(commandPool);//todo: use raytracing(compute) queue family? 
         VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        textureManager->SetupTextureImage(texture_index, img.width, img.height, usage, 1, VK_FORMAT_R8G8B8A8_SRGB, 8);
+        textureManager->SetupTextureImage(texture_index, img.width, img.height, usage, 1, format, 8);
         textureManager->GenerateTextureImageFromTexel(texture_index, 0, false, (void *)img.image.data(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL); //put sampler_id to 0 here, can change later
 
         //const VkDeviceSize sourceSize = img.image.size();
@@ -237,6 +241,36 @@ void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampl
         //const VkDeviceSize expectedSize = VkDeviceSize(img.width) * img.height * img.component * (img.bits / 8);
         //std::cout<<"expectedSize = "<<expectedSize<<std::endl;
         //return;
+
+        //print a image for debug
+        if (i == 2) {
+            const size_t count = std::min<size_t>(100, img.image.size());
+
+            std::cout << "Image 2 metadata:\n";
+            std::cout << "  width     = " << img.width << '\n';
+            std::cout << "  height    = " << img.height << '\n';
+            std::cout << "  component = " << img.component << '\n';
+            std::cout << "  bits      = " << img.bits << '\n';
+            std::cout << "  bytes     = " << img.image.size() << '\n';
+
+            std::cout << "First " << count << " bytes (hex):\n";
+
+            for (size_t j = 0; j < count; ++j) {
+                std::cout
+                    << std::hex
+                    << std::setw(2)
+                    << std::setfill('0')
+                    << static_cast<unsigned int>(img.image[j])
+                    << ' ';
+
+                // 每行显示 16 个 byte
+                if ((j + 1) % 16 == 0) {
+                    std::cout << '\n';
+                }
+            }
+
+            std::cout << std::dec << '\n';
+        }
     }
 
     std::cout<<"textureManager->textureImages.size() = "<<textureManager->textureImages.size()<<std::endl;
@@ -295,6 +329,10 @@ void CGLBManager::LoadGLBMaterial(){
 
     myGlbMaterials.clear();
     myGlbMaterials.resize(gltfModel.materials.size());
+
+    imageUsages.resize(gltfModel.images.size());
+    std::fill(imageUsages.begin(), imageUsages.end(), TextureUsage_None);
+        
 
     for (int materialIndex = 0; materialIndex < static_cast<int>(gltfModel.materials.size()); ++materialIndex){
         if (materialIndex < 0 || materialIndex >= static_cast<int>(gltfModel.materials.size())) throw std::runtime_error("Invalid material index.");
@@ -360,16 +398,61 @@ void CGLBManager::LoadGLBMaterial(){
         myGlbMaterials[materialIndex].alphaCutoff = static_cast<float>(material.alphaCutoff);
         myGlbMaterials[materialIndex].doubleSided = material.doubleSided;
 
-        // std::cout
-        //     << "Load Material [" << materialIndex << "] "
-        //     << "name = " << myGlbMaterials[materialIndex].name
-        //     << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
-        //     << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
-        //     << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
-        //     << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
-        //     << std::endl;
+        //------------------------------------------------------
+        // Fill image usages
+        //------------------------------------------------------
+        auto MarkImageUsage = [&](int textureIndex, uint32_t usage){
+            if (textureIndex < 0 || textureIndex >= static_cast<int>(gltfModel.textures.size())) return;
+            const int imageIndex = gltfModel.textures[textureIndex].source;
+            if (imageIndex < 0 || imageIndex >= static_cast<int>(imageUsages.size())) return;
+            imageUsages[imageIndex] |= usage;
+        };
+        MarkImageUsage(pbr.baseColorTexture.index, TextureUsage_BaseColor);
+        MarkImageUsage(pbr.metallicRoughnessTexture.index, TextureUsage_MetallicRoughness);
+        MarkImageUsage(material.normalTexture.index, TextureUsage_Normal);
+        MarkImageUsage(material.occlusionTexture.index, TextureUsage_Occlusion);
+        MarkImageUsage(material.emissiveTexture.index, TextureUsage_Emissive);
+
+        std::cout
+            << "Load Material [" << materialIndex << "] "
+            << "name = " << myGlbMaterials[materialIndex].name
+            << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
+            << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
+            << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
+            << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
+            << ", occlusionTextureIndex = " << myGlbMaterials[materialIndex].occlusionTextureIndex
+            << std::endl;
     }
     std::cout << "Loaded material count = " << myGlbMaterials.size() << std::endl;
+
+    //print for debug
+    for (size_t imageIndex = 0; imageIndex < imageUsages.size(); ++imageIndex){
+        const uint32_t usage = imageUsages[imageIndex];
+        std::cout<< "imageUsages[" << imageIndex << "]"<< " = " << usage<< " : ";
+        bool hasUsage = false;
+        if ((usage & TextureUsage_BaseColor) != 0){
+            std::cout << "BaseColor ";
+            hasUsage = true;
+        }
+        if ((usage & TextureUsage_MetallicRoughness) != 0){
+            std::cout << "MetallicRoughness ";
+            hasUsage = true;
+        }
+        if ((usage & TextureUsage_Normal) != 0){
+            std::cout << "Normal ";
+            hasUsage = true;
+        }
+        if ((usage & TextureUsage_Occlusion) != 0){
+            std::cout << "Occlusion ";
+            hasUsage = true;
+        }
+        if ((usage & TextureUsage_Emissive) != 0){
+            std::cout << "Emissive ";
+            hasUsage = true;
+        }
+        if (!hasUsage) std::cout << "None";
+        std::cout << '\n';
+    }
 
         /*
         const tinygltf::Material& material = gltfModel.materials[materialIndex];

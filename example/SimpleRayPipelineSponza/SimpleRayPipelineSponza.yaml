@@ -190,8 +190,10 @@ Attachments:
 
 MainCamera:
   camera_mode: 1
-  camera_position: [-5,1,0.0]
-  camera_rotation: [0,90,0]
+  #camera_position: [-5,1,0]
+  #camera_rotation: [0,90,0]
+  camera_position: [-6,1,0.5] #aim to lion
+  camera_rotation: [0,-110,0] #aim to lion
   object_id_target: 0
   camera_z: [0.1, 256]
   camera_projection_enable_orthographic: false

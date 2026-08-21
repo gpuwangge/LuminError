@@ -65,6 +65,17 @@ public:
     std::vector<MyGLBMaterial> myGlbMaterials;
     void LoadGLBMaterial();
 
+    //通过读GLB Material，需要获得每种image的usage
+    enum TextureUsage : uint32_t{
+        TextureUsage_None              = 0,
+        TextureUsage_BaseColor         = 1u << 0,
+        TextureUsage_MetallicRoughness = 1u << 1,
+        TextureUsage_Normal            = 1u << 2,
+        TextureUsage_Emissive          = 1u << 3,
+        TextureUsage_Occlusion         = 1u << 4,
+    };
+    std::vector<uint32_t> imageUsages;
+
     int GetGLBMeshSize(IN int glbIndex);
 };
 
