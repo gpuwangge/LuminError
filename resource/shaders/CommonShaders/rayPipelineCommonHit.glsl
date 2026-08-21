@@ -531,8 +531,8 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         float n2 = primaryPayload.insideMedium == 1u ? 1.0    : hitInfo.ior;
         float eta = n1 / n2;
 
-        vec3 normal = hitInfo.N_geom;
-        normal = hitInfo.N_shade; //test：应该用N_geom的，但是Dragon Test里面N_geom效果不好，先暂时用N_shade
+        vec3 normal = hitInfo.N_geom; //test：按道理这里应该用N_geom的，但是Dragon Test里面N_geom效果很奇怪，需要debug，先暂时用N_shade
+        normal = hitInfo.N_shade; //先暂时用N_shade
 
         vec3 R = safeNormalize(reflect(hitInfo.I, normal));
         vec3 T = refract(hitInfo.I, normal, eta);
