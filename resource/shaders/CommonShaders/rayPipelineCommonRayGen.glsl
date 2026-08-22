@@ -21,7 +21,9 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
     vec3 accumulatedRadiance = vec3(0.0);
 
     for (int s = 0; s < configUBO.spp; ++s){
-        vec2 jitter = rnd2(pixel, s, customUBO.frameCount);
+        vec2 jitter = vec2(0.0);
+        if(configUBO.accumulate == 1u) 
+            jitter = rnd2(pixel, s, customUBO.frameCount);
         vec2 uv = (vec2(pixel) + jitter) / vec2(size);
         vec2 ndc = uv * 2.0 - 1.0;
         // ndc.y = -ndc.y;// 如有需要再开

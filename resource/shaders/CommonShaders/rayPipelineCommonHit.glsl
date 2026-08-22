@@ -328,6 +328,16 @@ float traceShadowVisibility(vec3 origin, vec3 dir, float tMax){ //inout ShadowPa
     return float(shadowPayload.visibility);
 }
 
+//sampleDiskVogel()是为了产生没有噪声的软阴影
+// const float GOLDEN_ANGLE = 2.39996322973;
+// vec2 sampleDiskVogel(uint i, uint count){// 返回单位圆盘内的确定性采样点 // i: [0, count - 1]
+//     float n = float(max(count, 1u));
+//     float r = sqrt((float(i) + 0.5) / n);
+//     float phi = float(i) * GOLDEN_ANGLE;
+
+//     return r * vec2(cos(phi), sin(phi));
+// }
+
 //soft shadow只对whitted style有效
 float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCenter, float radius, uint sampleCount, uint baseSeed) {
     float visible = 0.0;
@@ -337,6 +347,14 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
     vec3 T, B;
     buildOrthonormalBasis(lightNormal, T, B);
 
+    //做两套软阴影效果：一个使用随机数，一个不使用随机数(但这个效果不好，去除)
+    //但这样的话如果要使用随机数软阴影，就必须开accumulate了
+    // bool useRandom = false;
+    // if(configUBO.accumulate == 1u && customUBO.cameraInMotion == 0u) 
+    //     useRandom = true; //如果开启积累，并且摄像机不动的时候
+    // else
+    //     sampleCount *= 4; //不适用随机的话，需要更多的sampleCount来生成软阴影
+
     for (int s = 0; s < sampleCount; ++s) {
         //uint rng = baseSeed ^ uint(s) * 1664525u + 1013904223u;
         uint rng = baseSeed;
@@ -344,6 +362,9 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
         rng *= 2891336453u;
 
         vec2 d = sampleDisk(rng) * radius;
+        //if(useRandom) d = sampleDisk(rng) * radius;//随机软阴影，在开启积累的时候用这个。sample count只需要4。
+        //else d = sampleDiskVogel(uint(s), sampleCount) * radius;//确定的软阴影，但要求16~64的sample count，关闭积累用这个。
+
         vec3 samplePos = lightCenter + T * d.x + B * d.y;
 
         vec3 toLight = samplePos - hitpos;
@@ -519,6 +540,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
 
         primaryPayload.nextRay[0].origin = hitInfo.hitPos + hitInfo.N_shade * EPSILON;
         primaryPayload.nextRay[0].dir = normalize(mix(R, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness * hitInfo.roughness));
+        //primaryPayload.nextRay[0].dir = R; //金属会变成完美镜面金属；hitInfo.roughness 在这个分支中不再生效。
         primaryPayload.nextRay[0].throughputMul = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
 
         primaryPayload.spawnRayCount = 1u;
@@ -631,7 +653,7 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         //给每一个light发射一根shadowray
         vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * SHADOW_BIAS;
         float visibility = 1.0f; //default is disable shadow
-        if(configUBO.softShadowEnable == 0){
+        if(configUBO.softShadowEnable == 0){ //|| customUBO.cameraInMotion == 1
             visibility = traceShadowVisibility(shadowOrigin, L, maxT);
         }else{
             visibility = traceSoftShadowVisibility(
