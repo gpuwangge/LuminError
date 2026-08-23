@@ -851,18 +851,18 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
     // 注意：mr texture 应按线性数据读取；不能 sRGB decode。
     // hitInfo.roughness = clamp(mat.roughness * mr.g, 0.04, 1.0);
     // hitInfo.metallic = clamp(mat.metallic * mr.b,0.0, 1.);
-    if(mr.b > 0.5) hitInfo.material_type = 2; //设为金属
-    float roughnessFactor = 1.0;
-    float metallicFactor = 1.0;
+    if(mr.b > 0.75) {
+        hitInfo.material_type = 2; //设为金属
+        // glTF-compatible metal/rough F0
+        //hitInfo.F0 = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
+        hitInfo.ior = 1.5;       // 仅在 transmission / dielectric refraction 时有意义
+        hitInfo.specular = 1.0;  // 若你的实现仍需要该字段，保持默认即可
+        //hitInfo.reflectance？
+    }
+    float roughnessFactor = 1.0; //TODO: use glb value isntead of hard-code
+    float metallicFactor = 1.0; //TODO: use glb value instead of hard-code
     hitInfo.roughness = clamp(roughnessFactor * mr.g,  0.04, 1.0);
     hitInfo.metallic  = clamp(metallicFactor * mr.b, 0.0, 1.0);
-    // glTF-compatible metal/rough F0
-    //hitInfo.F0 = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
-    // 不要为 glTF core 金属强行指定 0.47 的实数 IOR。
-    hitInfo.ior = 1.5;       // 仅在 transmission / dielectric refraction 时有意义
-    hitInfo.specular = 1.0;  // 若你的实现仍需要该字段，保持默认即可
-    //hitInfo.reflectance？
- 
 
 #endif
 
