@@ -788,11 +788,32 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
     }
 }
 
+//如果你的 base-color texture 已经以 Vulkan 的 sRGB image format 创建，例如：
+//VK_FORMAT_R8G8B8A8_SRGB
+//那么采样时硬件会自动做 sRGB → linear 转换。此时 shader 里不能再调用 SRGBToLinear，否则是 double-decode，颜色会变暗且饱和度/观感异常。
+// vec3 SRGBToLinear(vec3 c){
+//     bvec3 cutoff = lessThanEqual(c, vec3(0.04045));
+
+//     vec3 low  = c / 12.92;
+//     vec3 high = pow((c + 0.055) / 1.055, vec3(2.4));
+
+//     return mix(high, low, vec3(cutoff));
+// }
+
 void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_baseColor, uint textureIndex_normal, uint textureIndex_metallicRoughness, vec2 uv){
     
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;
+
+    hitInfo.emission = mat.emissionColor * mat.emissionStrength;
+    hitInfo.metallic = clamp(mat.metallic, 0.0, 1.0);
+    hitInfo.roughness = clamp(mat.roughness, 0.02, 1.0);
+    hitInfo.transmission = clamp(mat.transmission, 0.0, 1.0);
+    hitInfo.specular = clamp(mat.specular, 0.0, 1.0);
+    hitInfo.ior = max(mat.ior, 1.01);
+    
+    hitInfo.transmissionColor = mat.transmissionColor;
 
     hitInfo.albedo = mat.albedo;
     hitInfo.alpha = mat.alpha;
@@ -818,18 +839,33 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
     //primaryPayload.radiance = 0.5 * Ns + 0.5; //用了texture normal的话，边界比较smooth
     //primaryPayload.radiance = 0.5 * Ng + 0.5;//完全用geometry算的normal，在非平面部分转换比较生硬
 
+    //在 glTF/GLB 2.0 标准的 metallicRoughnessTexture 中，真正有定义的只有
+    //x / R	未使用	对 metallic-roughness 材质计算应忽略
+    //y / G	roughness（粗糙度）	0 = 很光滑、清晰反射；1 = 很粗糙、反射发散
+    //z / B	metallic（金属度）	0 = 非金属/绝缘体；1 = 金属
+    //primaryPayload.radiance = vec3(metallicRoughness.y);
+    //primaryPayload.radiance = vec3(metallicRoughness.w);
     //return;
+
+    vec4 mr = SampleTexture(textureIndex_metallicRoughness, uv);
+    // 注意：mr texture 应按线性数据读取；不能 sRGB decode。
+    // hitInfo.roughness = clamp(mat.roughness * mr.g, 0.04, 1.0);
+    // hitInfo.metallic = clamp(mat.metallic * mr.b,0.0, 1.);
+    if(mr.b > 0.5) hitInfo.material_type = 2; //设为金属
+    float roughnessFactor = 1.0;
+    float metallicFactor = 1.0;
+    hitInfo.roughness = clamp(roughnessFactor * mr.g,  0.04, 1.0);
+    hitInfo.metallic  = clamp(metallicFactor * mr.b, 0.0, 1.0);
+    // glTF-compatible metal/rough F0
+    //hitInfo.F0 = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
+    // 不要为 glTF core 金属强行指定 0.47 的实数 IOR。
+    hitInfo.ior = 1.5;       // 仅在 transmission / dielectric refraction 时有意义
+    hitInfo.specular = 1.0;  // 若你的实现仍需要该字段，保持默认即可
+    //hitInfo.reflectance？
+ 
 
 #endif
 
-    hitInfo.emission = mat.emissionColor * mat.emissionStrength;
-    hitInfo.metallic = clamp(mat.metallic, 0.0, 1.0);
-    hitInfo.roughness = clamp(mat.roughness, 0.02, 1.0);
-    hitInfo.transmission = clamp(mat.transmission, 0.0, 1.0);
-    hitInfo.specular = clamp(mat.specular, 0.0, 1.0);
-    hitInfo.ior = max(mat.ior, 1.01);
-    
-    hitInfo.transmissionColor = mat.transmissionColor;
 
     //Ng = Ns;//test good
     hitInfo.hitPos = getWorldHitPos();

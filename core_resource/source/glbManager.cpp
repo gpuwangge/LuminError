@@ -243,6 +243,7 @@ void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampl
         //return;
 
         //print a image for debug
+        /*
         if (i == 2) {
             const size_t count = std::min<size_t>(100, img.image.size());
 
@@ -264,13 +265,10 @@ void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampl
                     << ' ';
 
                 // 每行显示 16 个 byte
-                if ((j + 1) % 16 == 0) {
-                    std::cout << '\n';
-                }
+                if ((j + 1) % 16 == 0) std::cout << '\n';
             }
-
             std::cout << std::dec << '\n';
-        }
+        }*/
     }
 
     std::cout<<"textureManager->textureImages.size() = "<<textureManager->textureImages.size()<<std::endl;
@@ -413,6 +411,45 @@ void CGLBManager::LoadGLBMaterial(){
         MarkImageUsage(material.occlusionTexture.index, TextureUsage_Occlusion);
         MarkImageUsage(material.emissiveTexture.index, TextureUsage_Emissive);
 
+        //------------------------------------------------------
+        // Check for transmission
+        //------------------------------------------------------
+        auto it = material.extensions.find("KHR_materials_transmission");
+        if (it != material.extensions.end()) {
+            const tinygltf::Value& transmissionExt = it->second;
+
+            if (transmissionExt.Has("transmissionFactor")) {
+                double transmissionFactor = transmissionExt.Get("transmissionFactor").GetNumberAsDouble();
+                std::cout << "Material [" << materialIndex << "] " << "transmissionFactor = " << transmissionFactor << std::endl;
+            }
+
+            if (transmissionExt.Has("transmissionTexture")) {
+                const tinygltf::Value& texture = transmissionExt.Get("transmissionTexture");
+
+                if (texture.Has("index")) {
+                    int textureIndex = texture.Get("index").GetNumberAsInt();
+                    std::cout << "  transmissionTexture = " << textureIndex << std::endl;
+                }
+            }
+        }
+        else {
+            std::cout << "Material [" << materialIndex << "] has NO transmission extension" << std::endl;
+        }   
+
+        //------------------------------------------------------
+        // Check for alpha and metal/roughness factor
+        //------------------------------------------------------
+        std::cout
+            << "Material [" << materialIndex << "] "
+            << "alphaMode = " << material.alphaMode
+            << ", alphaCutoff = " << material.alphaCutoff
+            << ", metallicFactor = " << pbr.metallicFactor
+            << ", roughnessFactor = " << pbr.roughnessFactor
+            << std::endl;
+
+        //------------------------------------------------------
+        // Summary for this material
+        //------------------------------------------------------
         std::cout
             << "Load Material [" << materialIndex << "] "
             << "name = " << myGlbMaterials[materialIndex].name
@@ -454,103 +491,6 @@ void CGLBManager::LoadGLBMaterial(){
         std::cout << '\n';
     }
 
-        /*
-        const tinygltf::Material& material = gltfModel.materials[materialIndex];
-        const tinygltf::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
-
-        auto PrintTextureInfo = [](const char* name, const tinygltf::TextureInfo& textureInfo){
-            std::cout << "  " << name << ":\n";
-
-            if (textureInfo.index >= 0){
-                std::cout << "    texture index = " << textureInfo.index << "\n";
-                std::cout << "    texCoord set = " << textureInfo.texCoord << "\n";
-            }
-            else
-                std::cout << "    none\n";
-        };
-
-        if(bGLBMaterialVerbose){
-            std::cout << "========================================\n";
-            std::cout << "Material Index = " << materialIndex << "\n";
-            std::cout << "Material Name  = " << material.name << "\n";
-        }
-
-        //----------------------------------------------------------
-        // PBR Metallic-Roughness
-        //----------------------------------------------------------
-        if(bGLBMaterialVerbose) std::cout << "[PBR Metallic-Roughness]\n";
-
-        if(bGLBMaterialVerbose){
-            const std::vector<double>& baseColor = pbr.baseColorFactor;
-            std::cout << "  baseColorFactor = ("
-                    << baseColor[0] << ", "
-                    << baseColor[1] << ", "
-                    << baseColor[2] << ", "
-                    << baseColor[3] << ")\n";
-
-            std::cout << "  metallicFactor  = " << pbr.metallicFactor << "\n";
-            std::cout << "  roughnessFactor = " << pbr.roughnessFactor << "\n";
-
-            PrintTextureInfo("baseColorTexture", pbr.baseColorTexture);
-            PrintTextureInfo("metallicRoughnessTexture",
-                            pbr.metallicRoughnessTexture);
-        }
-
-        //----------------------------------------------------------
-        // Normal texture
-        //----------------------------------------------------------
-        if(bGLBMaterialVerbose){
-            std::cout << "[Normal]\n";
-            if (material.normalTexture.index >= 0){
-                std::cout << "  normalTexture index      = " << material.normalTexture.index << "\n";
-                std::cout << "  normalTexture texCoord   = "  << material.normalTexture.texCoord << "\n";
-                std::cout << "  normalTexture scale      = "  << material.normalTexture.scale << "\n";
-            }
-            else
-                std::cout << "  normalTexture = none\n";
-        }
-            
-
-        //----------------------------------------------------------
-        // Occlusion texture
-        //----------------------------------------------------------
-        if(bGLBMaterialVerbose){
-            std::cout << "[Occlusion]\n";
-            if (material.occlusionTexture.index >= 0){
-                std::cout << "  occlusionTexture index   = " << material.occlusionTexture.index << "\n";
-                std::cout << "  occlusionTexture texCoord= "  << material.occlusionTexture.texCoord << "\n";
-                std::cout << "  occlusionTexture strength= "  << material.occlusionTexture.strength << "\n";
-            }
-            else
-                std::cout << "  occlusionTexture = none\n";
-        }
-
-        //----------------------------------------------------------
-        // Emissive
-        //----------------------------------------------------------
-        if(bGLBMaterialVerbose){
-            std::cout << "[Emissive]\n";
-            std::cout << "  emissiveFactor = ("
-                    << material.emissiveFactor[0] << ", "
-                    << material.emissiveFactor[1] << ", "
-                    << material.emissiveFactor[2] << ")\n";
-
-            PrintTextureInfo("emissiveTexture", material.emissiveTexture);
-        }
-
-        //----------------------------------------------------------
-        // Rasterization / alpha mode
-        //----------------------------------------------------------
-        if(bGLBMaterialVerbose){
-            std::cout << "[Render State]\n";
-            std::cout << "  alphaMode  = " << material.alphaMode << "\n";
-            std::cout << "  alphaCutoff= " << material.alphaCutoff << "\n";
-            std::cout << "  doubleSided= "
-                    << (material.doubleSided ? "true" : "false") << "\n";
-
-            std::cout << "========================================\n";
-        }
-    }*/
 }
 
 VkSamplerAddressMode CGLBManager::gltfWrapToVk(int gltfWrap){

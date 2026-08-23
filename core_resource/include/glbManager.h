@@ -58,6 +58,12 @@ public:
         bool doubleSided = false;
 
         // tinygltf 中通常是 "OPAQUE"、"MASK"、"BLEND"
+        //OPAQUE	完全不透明，忽略 Alpha	墙、地板、金属、普通物体
+        //MASK	二值透明：要么完全显示，要么完全丢弃	树叶、铁丝网、镂空纹理
+        //  Alpha >= alphaCutoff  → 显示
+        //  Alpha <  alphaCutoff  → 丢弃
+        //  为什么需要 MASK:最经典就是树叶。树叶 texture 可能是一张矩形：实际上只有叶子的部分有 Alpha：MASK 可以把叶子外面的矩形区域直接 discard。
+        //BLEND	真正的半透明，可以 0~100%	玻璃、烟雾、塑料薄膜
         std::string alphaMode = "OPAQUE";
 
         std::string name;
