@@ -248,22 +248,41 @@ vec3 getLightDirAndRadiance(RtLightStruct light, vec3 hitPos, out float maxT, ou
     return L;
 }*/
 
-vec3 SampleDiskLight(RtLightStruct light, vec3 shadingPos, inout uint state){ //for path tracing NEE
-    // 光源法线（与你 Whitted 保持一致）
-    vec3 lightNormal = normalize(shadingPos - light.position.xyz);
+// vec3 SampleDiskLight(RtLightStruct light, vec3 shadingPos, inout uint state){ //for path tracing NEE
+//     // 光源法线（与你 Whitted 保持一致）
+//     vec3 lightNormal = normalize(shadingPos - light.position.xyz);
+
+//     vec3 T, B;
+//     buildOrthonormalBasis(lightNormal, T, B);
+
+//     // 在单位圆盘随机采样
+//     //vec2 d = sampleDisk(state) * light.radius;
+//     vec2 d = sampleDisk(state) * light.params.y;
+
+//     // 返回圆盘上的一点
+//     return light.position.xyz +T * d.x +B * d.y;
+// }
+
+vec3 SampleDiskLight(RtLightStruct light, inout uint state, out vec3 diskNormal){
+    // direction.xyz = disk 的固定正面 / 发光方向。
+    // 例如天花板向下照：vec3(0.0, -1.0, 0.0)
+    float dirLen2 = dot(light.direction.xyz, light.direction.xyz);
+
+    // 防止 direction 未初始化或为零时 normalize(0)。
+    // 建议最终在 CPU 端确保 disk light direction 永远有效。
+    diskNormal = (dirLen2 > 1e-8)
+        ? light.direction.xyz * inversesqrt(dirLen2)
+        : vec3(0.0, -1.0, 0.0);
 
     vec3 T, B;
-    buildOrthonormalBasis(lightNormal, T, B);
+    buildOrthonormalBasis(diskNormal, T, B);
 
-    // 在单位圆盘随机采样
-    //vec2 d = sampleDisk(state) * light.radius;
-    vec2 d = sampleDisk(state) * light.params.y;
-    
+    float radius = max(light.params.y, 1e-5);
 
-    // 返回圆盘上的一点
-    return light.position.xyz +
-           T * d.x +
-           B * d.y;
+    // 必须是 uniform-area disk sample。
+    vec2 diskOffset = sampleDisk(state) * radius;
+
+    return light.position.xyz + T * diskOffset.x + B * diskOffset.y;
 }
 
 /**************
@@ -403,73 +422,128 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
     return visible / float(sampleCount);
 }
 
-//目前发光材质和NEE最好只enable其中一个，不要一起开，需要进一步测试
-vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //for path tracing
-    //return vec3(20,0,0); //test
-    uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE)); 
+vec3 getLightDirAndRadianceAtPosition(RtLightStruct light,vec3 hitPos,vec3 sampledLightPos,out float maxT,out vec3 radiance){
+    const float EPS = 1e-6;
 
-    if(configUBO.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
+    float intensity       = light.params.x;
+    float sourceRadius    = max(light.params.y, 0.001);
+    float range           = light.params.z;
+    float falloffExponent = max(light.attenuation.x, 0.01);
 
-    // 暂时只在具有漫反射分量的表面做 NEE。
-    // 金属和玻璃当前使用近似 delta 路径，不在这里处理。
-    if(hitInfo.metallic > 0.8 || hitInfo.transmission > 0.01) return vec3(0.0);
+    // Directional light 不应调用这个函数。
+    vec3 toLight = sampledLightPos - hitPos;
+
+    float dist2 = max(dot(toLight, toLight), EPS);
+    float dist = sqrt(dist2);
+    vec3 L = toLight / dist;
+
+    maxT = max(dist - SHADOW_BIAS, SHADOW_BIAS);
+
+    float attenuation = 1.0;
+
+    if (range > EPS){
+        float s = dist / range;
+
+        if (s >= 1.0){
+            radiance = vec3(0.0);
+            return L;
+        }
+
+        float rangeFade = max(1.0 - s * s, 0.0);
+        attenuation *= pow(rangeFade, falloffExponent);
+    }
+
+    float normalizedDistance = dist / sourceRadius;
+    float nearFieldExponent = 0.5 * falloffExponent;
+
+    attenuation *= 1.0 / (1.0 + pow(normalizedDistance, nearFieldExponent));
+
+    if (isSpotLight(light)){
+        float outerAngle = light.position.w;
+        float innerAngle = light.direction.w;
+
+        if (innerAngle <= 0.0 || innerAngle >= outerAngle)
+            innerAngle = outerAngle * 0.80;
+
+        vec3 spotDir = safeNormalize(light.direction.xyz);
+
+        // sampledLightPos -> hitPos 的方向 = -L。
+        float cosTheta = dot(-L, spotDir);
+
+        float cosOuter = cos(outerAngle);
+        float cosInner = cos(innerAngle);
+
+        float spotFactor =
+            smoothstep(cosOuter, cosInner, cosTheta);
+
+        attenuation *= spotFactor;
+    }
+
+    radiance = light.color.rgb * intensity * attenuation;
+    return L;
+}
+
+vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){
+    uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
+
+    if (configUBO.enableNEE == 0u || lightCount == 0u)
+        return vec3(0.0);
 
     /*
-     * 从所有注册光源中随机选择一个。
+     * 先固定/随机选一盏解析灯。
      *
-     * 每个光源被选择的概率：
-     * lightPdf = 1 / lightCount
+     * 当前你只开一盏右侧小灯时：
+     * lightCount == 1，lightIndex 永远为 0。
      */
-    uint lightIndex = min(uint(Rand(state) * float(lightCount)), lightCount - 1u);
+    uint lightIndex = min(
+        uint(Rand(state) * float(lightCount)),
+        lightCount - 1u
+    );
 
     RtLightStruct light = rtLightUBO.lights[lightIndex];
 
+    const int LIGHT_SAMPLES = 4;
     vec3 direct = vec3(0.0);
-    const int LIGHT_SAMPLES = 1;//4; 1已经足够，因为有frame accumulate
-    for(int i = 0; i < LIGHT_SAMPLES; ++i){
-        //使用点光源做NEE
+
+    for (int i = 0; i < LIGHT_SAMPLES; ++i){
+        vec3 diskNormal = safeNormalize(light.direction.xyz);
+
+        vec3 T, B;
+        buildOrthonormalBasis(diskNormal, T, B);
+
+        float radius = max(light.params.y, 1e-5);
+        vec2 d = sampleDisk(state) * radius;
+
+        vec3 sampledLightPos = light.position.xyz + T * d.x + B * d.y;
+
         float maxT;
-        vec3 lightRadiance;
-        vec3 L = getLightDirAndRadiance(light, hitInfo.hitPos, maxT, lightRadiance);
+        vec3 Li;
 
-        //使用disk light做NEE，效果比较一般，需要调整
-        // vec3 samplePos = SampleDiskLight(light, hitInfo.hitPos, state);
-        // vec3 toLight = samplePos - hitInfo.hitPos;
-        // float dist = length(toLight);
-        // vec3 L = toLight / dist;
-        // float maxT = dist - SHADOW_BIAS;
-        // float dist2 = max(dot(toLight,toLight),1e-6);
-        // vec3 lightRadiance = light.color.rgb * light.intensity / dist2;
-    
-        // vec3 lightNormal = normalize(hitInfo.hitPos - light.position.xyz);  // 光源法线（与你采样时保持一致）
-        // float cosThetaLight = max(dot(lightNormal, -L), 1e-4);// 光源面朝向 shading point
-        // if (cosThetaLight <= 0.0) continue;
-        // float pdfArea = 1.0 / (PI * light.radius * light.radius); // 面积 PDF
-        // float pdfSolidAngle = pdfArea * dist2 / cosThetaLight;  // 转成立体角 PDF
+        vec3 L = getLightDirAndRadianceAtPosition(
+            light,
+            hitInfo.hitPos,
+            sampledLightPos,
+            maxT,
+            Li
+        );
 
-        
+        if (max(max(Li.r, Li.g), Li.b) <= 0.0) continue;
 
-        float NdotL = max(dot(hitInfo.N_shade, L), 0.0);
-        if(NdotL <= 0.0) continue;//return vec3(0.0);
+        // 保持先前 A/B 与 Whitted 一致的几何 normal。
+        float NdotL = max(dot(hitInfo.N_geom, L), 0.0);
+        if (NdotL <= 0.0) continue;
 
-        // 发射 shadow ray，判断采样到的光源是否可见
-        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * SHADOW_BIAS; //这里(NEE)必须用N_geom。如果用N_shade的话阴影边缘会出问题
+        float offsetSign = (dot(hitInfo.N_geom, L) >= 0.0) ? 1.0 : -1.0;
 
-        float visibility = traceShadowVisibility(shadowOrigin,L,maxT);
+        vec3 shadowOrigin = hitInfo.hitPos + hitInfo.N_geom * (offsetSign * SHADOW_BIAS);
 
-        if(visibility <= 0.0) continue;//return vec3(0.0);
-        
-        /*
-        * Lambert BRDF：
-        *
-        * f = kd / PI
-        *
-        * 这里加入：
-        * 1. 菲涅尔留下的漫反射能量 (1-F)
-        * 2. 非金属部分
-        * 3. 非透射部分
-        * 4. alpha
-        */
+        float visibility = traceShadowVisibility( shadowOrigin, L, maxT);
+
+        if (visibility <= 0.0) continue;
+
+        float lightSelectionPdf = 1.0 / float(lightCount);
+
+
         vec3 kd =
             (vec3(1.0) - hitInfo.F) *
             (1.0 - hitInfo.metallic) *
@@ -479,27 +553,79 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo, inout uint state){ //fo
 
         vec3 diffuseBRDF = kd / PI;
 
-        /*
-        * Monte Carlo estimator：
-        *
-        * direct =
-        *     f * Li * cosTheta * visibility
-        *     --------------------------------
-        *              lightPdf
-        *
-        * lightPdf = 1 / lightCount
-        *
-        * 所以等价于乘以 lightCount。
-        */
-        float lightPdf = 1.0 / float(lightCount);
-        direct += diffuseBRDF * lightRadiance * NdotL * visibility / lightPdf; //使用点光源做NEE
-        //return diffuseBRDF * lightRadiance * NdotL * visibility / lightPdf;
-
-        //direct += diffuseBRDF * lightRadiance * NdotL * visibility / pdfSolidAngle; //使用disk light做NEE
+        direct += diffuseBRDF
+                * Li
+                * NdotL
+                * visibility
+                / lightSelectionPdf;
     }
 
     return direct / float(LIGHT_SAMPLES);
 }
+
+
+
+//下面是一个debug版本的NEE，可以看某一盏灯的可见区域
+/*
+vec3 EstimateDirectLightingNEE(
+    in HitInfoStruct hitInfo,
+    inout uint state)
+{
+    // ----------------------------------------------------------
+    // 纯 shadow visibility debug：
+    // 固定选顶部 disk light，不走 BRDF / PDF / Le / NdotL。
+    // ----------------------------------------------------------
+
+    const uint TOP_DISK_LIGHT_INDEX = 5u; // 改成灯 index
+
+    uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
+    if (lightCount == 0u)
+        return vec3(0.0);
+
+    if (TOP_DISK_LIGHT_INDEX >= lightCount)
+        return vec3(1.0, 0.0, 1.0); // 紫色：index 配错
+
+    RtLightStruct light = rtLightUBO.lights[TOP_DISK_LIGHT_INDEX];
+
+    // 使用你已有、修正后的 SampleDiskLight。
+    vec3 diskNormal;
+    vec3 samplePos = SampleDiskLight(light, state, diskNormal);
+
+    vec3 toLight = samplePos - hitInfo.hitPos;
+    float dist2 = dot(toLight, toLight);
+
+    if (dist2 <= 1e-8)
+        return vec3(1.0, 0.0, 0.0); // 红色：sample 与 hit 重合
+
+    float dist = sqrt(dist2);
+    vec3 L = toLight / dist;
+
+    // 这里故意不检查 NdotL，也不检查 disk 的 front/back。
+    // 目的只是看“这条线段被不被几何挡住”。
+
+    float offsetSign = (dot(hitInfo.N_geom, L) >= 0.0) ? 1.0 : -1.0;
+
+    vec3 shadowOrigin = hitInfo.hitPos
+        + hitInfo.N_geom * (offsetSign * SHADOW_BIAS);
+
+    float tMax = dist - SHADOW_BIAS;
+
+    if (tMax <= SHADOW_BIAS)
+        return vec3(1.0, 1.0, 0.0); // 黄色：tMax 太小
+
+    float visibility = traceShadowVisibility(
+        shadowOrigin,
+        L,
+        tMax
+    );
+
+    // 白：miss / visible。
+    // 黑：first hit / blocked。
+    return vec3(visibility);
+}*/
+
+
+
 
 /**************
 Core
@@ -845,6 +971,7 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
     //z / B	metallic（金属度）	0 = 非金属/绝缘体；1 = 金属
     //primaryPayload.radiance = vec3(metallicRoughness.y);
     //primaryPayload.radiance = vec3(metallicRoughness.w);
+    
     //return;
 
     vec4 mr = SampleTexture(textureIndex_metallicRoughness, uv);

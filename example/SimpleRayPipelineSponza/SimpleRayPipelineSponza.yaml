@@ -97,21 +97,21 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_falloff: 1
   - rt_light_name: Light4_Sun
     rt_light_id: 4
-    rt_light_position: [0.0, 6.5, 0.0]
+    rt_light_position: [0.0, 8, 0.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 30
+    rt_light_intensity: 10
     rt_light_radius: 0.5 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
     rt_light_angle: 30 #only for spot light, not used yet
-    rt_light_range: 10
+    rt_light_range: 30
     rt_light_falloff: 1
   - rt_light_name: Light
     rt_light_id: 5
     rt_light_position: [-3.1, 0.65, -1.1]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 60
-    rt_light_radius: 0.1 #spot light can use this to create soft shadow
+    rt_light_intensity: 100
+    rt_light_radius: 0.13 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
     rt_light_angle: 30 #only for spot light, not used yet
@@ -190,16 +190,16 @@ Attachments:
 
 MainCamera:
   camera_mode: 1
-  #camera_position: [-5,1,0]
-  #camera_rotation: [0,90,0]
+  camera_position: [-6.5,1,0]
+  camera_rotation: [0,90,0]
   #camera_position: [-6,1,0.5] #aim to lion
   #camera_rotation: [0,-110,0] #aim to lion
-  camera_position: [-3.5,1,-0.5] #aim to curtain
-  camera_rotation: [0,-0,0] #aim to curtain
+  #camera_position: [-3.5,1,-0.5] #aim to curtain
+  #camera_rotation: [0,-0,0] #aim to curtain
   object_id_target: 0
   camera_z: [0.1, 256]
   camera_projection_enable_orthographic: false
-  camera_projection_perspective_fov: 90
+  camera_projection_perspective_fov: 50
   camera_projection_orthographic_width: 8
   camera_projection_orthographic_height: 8
   camera_keyboard_sensitive: 3

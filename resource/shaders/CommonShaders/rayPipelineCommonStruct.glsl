@@ -27,13 +27,6 @@ struct RtLightStruct{
                         // z: range
                         // w: type
     vec4 attenuation; // x: falloffExponent, yzw reserved
-    // vec4 position;
-    // vec4 color;
-    // vec4 direction;
-    // float intensity;
-    // float radius;
-    // float angle;
-    // float type;
 };
 
 struct MaterialStruct {
