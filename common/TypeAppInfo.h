@@ -37,6 +37,8 @@ struct FeatureConfig {
     int feature_raytracing_pipeline_maximum_path = 4;
     bool feature_raytracing_pipeline_accumulate = true;
     bool feature_raytracing_pipeline_enableNEE = false;
+    int feature_raytracing_pipeline_NEE_sample_count = 1;
+    bool feature_raytracing_pipeline_NEE_soft_shadow = false;
     bool feature_raytracing_pipeline_use_sky = false;
     float feature_raytracing_pipeline_maximum_Radiance = 0;
     int feature_raytracing_pipeline_debug_mode = 0;
@@ -66,6 +68,8 @@ struct FeatureConfig {
         feature_raytracing_pipeline_maximum_path     = getOrDefault(node, "feature_raytracing_pipeline_maximum_path", 4);
         feature_raytracing_pipeline_accumulate     = getOrDefault(node, "feature_raytracing_pipeline_accumulate", true);
         feature_raytracing_pipeline_enableNEE     = getOrDefault(node, "feature_raytracing_pipeline_enableNEE", false);
+        feature_raytracing_pipeline_NEE_sample_count     = getOrDefault(node, "feature_raytracing_pipeline_NEE_sample_count", 1);
+        feature_raytracing_pipeline_NEE_soft_shadow     = getOrDefault(node, "feature_raytracing_pipeline_NEE_soft_shadow", false);
         feature_raytracing_pipeline_use_sky     = getOrDefault(node, "feature_raytracing_pipeline_use_sky", false);
         feature_raytracing_pipeline_maximum_Radiance     = getOrDefault(node, "feature_raytracing_pipeline_maximum_Radiance", 0);
         feature_raytracing_pipeline_debug_mode     = getOrDefault(node, "feature_raytracing_pipeline_debug_mode", 0);

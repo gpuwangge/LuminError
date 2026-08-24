@@ -179,6 +179,8 @@ Features:
   feature_raytracing_pipeline_maximum_path: 4
   feature_raytracing_pipeline_accumulate: true
   feature_raytracing_pipeline_enableNEE: false
+  feature_raytracing_pipeline_NEE_sample_count: 1
+  feature_raytracing_pipeline_NEE_soft_shadow: false
   feature_raytracing_pipeline_use_sky: false
   feature_raytracing_pipeline_maximum_Radiance: 0
   feature_raytracing_pipeline_debug_mode: 0

@@ -273,6 +273,8 @@ int GameEngine::Get_feature_raytracing_pipeline_maximum_bounce() {return yamler-
 int GameEngine::Get_feature_raytracing_pipeline_maximum_path() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_path;}
 bool GameEngine::Get_feature_raytracing_pipeline_accumulate() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_accumulate;}
 bool GameEngine::Get_feature_raytracing_pipeline_enableNEE() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_enableNEE;}
+int GameEngine::Get_feature_raytracing_pipeline_NEE_sample_count() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_NEE_sample_count;}
+bool GameEngine::Get_feature_raytracing_pipeline_NEE_soft_shadow() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_NEE_soft_shadow;}
 bool GameEngine::Get_feature_raytracing_pipeline_use_sky() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_use_sky;}
 float GameEngine::Get_feature_raytracing_pipeline_maximum_Radiance() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_maximum_Radiance;}
 int GameEngine::Get_feature_raytracing_pipeline_debug_mode() {return yamler->GetAppInfo().Feature.feature_raytracing_pipeline_debug_mode;}

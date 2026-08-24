@@ -138,6 +138,8 @@ void GameEngine::Initialize(){
         configUniformBufferObject.maxPath = Get_feature_raytracing_pipeline_maximum_path();
         configUniformBufferObject.accumulate = Get_feature_raytracing_pipeline_accumulate();
         configUniformBufferObject.enableNEE = Get_feature_raytracing_pipeline_enableNEE();
+        configUniformBufferObject.NEESampleCount = Get_feature_raytracing_pipeline_NEE_sample_count();
+        configUniformBufferObject.NEESoftShadow = Get_feature_raytracing_pipeline_NEE_soft_shadow();
         configUniformBufferObject.useSky = Get_feature_raytracing_pipeline_use_sky();
         configUniformBufferObject.maxRadiance = Get_feature_raytracing_pipeline_maximum_Radiance();
         configUniformBufferObject.debugMode = Get_feature_raytracing_pipeline_debug_mode();

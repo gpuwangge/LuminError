@@ -47,6 +47,8 @@ namespace LEGameEngine{
         virtual int Get_feature_raytracing_pipeline_maximum_path() = 0;
         virtual bool Get_feature_raytracing_pipeline_accumulate() = 0;
         virtual bool Get_feature_raytracing_pipeline_enableNEE() = 0;
+        virtual int Get_feature_raytracing_pipeline_NEE_sample_count() = 0;
+        virtual bool Get_feature_raytracing_pipeline_NEE_soft_shadow() = 0;
         virtual bool Get_feature_raytracing_pipeline_use_sky() = 0;
         virtual float Get_feature_raytracing_pipeline_maximum_Radiance() = 0;
         virtual int Get_feature_raytracing_pipeline_debug_mode() = 0;

@@ -200,6 +200,8 @@ namespace LEGameEngine{
         int Get_feature_raytracing_pipeline_maximum_path() override;
         bool Get_feature_raytracing_pipeline_accumulate() override;
         bool Get_feature_raytracing_pipeline_enableNEE() override;
+        int Get_feature_raytracing_pipeline_NEE_sample_count() override;
+        bool Get_feature_raytracing_pipeline_NEE_soft_shadow() override;
         bool Get_feature_raytracing_pipeline_use_sky() override;
         float Get_feature_raytracing_pipeline_maximum_Radiance() override;
         int Get_feature_raytracing_pipeline_debug_mode() override;

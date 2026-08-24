@@ -130,30 +130,41 @@ struct StructUniformBuffer_Material{
  * Config
  *******/
 struct StructConfigUniformBuffer {
-    alignas(4) unsigned int lightCount = 0;
-    alignas(4) unsigned int materialCount = 0;
+    alignas(4) uint32_t lightCount = 0;
+    alignas(4) uint32_t materialCount = 0;
 
-    //alignas(4) unsigned int renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
-    alignas(4) unsigned int spp;             // Samples Per Pixel
-    alignas(4) unsigned int maxBounce;       // 最大反弹次数
-    alignas(4) unsigned int maxPath;         // 最大路径数
-    alignas(4) unsigned int accumulate;      // 0 = 不积累, 1 = 帧间积累
-    alignas(4) unsigned int randomSeed;      // 可选，每次运行不同
+    //alignas(4) uint32_t int renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
+    alignas(4) uint32_t spp;             // Samples Per Pixel
+    alignas(4) uint32_t maxBounce;       // 最大反弹次数
+    alignas(4) uint32_t maxPath;         // 最大路径数
+    alignas(4) uint32_t accumulate;      // 0 = 不积累, 1 = 帧间积累
+    alignas(4) uint32_t randomSeed;      // 可选，每次运行不同
 
     alignas(4) float rrProbability;   //RR（俄罗斯轮盘）
-    alignas(4) unsigned enableNEE;
-    alignas(4) unsigned useSky;
+    alignas(4) uint32_t enableNEE;
+    alignas(4) uint32_t NEESampleCount;
+    alignas(4) uint32_t NEESoftShadow;
+    alignas(4) uint32_t useSky;
     alignas(4) float maxRadiance;
-    alignas(4) unsigned int debugMode;
+    alignas(4) uint32_t debugMode;
 
-    alignas(4) unsigned int softShadowEnable; //for whitted style only
-    alignas(4) unsigned int softShadowSampleNumber; //for whitted style only
+    alignas(4) uint32_t softShadowEnable; //for whitted style only
+    alignas(4) uint32_t softShadowSampleNumber; //for whitted style only
 
-    alignas(4) unsigned int maxReflectionDepth;
-    alignas(4) unsigned int maxRefractionDepth;
+    alignas(4) uint32_t maxReflectionDepth;
+    alignas(4) uint32_t maxRefractionDepth;
 
-    alignas(4) unsigned int shadowRayIgnoreSphere;
+    alignas(4) uint32_t shadowRayIgnoreSphere;
 };
+static_assert(offsetof(StructConfigUniformBuffer, rrProbability) == 28);
+static_assert(offsetof(StructConfigUniformBuffer, enableNEE) == 32);
+static_assert(offsetof(StructConfigUniformBuffer, NEESampleCount) == 36);
+static_assert(offsetof(StructConfigUniformBuffer, NEESoftShadow) == 40);
+static_assert(offsetof(StructConfigUniformBuffer, useSky) == 44);
+static_assert(offsetof(StructConfigUniformBuffer, maxRadiance) == 48);
+static_assert(offsetof(StructConfigUniformBuffer, shadowRayIgnoreSphere) == 72);
+static_assert(sizeof(StructConfigUniformBuffer) == 76);
+
 
 /*********
  * Ray Tracing Light

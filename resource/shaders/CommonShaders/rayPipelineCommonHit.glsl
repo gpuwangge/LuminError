@@ -129,6 +129,7 @@ bool isSpotLight(RtLightStruct light){
     //return light.type >= 1.5 && light.type < 2.5;
 }
 
+//只有whitted-style里面调用这个函数
 vec3 getLightDirAndRadiance(RtLightStruct light, vec3 hitPos, out float maxT, out vec3 radiance){
     const float EPS = 1e-6;
 
@@ -313,7 +314,7 @@ Texture function
 #ifndef DISABLE_TEXTURE
 vec4 SampleTexture(uint texId, vec2 uv){
     texId = min(texId, MAX_GLOBAL_TEXTURES - 1u);
-    return texture(texarray[texId], uv);
+    return texture(texarray[texId], vec2(uv.x, 1.0 - uv.y));
 }
 #endif
 
@@ -422,6 +423,7 @@ float traceSoftShadowVisibility(vec3 origin, vec3 hitpos, vec3 N, vec3 lightCent
     return visible / float(sampleCount);
 }
 
+//只有PT里的NEE调用这个函数。根据Whitted Style的getLightDirAndRadiance缝合。单位不太正确，不太能量守恒(todo)。
 vec3 getLightDirAndRadianceAtPosition(RtLightStruct light,vec3 hitPos,vec3 sampledLightPos,out float maxT,out vec3 radiance){
     const float EPS = 1e-6;
 
@@ -462,8 +464,7 @@ vec3 getLightDirAndRadianceAtPosition(RtLightStruct light,vec3 hitPos,vec3 sampl
         float outerAngle = light.position.w;
         float innerAngle = light.direction.w;
 
-        if (innerAngle <= 0.0 || innerAngle >= outerAngle)
-            innerAngle = outerAngle * 0.80;
+        if (innerAngle <= 0.0 || innerAngle >= outerAngle) innerAngle = outerAngle * 0.80;
 
         vec3 spotDir = safeNormalize(light.direction.xyz);
 
@@ -473,8 +474,7 @@ vec3 getLightDirAndRadianceAtPosition(RtLightStruct light,vec3 hitPos,vec3 sampl
         float cosOuter = cos(outerAngle);
         float cosInner = cos(innerAngle);
 
-        float spotFactor =
-            smoothstep(cosOuter, cosInner, cosTheta);
+        float spotFactor = smoothstep(cosOuter, cosInner, cosTheta);
 
         attenuation *= spotFactor;
     }
@@ -483,49 +483,41 @@ vec3 getLightDirAndRadianceAtPosition(RtLightStruct light,vec3 hitPos,vec3 sampl
     return L;
 }
 
-vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){
+vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){//只有PT里使用NEE
     uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
 
-    if (configUBO.enableNEE == 0u || lightCount == 0u)
-        return vec3(0.0);
+    if (configUBO.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
 
-    /*
-     * 先固定/随机选一盏解析灯。
-     *
-     * 当前你只开一盏右侧小灯时：
-     * lightCount == 1，lightIndex 永远为 0。
-     */
-    uint lightIndex = min(
-        uint(Rand(state) * float(lightCount)),
-        lightCount - 1u
-    );
+    //先固定/随机选一盏解析灯。
+    //lightCount == 1，lightIndex 永远为 0。
+    uint lightIndex = min(uint(Rand(state) * float(lightCount)), lightCount - 1u);
 
     RtLightStruct light = rtLightUBO.lights[lightIndex];
 
-    const int LIGHT_SAMPLES = 4;
     vec3 direct = vec3(0.0);
 
-    for (int i = 0; i < LIGHT_SAMPLES; ++i){
-        vec3 diskNormal = safeNormalize(light.direction.xyz);
+    for (int i = 0; i < configUBO.NEESampleCount; ++i){
+        vec3 sampledLightPos;
 
-        vec3 T, B;
-        buildOrthonormalBasis(diskNormal, T, B);
+        if (configUBO.NEESoftShadow == 0u){ 
+            sampledLightPos = light.position.xyz;
+        }
+        else{
+            vec3 diskNormal = safeNormalize(light.direction.xyz);
 
-        float radius = max(light.params.y, 1e-5);
-        vec2 d = sampleDisk(state) * radius;
+            vec3 T, B;
+            buildOrthonormalBasis(diskNormal, T, B);
 
-        vec3 sampledLightPos = light.position.xyz + T * d.x + B * d.y;
+            float radius = max(light.params.y, 1e-5);
+            vec2 d = sampleDisk(state) * radius;
+
+            sampledLightPos = light.position.xyz + T * d.x + B * d.y;
+        }
 
         float maxT;
         vec3 Li;
 
-        vec3 L = getLightDirAndRadianceAtPosition(
-            light,
-            hitInfo.hitPos,
-            sampledLightPos,
-            maxT,
-            Li
-        );
+        vec3 L = getLightDirAndRadianceAtPosition(light, hitInfo.hitPos, sampledLightPos, maxT, Li);
 
         if (max(max(Li.r, Li.g), Li.b) <= 0.0) continue;
 
@@ -543,7 +535,6 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){
 
         float lightSelectionPdf = 1.0 / float(lightCount);
 
-
         vec3 kd =
             (vec3(1.0) - hitInfo.F) *
             (1.0 - hitInfo.metallic) *
@@ -553,24 +544,17 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){
 
         vec3 diffuseBRDF = kd / PI;
 
-        direct += diffuseBRDF
-                * Li
-                * NdotL
-                * visibility
-                / lightSelectionPdf;
+        direct += diffuseBRDF * Li * NdotL * visibility / lightSelectionPdf;
     }
 
-    return direct / float(LIGHT_SAMPLES);
+    return direct / float(configUBO.NEESampleCount);
 }
 
 
 
 //下面是一个debug版本的NEE，可以看某一盏灯的可见区域
 /*
-vec3 EstimateDirectLightingNEE(
-    in HitInfoStruct hitInfo,
-    inout uint state)
-{
+vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){
     // ----------------------------------------------------------
     // 纯 shadow visibility debug：
     // 固定选顶部 disk light，不走 BRDF / PDF / Le / NdotL。
@@ -613,11 +597,7 @@ vec3 EstimateDirectLightingNEE(
     if (tMax <= SHADOW_BIAS)
         return vec3(1.0, 1.0, 0.0); // 黄色：tMax 太小
 
-    float visibility = traceShadowVisibility(
-        shadowOrigin,
-        L,
-        tMax
-    );
+    float visibility = traceShadowVisibility(shadowOrigin,L,tMax);
 
     // 白：miss / visible。
     // 黑：first hit / blocked。
@@ -946,9 +926,10 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
 #ifndef DISABLE_TEXTURE
     //if (mat.baseColorTextureIndex != INVALID_TEXTURE_INDEX) {//add texture
         //vec4 baseColor = SampleTexture(mat.baseColorTextureIndex, uv);
-        vec4 baseColor = SampleTexture(textureIndex_baseColor, uv); //todo: use real tex id
-        hitInfo.albedo *= baseColor.rgb;
-        hitInfo.alpha *= baseColor.a;
+    
+    vec4 baseColor = SampleTexture(textureIndex_baseColor, uv);
+    hitInfo.albedo *= baseColor.rgb;
+    hitInfo.alpha *= baseColor.a;
     //}
 
     //test: draw normal texture。可以用来证明切线空间贴图采样正确

@@ -19,6 +19,8 @@ layout(set = 0, binding = 8) uniform ConfigUniformInfo {
 
     float rrProbability;   //RR（俄罗斯轮盘）
     uint enableNEE;
+    uint NEESampleCount;
+    uint NEESoftShadow;
     uint useSky;
     float maxRadiance;
     uint debugMode;
