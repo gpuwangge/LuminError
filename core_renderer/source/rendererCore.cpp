@@ -1062,7 +1062,7 @@ void RendererCore::CreateTriangleBlas(){
         VkAccelerationStructureGeometryKHR geometry{};
         geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
         geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-        geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
+        geometry.flags = 0;//VK_GEOMETRY_OPAQUE_BIT_KHR;//要使用anyhit就不能用VK_GEOMETRY_OPAQUE_BIT_KHR
         geometry.geometry.triangles = triangles;
 
         // 3) build info (for size query first)
@@ -1521,11 +1521,25 @@ void RendererCore::CreateInstanceBuffer(){
         //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use material_id = "<<material_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
         count++;
 
-        storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id;
-        storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id;
-        storageBufferObject_instance.instances[instanceIndex].textureIndex_baseColor = game->GetObjectTextureID_BaseColor(i);
-        storageBufferObject_instance.instances[instanceIndex].textureIndex_normal = game->GetObjectTextureID_Normal(i);
-        storageBufferObject_instance.instances[instanceIndex].textureIndex_metallicRoughness = game->GetObjectTextureID_MetallicRoughness(i);
+        //每个instance都需要的几何，材质，alpha数据（todo:目前自定义的时使用material id。glb是比较粗暴的拆开传过来的。以后稳定了再优化。）
+        //通用
+        storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id; //每个instance都要有model(mesh)
+        
+        //自定义
+        storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id; //这是自定义的material id; glb不需要这个(都是0)
+        
+        //GLB
+        storageBufferObject_instance.instances[instanceIndex].textureIndex_baseColor = game->GetObjectTextureID_BaseColor(i); //不用材质就不需要这个；glb需要
+        storageBufferObject_instance.instances[instanceIndex].textureIndex_normal = game->GetObjectTextureID_Normal(i); //不用材质就不需要这个；glb需要
+        storageBufferObject_instance.instances[instanceIndex].textureIndex_metallicRoughness = game->GetObjectTextureID_MetallicRoughness(i); //不用材质就不需要这个；glb需要
+        
+        storageBufferObject_instance.instances[instanceIndex].metallicFactor = game->GetObjectTextureID_MetallicFactor(i); //不用材质就不需要这个；glb需要
+        storageBufferObject_instance.instances[instanceIndex].roughnessFactor = game->GetObjectTextureID_RoughnessFactor(i); //不用材质就不需要这个；glb需要
+        storageBufferObject_instance.instances[instanceIndex].alphaMode = game->GetObjectTextureID_alphaMode(i); //不用材质就不需要这个；glb需要
+        storageBufferObject_instance.instances[instanceIndex].alphaCutoff = game->GetObjectTextureID_alphaCutoff(i); //不用材质就不需要这个；glb需要
+        storageBufferObject_instance.instances[instanceIndex].doubleSided = game->GetObjectTextureID_doubleSided(i); //不用材质就不需要这个；glb需要
+        
+
         instanceIndex++;
     }
     //step2 for sphere

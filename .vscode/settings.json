@@ -121,5 +121,9 @@
     "regex": "cpp"
   },
   "C_Cpp.default.compilerPath": "C:\\mingw64\\bin\\g++.exe",
-  "cmake.configureOnOpen": false
+  "cmake.configureOnOpen": false,
+
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.enablePersistentSessions": true,
+  "terminal.integrated.persistentSessionReviveProcess": "onExit"
 }

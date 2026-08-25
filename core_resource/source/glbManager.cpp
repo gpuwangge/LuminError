@@ -65,7 +65,8 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     //     << ", textureIndex_normal = " << textureIndex_normal << ", coordIndex = " << coordIndex_normal
     //     << ", textureIndex_metalicRoughness = " << textureIndex_metalicRoughness << ", coordIndex = " << coordIndex_metalicRoughness
     //     << "\n";
-    textureIds.push_back(std::vector<int>{textureIndex_baseColor,textureIndex_normal,textureIndex_metalicRoughness});
+    //textureIds.push_back(std::vector<int>{textureIndex_baseColor,textureIndex_normal,textureIndex_metalicRoughness});
+    glbMaterialIds.push_back(primitive.material);
 
     //std::cout << "primitiveIndex = " << primitiveIndex << "\n";
     //std::cout << "materialId     = " << materialId << "\n";
@@ -392,7 +393,14 @@ void CGLBManager::LoadGLBMaterial(){
         //------------------------------------------------------
         // Alpha / raster state
         //------------------------------------------------------
-        myGlbMaterials[materialIndex].alphaMode = material.alphaMode;
+        //myGlbMaterials[materialIndex].alphaMode = material.alphaMode;
+        if (material.alphaMode == "MASK") 
+            myGlbMaterials[materialIndex].alphaMode = static_cast<int>(AlphaMode::Mask);
+        else if (material.alphaMode == "BLEND") 
+            myGlbMaterials[materialIndex].alphaMode = static_cast<int>(AlphaMode::Blend);
+        else 
+            myGlbMaterials[materialIndex].alphaMode = static_cast<int>(AlphaMode::Opaque); // "OPAQUE" 或缺省/未知值
+        
         myGlbMaterials[materialIndex].alphaCutoff = static_cast<float>(material.alphaCutoff);
         myGlbMaterials[materialIndex].doubleSided = material.doubleSided;
 
@@ -443,6 +451,7 @@ void CGLBManager::LoadGLBMaterial(){
             << "Material [" << materialIndex << "] "
             << "alphaMode = " << material.alphaMode
             << ", alphaCutoff = " << material.alphaCutoff
+            << ", doubleSided = " << material.doubleSided
             << ", metallicFactor = " << pbr.metallicFactor
             << ", roughnessFactor = " << pbr.roughnessFactor
             << std::endl;
@@ -490,7 +499,10 @@ void CGLBManager::LoadGLBMaterial(){
         if (!hasUsage) std::cout << "None";
         std::cout << '\n';
     }
+}
 
+GLBMaterial& CGLBManager::getGLBMaterial(int materialId){
+    return myGlbMaterials[materialId];
 }
 
 VkSamplerAddressMode CGLBManager::gltfWrapToVk(int gltfWrap){

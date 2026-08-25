@@ -216,19 +216,29 @@ vec2 getTriangleUV(uint geometryIndex){
 // #endif
 
 void main(){
-    uint instanceIndex = uint(gl_InstanceCustomIndexEXT);
-    uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
-    uint geometryIndex = instanceUBO.instances[instanceIndex].geometryIndex; //thats the model
-    uint textureIndex_baseColor = instanceUBO.instances[instanceIndex].textureIndex_baseColor;
-    uint textureIndex_normal = instanceUBO.instances[instanceIndex].textureIndex_normal;
-    uint textureIndex_metallicRoughness = instanceUBO.instances[instanceIndex].textureIndex_metallicRoughness;
+    InstanceStruct ins = instanceUBO.instances[uint(gl_InstanceCustomIndexEXT)];
 
-    MaterialStruct mat = materialUBO.materials[materialIndex];
+    //uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
+    //uint geometryIndex = instanceUBO.instances[instanceIndex].geometryIndex; //thats the model
+    
+
+    // uint textureIndex_baseColor = instanceUBO.instances[instanceIndex].textureIndex_baseColor;
+    //uint textureIndex_normal = instanceUBO.instances[instanceIndex].textureIndex_normal;
+    // uint textureIndex_metallicRoughness = instanceUBO.instances[instanceIndex].textureIndex_metallicRoughness;
+
+    // float metallicFactor = instanceUBO.instances[instanceIndex].metallicFactor;
+    // float roughnessFactor = instanceUBO.instances[instanceIndex].roughnessFactor;
+    // uint alphaMode = instanceUBO.instances[instanceIndex].alphaMode;
+    // float alphaCutoff = instanceUBO.instances[instanceIndex].alphaCutoff;
+    // float doubleSided = instanceUBO.instances[instanceIndex].doubleSided;
+
+
+    MaterialStruct mat = materialUBO.materials[ins.materialIndex];
     
     //Core
-    vec3 Ntri = getTriangleWorldNormal(geometryIndex); //legacy
+    vec3 Ntri = getTriangleWorldNormal(ins.geometryIndex); //legacy
     //vec2 uv = getTriangleUV(geometryIndex); //legacy
-    SurfaceFrame frame = getTriangleSurfaceFrame(geometryIndex);
+    SurfaceFrame frame = getTriangleSurfaceFrame(ins.geometryIndex);
 
     //翻转
     vec3 I = safeNormalize(gl_WorldRayDirectionEXT);
@@ -249,10 +259,10 @@ void main(){
     //normal map 的 RGB 通常保存 tangent-space 的 XYZ 方向，而不是颜色。
     //这段代码最终得到的是与后续光照计算处于同一坐标系的 shading normal (N)
 #ifndef DISABLE_TEXTURE
-    if (textureIndex_normal >= 0){
+    if (ins.textureIndex_normal >= 0){
         // 替换成你自己的 bindless texture sampling 函数。
         //用当前 hit point 的 UV 去采样 normal texture。
-        vec3 encodedNormal = SampleTexture(textureIndex_normal, frame.uv).xyz;
+        vec3 encodedNormal = SampleTexture(ins.textureIndex_normal, frame.uv).xyz;
         
         //这一步把 texture 的 [0, 1] 范围还原到 normal vector 的 [-1, 1] 范围：
         vec3 Nts = decodeNormalMap(encodedNormal);
@@ -291,7 +301,9 @@ void main(){
     //updatePayload(mat, Ns, Ns, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
     //updatePayload(mat, Ng, Ng, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
 
-    updatePayload(mat, Ng, Ns, textureIndex_baseColor, textureIndex_normal, textureIndex_metallicRoughness, frame.uv);
+    
+
+    updatePayload(mat, Ng, Ns, ins, frame.uv);
 
     //Notes
     //例如一个 low-poly sphere：

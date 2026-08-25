@@ -523,11 +523,23 @@ void GameEngine::Initialize(){
             objects[i].m_object_id = i;
             objects[i].m_model_id = i;
             objects[i].m_material_id = 0;
+            // objects[i].m_texture_ids = std::vector<int>{
+            //     resourcer->GetGLBTextureIndexBaseColor(i),
+            //     resourcer->GetGLBTextureIndexNormal(i),
+            //     resourcer->GetGLBTextureIndexMetallic(i)
+            // };
+            int glbMaterialId = resourcer->GetGLBMaterialId(i);
+            GLBMaterial &glbMat = resourcer->GetGLBMaterial(glbMaterialId);
             objects[i].m_texture_ids = std::vector<int>{
-                resourcer->GetGLBTextureIndexBaseColor(i),
-                resourcer->GetGLBTextureIndexNormal(i),
-                resourcer->GetGLBTextureIndexMetallic(i)
-            };
+                glbMat.baseColorTextureIndex, glbMat.normalTextureIndex, glbMat.metallicRoughnessTextureIndex};
+        
+            objects[i].metallicFactor = glbMat.metallicFactor;
+            objects[i].roughnessFactor = glbMat.roughnessFactor;
+            objects[i].alphaMode = glbMat.alphaMode;
+            objects[i].alphaCutoff = glbMat.alphaCutoff;
+            objects[i].doubleSided = glbMat.doubleSided;
+
+             
             objects[i].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
             objects[i].Name = "default";
             objects[i].bSticker = false;

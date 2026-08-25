@@ -305,6 +305,11 @@ glm::vec3 GameEngine::GetObjectRotation(int objectId) { return objects[objectId]
 int GameEngine::GetObjectTextureID_BaseColor(int objectId) { return objects[objectId].m_texture_ids[0];}
 int GameEngine::GetObjectTextureID_Normal(int objectId) { return (objects[objectId].m_texture_ids.size() > 1) ? objects[objectId].m_texture_ids[1] : 0;}
 int GameEngine::GetObjectTextureID_MetallicRoughness(int objectId) { return (objects[objectId].m_texture_ids.size() > 2) ? objects[objectId].m_texture_ids[2] : 0;}
+float GameEngine::GetObjectTextureID_MetallicFactor(int objectId) { return objects[objectId].metallicFactor; }
+float GameEngine::GetObjectTextureID_RoughnessFactor(int objectId) { return objects[objectId].roughnessFactor; }
+int GameEngine::GetObjectTextureID_alphaMode(int objectId) { return objects[objectId].alphaMode; }
+float GameEngine::GetObjectTextureID_alphaCutoff(int objectId) { return objects[objectId].alphaCutoff; }
+int GameEngine::GetObjectTextureID_doubleSided(int objectId) { return objects[objectId].doubleSided; }
 
 int GameEngine::GetLightSize() { return lights.size(); }
 glm::vec3 GameEngine::GetLightPosition(int lightId) { return lights[lightId].GetLightPosition(); }

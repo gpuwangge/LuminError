@@ -181,6 +181,11 @@ namespace LEGameEngine{
         virtual int GetObjectTextureID_BaseColor(int objectId) = 0;
         virtual int GetObjectTextureID_Normal(int objectId) = 0;
         virtual int GetObjectTextureID_MetallicRoughness(int objectId) = 0;
+        virtual float GetObjectTextureID_MetallicFactor(int objectId) = 0;
+        virtual float GetObjectTextureID_RoughnessFactor(int objectId) = 0;
+        virtual int GetObjectTextureID_alphaMode(int objectId) = 0;
+        virtual float GetObjectTextureID_alphaCutoff(int objectId) = 0;
+        virtual int GetObjectTextureID_doubleSided(int objectId) = 0;
 
         //Expose functions for Example(SimpleParticles) to use
         virtual double GetDeltaTime() = 0;

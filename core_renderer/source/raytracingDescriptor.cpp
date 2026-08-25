@@ -127,7 +127,7 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].descriptorCount = 1;
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
-        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_ANY_HIT_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
         counter++;
 
         raytracingBindings[counter].binding = counter; //uniform buffer for material
@@ -163,7 +163,7 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].descriptorCount = 1;
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
-        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_ANY_HIT_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
         counter++;
 
         raytracingBindings[counter].binding = counter; //config uniform buffer

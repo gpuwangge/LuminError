@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "TypeVertex.h"
 #include "TypeText.h"
+#include "TypeRaytracing.h"
 
 namespace LEGameEngine{
     class IGameEngine;
@@ -25,9 +26,11 @@ namespace LEResource{
         virtual void LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) = 0;
         virtual void LoadGLBMaterial() = 0;
         virtual int GetGLBMeshSize(IN int glbIndex) = 0;
-        virtual int GetGLBTextureIndexBaseColor(int meshIndex) = 0;
-        virtual int GetGLBTextureIndexNormal(int meshIndex) = 0;
-        virtual int GetGLBTextureIndexMetallic(int meshIndex) = 0;
+        // virtual int GetGLBTextureIndexBaseColor(int meshIndex) = 0;
+        // virtual int GetGLBTextureIndexNormal(int meshIndex) = 0;
+        // virtual int GetGLBTextureIndexMetallic(int meshIndex) = 0;
+        virtual int GetGLBMaterialId(IN int glbMeshId) = 0;
+        virtual GLBMaterial& GetGLBMaterial(IN int glbMaterialId) = 0;
 
         /**************************
          * Shader Resource

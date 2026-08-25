@@ -1,7 +1,119 @@
 #version 460
+
+#include "../CommonShaders/rayPipelineCommonStruct.glsl"
+#include "../CommonShaders/rayPipelineCommonUBO.glsl"
+
 #extension GL_EXT_ray_tracing : require
-void main()
-{
-    // 先什么都不做
-    // 不调用 ignoreIntersectionEXT()，让命中正常继续
+#extension GL_EXT_nonuniform_qualifier : require
+#extension GL_EXT_buffer_reference : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_scalar_block_layout : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+hitAttributeEXT vec2 bary;
+
+layout(location = 0) rayPayloadInEXT PrimaryPayloadStruct primaryPayload;
+layout(location = 1) rayPayloadEXT ShadowPayloadStruct shadowPayload;
+
+struct TriangleVertexInfo{
+    vec3 position;
+    float _padding0;
+    vec3 normal;
+    float _padding1;
+    //vec3 tangent;
+    //float _padding2;
+    vec4 tangent; // xyz = tangent direction, w = handedness (+1 / -1)
+    vec3 color;
+    float _padding3;
+    vec2 uv;
+    float _padding4;
+    float _padding5;
+    int material_id;
+    float padding[15]; //60 bytes
+    //total size: 16*4+4+60=128 bytes
+};
+layout(buffer_reference, scalar, buffer_reference_align = 16) readonly buffer VertexBufferRef { TriangleVertexInfo vertices[]; };
+layout(buffer_reference, scalar, buffer_reference_align = 4) readonly buffer IndexBufferRef { uint indices[]; };
+struct GeometryInfo {
+    VertexBufferRef vertexBuf;
+    IndexBufferRef  indexBuf;
+    //uint materialIndex;
+    //uint _pad0;
+};
+layout(set = 0, binding = 2, scalar) readonly buffer SBOGeometryInfoBuffer {
+    GeometryInfo infos[];
+} sboGeometryInfos;
+
+const int INSTANCE_SIZE = 256;
+layout(set = 0, binding = 7) uniform InstanceUniformInfo {
+    InstanceStruct instances[INSTANCE_SIZE];
+} instanceUBO;
+
+#ifndef DISABLE_TEXTURE
+const uint MAX_GLOBAL_TEXTURES = 69u;
+layout(set = 0, binding = 10) uniform sampler2D texarray[MAX_GLOBAL_TEXTURES];
+#endif
+
+#ifndef DISABLE_TEXTURE
+vec4 SampleTexture(uint texId, vec2 uv) {
+    texId = min(texId, MAX_GLOBAL_TEXTURES - 1u);
+    return texture(texarray[texId], vec2(uv.x, 1.0 - uv.y));
+}
+#endif
+
+vec2 getTriangleUV(uint geometryIndex){//这个之后跟rchit一起放进公共头文件
+
+    GeometryInfo geo = sboGeometryInfos.infos[geometryIndex];
+
+    uint baseIndex = gl_PrimitiveID * 3u;
+
+    uint i0 = geo.indexBuf.indices[baseIndex + 0u];
+    uint i1 = geo.indexBuf.indices[baseIndex + 1u];
+    uint i2 = geo.indexBuf.indices[baseIndex + 2u];
+
+    TriangleVertexInfo v0 = geo.vertexBuf.vertices[i0];
+    TriangleVertexInfo v1 = geo.vertexBuf.vertices[i1];
+    TriangleVertexInfo v2 = geo.vertexBuf.vertices[i2];
+
+    vec3 bc = vec3(
+        1.0 - bary.x - bary.y,
+        bary.x,
+        bary.y
+    );
+
+    return v0.uv * bc.x +
+           v1.uv * bc.y +
+           v2.uv * bc.z;
+}
+
+void main(){
+    InstanceStruct ins = instanceUBO.instances[gl_InstanceCustomIndexEXT];
+
+    // OPAQUE 无须额外工作。
+    if (ins.alphaMode == ALPHA_MODE_OPAQUE) return;
+
+#ifndef DISABLE_TEXTURE
+    // 这里必须用与 closest-hit 完全一致的 UV 插值方式。
+    //vec2 uv = GetInterpolatedUV(gl_PrimitiveID, gl_HitTEXT);
+    vec2 uv = getTriangleUV(ins.geometryIndex);
+    float alpha = SampleTexture(ins.textureIndex_baseColor, uv).a;
+
+    // 若你的 MaterialStruct 中也有 baseColorFactor.a，
+    // 应乘上它：alpha *= material.alpha;
+#else
+    float alpha = 1.0;
+#endif
+
+    if (ins.alphaMode == ALPHA_MODE_MASK) {
+        if (alpha < ins.alphaCutoff) ignoreIntersectionEXT;
+        return;
+    }
+
+    // BLEND：先采用 stochastic alpha，避免 closest-hit 获得
+    // “最近但半透明”的错误命中。
+    // if (ins.alphaMode == ALPHA_MODE_BLEND) { //TODO: 暂时没有实现BLEND
+    //     uint state = ...; // 使用像素、sample、depth、primitive id 构造 RNG
+    //     float xi = Rand(state);
+    //     if (xi > alpha) ignoreIntersectionEXT;
+    // }
 }

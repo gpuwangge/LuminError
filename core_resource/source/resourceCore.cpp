@@ -52,15 +52,23 @@ int ResourceCore::GetGLBMeshSize(IN int glbIndex){
     return glbManager.GetGLBMeshSize(glbIndex);
 }
 
-int ResourceCore::GetGLBTextureIndexBaseColor(int meshIndex){
-    return glbManager.textureIds[meshIndex][0];
+// int ResourceCore::GetGLBTextureIndexBaseColor(int meshIndex){
+//     return glbManager.textureIds[meshIndex][0];
+// }
+
+// int ResourceCore::GetGLBTextureIndexNormal(int meshIndex){
+//     return glbManager.textureIds[meshIndex][1];
+// }
+// int ResourceCore::GetGLBTextureIndexMetallic(int meshIndex){
+//     return glbManager.textureIds[meshIndex][2];
+// }
+
+int ResourceCore::GetGLBMaterialId(IN int glbMeshId){
+    return glbManager.glbMaterialIds[glbMeshId];
 }
 
-int ResourceCore::GetGLBTextureIndexNormal(int meshIndex){
-    return glbManager.textureIds[meshIndex][1];
-}
-int ResourceCore::GetGLBTextureIndexMetallic(int meshIndex){
-    return glbManager.textureIds[meshIndex][2];
+GLBMaterial& ResourceCore::GetGLBMaterial(IN int glbMaterialId){
+    return glbManager.myGlbMaterials[glbMaterialId];
 }
 
 /**************************

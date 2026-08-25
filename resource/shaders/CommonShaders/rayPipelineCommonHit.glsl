@@ -906,8 +906,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
 //     return mix(high, low, vec3(cutoff));
 // }
 
-void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_baseColor, uint textureIndex_normal, uint textureIndex_metallicRoughness, vec2 uv){
-    
+void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, InstanceStruct ins, vec2 uv){
     //命中信息重建
     HitInfoStruct hitInfo;
     hitInfo.material_type = mat.type;
@@ -922,15 +921,40 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
     hitInfo.transmissionColor = mat.transmissionColor;
 
     hitInfo.albedo = mat.albedo;
-    hitInfo.alpha = mat.alpha;
+    hitInfo.alpha = mat.alpha; 
 #ifndef DISABLE_TEXTURE
+
     //if (mat.baseColorTextureIndex != INVALID_TEXTURE_INDEX) {//add texture
         //vec4 baseColor = SampleTexture(mat.baseColorTextureIndex, uv);
+    uint textureIndex_baseColor = ins.textureIndex_baseColor;
+    uint textureIndex_metallicRoughness = ins.textureIndex_metallicRoughness;
     
     vec4 baseColor = SampleTexture(textureIndex_baseColor, uv);
     hitInfo.albedo *= baseColor.rgb;
     hitInfo.alpha *= baseColor.a;
     //}
+
+    //处理glb里面的alphaMode/alphaCut
+    uint alphaMode = ins.alphaMode;
+    if (alphaMode == ALPHA_MODE_OPAQUE) {
+        hitInfo.alpha = 1.0;// glTF 规定：OPAQUE 忽略 baseColor alpha
+    }else if (alphaMode == ALPHA_MODE_MASK) {
+        // 注意：这在 closest-hit 中只能“黑掉当前交点”，
+        // 不能让 ray 穿过该三角形，因此不是最终正确实现。
+        // if (hitInfo.alpha < ins.alphaCutoff) {//测试用。如果实现了rahit就不需要这个了
+        //     primaryPayload.radiance = vec3(0.0);
+        //     primaryPayload.spawnRayCount = 0u;
+        //     primaryPayload.done = 1u;
+        //     return;
+        // }
+
+        hitInfo.alpha = 1.0;
+    }
+    else if (alphaMode == ALPHA_MODE_BLEND) {
+        hitInfo.alpha = clamp(hitInfo.alpha, 0.0, 1.0);
+    }
+
+    
 
     //test: draw normal texture。可以用来证明切线空间贴图采样正确
     // vec3 n = SampleTexture(textureIndex_normal, uv).xyz * 2.0 - 1.0; 
@@ -967,10 +991,8 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, uint textureIndex_ba
         hitInfo.specular = 1.0;  // 若你的实现仍需要该字段，保持默认即可
         //hitInfo.reflectance？
     }
-    float roughnessFactor = 1.0; //TODO: use glb value isntead of hard-code
-    float metallicFactor = 1.0; //TODO: use glb value instead of hard-code
-    hitInfo.roughness = clamp(roughnessFactor * mr.g,  0.04, 1.0);
-    hitInfo.metallic  = clamp(metallicFactor * mr.b, 0.0, 1.0);
+    hitInfo.roughness = clamp(ins.roughnessFactor * mr.g,  0.04, 1.0);
+    hitInfo.metallic  = clamp(ins.metallicFactor * mr.b, 0.0, 1.0);
 
 #endif
 

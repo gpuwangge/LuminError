@@ -25,9 +25,11 @@ vec2 getSphereUV(){
 }
 
 void main(){
-    uint instanceIndex = uint(gl_InstanceCustomIndexEXT);
-    uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
-    MaterialStruct mat = materialUBO.materials[materialIndex];
+    InstanceStruct ins = instanceUBO.instances[uint(gl_InstanceCustomIndexEXT)];
+
+    //uint instanceIndex = uint(gl_InstanceCustomIndexEXT);
+    //uint materialIndex = instanceUBO.instances[instanceIndex].materialIndex;
+    MaterialStruct mat = materialUBO.materials[ins.materialIndex];
 
     //bool bExit = earlyExit(mat);
     //if(bExit) return;
@@ -35,5 +37,6 @@ void main(){
     //Core
     vec3 Ngeom = getSphereWorldNormal(); //Normal for Geometry
     vec2 uv = getSphereUV();
-    updatePayload(mat, Ngeom, Ngeom, 0, 0, 0, uv); //all sphere use 0 texture for now
+    //updatePayload(mat, Ngeom, Ngeom, 0, 0, 0, uv); //all sphere use 0 texture for now
+    updatePayload(mat, Ngeom, Ngeom, ins, uv);
 }

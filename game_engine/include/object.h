@@ -55,6 +55,13 @@ public:
     bool bSticker = false;
     //bool bSkybox = false;
 
+    //for RT Pipeline
+    float metallicFactor = 1.0f;
+    float roughnessFactor = 1.0f;
+    uint32_t alphaMode = 0;
+    float alphaCutoff = 0.5f;
+    int doubleSided = 0;
+
     int GetObjectID(){return m_object_id;}
     std::vector<int> GetTextureID(){return m_texture_ids;}
     int GetModelID(){return m_model_id;}

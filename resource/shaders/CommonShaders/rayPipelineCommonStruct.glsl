@@ -45,12 +45,21 @@ struct MaterialStruct {
     //int  baseColorTextureIndex;      // -1 = 无贴图
 };
 
+const uint ALPHA_MODE_OPAQUE = 0u;
+const uint ALPHA_MODE_MASK   = 1u;
+const uint ALPHA_MODE_BLEND  = 2u;
 struct InstanceStruct {
     uint geometryIndex;
     uint materialIndex;
     uint textureIndex_baseColor;
     uint textureIndex_normal;
     uint textureIndex_metallicRoughness;
+    float metallicFactor;
+    float roughnessFactor;
+    uint alphaMode;
+    float alphaCutoff;
+    uint doubleSided;
+    //uint _pad0; // std140 UBO 下明确补齐到 16 bytes？
 };
 
 /*************

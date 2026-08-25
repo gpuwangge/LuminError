@@ -232,6 +232,11 @@ namespace LEGameEngine{
         int GetObjectTextureID_BaseColor(int objectId) override;
         int GetObjectTextureID_Normal(int objectId) override;
         int GetObjectTextureID_MetallicRoughness(int objectId) override;
+        float GetObjectTextureID_MetallicFactor(int objectId) override;
+        float GetObjectTextureID_RoughnessFactor(int objectId) override;
+        int GetObjectTextureID_alphaMode(int objectId) override;
+        float GetObjectTextureID_alphaCutoff(int objectId) override;
+        int GetObjectTextureID_doubleSided(int objectId) override;
 
         int GetLightSize() override;
         glm::vec3 GetLightPosition(int lightId) override;
