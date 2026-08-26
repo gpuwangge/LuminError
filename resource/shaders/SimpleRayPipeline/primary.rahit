@@ -89,6 +89,18 @@ vec2 getTriangleUV(uint geometryIndex){//这个之后跟rchit一起放进公共�
 void main(){
     InstanceStruct ins = instanceUBO.instances[gl_InstanceCustomIndexEXT];
 
+    bool frontFace = (gl_HitKindEXT != gl_HitKindBackFacingTriangleEXT);
+    //Note: 这里用doubleSided的好处：
+    //它可能减少后续 closest-hit、材质采样、BSDF 计算，以及背面错误遮挡导致的无效路径；
+    //但它不是“早期跳过”，不能简单认为一定更快。
+    //对 doubleSided=0 材质，正确地拒绝背面 candidate hit，避免它们成为最终 surface hit、shadow blocker 或 BSDF bounce；
+    //性能效果需要 profile，不能假定必然提升。
+    if (ins.doubleSided == 0u && !frontFace) { //如果doubleSided==0，开启剔除
+    //if (!frontFace) { //测试：无条件剔除所有背面。在Sponaza里，锁链的背面会看不见(视觉穿透)
+        ignoreIntersectionEXT;
+        return;
+    }
+    
     // OPAQUE 无须额外工作。
     if (ins.alphaMode == ALPHA_MODE_OPAQUE) return;
 
@@ -104,8 +116,8 @@ void main(){
     float alpha = 1.0;
 #endif
 
-    if (ins.alphaMode == ALPHA_MODE_MASK) {
-        if (alpha < ins.alphaCutoff) ignoreIntersectionEXT;
+    if (ins.alphaMode == ALPHA_MODE_MASK && alpha < ins.alphaCutoff) {
+        ignoreIntersectionEXT;
         return;
     }
 

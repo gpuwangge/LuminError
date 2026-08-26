@@ -996,17 +996,19 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, InstanceStruct ins, 
 
 #endif
 
+    //射线命中的是正面还是反面的判定：
+    //dot(I, Ng) < 0：射线从 Ng 所指的半球射向表面，命中的是几何正面；
+    //dot(I, Ng) > 0：射线从另一侧射来，命中的是背面。
 
-    //Ng = Ns;//test good
     hitInfo.hitPos = getWorldHitPos();
     hitInfo.I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
     hitInfo.V = -hitInfo.I; //视向向量，观察方向
-    bool frontFace = dot(hitInfo.I, Ng) < 0.0; //入射光线落在表面的哪一侧（正面还是背面）
+    bool frontFace = dot(hitInfo.I, Ng) < 0.0; //入射光线落在表面的哪一侧（正面还是背面），<0就是正面
     Ng = frontFace ? Ng : -Ng; // N 始终朝向入射光
     Ns = frontFace ? Ns : -Ns; // N 始终朝向入射光
     if (dot(Ns, Ng) < 0.0) Ns = -Ns; // 使 shading normal 留在 face-forward geometric normal 所在半球。
     
-   // Ng = Ns;//test bad
+
     hitInfo.N_shade = Ns;// Ns 用于光照、BRDF、Fresnel 和 normal map 外观。
     hitInfo.N_geom = Ng;// 保留 mesh winding 的 geometric normal。
 
