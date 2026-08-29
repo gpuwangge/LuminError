@@ -14,32 +14,32 @@ public:
     void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, 
             VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, bool bCubeMap,
             VkImageLayout layout){
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = mipLevels;
+        
+        imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageCreateInfo.extent.depth = 1;
+        imageCreateInfo.mipLevels = mipLevels;
         if(bCubeMap){
             //imageInfo.extent.width = width / 6; //horizontal skybox
             //imageInfo.extent.height = height;
-            imageInfo.extent.width = width / 4; //standard skybox
-            imageInfo.extent.height = height / 3;
-            imageInfo.arrayLayers = 6; //for cubemap
-            imageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;//for cubemap
+            imageCreateInfo.extent.width = width / 4; //standard skybox
+            imageCreateInfo.extent.height = height / 3;
+            imageCreateInfo.arrayLayers = 6; //for cubemap
+            imageCreateInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;//for cubemap
         }else{
-            imageInfo.extent.width = width;
-            imageInfo.extent.height = height;
-            imageInfo.arrayLayers = 1;
+            imageCreateInfo.extent.width = width;
+            imageCreateInfo.extent.height = height;
+            imageCreateInfo.arrayLayers = 1;
         }
-        imageInfo.format = format;
-        imageInfo.tiling = tiling;
-        imageInfo.initialLayout = layout;//VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.usage = usage;
-        imageInfo.samples = numSamples;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageCreateInfo.format = format;
+        imageCreateInfo.tiling = tiling;
+        imageCreateInfo.initialLayout = layout;//VK_IMAGE_LAYOUT_UNDEFINED;
+        imageCreateInfo.usage = usage;
+        imageCreateInfo.samples = numSamples;
+        imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         
 
-        if (vkCreateImage(logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+        if (vkCreateImage(logicalDevice, &imageCreateInfo, nullptr, &image) != VK_SUCCESS) {
             //throw std::runtime_error("failed to create image!");
         }
         //printf("Created VkImage: %p\n", image);
@@ -173,6 +173,10 @@ public:
     VkImageView view = NULL;
     VkDevice logicalDevice;
     VkPhysicalDevice physicalDevice;
+    VkImageCreateInfo imageCreateInfo{};
+
+    VkImageCreateInfo GetImageCreateInfo(){ return imageCreateInfo; }
+    
 };
 
 

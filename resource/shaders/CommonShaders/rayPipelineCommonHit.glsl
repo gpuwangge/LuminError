@@ -652,6 +652,14 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         primaryPayload.spawnRayCount = 1u;
         primaryPayload.done = 0u;
     }else if(hitInfo.material_type == MATERIAL_GLASS || hitInfo.material_type == MATERIAL_JADE){
+
+        //test
+        // primaryPayload.radiance = vec3(0.0);
+        // primaryPayload.spawnRayCount = 0u;
+        // primaryPayload.done = 1u;
+        // return;
+
+
     //if(hasTransmission){
         //float eta = frontFace ? (1.0 / ior) : ior;
 
@@ -660,7 +668,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
         float eta = n1 / n2;
 
         vec3 normal = hitInfo.N_geom; //test：按道理这里应该用N_geom的，但是Dragon Test里面N_geom效果很奇怪，需要debug，先暂时用N_shade
-        normal = hitInfo.N_shade; //先暂时用N_shade
+        normal = hitInfo.N_shade; //先暂时用N_shade //
 
         vec3 R = safeNormalize(reflect(hitInfo.I, normal));
         vec3 T = refract(hitInfo.I, normal, eta);
@@ -685,7 +693,7 @@ void UploadNextRays(in HitInfoStruct hitInfo){
             T = safeNormalize(T);
             vec3 Toff = dot(T, normal) > 0.0 ? normal : -normal;
             vec3 Roff = dot(R, normal) > 0.0 ? normal : -normal;
-            float F2 = pow(fresnelScalar,0.5);
+            float F2 = fresnelScalar;//pow(fresnelScalar,0.5);
 
             uint rayIndex = 0; //第一条射线，查询折射
             if(primaryPayload.depth < configUBO.maxRefractionDepth ){ //&& Rand(hitInfo.state) < hitInfo.transmission
@@ -694,6 +702,8 @@ void UploadNextRays(in HitInfoStruct hitInfo){
                 primaryPayload.nextRay[rayIndex].origin = hitInfo.hitPos + Toff * EPSILON;
                 primaryPayload.nextRay[rayIndex].dir = T;
                 primaryPayload.nextRay[rayIndex].throughputMul = hitInfo.transmissionColor * (1.0 - F2);
+
+                //primaryPayload.nextRay[rayIndex].throughputMul = vec3(0.05, 0.35, 0.12) * (1.0 - F2); //test
 
                 //这段代码实现的是折射特性里面的 Beer-Lambert Law：光在介质里面走得越远，能量损失越多。
                 if(hitInfo.airToMedium){
@@ -798,12 +808,14 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
     }
 
     //vec3 localRadiance = emission + directDiffuse + directSpecular;
-    vec3 localRadiance = hitInfo.emission;
+    vec3 localRadiance = hitInfo.emission;//recover
+    //vec3 localRadiance = vec3(0.0); // test: 暂时不要加 emission
     if(hitInfo.transmission < 0.01){
         localRadiance += directDiffuse + directSpecular;
     } else {
         localRadiance += directSpecular;
     }
+    //recover
     float ambientIntensity = 0.2;
     vec3 ambient = diffuseBRDF * SampleSky(hitInfo.N_shade) * PI * ambientIntensity; //增加天空漫反射
     localRadiance += ambient;
@@ -835,6 +847,8 @@ ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
     result.valid = 1u;
     result.direction = reflectedDir;
     result.throughputMul = hitInfo.F * hitInfo.albedo;
+    //result.throughputMul = hitInfo.albedo;
+ 
 
     return result;
 }
@@ -875,8 +889,8 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
     if(configUBO.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
 
     ScatterResult scatter; //散射逻辑：TODO 解决Warp Divergence问题
-    if(hitInfo.material_type != MATERIAL_GLASS && hitInfo.material_type != MATERIAL_JADE){ //传统PathTracing部分，随机采样的 Monte Carlo Path Tracing
-        if(hitInfo.material_type == MATERIAL_GOLD) 
+    if(hitInfo.material_type != MATERIAL_GLASS && hitInfo.material_type != MATERIAL_JADE){ //传统PathTracing部分，随机采样的 Monte Carlo Path Tracing //&& hitInfo.material_type != MATERIAL_JADE
+        if(hitInfo.material_type == MATERIAL_GOLD ) //|| hitInfo.material_type == MATERIAL_JADE
             scatter = ScatterMetal(hitInfo);
         else if(hitInfo.material_type == MATERIAL_PLASTIC || hitInfo.material_type == MATERIAL_CERAMIC || hitInfo.material_type == MATERIAL_LIGHT) 
             scatter = ScatterDiffuse(hitInfo);// 处理电介质材质（混合漫反射和镜面反射）
@@ -1003,6 +1017,7 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, InstanceStruct ins, 
     hitInfo.hitPos = getWorldHitPos();
     hitInfo.I = safeNormalize(gl_WorldRayDirectionEXT); // 入射方向：射线前进方向
     hitInfo.V = -hitInfo.I; //视向向量，观察方向
+
     bool frontFace = dot(hitInfo.I, Ng) < 0.0; //入射光线落在表面的哪一侧（正面还是背面），<0就是正面
     Ng = frontFace ? Ng : -Ng; // N 始终朝向入射光
     Ns = frontFace ? Ns : -Ns; // N 始终朝向入射光
@@ -1013,8 +1028,8 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, InstanceStruct ins, 
     hitInfo.N_geom = Ng;// 保留 mesh winding 的 geometric normal。
 
     //todo: ai说这里frontFace写反了。但是反过来后dragon看起来怪怪的，需要验证
-    hitInfo.airToMedium = (primaryPayload.insideMedium == 0u) && !frontFace;
-    hitInfo.mediumToAir = (primaryPayload.insideMedium == 1u) && frontFace;
+    hitInfo.airToMedium = (primaryPayload.insideMedium == 0u) && frontFace;
+    hitInfo.mediumToAir = (primaryPayload.insideMedium == 1u) && !frontFace;
     //bool invalid1 = (primaryPayload.insideMedium == 1u && !frontFace);
     //bool invalid2 = (primaryPayload.insideMedium == 0u && frontFace);
 

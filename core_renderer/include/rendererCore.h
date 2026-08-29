@@ -534,7 +534,12 @@ namespace LERenderer{
                 return swapchain.intermediaColor[frameIndex].image;
             else
                 //return swapchain.intermediaColor2[frameIndex].image;
+                //std::cout<<"GetIntermediaColor_Image imageIndex="<<imageIndex<<swapchain.intermediaColor2. 
                 return swapchain.intermediaColor2.image;
+        }
+        VkExtent3D GetIntermediaColor_Extent(int frameIndex, int imageIndex) override {
+            if(imageIndex == 0) return swapchain.intermediaColor[frameIndex].GetImageCreateInfo().extent;
+            else return swapchain.intermediaColor2.GetImageCreateInfo().extent;
         }
         VkSwapchainKHR GetSwapchainHandle() override { return swapchain.getHandle(); }
         std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() override { return swapchain.framebuffers_mainscene; }

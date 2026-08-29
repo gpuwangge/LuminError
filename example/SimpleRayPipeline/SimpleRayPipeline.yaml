@@ -100,7 +100,7 @@ CustomSpheres:
   - custom_sphere_name: Sphere
     custom_sphere_id: 4
     custom_sphere_position: [0, 3, -1]
-    custom_sphere_radius: 1.15
+    custom_sphere_radius: 0.85
     custom_sphere_material_id: 4
     custom_sphere_visibility: true
 
@@ -109,7 +109,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_id: 0
     rt_light_position: [0.0, 1.5, -1.0]
     rt_light_color: [1, 1, 1]
-    rt_light_intensity: 6
+    rt_light_intensity: 10
     rt_light_radius: 0.08 #spot light can use this to create soft shadow
     rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
     rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
@@ -178,9 +178,9 @@ Features:
   feature_raytracing_pipeline_maximum_bounce: 8
   feature_raytracing_pipeline_maximum_path: 4
   feature_raytracing_pipeline_accumulate: true
-  feature_raytracing_pipeline_enableNEE: false
+  feature_raytracing_pipeline_enableNEE: true
   feature_raytracing_pipeline_NEE_sample_count: 1
-  feature_raytracing_pipeline_NEE_soft_shadow: false
+  feature_raytracing_pipeline_NEE_soft_shadow: true
   feature_raytracing_pipeline_use_sky: false
   feature_raytracing_pipeline_maximum_Radiance: 0
   feature_raytracing_pipeline_debug_mode: 0

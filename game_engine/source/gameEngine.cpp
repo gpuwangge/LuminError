@@ -529,8 +529,55 @@ void GameEngine::Record_Present(){
                 0, VK_ACCESS_TRANSFER_WRITE_BIT, //AccessMask
                 VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT); //StageMask
 
-            vkCmdCopyImage(renderer->GetRaytracingCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0), VK_IMAGE_LAYOUT_GENERAL,
-                renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
+            
+            //VkExtent2D swapchain_extent = renderer->GetSwapchainExtent();
+            //std::cout<<"swapchain_extent width = "<<swapchain_extent.width <<", height = "<<swapchain_extent.height<<std::endl;
+            //output: swapchain_extent width = 800, height = 800
+            //VkExtent3D image_extent =  renderer->GetIntermediaColor_Extent(renderer->GetCurrentFrame(), 0);
+            //std::cout<<"image_extent width = "<<image_extent.width <<", height = "<<image_extent.height<<", depth = "<<image_extent.depth<<std::endl;
+            //output: image_extent width = 800, height = 800, depth = 1
+
+            //vkCmdCopyImage(renderer->GetRaytracingCommandBuffer(), renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0), VK_IMAGE_LAYOUT_GENERAL,
+            //     renderer->GetSwapchain_Images()[renderer->GetCurrentImage()], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
+
+            VkImage sourceImage = renderer->GetIntermediaColor_Image(renderer->GetCurrentFrame(), 0);
+            VkImage swapchainImage = renderer->GetSwapchain_Images()[renderer->GetCurrentImage()];
+
+            VkImageBlit blit{};
+            blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            blit.srcSubresource.mipLevel = 0;
+            blit.srcSubresource.baseArrayLayer = 0;
+            blit.srcSubresource.layerCount = 1;
+
+            blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            blit.dstSubresource.mipLevel = 0;
+            blit.dstSubresource.baseArrayLayer = 0;
+            blit.dstSubresource.layerCount = 1;
+
+            blit.srcOffsets[0] = {0, 0, 0};
+            blit.srcOffsets[1] = {
+                (int32_t)renderer->GetSwapchainExtent().width,
+                (int32_t)renderer->GetSwapchainExtent().height,
+                1
+            };
+
+            blit.dstOffsets[0] = {0, 0, 0};
+            blit.dstOffsets[1] = {
+                (int32_t)renderer->GetSwapchainExtent().width,
+                (int32_t)renderer->GetSwapchainExtent().height,
+                1
+            };
+
+            vkCmdBlitImage(
+                renderer->GetRaytracingCommandBuffer(),
+                sourceImage,
+                VK_IMAGE_LAYOUT_GENERAL,
+                swapchainImage,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                1,
+                &blit,
+                VK_FILTER_NEAREST //VK_FILTER_LINEAR
+            );
 
 
             renderer->RecordImageBarrier(renderer->GetRaytracingCommandBuffer(), renderer->GetSwapchain_Images()[renderer->GetCurrentImage()],

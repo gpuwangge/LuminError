@@ -331,7 +331,9 @@ namespace LERenderer{
         virtual VkSwapchainKHR GetSwapchainHandle() = 0;
         virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffers_Mainscene() = 0;
         virtual std::vector<VkFramebuffer>& GetSwapchain_FrameBuffer_Shadowmap(int index) = 0;
+
         virtual VkExtent2D& GetSwapchainExtent() = 0;
+        virtual VkExtent3D GetIntermediaColor_Extent(int frameIndex, int imageIndex) = 0;
 
         virtual void SetSwapchainDevice() = 0;
         virtual void SwapchainCleanup() = 0;

@@ -237,7 +237,7 @@ void main(){
     
     //Core
     vec3 Ntri = getTriangleWorldNormal(ins.geometryIndex); //legacy
-    //vec2 uv = getTriangleUV(geometryIndex); //legacy
+    //vec2 uv = getTriangleUV(geometryIndex); //legacy 
     SurfaceFrame frame = getTriangleSurfaceFrame(ins.geometryIndex);
 
     //翻转
@@ -255,7 +255,7 @@ void main(){
     vec3 Ng = frame.N_geometric;
     //从 normal map 取出一个切线空间法线，
     //再通过 TBN 矩阵把它转换为世界空间法线，
-    //最后作为光照、反射、BRDF 计算使用的表面法线。
+    //最后作为光照、反射、BRDF 计算使用的表面法线。  
     //normal map 的 RGB 通常保存 tangent-space 的 XYZ 方向，而不是颜色。
     //这段代码最终得到的是与后续光照计算处于同一坐标系的 shading normal (N)
 #ifndef DISABLE_TEXTURE

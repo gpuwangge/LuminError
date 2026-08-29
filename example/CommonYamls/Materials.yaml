@@ -44,7 +44,7 @@ Materials:
   - material_name: red_plastic_ceramic
     material_id: 3
     material_type: 3 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
-    albedo: [0.8, 0.2, 0.2]
+    albedo: [0.9, 0.05, 0.05]
     emissionColor: [0.0, 0.0, 0.0]
     transmissionColor: [1.0, 1.0, 1.0]
     metallic: 0.0
@@ -59,7 +59,7 @@ Materials:
     material_id: 4
     material_type: 4 #0:plastic 1:glass 2:gold 3:ceramic 4:light 5:jade
     albedo: [1.0, 1.0, 1.0]
-    emissionColor: [1.0, 0.9, 0.7]
+    emissionColor: [1.0, 1.0, 1.0]
     transmissionColor: [1.0, 1.0, 1.0]
     metallic: 0.0
     roughness: 1.0

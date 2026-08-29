@@ -153,7 +153,10 @@ void CSwapchain::createSwapchainImages(VkSurfaceKHR surface, int width, int heig
     createInfo.surface = surface;
 
     createInfo.minImageCount = swapchainImageSize;
-    createInfo.imageFormat = surfaceFormat.format;
+    //createInfo.imageFormat = VK_FORMAT_R8G8B8A8_SNORM;//画面全黑
+    //createInfo.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;//画面偏蓝
+    //createInfo.imageFormat = VK_FORMAT_R32G32B32A32_SFLOAT;//画面全黑
+    createInfo.imageFormat = surfaceFormat.format;//VK_FORMAT_R8G8B8A8_UNORM;//VK_FORMAT_R32G32B32A32_SFLOAT;//surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
@@ -230,7 +233,7 @@ void CSwapchain::createIntermediaColor(int width, int height){
 void CSwapchain::createIntermediaColor2(int width, int height){
     //std::cout<<"Create Intermedia Color2: width = "<<width<<", height = "<<height<<", swapchainImageSize = "<<swapchainImageSize<<std::endl;
     VkImageUsageFlags usage = VK_IMAGE_LAYOUT_GENERAL | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    //VkFormat format = VK_FORMAT_R16G16B16A16_SFLOAT;//instead of VK_FORMAT_R8G8B8A8_UNORM;, because accumulated image need higher accuracy
+    //VkFormat format = VK_FORMAT_R16G16B16A16_SFLOAT;//instead of VK_FORMAT_R8G8B8A8_UNORM; because accumulated image need higher accuracy
     VkFormat format = VK_FORMAT_R32G32B32A32_SFLOAT;
 
     //intermediaColor2.resize(swapchainImageSize);

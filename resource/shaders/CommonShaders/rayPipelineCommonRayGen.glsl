@@ -77,19 +77,47 @@ vec3 TracePixelRadiance(ivec2 size, ivec2 pixel){
 
             if(path.depth + 1u >= configUBO.maxBounce) continue;
 
-            for(uint i = 0u; i < primaryPayload.spawnRayCount; ++i){
+            // for(uint i = 0u; i < primaryPayload.spawnRayCount; ++i){
+            //     PathStateStruct nextPath;
+
+            //     nextPath.origin         = primaryPayload.nextRay[i].origin;
+            //     nextPath.direction      = primaryPayload.nextRay[i].dir;
+            //     nextPath.throughput     = path.throughput * primaryPayload.nextRay[i].throughputMul;
+            //     nextPath.currentIOR     = primaryPayload.nextRay[i].currentIOR;
+            //     nextPath.insideMedium   = primaryPayload.nextRay[i].insideMedium;
+            //     nextPath.mediumEntryPos = primaryPayload.nextRay[i].mediumEntryPos;
+
+            //     nextPath.depth = path.depth + 1u;
+            //     pathStack[stackSize++] = nextPath;
+            //     if(stackSize >= configUBO.maxPath) break;
+            // }
+
+            uint maxStackSize = min(configUBO.maxPath, MAX_PATHS);
+            uint childCount = min(primaryPayload.spawnRayCount, 2u);
+            for (uint i = 0u; i < childCount; ++i) {
+                // 一定要在写入数组前检查。  
+                if (uint(stackSize) >= maxStackSize) {
+                    break;
+                }
+
+                vec3 branchWeight = primaryPayload.nextRay[i].throughputMul;
+
+                // 调试期可保留：零能量路径不应入栈。
+                if (max(branchWeight.r, max(branchWeight.g, branchWeight.b)) <= 0.0) {
+                    continue;
+                }
+
                 PathStateStruct nextPath;
-
-                nextPath.origin         = primaryPayload.nextRay[i].origin;
-                nextPath.direction      = primaryPayload.nextRay[i].dir;
-                nextPath.throughput     = path.throughput * primaryPayload.nextRay[i].throughputMul;
-                nextPath.currentIOR     = primaryPayload.nextRay[i].currentIOR;
-                nextPath.insideMedium   = primaryPayload.nextRay[i].insideMedium;
+                nextPath.origin = primaryPayload.nextRay[i].origin;
+                nextPath.direction = primaryPayload.nextRay[i].dir;
+                nextPath.throughput = path.throughput * branchWeight;
+                nextPath.currentIOR = primaryPayload.nextRay[i].currentIOR;
+                nextPath.insideMedium = primaryPayload.nextRay[i].insideMedium;
                 nextPath.mediumEntryPos = primaryPayload.nextRay[i].mediumEntryPos;
-
                 nextPath.depth = path.depth + 1u;
-                pathStack[stackSize++] = nextPath;
-                if(stackSize >= configUBO.maxPath) break;
+
+                pathStack[stackSize] = nextPath;
+                stackSize++;
             }
         }//stack
         
