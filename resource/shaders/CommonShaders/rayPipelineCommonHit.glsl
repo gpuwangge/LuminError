@@ -834,21 +834,42 @@ struct ScatterResult{
 };
 
 ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
+    // ScatterResult result;
+
+    // // 金属材质主要进行镜面反射
+    // vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_shade);
+    
+    // // 根据粗糙度添加随机性
+    // if (hitInfo.roughness > 0.0) {
+    //     reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness));
+    // }
+
+    // result.valid = 1u;
+    // result.direction = reflectedDir;
+    // //result.throughputMul = hitInfo.F * hitInfo.albedo; //recover
+    // result.throughputMul = hitInfo.albedo; //test
+ 
+    // return result;
+
+    //理想镜面测试
+    //在当前阶段，保留“理想镜面金属 + 彩色 Fresnel”的最小修复完全是合理的工程选择：它稳定、容易调试，并且对于粗糙度很低的金属（例如你的 roughness = 0.1）视觉上往往已经足够可信
     ScatterResult result;
 
-    // 金属材质主要进行镜面反射
-    vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_shade);
-    
-    // 根据粗糙度添加随机性
-    if (hitInfo.roughness > 0.0) {
-        reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness));
-    }
+    vec3 N = faceforward(hitInfo.N_shade, hitInfo.I, hitInfo.N_geom);
+    vec3 wi = normalize(reflect(hitInfo.I, N));
 
-    result.valid = 1u;
-    result.direction = reflectedDir;
-    result.throughputMul = hitInfo.F * hitInfo.albedo;
-    //result.throughputMul = hitInfo.albedo;
- 
+    float NoV = clamp(dot(N, -hitInfo.I), 0.0, 1.0);
+
+    // 金属：baseColor 就是 F0，不要使用 dielectric 的 0.04。
+    vec3 F0 = clamp(hitInfo.albedo, vec3(0.0), vec3(0.999));
+    vec3 F  = F0 + (vec3(1.0) - F0) * pow(1.0 - NoV, 5.0);
+
+    result.valid = dot(wi, hitInfo.N_geom) > 0.0 ? 1u : 0u;
+    result.direction = wi;
+
+    // 对 delta/specular reflection，若采样与 BRDF 配对，
+    // 反射路径 throughput 可直接使用 Fresnel F。
+    result.throughputMul = F;
 
     return result;
 }
@@ -1001,7 +1022,8 @@ void updatePayload(in MaterialStruct mat, vec3 Ng, vec3 Ns, InstanceStruct ins, 
         hitInfo.material_type = 2; //设为金属
         // glTF-compatible metal/rough F0
         //hitInfo.F0 = mix(vec3(0.04), hitInfo.albedo, hitInfo.metallic);
-        hitInfo.ior = 1.5;       // 仅在 transmission / dielectric refraction 时有意义
+        //hitInfo.ior = 1.5;       // 仅在 transmission / dielectric refraction 时有意义
+        hitInfo.F0 = hitInfo.albedo;
         hitInfo.specular = 1.0;  // 若你的实现仍需要该字段，保持默认即可
         //hitInfo.reflectance？
     }

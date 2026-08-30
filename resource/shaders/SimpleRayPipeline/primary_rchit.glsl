@@ -237,7 +237,7 @@ void main(){
     
     //Core
     vec3 Ntri = getTriangleWorldNormal(ins.geometryIndex); //legacy
-    //vec2 uv = getTriangleUV(geometryIndex); //legacy 
+    //vec2 uv = getTriangleUV(geometryIndex); //legacy
     SurfaceFrame frame = getTriangleSurfaceFrame(ins.geometryIndex);
 
     //翻转
