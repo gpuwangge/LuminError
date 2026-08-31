@@ -441,64 +441,64 @@ void CGLBManager::LoadGLBMaterial(){
             }
         }
         else {
-            std::cout << "Material [" << materialIndex << "] has NO transmission extension" << std::endl;
+            //std::cout << "Material [" << materialIndex << "] has NO transmission extension" << std::endl;
         }   
 
         //------------------------------------------------------
         // Check for alpha and metal/roughness factor
         //------------------------------------------------------
-        std::cout
-            << "Material [" << materialIndex << "] "
-            << "alphaMode = " << material.alphaMode
-            << ", alphaCutoff = " << material.alphaCutoff
-            << ", doubleSided = " << material.doubleSided
-            << ", metallicFactor = " << pbr.metallicFactor
-            << ", roughnessFactor = " << pbr.roughnessFactor
-            << std::endl;
+        // std::cout
+        //     << "Material [" << materialIndex << "] "
+        //     << "alphaMode = " << material.alphaMode
+        //     << ", alphaCutoff = " << material.alphaCutoff
+        //     << ", doubleSided = " << material.doubleSided
+        //     << ", metallicFactor = " << pbr.metallicFactor
+        //     << ", roughnessFactor = " << pbr.roughnessFactor
+        //     << std::endl;
 
         //------------------------------------------------------
         // Summary for this material
         //------------------------------------------------------
-        std::cout
-            << "Load Material [" << materialIndex << "] "
-            << "name = " << myGlbMaterials[materialIndex].name
-            << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
-            << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
-            << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
-            << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
-            << ", occlusionTextureIndex = " << myGlbMaterials[materialIndex].occlusionTextureIndex
-            << std::endl;
+        // std::cout
+        //     << "Load Material [" << materialIndex << "] "
+        //     << "name = " << myGlbMaterials[materialIndex].name
+        //     << ", baseColorTex = " << myGlbMaterials[materialIndex].baseColorTextureIndex
+        //     << ", metallicRoughnessTex = " << myGlbMaterials[materialIndex].metallicRoughnessTextureIndex
+        //     << ", normalTex = " << myGlbMaterials[materialIndex].normalTextureIndex
+        //     << ", emissiveTextureIndex = " << myGlbMaterials[materialIndex].emissiveTextureIndex
+        //     << ", occlusionTextureIndex = " << myGlbMaterials[materialIndex].occlusionTextureIndex
+        //     << std::endl;
     }
     std::cout << "Loaded material count = " << myGlbMaterials.size() << std::endl;
 
     //print for debug
-    for (size_t imageIndex = 0; imageIndex < imageUsages.size(); ++imageIndex){
-        const uint32_t usage = imageUsages[imageIndex];
-        std::cout<< "imageUsages[" << imageIndex << "]"<< " = " << usage<< " : ";
-        bool hasUsage = false;
-        if ((usage & TextureUsage_BaseColor) != 0){
-            std::cout << "BaseColor ";
-            hasUsage = true;
-        }
-        if ((usage & TextureUsage_MetallicRoughness) != 0){
-            std::cout << "MetallicRoughness ";
-            hasUsage = true;
-        }
-        if ((usage & TextureUsage_Normal) != 0){
-            std::cout << "Normal ";
-            hasUsage = true;
-        }
-        if ((usage & TextureUsage_Occlusion) != 0){
-            std::cout << "Occlusion ";
-            hasUsage = true;
-        }
-        if ((usage & TextureUsage_Emissive) != 0){
-            std::cout << "Emissive ";
-            hasUsage = true;
-        }
-        if (!hasUsage) std::cout << "None";
-        std::cout << '\n';
-    }
+    // for (size_t imageIndex = 0; imageIndex < imageUsages.size(); ++imageIndex){
+    //     const uint32_t usage = imageUsages[imageIndex];
+    //     std::cout<< "imageUsages[" << imageIndex << "]"<< " = " << usage<< " : ";
+    //     bool hasUsage = false;
+    //     if ((usage & TextureUsage_BaseColor) != 0){
+    //         std::cout << "BaseColor ";
+    //         hasUsage = true;
+    //     }
+    //     if ((usage & TextureUsage_MetallicRoughness) != 0){
+    //         std::cout << "MetallicRoughness ";
+    //         hasUsage = true;
+    //     }
+    //     if ((usage & TextureUsage_Normal) != 0){
+    //         std::cout << "Normal ";
+    //         hasUsage = true;
+    //     }
+    //     if ((usage & TextureUsage_Occlusion) != 0){
+    //         std::cout << "Occlusion ";
+    //         hasUsage = true;
+    //     }
+    //     if ((usage & TextureUsage_Emissive) != 0){
+    //         std::cout << "Emissive ";
+    //         hasUsage = true;
+    //     }
+    //     if (!hasUsage) std::cout << "None";
+    //     std::cout << '\n';
+    // }
 }
 
 GLBMaterial& CGLBManager::getGLBMaterial(int materialId){

@@ -136,6 +136,7 @@ void CModelManager::LoadObjModel(IN const std::string modelName, OUT std::vector
 			min_z = std::min(min_z, vertex.pos.z);
 
 			vertex.color = { 1.0f, 1.0f, 1.0f };
+			vertex.tangent = { 0.0f, 0.0f, 0.0f, 0.0f};
 
 			// vertex.texCoord = {
 			// 	attrib.texcoords[2 * index.texcoord_index + 0],

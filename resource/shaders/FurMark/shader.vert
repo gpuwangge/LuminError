@@ -4,6 +4,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor; //is not used here
 layout(location = 2) in vec2 inTexCoord; //is not used here
 layout(location = 3) in vec3 inNormal; //is not used here
+layout(location = 4) in vec4 inTangent; //tangent is not used here
 
 void main() {
     gl_Position = vec4(inPosition, 1.0);

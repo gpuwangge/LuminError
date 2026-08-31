@@ -66,7 +66,7 @@ void CRaytracingDescriptorManager::createDescriptorPool(){
 	    raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT); ///!!!
         counter++;
 
-        std::cout<<"RT Descriptor: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
+        //std::cout<<"RT Descriptor: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
         // for(int i = 0; i < glbSamplers.size(); i++){
         //     raytracingDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	 	//     raytracingDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);

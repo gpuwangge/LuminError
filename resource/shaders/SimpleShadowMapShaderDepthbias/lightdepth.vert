@@ -7,6 +7,7 @@ layout(location = 0) in vec3 inPosition; //not used
 layout(location = 1) in vec3 inColor; //not used
 layout(location = 2) in vec2 inTexCoord; //not used
 layout(location = 3) in vec3 inNormal; //not used
+layout(location = 4) in vec4 inTangent; //tangent is not used here
 
 void main() {
 	//gl_Position = objectUBO.lightCameraProj * objectUBO.lightCameraView * objectUBO.model * vec4(inPosition, 1.0); //use light camera view to generate light depth image

@@ -59,7 +59,7 @@ struct Vertex3D {
     }
 
     bool operator==(const Vertex3D& other) const {
-        return pos == other.pos && color == other.color && texCoord == other.texCoord && normal == other.normal;
+        return pos == other.pos && color == other.color && texCoord == other.texCoord && normal == other.normal && tangent == other.tangent;
     }
 };
 
