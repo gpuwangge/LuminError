@@ -6,8 +6,10 @@
 
 # LuminError
 ## SimpleRayPipelineDragon
-<img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon1.png" alt="alt text" width="150" height="120">  
-<img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text" width="150" height="120">  
+<img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon1.png" alt="alt text" width="300" height="300">  
+<img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text" width="300" height="300">  
+
+## SimpleRayPipelineSponza
 
 
 
@@ -16,9 +18,7 @@
 
 
 
-
-
-# [Build Instructions](https://github.com/gpuwangge/LuminError/blob/main/BuildInstruction.md)  
+# [Build Instruction](https://github.com/gpuwangge/LuminError/blob/main/BuildInstruction.md)  
 
 
 
