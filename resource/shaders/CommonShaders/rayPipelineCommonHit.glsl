@@ -111,6 +111,31 @@ vec3 RandomDirectionInHemisphere(vec3 normal, inout uint state){
     return normalize(direction);
 }
 
+vec3 SampleCosineHemisphere(vec3 N, inout uint state){
+    float u1 = Rand(state);
+    float u2 = Rand(state);
+
+    // Concentric disk sampling（也可换成更简单的 sqrt(u1) 版本）
+    float r   = sqrt(u1);
+    float phi = 2.0 * PI * u2;
+
+    vec3 localDir = vec3(
+        r * cos(phi),
+        r * sin(phi),
+        sqrt(max(0.0, 1.0 - u1))
+    );
+
+    // 建立以 N 为 z 轴的正交基
+    vec3 helper = abs(N.z) < 0.999
+        ? vec3(0.0, 0.0, 1.0)
+        : vec3(0.0, 1.0, 0.0);
+
+    vec3 T = normalize(cross(helper, N));
+    vec3 B = cross(N, T);
+
+    return normalize(T * localDir.x + B * localDir.y + N * localDir.z);
+}
+
 /**************
 Light functions
 **************/
@@ -483,14 +508,14 @@ vec3 getLightDirAndRadianceAtPosition(RtLightStruct light,vec3 hitPos,vec3 sampl
     return L;
 }
 
-vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){//只有PT里使用NEE
+vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo){//只有PT里使用NEE
     uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
 
     if (configUBO.enableNEE == 0u || lightCount == 0u) return vec3(0.0);
 
     //先固定/随机选一盏解析灯。
     //lightCount == 1，lightIndex 永远为 0。
-    uint lightIndex = min(uint(Rand(state) * float(lightCount)), lightCount - 1u);
+    uint lightIndex = min(uint(Rand(hitInfo.state) * float(lightCount)), lightCount - 1u);
 
     RtLightStruct light = rtLightUBO.lights[lightIndex];
 
@@ -509,7 +534,7 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){//只�
             buildOrthonormalBasis(diskNormal, T, B);
 
             float radius = max(light.params.y, 1e-5);
-            vec2 d = sampleDisk(state) * radius;
+            vec2 d = sampleDisk(hitInfo.state) * radius;
 
             sampledLightPos = light.position.xyz + T * d.x + B * d.y;
         }
@@ -521,8 +546,7 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){//只�
 
         if (max(max(Li.r, Li.g), Li.b) <= 0.0) continue;
 
-        // 保持先前 A/B 与 Whitted 一致的几何 normal。
-        float NdotL = max(dot(hitInfo.N_geom, L), 0.0);
+        float NdotL = max(dot(hitInfo.N_shade, L), 0.0);
         if (NdotL <= 0.0) continue;
 
         float offsetSign = (dot(hitInfo.N_geom, L) >= 0.0) ? 1.0 : -1.0;
@@ -544,68 +568,29 @@ vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){//只�
 
         vec3 diffuseBRDF = kd / PI;
 
-        direct += diffuseBRDF * Li * NdotL * visibility / lightSelectionPdf;
+
+        /////////
+        vec3 H = safeNormalize(L + hitInfo.V);
+        float NdotH = max(dot(hitInfo.N_shade, H), 0.0);
+        float VdotH = max(dot(hitInfo.V, H), 0.0);
+
+        vec3 F1 = fresnelSchlick(VdotH, hitInfo.F0);
+        float shininess = mix(128.0, 4.0, hitInfo.roughness);
+        float specFactor = pow(NdotH, shininess) * hitInfo.specular;
+
+        vec3 specularBRDF;
+        if (hitInfo.metallic > 0.5) specularBRDF = hitInfo.albedo * specFactor;
+        else specularBRDF = F1 * specFactor;
+
+        direct += (diffuseBRDF + specularBRDF) * Li * NdotL * visibility / lightSelectionPdf;
+
+        ///////
+
+        //direct += diffuseBRDF * Li * NdotL * visibility / lightSelectionPdf;
     }
 
     return direct / float(configUBO.NEESampleCount);
 }
-
-
-
-//下面是一个debug版本的NEE，可以看某一盏灯的可见区域
-/*
-vec3 EstimateDirectLightingNEE(in HitInfoStruct hitInfo,inout uint state){
-    // ----------------------------------------------------------
-    // 纯 shadow visibility debug：
-    // 固定选顶部 disk light，不走 BRDF / PDF / Le / NdotL。
-    // ----------------------------------------------------------
-
-    const uint TOP_DISK_LIGHT_INDEX = 5u; // 改成灯 index
-
-    uint lightCount = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
-    if (lightCount == 0u)
-        return vec3(0.0);
-
-    if (TOP_DISK_LIGHT_INDEX >= lightCount)
-        return vec3(1.0, 0.0, 1.0); // 紫色：index 配错
-
-    RtLightStruct light = rtLightUBO.lights[TOP_DISK_LIGHT_INDEX];
-
-    // 使用你已有、修正后的 SampleDiskLight。
-    vec3 diskNormal;
-    vec3 samplePos = SampleDiskLight(light, state, diskNormal);
-
-    vec3 toLight = samplePos - hitInfo.hitPos;
-    float dist2 = dot(toLight, toLight);
-
-    if (dist2 <= 1e-8)
-        return vec3(1.0, 0.0, 0.0); // 红色：sample 与 hit 重合
-
-    float dist = sqrt(dist2);
-    vec3 L = toLight / dist;
-
-    // 这里故意不检查 NdotL，也不检查 disk 的 front/back。
-    // 目的只是看“这条线段被不被几何挡住”。
-
-    float offsetSign = (dot(hitInfo.N_geom, L) >= 0.0) ? 1.0 : -1.0;
-
-    vec3 shadowOrigin = hitInfo.hitPos
-        + hitInfo.N_geom * (offsetSign * SHADOW_BIAS);
-
-    float tMax = dist - SHADOW_BIAS;
-
-    if (tMax <= SHADOW_BIAS)
-        return vec3(1.0, 1.0, 0.0); // 黄色：tMax 太小
-
-    float visibility = traceShadowVisibility(shadowOrigin,L,tMax);
-
-    // 白：miss / visible。
-    // 黑：first hit / blocked。
-    return vec3(visibility);
-}*/
-
-
-
 
 /**************
 Core
@@ -625,7 +610,7 @@ inout是可读写，	相当于T&
 // }
 
 //whitted style在结束的时候一定会发射二次光线，MPT在遇到glass/jade等材质的时候发射二次光线
-void UploadNextRays(in HitInfoStruct hitInfo){
+void IndirectLight(in HitInfoStruct hitInfo){
     vec3 nextOrigin = vec3(0.0);
     vec3 nextDir = vec3(0.0);
     vec3 nextThroughputMul = vec3(1.0);
@@ -739,23 +724,17 @@ void UploadNextRays(in HitInfoStruct hitInfo){
     }
 }
 
-void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳定
-    vec3 directDiffuse = vec3(0.0);
-    vec3 directSpecular = vec3(0.0);
-
-    uint lightNum = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
-
-    // vec3 kd = (1.0 - metallic) * albedo;
-    // vec3 diffuseBRDF = kd / PI;
-    // // diffuse 抑制：为了玻璃材质
-    // kd *= (1.0 - transmission);
-    // kd *= mat.alpha;
-    vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo;
-    kd *= (1.0 - hitInfo.transmission);
-    kd *= hitInfo.alpha;
-    vec3 diffuseBRDF = kd / PI;
+vec3 directLight(in HitInfoStruct hitInfo){ //只在whitted style里面使用
+    //kd 可以理解为：分配给漫反射（diffuse / diffuse-like scattering）通道的有效反射率颜色。
+    vec3 kd = (1.0 - hitInfo.metallic) * hitInfo.albedo; //排除金属的漫反射
+    kd *= (1.0 - hitInfo.transmission); //排除投射的分量，给透射/折射通道腾出能量
+    kd *= hitInfo.alpha; //按覆盖率或混合透明度缩小表面贡献
+    vec3 diffuseBRDF = kd / PI; //通过kd可以计算Lambert 漫反射 BRDF 的颜色权重
 
     //直接光线(漫反射，高光，阴影)
+    uint lightNum = min(configUBO.lightCount, uint(RTLIGHT_SIZE));
+    vec3 directDiffuse = vec3(0.0);
+    vec3 directSpecular = vec3(0.0);
     for(uint i = 0u; i < lightNum; ++i){
         RtLightStruct light = rtLightUBO.lights[i];
 
@@ -800,31 +779,34 @@ void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳
         //     directSpecular += F * specFactor * lightRadiance * NdotL * visibility;
         // }
         if(hitInfo.metallic > 0.5){
-            directDiffuse = vec3(0.0);
+            //directDiffuse = vec3(0.0);
             directSpecular += hitInfo.albedo * specFactor * lightRadiance * NdotL * visibility;
         }else {
             directSpecular += F1 * specFactor * lightRadiance * NdotL * visibility;
         }
-    }
+    }//end of light loop
 
-    //vec3 localRadiance = emission + directDiffuse + directSpecular;
     vec3 localRadiance = hitInfo.emission;//recover
-    //vec3 localRadiance = vec3(0.0); // test: 暂时不要加 emission
-    if(hitInfo.transmission < 0.01){
-        localRadiance += directDiffuse + directSpecular;
-    } else {
-        localRadiance += directSpecular;
-    }
-    //recover
-    float ambientIntensity = 0.2;
-    vec3 ambient = diffuseBRDF * SampleSky(hitInfo.N_shade) * PI * ambientIntensity; //增加天空漫反射
-    localRadiance += ambient;
+    if(hitInfo.transmission < 0.01) localRadiance += directDiffuse + directSpecular;
+    else localRadiance += directSpecular;
+    
+    // Whitted mode only:
+    // PT mode must not add this fake ambient term here.
+    //if (!enableNEE) {
+        float ambientIntensity = 0.2;
+        vec3 ambient = diffuseBRDF * SampleSky(hitInfo.N_shade) * PI * ambientIntensity; //增加天空漫反射
+        localRadiance += ambient;
+    //}
 
-    primaryPayload.radiance = localRadiance;
+    return localRadiance;
+}
+
+void WhittedStyleRayTracing(in HitInfoStruct hitInfo){//没有随机分支，稳定
+    primaryPayload.radiance = directLight(hitInfo);
     primaryPayload.spawnRayCount = 0u;
     primaryPayload.done = 1u;
 
-    UploadNextRays(hitInfo); //二次光线(折射，反射)
+    IndirectLight(hitInfo); //二次光线(折射，反射)
 }
 
 struct ScatterResult{
@@ -834,23 +816,6 @@ struct ScatterResult{
 };
 
 ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
-    // ScatterResult result;
-
-    // // 金属材质主要进行镜面反射
-    // vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_shade);
-    
-    // // 根据粗糙度添加随机性
-    // if (hitInfo.roughness > 0.0) {
-    //     reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness));
-    // }
-
-    // result.valid = 1u;
-    // result.direction = reflectedDir;
-    // //result.throughputMul = hitInfo.F * hitInfo.albedo; //recover
-    // result.throughputMul = hitInfo.albedo; //test
- 
-    // return result;
-
     //理想镜面测试
     //在当前阶段，保留“理想镜面金属 + 彩色 Fresnel”的最小修复完全是合理的工程选择：它稳定、容易调试，并且对于粗糙度很低的金属（例如你的 roughness = 0.1）视觉上往往已经足够可信
     ScatterResult result;
@@ -874,47 +839,54 @@ ScatterResult ScatterMetal(in HitInfoStruct hitInfo){// 只处理金属
     return result;
 }
 
-ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){ // 只处理漫反射/介电反射
+
+
+ScatterResult ScatterDiffuse(in HitInfoStruct hitInfo){
     ScatterResult result;
 
-    // 根据菲涅尔项决定反射和漫反射的比例
-    float reflectionProbability = (hitInfo.F.r + hitInfo.F.g + hitInfo.F.b) / 3.0;
-    
-    if (Rand(hitInfo.state) < reflectionProbability) {
-        // 镜面反射
-        vec3 reflectedDir = reflect(hitInfo.I, hitInfo.N_shade);
-        
-        // 根据粗糙度添加随机性
-        if (hitInfo.roughness > 0.0) {
-            reflectedDir = normalize(mix(reflectedDir, RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state), hitInfo.roughness));
-        }
+    vec3 N = hitInfo.N_shade;
 
-        result.direction = reflectedDir;
-        result.throughputMul = hitInfo.F / reflectionProbability;
-    } else {
-        result.direction = RandomDirectionInHemisphere(hitInfo.N_shade, hitInfo.state);// 漫反射 
-
-        vec3 kD = (1.0 - hitInfo.F) * (1.0 - hitInfo.metallic); // 能量守恒：漫反射部分 = (1 - F) * 漫反射颜色
-        result.throughputMul = kD * hitInfo.albedo / (1.0 - reflectionProbability);
+    // 若 normal 可能未 face-forward，可先保证它面对入射 ray 的反侧。
+    // 假设 hitInfo.I 是 ray 的前进方向（camera / previous hit -> current hit）
+    if (dot(hitInfo.I, N) > 0.0) {
+        N = -N;
     }
 
-    result.valid = 1u;
+    vec3 wi = SampleCosineHemisphere(N, hitInfo.state);
+    float NoL = max(dot(N, wi), 0.0);
+
+    result.direction = wi;
+
+    // Lambert:
+    // f = albedo / PI
+    // pdf = NoL / PI
+    // throughputMul = f * NoL / pdf = albedo
+    result.throughputMul = hitInfo.albedo;
+
+    // Debug: 强制白色，不受布料绿色 albedo 影响
+    //result.throughputMul = vec3(0.8);
+
+    result.valid = (NoL > 0.0) ? 1u : 0u;
     return result;
 }
 
 void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic PT
-    primaryPayload.spawnRayCount = 0u;
-
-    //NEE = Next Event Estimation
-    vec3 localRadiance = hitInfo.emission; // 当前命中点的局部 radiance
-    if(configUBO.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo, hitInfo.state);
-
-    ScatterResult scatter; //散射逻辑：TODO 解决Warp Divergence问题
     if(hitInfo.material_type != MATERIAL_GLASS && hitInfo.material_type != MATERIAL_JADE){ //传统PathTracing部分，随机采样的 Monte Carlo Path Tracing //&& hitInfo.material_type != MATERIAL_JADE
+        primaryPayload.spawnRayCount = 0u;
+
+        //NEE = Next Event Estimation
+        vec3 localRadiance = hitInfo.emission; // 当前命中点的局部 radiance
+        if(configUBO.enableNEE != 0u) localRadiance += EstimateDirectLightingNEE(hitInfo);
+
+        // vec3 localRadiance;
+        // if(configUBO.enableNEE != 0u) localRadiance = directLight(hitInfo); //测试直接用whitted的方法模拟NEE
+
+        ScatterResult scatter; //散射逻辑：TODO 解决Warp Divergence问题
+    
         if(hitInfo.material_type == MATERIAL_GOLD ) //|| hitInfo.material_type == MATERIAL_JADE
             scatter = ScatterMetal(hitInfo);
         else if(hitInfo.material_type == MATERIAL_PLASTIC || hitInfo.material_type == MATERIAL_CERAMIC || hitInfo.material_type == MATERIAL_LIGHT) 
-            scatter = ScatterDiffuse(hitInfo);// 处理电介质材质（混合漫反射和镜面反射）
+            scatter = ScatterDiffuse(hitInfo);// 处理电介质材质（混合漫反射和镜面反射），里面有随机数发生
         vec3 offsetDir = dot(scatter.direction, hitInfo.N_geom) > 0.0 ? hitInfo.N_geom: -hitInfo.N_geom;
         primaryPayload.spawnRayCount = scatter.valid;
         //primaryPayload.radiance = hitInfo.emission; //跟whitted的最大区别是，前者有rtlight设定，但PT里面没有rtlight，而是靠自发光物体
@@ -925,7 +897,7 @@ void MDSPathTracing(in HitInfoStruct hitInfo){ //Mixed-deterministic/stochastic 
         primaryPayload.nextRay[0].throughputMul = scatter.throughputMul;
         primaryPayload.done = scatter.valid == 0u ? 1u : 0u;
     }else{ //whitted-style部分
-        UploadNextRays(hitInfo); //对glass/jade，发射二次光线(折射，反射)
+        IndirectLight(hitInfo); //对glass/jade，发射二次光线(折射，反射)
     }
 }
 

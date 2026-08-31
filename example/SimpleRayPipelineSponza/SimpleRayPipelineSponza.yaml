@@ -13,90 +13,90 @@ Objects:
 
 
 CustomSpheres:
-  - custom_sphere_name: Sphere
-    custom_sphere_id: 0
-    custom_sphere_position: [5.6, 0.8, 2]
-    custom_sphere_radius: 0.25
-    custom_sphere_material_id: 5
-    custom_sphere_visibility: true
-  - custom_sphere_name: Sphere
-    custom_sphere_id: 1
-    custom_sphere_position: [-6, 0.8, 2]
-    custom_sphere_radius: 0.25
-    custom_sphere_material_id: 6
-    custom_sphere_visibility: true
-  - custom_sphere_name: Sphere
-    custom_sphere_id: 2
-    custom_sphere_position: [5.6, 0.8, -2.25]
-    custom_sphere_radius: 0.25
-    custom_sphere_material_id: 7
-    custom_sphere_visibility: true
-  - custom_sphere_name: Sphere
-    custom_sphere_id: 3
-    custom_sphere_position: [-6, 0.8, -2.25]
-    custom_sphere_radius: 0.25
-    custom_sphere_material_id: 5
-    custom_sphere_visibility: true
+  # - custom_sphere_name: Sphere
+  #   custom_sphere_id: 0
+  #   custom_sphere_position: [5.6, 0.8, 2]
+  #   custom_sphere_radius: 0.25
+  #   custom_sphere_material_id: 5
+  #   custom_sphere_visibility: true
+  # - custom_sphere_name: Sphere
+  #   custom_sphere_id: 1
+  #   custom_sphere_position: [-6, 0.8, 2]
+  #   custom_sphere_radius: 0.25
+  #   custom_sphere_material_id: 6
+  #   custom_sphere_visibility: true
+  # - custom_sphere_name: Sphere
+  #   custom_sphere_id: 2
+  #   custom_sphere_position: [5.6, 0.8, -2.25]
+  #   custom_sphere_radius: 0.25
+  #   custom_sphere_material_id: 7
+  #   custom_sphere_visibility: true
+  # - custom_sphere_name: Sphere
+  #   custom_sphere_id: 3
+  #   custom_sphere_position: [-6, 0.8, -2.25]
+  #   custom_sphere_radius: 0.25
+  #   custom_sphere_material_id: 5
+  #   custom_sphere_visibility: true
   - custom_sphere_name: Sun
-    custom_sphere_id: 4
+    custom_sphere_id: 0
     custom_sphere_position: [0, 8, 0]
     custom_sphere_radius: 1.15
     custom_sphere_material_id: 4
     custom_sphere_visibility: true
   - custom_sphere_name: Sphere
-    custom_sphere_id: 5
+    custom_sphere_id: 1
     custom_sphere_position: [-3.1, 0.65, -1.1]
     custom_sphere_radius: 0.075
     custom_sphere_material_id: 4
     custom_sphere_visibility: true    
 
 RTLights: #ray tracing pipeline lights to generate shadow
-  - rt_light_name: Light0
-    rt_light_id: 0
-    rt_light_position: [5.6, 0.8, 2]
-    rt_light_color: [1, 0, 0]
-    rt_light_intensity: 16
-    rt_light_radius: 0.08 #spot light can use this to create soft shadow
-    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-    rt_light_angle: 30 #only for spot light, not used yet
-    rt_light_range: 10
-    rt_light_falloff: 1
-  - rt_light_name: Light1
-    rt_light_id: 1
-    rt_light_position: [-6, 0.8, 2]
-    rt_light_color: [0, 1, 0]
-    rt_light_intensity: 16
-    rt_light_radius: 0.08 #spot light can use this to create soft shadow
-    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-    rt_light_angle: 30 #only for spot light, not used yet
-    rt_light_range: 10
-    rt_light_falloff: 1
-  - rt_light_name: Light2
-    rt_light_id: 2
-    rt_light_position: [5.6, 0.8, -2.25]
-    rt_light_color: [0, 0, 1]
-    rt_light_intensity: 16
-    rt_light_radius: 0.08 #spot light can use this to create soft shadow
-    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-    rt_light_angle: 30 #only for spot light, not used yet
-    rt_light_range: 10
-    rt_light_falloff: 1
-  - rt_light_name: Light3
-    rt_light_id: 3
-    rt_light_position: [-6, 0.8, -2.25]
-    rt_light_color: [1, 0, 0]
-    rt_light_intensity: 16
-    rt_light_radius: 0.08 #spot light can use this to create soft shadow
-    rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-    rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-    rt_light_angle: 30 #only for spot light, not used yet
-    rt_light_range: 10
-    rt_light_falloff: 1
+  # - rt_light_name: Light0
+  #   rt_light_id: 0
+  #   rt_light_position: [5.6, 0.8, 2]
+  #   rt_light_color: [1, 0, 0]
+  #   rt_light_intensity: 16
+  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
+  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+  #   rt_light_angle: 30 #only for spot light, not used yet
+  #   rt_light_range: 10
+  #   rt_light_falloff: 1
+  # - rt_light_name: Light1
+  #   rt_light_id: 1
+  #   rt_light_position: [-6, 0.8, 2]
+  #   rt_light_color: [0, 1, 0]
+  #   rt_light_intensity: 16
+  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
+  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+  #   rt_light_angle: 30 #only for spot light, not used yet
+  #   rt_light_range: 10
+  #   rt_light_falloff: 1
+  # - rt_light_name: Light2
+  #   rt_light_id: 2
+  #   rt_light_position: [5.6, 0.8, -2.25]
+  #   rt_light_color: [0, 0, 1]
+  #   rt_light_intensity: 16
+  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
+  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+  #   rt_light_angle: 30 #only for spot light, not used yet
+  #   rt_light_range: 10
+  #   rt_light_falloff: 1
+  # - rt_light_name: Light3
+  #   rt_light_id: 3
+  #   rt_light_position: [-6, 0.8, -2.25]
+  #   rt_light_color: [1, 0, 0]
+  #   rt_light_intensity: 16
+  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
+  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
+  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
+  #   rt_light_angle: 30 #only for spot light, not used yet
+  #   rt_light_range: 10
+  #   rt_light_falloff: 1
   - rt_light_name: Light4_Sun
-    rt_light_id: 4
+    rt_light_id: 0
     rt_light_position: [0.0, 8, 0.0]
     rt_light_color: [1, 1, 1]
     rt_light_intensity: 10
@@ -107,7 +107,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
     rt_light_range: 30
     rt_light_falloff: 1
   - rt_light_name: Light
-    rt_light_id: 5
+    rt_light_id: 1
     rt_light_position: [-3.1, 0.65, -1.1]
     rt_light_color: [1, 1, 1]
     rt_light_intensity: 100
