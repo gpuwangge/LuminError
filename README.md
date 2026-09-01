@@ -1,7 +1,6 @@
 <p float="left">
   <img src="https://github.com/gpuwangge/VulkanPlatform/blob/main/images/vulkanLogo.png" alt="alt text" width="150" height="120">  
   <img src="https://github.com/gpuwangge/VulkanPlatform/blob/main/images/windowsLogo.png" alt="alt text" width="150" height="120">  
-  <img src="https://github.com/gpuwangge/VulkanPlatform/blob/main/images/androidLogo.png" alt="alt text" width="220" height="120">  
 </p>
 
 # LuminError
@@ -57,7 +56,7 @@ Ray-tracing algorithm: Monte Carlo Path Tracing with Next Event Estimation (NEE)
 
 
 
-
+# [More Examples](https://github.com/gpuwangge/LuminError/blob/main/ExampleLists.md)  
 
 
 # [Build Instruction](https://github.com/gpuwangge/LuminError/blob/main/BuildInstruction.md)  
