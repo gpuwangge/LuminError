@@ -3,7 +3,7 @@
 |------------------------------------|-----------------------|
 | SimpleTriangle <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleTriangle1.png" alt="alt text" width="200" height="200"> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleTriangle2.png" alt="alt text" width="200" height="200"> |  Simple triangle test to test graphics pipeline. <br> Use "H" to show/hide statistic panels. |
 | FurMark <img src="https://github.com/gpuwangge/LuminError/blob/main/images/FurMark.png" alt="alt text" width="200" height="200">  | A FurMark example test implemented with our in-house game engine to demonstrate real-time rendering performance and GPU workload handling. It serves as a simple benchmark example for validating the engine's rendering pipeline and performance. |
-
+| BasicTriangles <img src="https://github.com/gpuwangge/LuminError/blob/main/images/BasicTriangles.png" alt="alt text" width="200" height="200">  | This example draws 2 triangles with texture. |
 
 
 
