@@ -6,7 +6,7 @@
 
 # LuminError
 ## SimpleRayPipelineDragon
-<img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon1.png" alt="alt text" width="450" height="450">  
+<img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon1.png" alt="alt text">  
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text" width="450" height="450">  
 
 ## SimpleRayPipelineSponza
