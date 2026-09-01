@@ -123,7 +123,36 @@
   "C_Cpp.default.compilerPath": "C:\\mingw64\\bin\\g++.exe",
   "cmake.configureOnOpen": false,
 
-  "terminal.integrated.cwd": "${workspaceFolder}",
+  //"terminal.integrated.cwd": "${workspaceFolder}",
   "terminal.integrated.enablePersistentSessions": true,
-  "terminal.integrated.persistentSessionReviveProcess": "onExit"
+  "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
+  "terminal.integrated.shellIntegration.enabled": true,
+
+  "terminal.integrated.profiles.windows": {
+    "Go to Build": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "Set-Location -LiteralPath \"${workspaceFolder}\\build\""
+      ]
+    },
+    "Go to Build Bin": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "Set-Location -LiteralPath \"${workspaceFolder}\\build\\bin\""
+      ]
+    },
+    "Go to Resource Shaders": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "Set-Location -LiteralPath \"${workspaceFolder}\\resource\\shaders\""
+      ]
+    }
+  }
+
 }
