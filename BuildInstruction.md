@@ -88,16 +88,15 @@ A lightweight library for loading glb/gltf files.
 All components are bundled inside the repository under external/, and the CMake build system is already configured to include them.  
 
 ## Mesh
-tinyobjloader只支持.obj文件。  
-对于.ply文件，可以先用meshlab转换成.obj。  
-更多测试模型的地址：https://graphics.stanford.edu/data/3Dscanrep/  
+tinyobjloader supports only .obj files.  
+tinygltf supports .glb files and is compatible with glTF 2.0.  
+For .ply files, you can first convert them to .obj format using MeshLab.  
 
-tinygltf支持.glb文件。支持gltf2.0。  
-
-模型来源网站：  
+Model source websites:  
 https://sketchfab.com/  
 www.fab.com  
 https://github.com/KhronosGroup/glTF-Sample-Assets/blob/main/Models/Models.md  
+https://graphics.stanford.edu/data/3Dscanrep/  
 
 ## Smart App Control（智能应用控制）导致的启动延迟说明
 
