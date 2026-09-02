@@ -4,25 +4,29 @@
 </p>
 
 # LuminError
-LuminError 是一个面向现代实时渲染的开源游戏引擎，核心基于 Vulkan 构建，并集成硬件加速光线追踪能力。引擎旨在提供从窗口与输入交互、资源加载、场景管理，到高质量实时图形渲染的一体化基础框架。  
+LuminError(R) 是一台基于 Vulkan 的游戏引擎，专门把代码、显存和光线拧成一座会呼吸的数字城市。  
 
-在渲染层面，LuminError 利用 Vulkan 的低开销、显式资源管理与跨平台特性，实现高性能的图形与计算任务调度，并可进一步支持光线追踪阴影、反射、全局光照等更具真实感的视觉效果。引擎同时集成 GLM、stb_image、tinyobjloader、tinygltf 等组件，用于数学计算、纹理读取以及 OBJ、glTF/GLB 等常见资产格式的加载，为 PBR 材质、模型渲染和场景构建提供基础支持。  
+它用 Vulkan 接管 GPU：低开销、显式资源控制、跨平台调度，一个都不少。硬件光线追踪则负责制造“真实感幻觉”——阴影更利落，反射更骚。  
 
-在平台与交互层面，LuminError 通过 SDL3 统一处理窗口创建、键盘鼠标输入、事件分发及底层系统交互，减少平台相关代码，使项目能够更方便地扩展到 Windows、Linux 等支持 Vulkan 与 SDL 的平台。SDL3_ttf 则为引擎提供了文本和 TrueType 字体渲染能力，可用于调试信息、UI 和游戏内文字显示。  
+从窗口创建、键鼠输入、资源加载、场景管理，到高质量图形与计算渲染，LuminError 都给你铺好了底层线路。GLM 管数学，stb_image 读纹理，tinyobjloader 和 tinygltf 把 OBJ、glTF/GLB 资产塞进引擎，为 PBR 材质、模型和场景搭建备好零件。  
 
-项目采用 CMake 管理构建流程，并将 Vulkan SDK、SDL3、yaml-cpp 等主要第三方依赖集成在 external/ 目录中，降低了首次配置和构建的成本。无论是希望深入理解 Vulkan 光追管线、研究实时渲染技术，还是作为自定义游戏或图形应用的开发基础，LuminError 都提供了一个可阅读、可修改、可持续扩展的开源引擎框架。  
+SDL3 是跨平台接入终端，负责窗口、事件和输入；SDL3_ttf 则让 HUD、调试信息和游戏内文字在屏幕上亮起来，不至于只剩 GPU 在自言自语。  
 
-LuminError is an open-source game engine designed for modern real-time rendering. Built around Vulkan, it integrates hardware-accelerated ray tracing capabilities. The engine aims to provide a unified foundation covering window and input interaction, asset loading, scene management, and high-quality real-time graphics rendering.  
+构建交给 CMake，Vulkan SDK、SDL3、yaml-cpp 等依赖已收编进 external/。想研究 Vulkan 光追、拆渲染管线、魔改材质系统，或者从零搭一座自己的霓虹世界？  
 
-On the rendering side, LuminError leverages Vulkan’s low overhead, explicit resource management model, and cross-platform capabilities to schedule graphics and compute workloads efficiently. It can be further extended to support more realistic visual effects, including ray-traced shadows, reflections, and global illumination. The engine also integrates components such as GLM, stb_image, tinyobjloader, and tinygltf for mathematical computation, texture loading, and importing common asset formats including OBJ and glTF/GLB, providing the foundation for PBR materials, model rendering, and scene construction.  
+LuminError(R) is a Vulkan-based game engine built to weave code, VRAM, and rays into a living digital city.  
 
-For platform abstraction and interaction, LuminError uses SDL3 to handle window creation, keyboard and mouse input, event dispatch, and low-level system integration through a unified interface. This reduces platform-specific code and makes it easier to extend the project to platforms such as Windows and Linux that support Vulkan and SDL. SDL3_ttf additionally provides text and TrueType font rendering for debugging overlays, user interfaces, and in-game text.  
+It uses Vulkan to take direct control of the GPU: low overhead, explicit resource management, and cross-platform scheduling are all part of the package. Hardware ray tracing creates the illusion of realism—sharper shadows and more striking reflections.  
 
-The project uses CMake to manage its build workflow, with key third-party dependencies—including the Vulkan SDK, SDL3, and yaml-cpp—integrated under the external/ directory. This lowers the initial setup and build cost for new contributors. Whether used to study Vulkan ray-tracing pipelines, explore real-time rendering techniques, or serve as a development foundation for custom games and graphics applications, LuminError provides an open-source engine framework that is readable, modifiable, and continuously extensible.  
+From window creation, keyboard and mouse input, resource loading, and scene management to high-quality graphics and compute rendering, LuminError provides the underlying infrastructure. GLM handles the math; stb_image loads textures; tinyobjloader and tinygltf bring OBJ and glTF/GLB assets into the engine, providing the building blocks for PBR materials, models, and scenes.  
+
+SDL3 serves as the cross-platform entry point, handling windows, events, and input. SDL3_ttf makes HUD elements, debugging information, and in-game text visible on screen, so the GPU is not left talking to itself.  
+
+CMake handles the build system, while dependencies such as the Vulkan SDK, SDL3, and yaml-cpp are already integrated under external/. Whether you want to study Vulkan ray tracing, dissect rendering pipelines, heavily customize the material system, or build your own neon world from scratch, LuminError gives you a foundation to start from.  
 
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
 
-本项目提供大量测试案例(example/)，每个测试案例都是含有独立的游戏框架：  
+本项目提供测试案例(example/)，每个测试案例都含有独立的游戏框架：  
 
 This project provides a large collection of test cases under example/. Each test case contains an independent game framework:   
 
