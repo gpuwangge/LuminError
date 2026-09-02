@@ -4,25 +4,30 @@
 </p>
 
 # LuminError
-LuminError(R) 是一台基于 Vulkan 的游戏引擎，专门把代码、显存和光线拧成一座会呼吸的数字城市。  
+LuminError(R) 是一个基于 Vulkan 开发的游戏引擎项目，主要用于实时渲染、光线追踪和图形功能实验。  
 
-它用 Vulkan 接管 GPU：低开销、显式资源控制、跨平台调度，一个都不少。硬件光线追踪则负责制造“真实感幻觉”——阴影更利落，反射更骚。  
+引擎底层使用 Vulkan，直接处理 GPU 资源、同步、命令提交和渲染流程。相比封装程度更高的图形接口，这种方式需要处理更多细节，但也能更清楚地控制资源生命周期和渲染管线。项目支持硬件光线追踪，可用于实现阴影、反射等效果，并为路径追踪、全局光照等后续功能预留扩展空间。  
 
-从窗口创建、键鼠输入、资源加载、场景管理，到高质量图形与计算渲染，LuminError 都给你铺好了底层线路。GLM 管数学，stb_image 读纹理，tinyobjloader 和 tinygltf 把 OBJ、glTF/GLB 资产塞进引擎，为 PBR 材质、模型和场景搭建备好零件。  
+目前项目包含窗口创建、键盘鼠标输入、资源加载、场景管理、图形渲染和计算渲染等基础模块。GLM 用于向量、矩阵和变换计算；stb_image 用于加载纹理；tinyobjloader 和 tinygltf 分别处理 OBJ 与 glTF/GLB 格式资源，为模型、贴图、PBR 材质和场景数据提供支持。  
 
-SDL3 是跨平台接入终端，负责窗口、事件和输入；SDL3_ttf 则让 HUD、调试信息和游戏内文字在屏幕上亮起来，不至于只剩 GPU 在自言自语。  
+SDL3 负责跨平台窗口、事件和输入处理，SDL3_ttf 用于 HUD、调试信息及游戏内文本渲染。  
 
-构建交给 CMake，Vulkan SDK、SDL3、yaml-cpp 等依赖已收编进 external/。想研究 Vulkan 光追、拆渲染管线、魔改材质系统，或者从零搭一座自己的霓虹世界？  
+项目使用 CMake 管理构建流程，Vulkan SDK、SDL3、yaml-cpp 等依赖统一整理在 external/ 目录中。  
 
-LuminError(R) is a Vulkan-based game engine built to weave code, VRAM, and rays into a living digital city.  
+LuminError(R) 不是一个已经封装完成、开箱即用的商业引擎，更像是一套正在逐步搭建的 Vulkan 渲染框架。它适合用来研究光线追踪、调试渲染管线、扩展材质系统，或者把一座还只有网格、灯光和日志输出的城市慢慢做出来。  
 
-It uses Vulkan to take direct control of the GPU: low overhead, explicit resource management, and cross-platform scheduling are all part of the package. Hardware ray tracing creates the illusion of realism—sharper shadows and more striking reflections.  
+LuminError(R) is a game engine project built on Vulkan, primarily intended for real-time rendering, ray tracing, and graphics experimentation.  
 
-From window creation, keyboard and mouse input, resource loading, and scene management to high-quality graphics and compute rendering, LuminError provides the underlying infrastructure. GLM handles the math; stb_image loads textures; tinyobjloader and tinygltf bring OBJ and glTF/GLB assets into the engine, providing the building blocks for PBR materials, models, and scenes.  
+At its core, the engine uses Vulkan to manage GPU resources, synchronization, command submission, and the rendering pipeline directly. Compared with higher-level graphics APIs, this approach requires handling more low-level details, but it also provides clearer control over resource lifetimes and rendering behavior. The project supports hardware ray tracing for effects such as shadows and reflections, while leaving room for future features including path tracing and global illumination.  
 
-SDL3 serves as the cross-platform entry point, handling windows, events, and input. SDL3_ttf makes HUD elements, debugging information, and in-game text visible on screen, so the GPU is not left talking to itself.  
+The project currently includes core systems for window creation, keyboard and mouse input, asset loading, scene management, graphics rendering, and compute rendering. GLM is used for vector, matrix, and transformation math; stb_image handles texture loading; tinyobjloader and tinygltf are used to import OBJ and glTF/GLB assets, providing support for models, textures, PBR materials, and scene data.  
 
-CMake handles the build system, while dependencies such as the Vulkan SDK, SDL3, and yaml-cpp are already integrated under external/. Whether you want to study Vulkan ray tracing, dissect rendering pipelines, heavily customize the material system, or build your own neon world from scratch, LuminError gives you a foundation to start from.  
+SDL3 handles cross-platform windows, events, and input, while SDL3_ttf is used for rendering HUD elements, debug information, and in-game text.  
+
+The project uses CMake for build management. Dependencies such as the Vulkan SDK, SDL3, and yaml-cpp are organized under the external/ directory.  
+
+LuminError(R) is not a fully packaged, plug-and-play commercial engine. It is better described as a Vulkan rendering framework that is still being built out over time. It can be used to study ray tracing, debug rendering pipelines, extend material systems, or gradually build a world that currently consists of little more than geometry, lights, and log output.  
+
 
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
 
