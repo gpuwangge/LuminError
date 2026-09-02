@@ -6,6 +6,7 @@
 | BasicTriangles <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/BasicTriangles.png" alt="alt text" width="200" height="200">  | This example draws 2 triangles with texture. |
 | Bptpc16Texture <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/Bptpc16Texture.png" alt="alt text" width="200" height="200">  | This example uses texture with 16 bits per texel per channel. |
 | MultiCubes <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiCubes.png" alt="alt text" width="200" height="200">  | Test multiple objects with different descriptor dynamic offset. |
-
+| MultiPhongLightings <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiPhongLightings.png" alt="alt text" width="200" height="200">  | Test multiple phong lightings. |
+| MultiPhongShadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiPhongShadows.png" alt="alt text" width="200" height="200">  | Test multiple phong shadows. |
 
 
