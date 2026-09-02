@@ -20,6 +20,8 @@ For platform abstraction and interaction, LuminError uses SDL3 to handle window 
 
 The project uses CMake to manage its build workflow, with key third-party dependencies—including the Vulkan SDK, SDL3, and yaml-cpp—integrated under the external/ directory. This lowers the initial setup and build cost for new contributors. Whether used to study Vulkan ray-tracing pipelines, explore real-time rendering techniques, or serve as a development foundation for custom games and graphics applications, LuminError provides an open-source engine framework that is readable, modifiable, and continuously extensible.  
 
+<img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
+
 本项目提供大量测试案例(example/)，每个测试案例都是含有独立的游戏框架：  
 
 This project provides a large collection of test cases under example/. Each test case contains an independent game framework:   
