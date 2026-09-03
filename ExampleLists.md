@@ -9,5 +9,6 @@
 | MultiCubes <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiCubes.png" alt="alt text" width="200" height="200">  | Test multiple objects with different descriptor dynamic offset. |
 | MultiPhongLightings <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiPhongLightings.png" alt="alt text" width="200" height="200">  | Test multiple phong lightings. |
 | MultiPhongShadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiPhongShadows.png" alt="alt text" width="200" height="200">  | Test multiple phong shadows. |
-
+| SimpleDepthImage <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleDepthImage.png" alt="alt text" width="200" height="200">  | Render depth image to the right half of the window. |
+| SimpleEnvironmentmap <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleEnvironmentmap.png" alt="alt text" width="200" height="200">  | Testing environment mapping. |
 

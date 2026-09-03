@@ -6,27 +6,23 @@
 # LuminError
 LuminError(R) 是一个基于 Vulkan 开发的游戏引擎项目，主要用于实时渲染、光线追踪和图形功能实验。  
 
-引擎底层使用 Vulkan，直接处理 GPU 资源、同步、命令提交和渲染流程。相比封装程度更高的图形接口，这种方式需要处理更多细节，但也能更清楚地控制资源生命周期和渲染管线。项目支持硬件光线追踪，可用于实现阴影、反射等效果，并为路径追踪、全局光照等后续功能预留扩展空间。  
+引擎底层使用 Vulkan，直接处理 GPU 资源、同步、命令提交和渲染流程。相比封装程度更高的图形接口，这种方式需要处理更多细节，但也能更清楚地控制资源生命周期和渲染管线。项目支持硬件光线追踪，可用于实现阴影、反射等效果。  
 
 目前项目包含窗口创建、键盘鼠标输入、资源加载、场景管理、图形渲染和计算渲染等基础模块。GLM 用于向量、矩阵和变换计算；stb_image 用于加载纹理；tinyobjloader 和 tinygltf 分别处理 OBJ 与 glTF/GLB 格式资源，为模型、贴图、PBR 材质和场景数据提供支持。  
 
 SDL3 负责跨平台窗口、事件和输入处理，SDL3_ttf 用于 HUD、调试信息及游戏内文本渲染。  
 
-项目使用 CMake 管理构建流程，Vulkan SDK、SDL3、yaml-cpp 等依赖统一整理在 external/ 目录中。  
-
-LuminError(R) 不是一个已经封装完成、开箱即用的商业引擎，更像是一套正在逐步搭建的 Vulkan 渲染框架。它适合用来研究光线追踪、调试渲染管线、扩展材质系统，或者把一座还只有网格、灯光和日志输出的城市慢慢做出来。  
+LuminError(R)是一套正在逐步搭建的 Vulkan 渲染框架，它适合用来研究光线追踪、调试渲染管线、扩展材质系统，或者把一座还只有网格、灯光和日志输出的城市慢慢做出来。  
 
 LuminError(R) is a game engine project built on Vulkan, primarily intended for real-time rendering, ray tracing, and graphics experimentation.  
 
-At its core, the engine uses Vulkan to manage GPU resources, synchronization, command submission, and the rendering pipeline directly. Compared with higher-level graphics APIs, this approach requires handling more low-level details, but it also provides clearer control over resource lifetimes and rendering behavior. The project supports hardware ray tracing for effects such as shadows and reflections, while leaving room for future features including path tracing and global illumination.  
+At its core, the engine uses Vulkan to manage GPU resources, synchronization, command submission, and the rendering pipeline directly. Compared with higher-level graphics APIs, this approach requires handling more low-level details, but it also provides clearer control over resource lifetimes and rendering behavior. The project supports hardware ray tracing for effects such as shadows and reflections.  
 
 The project currently includes core systems for window creation, keyboard and mouse input, asset loading, scene management, graphics rendering, and compute rendering. GLM is used for vector, matrix, and transformation math; stb_image handles texture loading; tinyobjloader and tinygltf are used to import OBJ and glTF/GLB assets, providing support for models, textures, PBR materials, and scene data.  
 
 SDL3 handles cross-platform windows, events, and input, while SDL3_ttf is used for rendering HUD elements, debug information, and in-game text.  
 
-The project uses CMake for build management. Dependencies such as the Vulkan SDK, SDL3, and yaml-cpp are organized under the external/ directory.  
-
-LuminError(R) is not a fully packaged, plug-and-play commercial engine. It is better described as a Vulkan rendering framework that is still being built out over time. It can be used to study ray tracing, debug rendering pipelines, extend material systems, or gradually build a world that currently consists of little more than geometry, lights, and log output.  
+LuminError(R) is a Vulkan rendering framework that is still being built out over time. It can be used to study ray tracing, debug rendering pipelines, extend material systems, or gradually build a world that currently consists of little more than geometry, lights, and log output.  
 
 
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
