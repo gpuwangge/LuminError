@@ -13,4 +13,6 @@
 | SimpleEnvironmentmap <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleEnvironmentmap.png" alt="alt text" width="200" height="200">  | Testing environment mapping. |
 | SimpleMipmap <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleMipmap.png" alt="alt text" width="200" height="200">  | This is a mipmap test using distinct colors for each mip level. |
 | SimpleObjLoader <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleObjLoader.png" alt="alt text" width="200" height="200">  | Load a simple .obj mesh file. |
-
+| SimpleParticles <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleParticles.png" alt="alt text" width="200" height="200">  | Testing particle system based on graphics and compute pipelines. |
+| SimpleRayCompute <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayCompute.png" alt="alt text" width="200" height="200">  | An implementation of path tracing with compute pipeline. |
+| SimpleRayComputePlus <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayComputePlus.png" alt="alt text" width="200" height="200">  | Another path tracing example with compute pipeline. |
