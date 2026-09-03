@@ -11,4 +11,6 @@
 | MultiPhongShadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/MultiPhongShadows.png" alt="alt text" width="200" height="200">  | Test multiple phong shadows. |
 | SimpleDepthImage <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleDepthImage.png" alt="alt text" width="200" height="200">  | Render depth image to the right half of the window. |
 | SimpleEnvironmentmap <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleEnvironmentmap.png" alt="alt text" width="200" height="200">  | Testing environment mapping. |
+| SimpleMipmap <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleMipmap.png" alt="alt text" width="200" height="200">  | This is a mipmap test using distinct colors for each mip level. |
+| SimpleObjLoader <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleObjLoader.png" alt="alt text" width="200" height="200">  | Load a simple .obj mesh file. |
 
