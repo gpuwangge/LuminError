@@ -16,3 +16,7 @@
 | SimpleParticles <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleParticles.png" alt="alt text" width="200" height="200">  | Testing particle system based on graphics and compute pipelines. |
 | SimpleRayCompute <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayCompute.png" alt="alt text" width="200" height="200">  | An implementation of path tracing with compute pipeline. |
 | SimpleRayComputePlus <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayComputePlus.png" alt="alt text" width="200" height="200">  | Another path tracing example with compute pipeline. |
+| SimpleRayGraphics <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayGraphics.png" alt="alt text" width="200" height="200">  | Testing path tracing with graphics pipeline. |
+| SimpleSkybox <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleSkybox.png" alt="alt text" width="200" height="200">  | A test of skybox. |
+| SimpleText <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleText.png" alt="alt text" width="200" height="200">  | Testing text representation of English characters. |
+
