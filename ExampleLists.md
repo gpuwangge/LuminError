@@ -19,4 +19,8 @@
 | SimpleRayGraphics <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayGraphics.png" alt="alt text" width="200" height="200">  | Testing path tracing with graphics pipeline. |
 | SimpleSkybox <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleSkybox.png" alt="alt text" width="200" height="200">  | A test of skybox. |
 | SimpleText <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleText.png" alt="alt text" width="200" height="200">  | Testing text representation of English characters. |
-
+| SimpleShadowMap2Shadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMap2Shadows.png" alt="alt text" width="200" height="200">  | Test of 2 shadowmap shadows. |
+| SimpleShadowMap8Shadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMap8Shadows.png" alt="alt text" width="200" height="200">  | Test of 8 shadowmap shadows. |
+| SimpleShadowMap16Shadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMap16Shadows.png" alt="alt text" width="200" height="200">  | Test of 16 shadowmap shadows. |
+| SimpleShadowMapHWDepthbias <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMapHWDepthbias.png" alt="alt text" width="200" height="200">  | Test of hardware shadowmap depth bias. |
+| SimpleShadowMapShaderDepthbias <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMapShaderDepthbias.png" alt="alt text" width="200" height="200">  | Test of shadowmap depth bias. |
