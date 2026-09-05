@@ -26,7 +26,7 @@ Resources:
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
-    - resource_texture_name: texture.jpg
+    - resource_texture_name: wall.jpg
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
