@@ -31,7 +31,7 @@ public:
     int iShadowmapAttachmentDepthLight = -1; //this is for shadowmap renderpass, not main scene renderpass
     int iMainSceneAttachmentDepthLight = -1;
     int iMainSceneAttachmentDepthCamera = -1;
-    int iMainSceneAttachmentColorResovle = -1;
+    int iMainSceneAttachmentColorresolve = -1;
     int iMainSceneAttachmentColorPresent = -1;
 
     void create_attachmentdescription_shadowmap_depthlight(VkFormat depthFormat);

@@ -233,7 +233,7 @@ void CControlAttachment::Update(){
         else m_pTextboxes[5]->SetTextColor(greyColor);
         m_pTextboxes[5]->SetTextContent("Depth(Camera)");
 
-        if(m_pApp->renderer->GetMainSceneAttachmentColorResovle()>=0) m_pTextboxes[6]->bFlash = true;
+        if(m_pApp->renderer->GetMainSceneAttachmentColorresolve()>=0) m_pTextboxes[6]->bFlash = true;
         else m_pTextboxes[6]->SetTextColor(greyColor);
         m_pTextboxes[6]->SetTextContent("Color(Resolve)");
 

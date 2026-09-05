@@ -24,3 +24,4 @@
 | SimpleShadowMap16Shadows <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMap16Shadows.png" alt="alt text" width="200" height="200">  | Test of 16 shadowmap shadows. |
 | SimpleShadowMapHWDepthbias <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMapHWDepthbias.png" alt="alt text" width="200" height="200">  | Test of hardware shadowmap depth bias. |
 | SimpleShadowMapShaderDepthbias <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMapShaderDepthbias.png" alt="alt text" width="200" height="200">  | Test of shadowmap depth bias. |
+| SimpleMSAA <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleMSAA.png" alt="alt text" width="200" height="200">  | Test of MSAA. |

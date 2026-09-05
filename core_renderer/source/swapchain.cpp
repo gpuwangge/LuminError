@@ -293,7 +293,7 @@ void CSwapchain::CreateFramebuffer_mainscene(VkRenderPass &renderPass){ //pAttac
         std::vector<VkImageView> imageViews_to_attach; 
         if(iMainSceneAttachmentDepthLight >= 0) imageViews_to_attach.push_back(buffer_depthlight[0].view);
         if(iMainSceneAttachmentDepthCamera >= 0) imageViews_to_attach.push_back(buffer_depthcamera.view);
-        if(iMainSceneAttachmentColorResovle >= 0) imageViews_to_attach.push_back(buffer_colorresolve.view);
+        if(iMainSceneAttachmentColorresolve >= 0) imageViews_to_attach.push_back(buffer_colorresolve.view);
         if(iMainSceneAttachmentColorPresent >= 0) imageViews_to_attach.push_back(swapchain_views[i]); //views are created from swapchain, sampler number is always 1
 
         //std::cout<<"SwapImageIndex: "<<i<<"/"<<imageSize<<" imageViews_to_attach size: "<<imageViews_to_attach.size()<<std::endl;

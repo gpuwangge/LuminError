@@ -115,12 +115,12 @@ namespace LERenderer{
         virtual void SetShadowmapAttachmentDepthLight(int value) = 0;
         virtual void SetMainSceneAttachmentDepthLight(int value) = 0;
         virtual void SetMainSceneAttachmentDepthCamera(int value) = 0;
-        virtual void SetMainSceneAttachmentColorResovle(int value) = 0;
+        virtual void SetMainSceneAttachmentColorresolve(int value) = 0;
         virtual void SetMainSceneAttachmentColorPresent(int value) = 0;
         virtual int GetShadowmapAttachmentDepthLight() = 0;
         virtual int GetMainSceneAttachmentDepthLight() = 0;
         virtual int GetMainSceneAttachmentDepthCamera() = 0;
-        virtual int GetMainSceneAttachmentColorResovle() = 0;
+        virtual int GetMainSceneAttachmentColorresolve() = 0;
         virtual int GetMainSceneAttachmentColorPresent() = 0;
 
         virtual void Create_attachmentdescription_shadowmap_depthlight(VkFormat depthFormat) = 0;

@@ -83,7 +83,7 @@ Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
   mainsceneRenderpass_attachment_depth_light: false
   mainsceneRenderpass_attachment_depth_camera: false
-  mainsceneRenderpass_attachment_color_resovle: false
+  mainsceneRenderpass_attachment_color_resolve: false
   mainsceneRenderpass_attachment_color_present: true
 
 Subpasses:

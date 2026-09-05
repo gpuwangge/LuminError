@@ -183,17 +183,17 @@ void GameEngine::Initialize(){
     int AttachmentCount = 0;
     renderer->SetMainSceneAttachmentDepthLight(appInfo->Attachment.bMainSceneAttachmentDepthLight ? AttachmentCount++ : -1);
     renderer->SetMainSceneAttachmentDepthCamera(appInfo->Attachment.bMainSceneAttachmentDepthCamera ? AttachmentCount++ : -1);
-    renderer->SetMainSceneAttachmentColorResovle(appInfo->Attachment.bMainSceneAttachmentColorResovle ? AttachmentCount++ : -1);
+    renderer->SetMainSceneAttachmentColorresolve(appInfo->Attachment.bMainSceneAttachmentColorresolve ? AttachmentCount++ : -1);
     renderer->SetMainSceneAttachmentColorPresent(appInfo->Attachment.bMainSceneAttachmentColorPresent ? AttachmentCount++ : -1);
 
     renderer->SetSwapchain_ShadowmapAttachmentDepthLight(renderer->GetShadowmapAttachmentDepthLight());
     renderer->SetSwapchain_MainSceneAttachmentDepthLight(renderer->GetMainSceneAttachmentDepthLight());
     renderer->SetSwapchain_MainSceneAttachmentDepthCamera(renderer->GetMainSceneAttachmentDepthCamera());
-    renderer->SetSwapchain_MainSceneAttachmentColorResolve(renderer->GetMainSceneAttachmentColorResovle());
+    renderer->SetSwapchain_MainSceneAttachmentColorResolve(renderer->GetMainSceneAttachmentColorresolve());
     renderer->SetSwapchain_MainSceneAttachmentColorPresent(renderer->GetMainSceneAttachmentColorPresent());
 
     //when creating attachment resource, need 1.create attachment description in renderProcess; 2.create attachment buffer in swapchain
-    if(renderer->GetMainSceneAttachmentColorResovle() >= 0) renderer->GetSwapchainMaxUsableSampleCount(); //calcuate max sampler count first
+    if(renderer->GetMainSceneAttachmentColorresolve() >= 0) renderer->GetSwapchainMaxUsableSampleCount(); //calcuate max sampler count first
 
     if(renderer->GetShadowmapAttachmentDepthLight() >= 0){ //if shadowmap renderpass attachment depth light is enabled
         renderer->CreateSwapchain_attachment_resource_depthlight(VK_SAMPLE_COUNT_1_BIT); //hardware bias todo
@@ -206,7 +206,7 @@ void GameEngine::Initialize(){
         renderer->CreateSwapchain_attachment_resource_depthcamera();
         renderer->Create_attachmentdescription_mainscene_depthcamera(renderer->GetSwapchainDepthFormat(), renderer->GetSwapchainMSAASamples());
     }
-    if(renderer->GetMainSceneAttachmentColorResovle() >= 0){
+    if(renderer->GetMainSceneAttachmentColorresolve() >= 0){
         renderer->CreateSwapchain_attachment_resource_colorresolve();
         renderer->Create_attachmentdescription_mainscene_colorresolve(renderer->GetSwapchainImageFormat(), renderer->GetSwapchainMSAASamples(), VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     }

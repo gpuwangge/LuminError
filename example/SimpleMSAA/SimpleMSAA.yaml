@@ -1,9 +1,9 @@
 Objects:
-  - object_name: Hallway
+  - object_name: Spider
     object_id: 0
-    object_scale: 1
+    object_scale: 0.02
     object_position: [0,0,0]
-    object_rotation: [-135,0,45]
+    object_rotation: [90,0,135]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,20]
     resource_model_id: 2
@@ -20,13 +20,14 @@ Resources:
   - Models:
     - resource_model_name: TEXTBOXIMAGE
     - resource_model_name: TEXTQUAD
-    - resource_model_name: viking_room.obj
+    - resource_model_name: spider.obj
+    #- resource_model_name: viking_room.obj
   - Textures:
     - resource_texture_name: textbox_cyber.png
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
-    - resource_texture_name: viking_room.png
+    - resource_texture_name: metal.jpg
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
@@ -83,7 +84,7 @@ Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
   mainsceneRenderpass_attachment_depth_light: false
   mainsceneRenderpass_attachment_depth_camera: true
-  mainsceneRenderpass_attachment_color_resovle: true
+  mainsceneRenderpass_attachment_color_resolve: true #MSAA
   mainsceneRenderpass_attachment_color_present: true
 
 Subpasses:

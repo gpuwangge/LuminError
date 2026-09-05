@@ -32,7 +32,7 @@ public:
     int iShadowmapAttachmentDepthLight = -1; //this is for shadowmap renderpass, not main scene renderpass
     int iMainSceneAttachmentDepthLight = -1; //this is for shadowmap in main scene renderpass
     int iMainSceneAttachmentDepthCamera = -1;
-    int iMainSceneAttachmentColorResovle = -1;
+    int iMainSceneAttachmentColorresolve = -1;
     int iMainSceneAttachmentColorPresent = -1;
 
     /**********************
@@ -53,7 +53,7 @@ public:
     void create_attachment_resource_depthcamera();
 
     //Resource#3.buffer_colorresolve
-    //for iMainSceneAttachmentColorResovle to use
+    //for iMainSceneAttachmentColorresolve to use
     VkSampleCountFlagBits msaaSamples;
     CWxjImageBuffer buffer_colorresolve;
     void create_attachment_resource_colorresolve();

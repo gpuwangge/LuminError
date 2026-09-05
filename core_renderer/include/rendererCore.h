@@ -280,12 +280,12 @@ namespace LERenderer{
         void SetShadowmapAttachmentDepthLight(int value) override { renderProcess.iShadowmapAttachmentDepthLight = value; }
         void SetMainSceneAttachmentDepthLight(int value) override { renderProcess.iMainSceneAttachmentDepthLight = value; }
         void SetMainSceneAttachmentDepthCamera(int value) override { renderProcess.iMainSceneAttachmentDepthCamera = value; }
-        void SetMainSceneAttachmentColorResovle(int value) override { renderProcess.iMainSceneAttachmentColorResovle = value; }
+        void SetMainSceneAttachmentColorresolve(int value) override { renderProcess.iMainSceneAttachmentColorresolve = value; }
         void SetMainSceneAttachmentColorPresent(int value) override { renderProcess.iMainSceneAttachmentColorPresent = value; }
         int GetShadowmapAttachmentDepthLight() override { return renderProcess.iShadowmapAttachmentDepthLight; }
         int GetMainSceneAttachmentDepthLight() override { return renderProcess.iMainSceneAttachmentDepthLight; }
         int GetMainSceneAttachmentDepthCamera() override { return renderProcess.iMainSceneAttachmentDepthCamera; }
-        int GetMainSceneAttachmentColorResovle() override { return renderProcess.iMainSceneAttachmentColorResovle; }
+        int GetMainSceneAttachmentColorresolve() override { return renderProcess.iMainSceneAttachmentColorresolve; }
         int GetMainSceneAttachmentColorPresent() override { return renderProcess.iMainSceneAttachmentColorPresent; }
 
         void Create_attachmentdescription_shadowmap_depthlight(VkFormat depthFormat) override { renderProcess.create_attachmentdescription_shadowmap_depthlight(depthFormat); }
@@ -517,12 +517,12 @@ namespace LERenderer{
         void SetSwapchain_ShadowmapAttachmentDepthLight(int value) override { swapchain.iShadowmapAttachmentDepthLight = value; }
         void SetSwapchain_MainSceneAttachmentDepthLight(int value) override { swapchain.iMainSceneAttachmentDepthLight = value; }
         void SetSwapchain_MainSceneAttachmentDepthCamera(int value) override { swapchain.iMainSceneAttachmentDepthCamera = value; }
-        void SetSwapchain_MainSceneAttachmentColorResolve(int value) override { swapchain.iMainSceneAttachmentColorResovle = value; }
+        void SetSwapchain_MainSceneAttachmentColorResolve(int value) override { swapchain.iMainSceneAttachmentColorresolve = value; }
         void SetSwapchain_MainSceneAttachmentColorPresent(int value) override { swapchain.iMainSceneAttachmentColorPresent = value; }
         int GetSwapchain_ShadowmapAttachmentDepthLight() override { return swapchain.iShadowmapAttachmentDepthLight; }
         int GetSwapchain_MainSceneAttachmentDepthLight() override { return swapchain.iMainSceneAttachmentDepthLight; }
         int GetSwapchain_MainSceneAttachmentDepthCamera() override { return swapchain.iMainSceneAttachmentDepthCamera; }
-        int GetSwapchain_MainSceneAttachmentColorResolve() override { return swapchain.iMainSceneAttachmentColorResovle; }
+        int GetSwapchain_MainSceneAttachmentColorResolve() override { return swapchain.iMainSceneAttachmentColorresolve; }
         int GetSwapchain_MainSceneAttachmentColorPresent() override { return swapchain.iMainSceneAttachmentColorPresent; }
 
         VkImageView GetSwapchain_Buffer_DepthLight_View(int index) override { return swapchain.buffer_depthlight[index].view; }

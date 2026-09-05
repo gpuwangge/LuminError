@@ -120,7 +120,7 @@ void CRenderProcess::createSubpass_shadowmap(){
 void CRenderProcess::createSubpass_mainscene(int attachment_id_to_observe){ 
 	if(iMainSceneAttachmentDepthLight >= 0) clearValues.push_back({1.0f, 0}); 
 	if(iMainSceneAttachmentDepthCamera >= 0) clearValues.push_back({1.0f, 0}); 
-	if(iMainSceneAttachmentColorResovle >= 0) clearValues.push_back({0.0f, 0.0f, 0.0f, 1.0f});
+	if(iMainSceneAttachmentColorresolve >= 0) clearValues.push_back({0.0f, 0.0f, 0.0f, 1.0f});
 	if(iMainSceneAttachmentColorPresent >= 0) clearValues.push_back({0.0f, 0.0f, 0.0f, 1.0f});
 
 	if(bEnableMainSceneRenderpassSubpassShadowmap) createSubpass_mainscene_lightdepth();	
@@ -171,8 +171,8 @@ void CRenderProcess::createSubpass_mainscene_draw(){
 		subpass.pColorAttachments = &attachmentRef_mainscene_draw_color;
 		subpass.colorAttachmentCount = 1;
 	}
-	if(iMainSceneAttachmentColorResovle >= 0){
-		attachmentRef_mainscene_draw_color_multisample.attachment = iMainSceneAttachmentColorResovle; 
+	if(iMainSceneAttachmentColorresolve >= 0){
+		attachmentRef_mainscene_draw_color_multisample.attachment = iMainSceneAttachmentColorresolve; 
 		attachmentRef_mainscene_draw_color_multisample.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		subpass.pColorAttachments = &attachmentRef_mainscene_draw_color_multisample; //use multi sampler color attachment to override pColorAttachments
 		subpass.pResolveAttachments = &attachmentRef_mainscene_draw_color;
@@ -196,8 +196,8 @@ void CRenderProcess::createSubpass_mainscene_observe(int attachment_id_to_observ
 		subpass.pColorAttachments = &attachmentRef_mainscene_observe_color;
 		subpass.colorAttachmentCount = 1;
 	}
-	if(iMainSceneAttachmentColorResovle >= 0){
-		attachmentRef_mainscene_observe_color_multisample.attachment = iMainSceneAttachmentColorResovle; 
+	if(iMainSceneAttachmentColorresolve >= 0){
+		attachmentRef_mainscene_observe_color_multisample.attachment = iMainSceneAttachmentColorresolve; 
 		attachmentRef_mainscene_observe_color_multisample.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		subpass.pColorAttachments = &attachmentRef_mainscene_observe_color_multisample;
 		subpass.pResolveAttachments = &attachmentRef_mainscene_observe_color;
@@ -340,7 +340,7 @@ void CRenderProcess::createRenderPass_mainscene(){ //pAttachments order must mat
 	std::vector<VkAttachmentDescription> attachmentDescriptions;
 	if(iMainSceneAttachmentDepthLight >= 0) attachmentDescriptions.push_back(attachmentdescription_mainscene_depthlight);
 	if(iMainSceneAttachmentDepthCamera >= 0) attachmentDescriptions.push_back(attachmentdescription_mainscene_depthcamera);
-	if(iMainSceneAttachmentColorResovle >= 0) attachmentDescriptions.push_back(attachmentdescription_mainscene_colorresolve);
+	if(iMainSceneAttachmentColorresolve >= 0) attachmentDescriptions.push_back(attachmentdescription_mainscene_colorresolve);
 	if(iMainSceneAttachmentColorPresent >= 0) attachmentDescriptions.push_back(attachmentdescription_mainscene_colorpresent);
 
 	//std::cout<<"Begin prepare renderpass info"<<std::endl;

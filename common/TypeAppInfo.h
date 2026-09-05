@@ -409,14 +409,14 @@ struct AttachmentConfig{
     bool bShadowmapAttachmentDepthLight = false;
     bool bMainSceneAttachmentDepthLight = false;
     bool bMainSceneAttachmentDepthCamera = false;
-    bool bMainSceneAttachmentColorResovle = false;
+    bool bMainSceneAttachmentColorresolve = false;
     bool bMainSceneAttachmentColorPresent = true;
 
     void loadFromYaml(const YAML::Node& node) {
         bShadowmapAttachmentDepthLight                 = getOrDefault(node, "ShadowmapRenderpass_attachment_depth_light", false);
         bMainSceneAttachmentDepthLight                 = getOrDefault(node, "mainsceneRenderpass_attachment_depth_light", false);
         bMainSceneAttachmentDepthCamera                = getOrDefault(node, "mainsceneRenderpass_attachment_depth_camera", false);
-        bMainSceneAttachmentColorResovle               = getOrDefault(node, "mainsceneRenderpass_attachment_color_resovle", false);
+        bMainSceneAttachmentColorresolve               = getOrDefault(node, "mainsceneRenderpass_attachment_color_resolve", false);
         bMainSceneAttachmentColorPresent               = getOrDefault(node, "mainsceneRenderpass_attachment_color_present", true);
     }
 };
