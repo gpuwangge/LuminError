@@ -26,5 +26,7 @@
 | SimpleShadowMapShaderDepthbias <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleShadowMapShaderDepthbias.png" alt="alt text" width="200" height="200">  | Test of shadowmap depth bias. |
 | SimpleMSAA <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleMSAA.png" alt="alt text" width="200" height="200">  | Test of MSAA. |
 | SimpleTexture <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleTexture.png" alt="alt text" width="200" height="200">  | Test of texture mapping. |
-
+| SimpleUI <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleUI.png" alt="alt text" width="200" height="200">  | Test of objects sticker to screen as UI. |
+| SimpleUniformBuffer <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleUniformBuffer.png" alt="alt text" width="200" height="200">  | Test of uniform buffer. |
+| SimpleVertexBuffer <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleVertexBuffer.png" alt="alt text" width="200" height="200">  | Test of vertex buffer. |
 
