@@ -37,10 +37,11 @@
 | SimpleRayComputePlus <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayComputePlus.png" alt="alt text" width="200" height="200">  | Another path tracing example with compute pipeline. |
 | GemmCompute <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/vulkanLogo.png" alt="alt text" width="200" height="200">  | General Matrix Multiply Test. |
 | SimpleComputeStorageBuffer <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/vulkanLogo.png" alt="alt text" width="200" height="200">  | Test usage of storage buffer. |
-| SimpleComputeStorageImage <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleComputeStorageImage.png" alt="alt text" width="200" height="200">  | Test usage of storage image |
+| SimpleComputeStorageImage <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleComputeStorageImage.png" alt="alt text" width="200" height="200">  | Test usage of storage image. |
 | TextureCompute <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/TextureCompute.png" alt="alt text" width="200" height="200">  | Read a texutre into compute shader, then blur the pixels and copy to render target. |
 
 ## Ray Tracing Pipeline
 |   Example  | Description |
 |------------------------------------|-----------------------|
-
+| SimpleRayPipelineDragon <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text" width="200" height="200">  | Render Stanford Dragon with Whitted style ray tracing. |
+| SimpleRayPipelineSponza <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineSponza1.png" alt="alt text" width="200" height="200">  | Render Sponza with Monte Carlo path tracing. |
