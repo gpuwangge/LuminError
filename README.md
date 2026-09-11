@@ -4,7 +4,7 @@
 </p>
 
 # LuminError 
-**Vulkan Rendering & GPU Architecture Experimentation Framework**  
+**Vulkan Rendering & GPU Experimentation Framework**  
 
 LuminError is a **Vulkan-based rendering framework for real-time graphics, hardware ray tracing, and GPU experimentation**, written in C++.  
 
