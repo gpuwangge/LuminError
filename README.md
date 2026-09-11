@@ -4,30 +4,22 @@
 </p>
 
 # LuminError 
-Vulkan-based real-time rendering and GPU architecture
-experimentation framework written in C++.
+**Vulkan Rendering & GPU Architecture Experimentation Framework**  
+LuminError is a **Vulkan-based rendering framework for real-time graphics, hardware ray tracing, and GPU experimentation**, written in C++.  
 
-## Highlights
-- Vulkan 1.3/1.4 rendering architecture
-- Hardware ray tracing with VK_KHR_acceleration_structure
-  and VK_KHR_ray_tracing_pipeline
-- BLAS/TLAS construction and GPU resource management
-- Whitted-style ray tracing
-- Monte Carlo path tracing with Next Event Estimation
-- Compute and graphics workloads
-- PBR materials and glTF/GLB asset pipeline
-- GPU synchronization and descriptor management
-- Rendering validation and performance experiments  
+The engine directly manages Vulkan GPU resources, synchronization, command submission, descriptor sets, and rendering pipelines. It supports graphics and compute workloads and provides a low-level environment for experimenting with **rasterization, hardware ray tracing, path tracing, GPU resource management, and rendering performance**.  
+
+### Key Features
+* **Vulkan Rendering** — Graphics and compute workloads with explicit GPU resource and synchronization management
+* **Hardware Ray Tracing** — BLAS/TLAS acceleration structures and Vulkan ray-tracing pipelines
+* **Path Tracing** — Monte Carlo path tracing with Next Event Estimation (NEE)
+* **PBR Rendering** — Physically based materials and glTF/GLB asset support
+* **GPU Experiments** — Rendering workloads, compute workloads, ray-tracing experiments, and performance analysis
+* **Modular Architecture** — Decoupled renderer, resource, and pipeline subsystems
+
+LuminError is under active development and serves as a personal environment for exploring **GPU architecture concepts, rendering algorithms, Vulkan programming, and GPU performance**.  
 
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
-
-LuminError is a **Vulkan-based rendering framework for real-time graphics, ray tracing, and GPU experimentation**, written in C++.  
-
-The engine directly manages Vulkan GPU resources, synchronization, command submission, and rendering pipelines, providing explicit control over resource lifetimes and GPU execution behavior. It supports both graphics and compute workloads, as well as **hardware ray tracing** through Vulkan ray-tracing extensions.  
-
-The framework includes core systems for resource and scene management, graphics and compute rendering, and OBJ/glTF/GLB asset pipelines with support for textures and PBR materials. It is designed as an environment for studying and experimenting with **GPU rendering pipelines, ray tracing, resource management, synchronization, and performance**.  
-
-LuminError is under active development, with ongoing work focused on expanding rendering features, GPU workloads, ray-tracing techniques, and performance experiments.  
 
 ## SimpleRayPipelineDragon
 The model is a classic test asset created by the Stanford Graphics Lab through 3D scanning of a dragon sculpture. It contains approximately 870,000 triangles.  
