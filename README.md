@@ -4,25 +4,32 @@
 </p>
 
 # LuminError 
-LuminError is a game engine project built on Vulkan, primarily intended for real-time rendering, ray tracing, and graphics experimentation.  
+Vulkan-based real-time rendering and GPU architecture
+experimentation framework written in C++.
 
-At its core, the engine uses Vulkan to manage GPU resources, synchronization, command submission, and the rendering pipeline directly. Compared with higher-level graphics APIs, this approach requires handling more low-level details, but it also provides clearer control over resource lifetimes and rendering behavior. The project supports hardware ray tracing for effects such as shadows and reflections.  
-
-The project currently includes core systems for window creation, keyboard and mouse input, asset loading, scene management, graphics rendering, and compute rendering. GLM is used for vector, matrix, and transformation math; stb_image handles texture loading; tinyobjloader and tinygltf are used to import OBJ and glTF/GLB assets, providing support for models, textures, PBR materials, and scene data.  
-
-SDL3 handles cross-platform windows, events, and input, while SDL3_ttf is used for rendering HUD elements, debug information, and in-game text.  
-
-LuminError is a Vulkan rendering framework that is still being built out over time. It can be used to study ray tracing, debug rendering pipelines, extend material systems, or gradually build a world that currently consists of little more than geometry, lights, and log output.  
+## Highlights
+- Vulkan 1.3/1.4 rendering architecture
+- Hardware ray tracing with VK_KHR_acceleration_structure
+  and VK_KHR_ray_tracing_pipeline
+- BLAS/TLAS construction and GPU resource management
+- Whitted-style ray tracing
+- Monte Carlo path tracing with Next Event Estimation
+- Compute and graphics workloads
+- PBR materials and glTF/GLB asset pipeline
+- GPU synchronization and descriptor management
+- Rendering validation and performance experiments  
 
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
 
-This project provides a large collection of test cases under example/. Each test case contains an independent game framework:   
+LuminError is a **Vulkan-based rendering framework for real-time graphics, ray tracing, and GPU experimentation**, written in C++.  
+
+The engine directly manages Vulkan GPU resources, synchronization, command submission, and rendering pipelines, providing explicit control over resource lifetimes and GPU execution behavior. It supports both graphics and compute workloads, as well as **hardware ray tracing** through Vulkan ray-tracing extensions.  
+
+The framework includes core systems for resource and scene management, graphics and compute rendering, and OBJ/glTF/GLB asset pipelines with support for textures and PBR materials. It is designed as an environment for studying and experimenting with **GPU rendering pipelines, ray tracing, resource management, synchronization, and performance**.  
+
+LuminError is under active development, with ongoing work focused on expanding rendering features, GPU workloads, ray-tracing techniques, and performance experiments.  
 
 ## SimpleRayPipelineDragon
-模型是Stanford Graphics Lab通过三维扫描龙形雕塑生成的经典测试模型，包含约 87 万个三角形。  
-Dragon 模型几何细节密集，用于检查 BVH/AS 构建、实例变换、法线插值、命中信息读取以及 GPU 资源同步等环节。  
-光追算法：Whitted-style Ray Tracing。  
-
 The model is a classic test asset created by the Stanford Graphics Lab through 3D scanning of a dragon sculpture. It contains approximately 870,000 triangles.  
 With its dense geometric detail, the Dragon model was used to validate key stages of the rendering pipeline, including BVH/acceleration-structure construction, instance transformations, normal interpolation, hit-record retrieval, and GPU resource synchronization.  
 Ray-tracing algorithm: Whitted-style Ray Tracing.  
@@ -31,10 +38,6 @@ Ray-tracing algorithm: Whitted-style Ray Tracing.
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text">  
 
 ## SimpleRayPipelineSponza
-Sponza是以克罗地亚杜布罗夫尼克Sponza Palace的中庭为原型的场景模型。它最初为渲染竞赛制作，随后因其复杂的室内遮挡结构、大量材质与纹理、明显的明暗区域和适合观察全局光照的空间布局，被全球光照研究与实时渲染社区广泛采用，现已成为测试 GI、Path Tracing、光照采样、去噪和渲染性能的经典场景。  
-Sponza 包含大量独立网格、纹理和材质区域，能够更全面地验证 glTF/GLB 资产解析、PBR 材质参数处理、纹理采样、descriptor 管理及实例级加速结构组织流程。  
-光追算法：Monte Carlo Path Tracing。NEE开启。  
-
 Sponza is a scene model based on the atrium of the Sponza Palace in Dubrovnik, Croatia. It was originally created for a rendering contest and was later widely adopted by the global-illumination and real-time-rendering communities because of its complex indoor occlusion, numerous materials and textures, pronounced light-and-shadow regions, and spatial layout well suited to evaluating global illumination. It has since become a classic benchmark scene for testing GI, path tracing, light sampling, denoising, and rendering performance.  
 Sponza contains a large number of individual meshes, textures, and material regions, making it suitable for more comprehensive validation of glTF/GLB asset parsing, PBR material-parameter processing, texture sampling, descriptor management, and instance-level acceleration-structure organization.  
 Ray-tracing algorithm: Monte Carlo Path Tracing with Next Event Estimation (NEE) enabled.  
