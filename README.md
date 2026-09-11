@@ -5,6 +5,7 @@
 
 # LuminError 
 **Vulkan Rendering & GPU Architecture Experimentation Framework**  
+
 LuminError is a **Vulkan-based rendering framework for real-time graphics, hardware ray tracing, and GPU experimentation**, written in C++.  
 
 The engine directly manages Vulkan GPU resources, synchronization, command submission, descriptor sets, and rendering pipelines. It supports graphics and compute workloads and provides a low-level environment for experimenting with **rasterization, hardware ray tracing, path tracing, GPU resource management, and rendering performance**.  
