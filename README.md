@@ -3,10 +3,10 @@
   <img src="https://github.com/gpuwangge/VulkanPlatform/blob/main/images/windowsLogo.png" alt="alt text" width="150" height="120">  
 </p>
 
-# LuminEvolution 
+# LuminEvo 
 **Vulkan Rendering & GPU Experimentation Framework**  
 
-LuminEvolution is a **Vulkan-based rendering framework for real-time graphics, hardware ray tracing, and GPU experimentation**, written in C++.  
+LuminEvo is a **Vulkan-based rendering framework for real-time graphics, hardware ray tracing, and GPU experimentation**, written in C++.  
 
 The engine directly manages Vulkan GPU resources, synchronization, command submission, descriptor sets, and rendering pipelines. It supports graphics and compute workloads and provides a low-level environment for experimenting with **rasterization, hardware ray tracing, path tracing, GPU resource management, and rendering performance**.  
 
@@ -18,7 +18,7 @@ The engine directly manages Vulkan GPU resources, synchronization, command submi
 * **GPU Experiments** — Rendering workloads, compute workloads, ray-tracing experiments, and performance analysis
 * **Modular Architecture** — Decoupled renderer, resource, and pipeline subsystems
 
-LuminEvolution is under active development and serves as a personal environment for exploring **GPU architecture concepts, rendering algorithms, Vulkan programming, and GPU performance**.  
+LuminEvo is under active development and serves as a personal environment for exploring **GPU architecture concepts, rendering algorithms, Vulkan programming, and GPU performance**.  
 
 <img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminEvolutionArch.png" alt="alt text"> 
 
@@ -47,7 +47,7 @@ Ray-tracing algorithm: Monte Carlo Path Tracing with Next Event Estimation (NEE)
 
 
 # [More Examples](https://github.com/gpuwangge/LuminError/blob/main/ExampleLists.md)  
-LuminEvolution includes **35 example programs** across three pipeline types:  
+LuminEvo includes **35 example programs** across three pipeline types:  
 
 | Pipeline | Examples | Highlights |
 |----------|----------|------------|
