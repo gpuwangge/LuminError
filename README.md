@@ -20,7 +20,7 @@ The engine directly manages Vulkan GPU resources, synchronization, command submi
 
 LuminEvolution is under active development and serves as a personal environment for exploring **GPU architecture concepts, rendering algorithms, Vulkan programming, and GPU performance**.  
 
-<img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminErrorArch.png" alt="alt text"> 
+<img src="https://github.com/gpuwangge/LuminError/blob/main/images/LuminEvolutionArch.png" alt="alt text"> 
 
 ## SimpleRayPipelineDragon
 The model is a classic test asset created by the Stanford Graphics Lab through 3D scanning of a dragon sculpture. It contains approximately 870,000 triangles.  
