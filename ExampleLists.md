@@ -42,6 +42,7 @@
 | TextureCompute <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/TextureCompute.png" alt="alt text" width="200" height="200">  | Read a texutre into compute shader, then blur the pixels and copy to render target. |
 
 ## Ray Tracing Pipeline
+You need a graphics card that supports hardware ray tracing to run these tests.  
 |   Example  | Description |
 |------------------------------------|-----------------------|
 | SimpleRayPipelineDragon <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text" width="200" height="200">  | Render Stanford Dragon with Whitted style ray tracing. |
