@@ -11,19 +11,7 @@ namespace LELog{
         virtual ~ILogCore() = default;
         //void SetApplication(LEGameEngine::IGameEngine* pApplication) {game = pApplication;}
 
-        //Print to screen
-        virtual void Print(const std::string& message) = 0;
-        template<typename... Args> // 可变参数模板 - 处理所有类型
-        void Print(const std::string& format, Args... args) {
-            std::string formatted = formatString(format, args...);
-            Print(formatted);
-        }
-
-        //Log to File(Array, glm::vec3)
-        virtual void LogArray(const std::string& message, float *n, int size) = 0;
-        virtual void LogVec3(const std::string& message, glm::vec3 v) = 0;
-
-        //Log to File
+        //Log File Helper Functions
         virtual bool SetLogFile(const std::string& filename) = 0;
         virtual void CloseLogFile() = 0;
         virtual bool IsFileLogging() const = 0;
@@ -31,6 +19,15 @@ namespace LELog{
         virtual std::string GetLogFileName(std::string exampleName) = 0;
         virtual std::string CreateDateFolder(const std::string& basePath = "") = 0;
 
+        //Print to screen (formatString version) TODO: Template should be put in cpp file
+        virtual void Print(const std::string& message) = 0;
+        template<typename... Args> // 可变参数模板 - 处理所有类型
+        void Print(const std::string& format, Args... args) {
+            std::string formatted = formatString(format, args...);
+            Print(formatted);
+        }
+
+        //Log to File (formatString version) TODO: Template should be put in cpp file
         virtual void Log(const std::string& message) = 0;
         template<typename... Args> // 可变参数模板 - 处理所有类型
         void Log(const std::string& format, Args... args) {
@@ -38,7 +35,12 @@ namespace LELog{
             Log(formatted);
         }
 
+        //Special Log Functions(Array, glm::vec3)
+        virtual void LogArray(const std::string& message, float *n, int size) = 0;
+        virtual void LogVec3(const std::string& message, glm::vec3 v) = 0;
+
     private:
+        /*
         // 递归终止条件
         void formatImpl(std::ostringstream& oss, const std::string& format, size_t index) {
             oss << format.substr(index);
@@ -57,13 +59,14 @@ namespace LELog{
             oss << value;
             formatImpl(oss, format, pos + 2, args...);
         }
-        
-        // 基础情况
+        */
+
+        // 基础情况 TODO: Template should be put in cpp file
         inline std::string formatString(const std::string& format) {
             return format;
         }
 
-        // 处理单个格式说明符
+        // 处理单个格式说明符 TODO: Template should be put in cpp file
         template<typename T>
         void formatArg(std::stringstream& ss, const std::string& specifier, T&& arg) {
             if (specifier.empty()) {
@@ -157,7 +160,7 @@ namespace LELog{
             ss.fill(original_fill);
         }
 
-        // 递归格式化函数
+        // 递归格式化函数 TODO: Template should be put in cpp file
         template<typename T, typename... Args>
         std::string formatString(const std::string& format, T&& first, Args&&... rest) {
             std::stringstream result;
