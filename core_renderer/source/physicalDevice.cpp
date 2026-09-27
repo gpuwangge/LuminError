@@ -152,14 +152,24 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
 
     if(enableRaytracingPipeline){
     /////////////////Ray Tracing Related/////////////
-        VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
-        bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-        bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
+        //createInfo.pNext -> deviceFeatures2 -> rayTracingPipelineFeatures -> accelerationStructureFeatures -> features12 -> nullptr
+
+        // VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
+        // bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+        // bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
+
+        VkPhysicalDeviceVulkan12Features features12{};
+        features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+        features12.runtimeDescriptorArray = VK_TRUE;
+        features12.bufferDeviceAddress = VK_TRUE;
+        features12.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+
+        //bufferDeviceAddressFeatures.pNext = &features12;
 
         VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
         accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
         accelerationStructureFeatures.accelerationStructure = VK_TRUE;
-        accelerationStructureFeatures.pNext = &bufferDeviceAddressFeatures;
+        accelerationStructureFeatures.pNext = &features12;//bufferDeviceAddressFeatures;
 
         VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
         rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;

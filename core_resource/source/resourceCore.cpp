@@ -27,6 +27,7 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
     glbManager.m_physicalDevice = physicalDevice_;
     glbManager.m_raytracingQueue = raytracingQueue_;
     glbManager.textureManager = &textureManager;
+    glbManager.SetLogger(logger);
 
     textureManager.logger = logger;
 }
@@ -50,6 +51,10 @@ void ResourceCore::LoadGLBMaterial(){
 
 int ResourceCore::GetGLBMeshSize(IN int glbIndex){
     return glbManager.GetGLBMeshSize(glbIndex);
+}
+
+int ResourceCore::GetGLBTextureSize(){
+    return glbManager.GetGLBTextureSize();
 }
 
 // int ResourceCore::GetGLBTextureIndexBaseColor(int meshIndex){

@@ -1479,6 +1479,7 @@ void RendererCore::CreateInstanceBuffer(){
         //VkAccelerationStructureInstanceKHR instance{};
         
         glm::vec3 scale = game->GetObjectScale(i);
+        //std::cout<<"CreateInstanceBuffer(): object "<<i<<": scale = ("<<scale.x<<", "<<scale.y<<", "<<scale.z<<")"<<std::endl;
         glm::vec3 position = game->GetObjectPosition(i);
         int model_id = game->GetObjectModelID(i);
         int material_id = game->GetObjectMaterialID(i);

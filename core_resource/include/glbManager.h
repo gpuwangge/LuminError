@@ -2,6 +2,7 @@
 #include <tiny_gltf.h>
 #include "TypeVertex.h"
 #include "TypeRaytracing.h"
+#include "ILogCore.h"
 
 namespace LEResource{
 
@@ -11,6 +12,9 @@ class CGLBManager final{
 public:
     CGLBManager() {}
     ~CGLBManager() {}
+
+    LELog::ILogCore *logger = NULL;
+    void SetLogger(LELog::ILogCore *logger_){logger = logger_;}
 
     VkDevice m_logicalDevice;
     VkPhysicalDevice m_physicalDevice;
@@ -49,6 +53,7 @@ public:
     std::vector<uint32_t> imageUsages;
 
     int GetGLBMeshSize(IN int glbIndex);
+    int GetGLBTextureSize();
 };
 
 }//namespace

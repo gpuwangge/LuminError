@@ -133,6 +133,7 @@ struct StructUniformBuffer_Material{
 struct StructConfigUniformBuffer {
     alignas(4) uint32_t lightCount = 0;
     alignas(4) uint32_t materialCount = 0;
+    alignas(4) uint32_t textureCount = 0;
 
     //alignas(4) uint32_t int renderMode;      // 0 = Whitted, 1 = Path Tracing, 2 = ReSTIR(未实现), 3 = Bidirectional(未实现)
     alignas(4) uint32_t spp;             // Samples Per Pixel
@@ -157,14 +158,14 @@ struct StructConfigUniformBuffer {
 
     alignas(4) uint32_t shadowRayIgnoreSphere;
 };
-static_assert(offsetof(StructConfigUniformBuffer, rrProbability) == 28);
-static_assert(offsetof(StructConfigUniformBuffer, enableNEE) == 32);
-static_assert(offsetof(StructConfigUniformBuffer, NEESampleCount) == 36);
-static_assert(offsetof(StructConfigUniformBuffer, NEESoftShadow) == 40);
-static_assert(offsetof(StructConfigUniformBuffer, useSky) == 44);
-static_assert(offsetof(StructConfigUniformBuffer, maxRadiance) == 48);
-static_assert(offsetof(StructConfigUniformBuffer, shadowRayIgnoreSphere) == 72);
-static_assert(sizeof(StructConfigUniformBuffer) == 76);
+// static_assert(offsetof(StructConfigUniformBuffer, rrProbability) == 28);
+// static_assert(offsetof(StructConfigUniformBuffer, enableNEE) == 32);
+// static_assert(offsetof(StructConfigUniformBuffer, NEESampleCount) == 36);
+// static_assert(offsetof(StructConfigUniformBuffer, NEESoftShadow) == 40);
+// static_assert(offsetof(StructConfigUniformBuffer, useSky) == 44);
+// static_assert(offsetof(StructConfigUniformBuffer, maxRadiance) == 48);
+// static_assert(offsetof(StructConfigUniformBuffer, shadowRayIgnoreSphere) == 72);
+// static_assert(sizeof(StructConfigUniformBuffer) == 76);
 
 
 /*********

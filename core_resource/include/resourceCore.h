@@ -21,6 +21,7 @@ namespace LEResource{
         void LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) override;
         void LoadGLBMaterial() override;
         int GetGLBMeshSize(IN int glbIndex) override;
+        int GetGLBTextureSize() override;
         // int GetGLBTextureIndexBaseColor(int meshIndex) override;
         // int GetGLBTextureIndexNormal(int meshIndex) override;
         // int GetGLBTextureIndexMetallic(int meshIndex) override;

@@ -10,6 +10,7 @@ layout(set = 0, binding = 5) uniform CustomUniformInfo {
 layout(set = 0, binding = 8) uniform ConfigUniformInfo {
     uint lightCount;
     uint materialCount;
+    uint textureCount;
 
     uint spp;             // Samples Per Pixel
     uint maxBounce;       // 最大反弹次数

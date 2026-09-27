@@ -122,6 +122,13 @@ RTLights: #ray tracing pipeline lights to generate shadow
 Resources:
   - Glbs:
       - resource_glb_name: sponza-palace.glb
+      #- resource_glb_name: bread_roll.glb
+      #- resource_glb_name: teddybear.glb
+      #- resource_glb_name: dragon_statue.glb
+      #- resource_glb_name: Female_Maid_Facesless.glb
+      #- resource_glb_name: asian_canal_building_01.glb
+      #- resource_glb_name: Eilan_Donan_Castle.glb
+      
   # - Models:
     # - resource_model_name: low_poly_tree.obj
     # - resource_model_name: cube.obj

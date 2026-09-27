@@ -1,6 +1,8 @@
 #ifndef RAY_COMMONHIT_GLSL
 #define RAY_COMMONHIT_GLSL
 
+#extension GL_EXT_nonuniform_qualifier : require
+
 #include "../CommonShaders/rayPipelineCommonUBO.glsl"
 
 #extension GL_EXT_ray_tracing : require
@@ -25,8 +27,9 @@ layout(set = 0, binding = 7) uniform InstanceUniformInfo {
 } instanceUBO;
 
 #ifndef DISABLE_TEXTURE
-const uint MAX_GLOBAL_TEXTURES = 69u;
-layout(set = 0, binding = 10) uniform sampler2D texarray[MAX_GLOBAL_TEXTURES];
+//const uint MAX_GLOBAL_TEXTURES = 69u;
+//layout(set = 0, binding = 10) uniform sampler2D texarray[MAX_GLOBAL_TEXTURES];
+layout(set = 0, binding = 10) uniform sampler2D texarray[];//Bindless / Unsized Array
 //texture(texarray[texId], uv);
 #endif
 
@@ -338,8 +341,8 @@ Texture function
 **************/
 #ifndef DISABLE_TEXTURE
 vec4 SampleTexture(uint texId, vec2 uv){
-    texId = min(texId, MAX_GLOBAL_TEXTURES - 1u);
-    return texture(texarray[texId], vec2(uv.x, 1.0 - uv.y));
+    texId = min(texId, configUBO.textureCount - 1u);
+    return texture(texarray[nonuniformEXT(texId)], vec2(uv.x, 1.0 - uv.y));
 }
 #endif
 

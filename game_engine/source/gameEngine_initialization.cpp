@@ -129,31 +129,33 @@ void GameEngine::Initialize(){
         renderer->addRaytracingUniformBuffer_config();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
 
-        StructConfigUniformBuffer configUniformBufferObject{};
-        configUniformBufferObject.lightCount = GetRTLightSize();
-        configUniformBufferObject.materialCount = GetMaterialSize();
-        //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
-        configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
-        configUniformBufferObject.maxBounce = Get_feature_raytracing_pipeline_maximum_bounce();
-        configUniformBufferObject.maxPath = Get_feature_raytracing_pipeline_maximum_path();
-        configUniformBufferObject.accumulate = Get_feature_raytracing_pipeline_accumulate();
-        configUniformBufferObject.enableNEE = Get_feature_raytracing_pipeline_enableNEE();
-        configUniformBufferObject.NEESampleCount = Get_feature_raytracing_pipeline_NEE_sample_count();
-        configUniformBufferObject.NEESoftShadow = Get_feature_raytracing_pipeline_NEE_soft_shadow();
-        configUniformBufferObject.useSky = Get_feature_raytracing_pipeline_use_sky();
-        configUniformBufferObject.maxRadiance = Get_feature_raytracing_pipeline_maximum_Radiance();
-        configUniformBufferObject.debugMode = Get_feature_raytracing_pipeline_debug_mode();
-        configUniformBufferObject.softShadowEnable = Get_feature_raytracing_pipeline_softShadowEnable();
-        configUniformBufferObject.softShadowSampleNumber = Get_feature_raytracing_pipeline_softShadowSampleNumber();
-        configUniformBufferObject.maxReflectionDepth = Get_feature_raytracing_pipeline_maxReflectionDepth();
-        configUniformBufferObject.maxRefractionDepth = Get_feature_raytracing_pipeline_maxRefractionDepth();
-        configUniformBufferObject.shadowRayIgnoreSphere = Get_feature_raytracing_pipeline_shadowRayIgnoreSphere();
+        // StructConfigUniformBuffer configUniformBufferObject{};
+        // configUniformBufferObject.lightCount = GetRTLightSize();
+        // configUniformBufferObject.materialCount = GetMaterialSize();
+        // configUniformBufferObject.textureCount = resourcer->GetGLBTextureSize(); //must be called after LoadGLBTexture, otherwise textureCount = 0
+        // std::cout<<"[GameEngine] Initialize: configUniformBufferObject.lightCount = "<<configUniformBufferObject.lightCount<<", materialCount = "<<configUniformBufferObject.materialCount<<", textureCount = "<<configUniformBufferObject.textureCount<<"\n";
+        // //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
+        // configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
+        // configUniformBufferObject.maxBounce = Get_feature_raytracing_pipeline_maximum_bounce();
+        // configUniformBufferObject.maxPath = Get_feature_raytracing_pipeline_maximum_path();
+        // configUniformBufferObject.accumulate = Get_feature_raytracing_pipeline_accumulate();
+        // configUniformBufferObject.enableNEE = Get_feature_raytracing_pipeline_enableNEE();
+        // configUniformBufferObject.NEESampleCount = Get_feature_raytracing_pipeline_NEE_sample_count();
+        // configUniformBufferObject.NEESoftShadow = Get_feature_raytracing_pipeline_NEE_soft_shadow();
+        // configUniformBufferObject.useSky = Get_feature_raytracing_pipeline_use_sky();
+        // configUniformBufferObject.maxRadiance = Get_feature_raytracing_pipeline_maximum_Radiance();
+        // configUniformBufferObject.debugMode = Get_feature_raytracing_pipeline_debug_mode();
+        // configUniformBufferObject.softShadowEnable = Get_feature_raytracing_pipeline_softShadowEnable();
+        // configUniformBufferObject.softShadowSampleNumber = Get_feature_raytracing_pipeline_softShadowSampleNumber();
+        // configUniformBufferObject.maxReflectionDepth = Get_feature_raytracing_pipeline_maxReflectionDepth();
+        // configUniformBufferObject.maxRefractionDepth = Get_feature_raytracing_pipeline_maxRefractionDepth();
+        // configUniformBufferObject.shadowRayIgnoreSphere = Get_feature_raytracing_pipeline_shadowRayIgnoreSphere();
 
-        for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
-            renderer->SetCurrentFrame(i);
-            renderer->uploadRaytracingUniformBuffer_config(GetCurrentFrame(), &configUniformBufferObject, sizeof(StructConfigUniformBuffer));
-        }
-        renderer->SetCurrentFrame(0);
+        // for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
+        //     renderer->SetCurrentFrame(i);
+        //     renderer->uploadRaytracingUniformBuffer_config(GetCurrentFrame(), &configUniformBufferObject, sizeof(StructConfigUniformBuffer));
+        // }
+        // renderer->SetCurrentFrame(0);
     }
 
     if(appInfo->Samplers.size() > 0){
@@ -488,6 +490,8 @@ void GameEngine::Initialize(){
     * 8.5 Register Objects
     * Register object after descriptor layout (texture)
     * But before raytracing descriptor layout (because rt pipeline needs to know object model_id, scale...)
+    * 如果是非GLB，每个object都是独立个体
+    * 如果是GLB，每个GLB是独立个体,也叫object，原来的yaml读进来的appInfo->Objects[0]指的是glb的整体属性
     ****************************/
     if(!bLoadGLB){
         for(int i = 0; i < appInfo->Objects.size(); i++){
@@ -519,44 +523,79 @@ void GameEngine::Initialize(){
     }else{ //use GLB objects:对RT Pipeline来说，GLB Mesh之前读进了buffer，现在mesh注册，之后再rendererCore里面把这里注册的信息放入instance buffer
         objects.resize(resourcer->GetGLBMeshSize(0) + objectCountControl);
         std::cout<<"Application: Register "<<objects.size()<<" objects from GLB."<<std::endl;
-        for(int i = 0; i < resourcer->GetGLBMeshSize(0); i++){
-            objects[i].m_object_id = i;
-            objects[i].m_model_id = i;
-            objects[i].m_material_id = 0;
-            // objects[i].m_texture_ids = std::vector<int>{
-            //     resourcer->GetGLBTextureIndexBaseColor(i),
-            //     resourcer->GetGLBTextureIndexNormal(i),
-            //     resourcer->GetGLBTextureIndexMetallic(i)
-            // };
-            int glbMaterialId = resourcer->GetGLBMaterialId(i);
-            GLBMaterial &glbMat = resourcer->GetGLBMaterial(glbMaterialId);
-            objects[i].m_texture_ids = std::vector<int>{
-                glbMat.baseColorTextureIndex, glbMat.normalTextureIndex, glbMat.metallicRoughnessTextureIndex};
+        for(int j = 0; j < appInfo->Objects.size(); j++){
+            for(int i = 0; i < resourcer->GetGLBMeshSize(0); i++){
+                objects[i].m_object_id = i;
+                objects[i].m_model_id = i;
+                objects[i].m_material_id = 0;
+                // objects[i].m_texture_ids = std::vector<int>{
+                //     resourcer->GetGLBTextureIndexBaseColor(i),
+                //     resourcer->GetGLBTextureIndexNormal(i),
+                //     resourcer->GetGLBTextureIndexMetallic(i)
+                // };
+                int glbMaterialId = resourcer->GetGLBMaterialId(i);
+                GLBMaterial &glbMat = resourcer->GetGLBMaterial(glbMaterialId);
+                objects[i].m_texture_ids = std::vector<int>{
+                    glbMat.baseColorTextureIndex, glbMat.normalTextureIndex, glbMat.metallicRoughnessTextureIndex};
+            
+                objects[i].metallicFactor = glbMat.metallicFactor;
+                objects[i].roughnessFactor = glbMat.roughnessFactor;
+                objects[i].alphaMode = glbMat.alphaMode;
+                objects[i].alphaCutoff = glbMat.alphaCutoff;
+                objects[i].doubleSided = glbMat.doubleSided;
+
+                
+                objects[i].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
+                objects[i].Name = appInfo->Objects[j].object_name;
+                objects[i].bSticker = false;
+                objects[i].SetPosition(appInfo->Objects[j].object_position[0], appInfo->Objects[j].object_position[1], appInfo->Objects[j].object_position[2]);
+                objects[i].SetRotation(appInfo->Objects[j].object_rotation[0], appInfo->Objects[j].object_rotation[1], appInfo->Objects[j].object_rotation[2]);
+                objects[i].SetVelocity(appInfo->Objects[j].object_velocity[0], appInfo->Objects[j].object_velocity[1], appInfo->Objects[j].object_velocity[2]);
+                objects[i].SetAngularVelocity(appInfo->Objects[j].object_angular_velocity[0], appInfo->Objects[j].object_angular_velocity[1], appInfo->Objects[j].object_angular_velocity[2]);
+
+                objects[i].SetScale(appInfo->Objects[j].object_scale, appInfo->Objects[j].object_scale, appInfo->Objects[j].object_scale);
+                //objects[i].SetScale(appInfo->Objects[i].object_scale_3[0], appInfo->Objects[i].object_scale_3[1], appInfo->Objects[i].object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
+                //std::cout<<"scale = "<<appInfo->Objects[i].object_scale_3[0]<<", "<<appInfo->Objects[i].object_scale_3[1]<<", "<<appInfo->Objects[i].object_scale_3[2]<<std::endl;
+
+                //must load resources before object register
+                if(objects[i].bRegistered) {
+                    std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+                    continue;
+                }
+                objects[i].Register((GameEngine*)this);
+            }//i: glb mesh
+        }//j: object
+    }
+
+    //upload raytracing pipeline uniform: config
+    if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) {
+        StructConfigUniformBuffer configUniformBufferObject{};
+        configUniformBufferObject.lightCount = GetRTLightSize();
+        configUniformBufferObject.materialCount = GetMaterialSize();
+        configUniformBufferObject.textureCount = resourcer->GetGLBTextureSize(); //must be called after LoadGLBTexture, otherwise textureCount = 0
+        //std::cout<<"[GameEngine] Initialize: configUniformBufferObject.lightCount = "<<configUniformBufferObject.lightCount<<", materialCount = "<<configUniformBufferObject.materialCount<<", textureCount = "<<configUniformBufferObject.textureCount<<"\n";
+        //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
+        configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
+        configUniformBufferObject.maxBounce = Get_feature_raytracing_pipeline_maximum_bounce();
+        configUniformBufferObject.maxPath = Get_feature_raytracing_pipeline_maximum_path();
+        configUniformBufferObject.accumulate = Get_feature_raytracing_pipeline_accumulate();
+        configUniformBufferObject.enableNEE = Get_feature_raytracing_pipeline_enableNEE();
+        configUniformBufferObject.NEESampleCount = Get_feature_raytracing_pipeline_NEE_sample_count();
+        configUniformBufferObject.NEESoftShadow = Get_feature_raytracing_pipeline_NEE_soft_shadow();
+        configUniformBufferObject.useSky = Get_feature_raytracing_pipeline_use_sky();
+        configUniformBufferObject.maxRadiance = Get_feature_raytracing_pipeline_maximum_Radiance();
+        configUniformBufferObject.debugMode = Get_feature_raytracing_pipeline_debug_mode();
+        configUniformBufferObject.softShadowEnable = Get_feature_raytracing_pipeline_softShadowEnable();
+        configUniformBufferObject.softShadowSampleNumber = Get_feature_raytracing_pipeline_softShadowSampleNumber();
+        configUniformBufferObject.maxReflectionDepth = Get_feature_raytracing_pipeline_maxReflectionDepth();
+        configUniformBufferObject.maxRefractionDepth = Get_feature_raytracing_pipeline_maxRefractionDepth();
+        configUniformBufferObject.shadowRayIgnoreSphere = Get_feature_raytracing_pipeline_shadowRayIgnoreSphere();
         
-            objects[i].metallicFactor = glbMat.metallicFactor;
-            objects[i].roughnessFactor = glbMat.roughnessFactor;
-            objects[i].alphaMode = glbMat.alphaMode;
-            objects[i].alphaCutoff = glbMat.alphaCutoff;
-            objects[i].doubleSided = glbMat.doubleSided;
-
-             
-            objects[i].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
-            objects[i].Name = "default";
-            objects[i].bSticker = false;
-            objects[i].SetPosition(0,0,0);
-            objects[i].SetRotation(0,0,0);
-            objects[i].SetVelocity(0,0,0);
-            objects[i].SetAngularVelocity(0,0,0);
-
-            objects[i].SetScale(0.005f, 0.005f, 0.005f);
-
-            //must load resources before object register
-            if(objects[i].bRegistered) {
-                std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
-                continue;
-            }
-            objects[i].Register((GameEngine*)this);
+        for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
+            renderer->SetCurrentFrame(i);
+            renderer->uploadRaytracingUniformBuffer_config(GetCurrentFrame(), &configUniformBufferObject, sizeof(StructConfigUniformBuffer));
         }
+        renderer->SetCurrentFrame(0);
     }
 
     //register objects for controls
@@ -569,16 +608,29 @@ void GameEngine::Initialize(){
     }
 
     for(int i = 0; i < objects.size(); i++){
-        if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
-        logger->Log("Object ID: {}", i);
-        logger->Log("\tName: {}", objects[i].Name.c_str());
-        logger->LogVec3("\tPosition", objects[i].Position);
-        logger->LogVec3("\tLength_original", objects[i].Length_original);
-        logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
-        logger->LogVec3("\tLengthMax_original", objects[i].LengthMax_original);
-        logger->LogVec3("\tScale", objects[i].Scale);
-        logger->LogVec3("\tLength", objects[i].Length);
-        logger->Log("");
+        if(!bLoadGLB){
+            if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
+            logger->Log("Object ID: {}", i);
+            logger->Log("\tName: {}", objects[i].Name.c_str());
+            logger->LogVec3("\tPosition", objects[i].Position);
+            logger->LogVec3("\tLength_original", objects[i].Length_original);
+            logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
+            logger->LogVec3("\tLengthMax_original", objects[i].LengthMax_original);
+            logger->LogVec3("\tScale", objects[i].Scale);
+            logger->LogVec3("\tLength", objects[i].Length);
+            logger->Log("");
+        }else{
+            if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
+            logger->Log("Object ID: {}", i);
+            logger->Log("\tName: {}", objects[i].Name.c_str());
+            logger->LogVec3("\tPosition", objects[i].Position);
+            logger->LogVec3("\tLength_original", objects[i].Length_original);
+            logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
+            logger->LogVec3("\tLengthMax_original", objects[i].LengthMax_original);
+            logger->LogVec3("\tScale", objects[i].Scale);
+            logger->LogVec3("\tLength", objects[i].Length);
+            logger->Log("");
+        }
     }
 
     if(bVerboseInitialization) {
@@ -658,6 +710,7 @@ void GameEngine::Initialize(){
     if(b_uniform_raytracing) {
         //if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->createRaytracingDescriptorSets(NULL);
         //else renderer->createRaytracingDescriptorSets();
+        std::cout<<"RT Descriptor: textureImageViews.size() = "<<resourcer->GetTextureImageViews().size()<<std::endl;
         renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas(), resourcer->GetTextureImageViews());
     }
 

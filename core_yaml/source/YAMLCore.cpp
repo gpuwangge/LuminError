@@ -114,6 +114,13 @@ void YAMLCore::ReadExampleYAMLFile(const std::string& examplename) {
             appInfo.Objects[object_id].loadFromYaml(obj);
         }
     }
+    // for (const auto& obj : appInfo.Objects) {
+    //     std::cout << "Loaded Object: " << obj.object_name << " with ID: " << obj.object_id << std::endl;
+    //     std::cout << "  Position: (" << obj.object_position[0] << ", " << obj.object_position[1] << ", " << obj.object_position[2] << ")" << std::endl;
+    //     std::cout << "  Rotation: (" << obj.object_rotation[0] << ", " << obj.object_rotation[1] << ", " << obj.object_rotation[2] << ")" << std::endl;
+    //     std::cout<< "   Scale: "<< obj.object_scale << std::endl;
+    //     std::cout << "  Scale: (" << obj.object_scale_3[0] << ", " << obj.object_scale_3[1] << ", " << obj.object_scale_3[2] << ")" << std::endl;
+    // }
 
     int max_customSpheres_id = -1;
     if (yamlNode["CustomSpheres"]) {

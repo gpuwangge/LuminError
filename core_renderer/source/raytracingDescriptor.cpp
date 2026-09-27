@@ -170,7 +170,7 @@ void CRaytracingDescriptorManager::createDescriptorSetLayout(VkDescriptorSetLayo
         raytracingBindings[counter].descriptorCount = 1;
         raytracingBindings[counter].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         raytracingBindings[counter].pImmutableSamplers = nullptr;
-        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        raytracingBindings[counter].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
         counter++;
 
         raytracingBindings[counter].binding = counter;
@@ -399,7 +399,7 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
 
             
             if (!glbSamplers.empty()) {
-                std::cout<<"RT Descriptor: textureImageViews.size() = "<<glbTextureImageViews.size()<<std::endl;
+                //std::cout<<"RT Descriptor: textureImageViews.size() = "<<glbTextureImageViews.size()<<std::endl;
                 // std::cout << "glbSamplers.size() = "
                 //         << glbSamplers.size()
                 //         << ", glbTextureImageViews.size() = "
