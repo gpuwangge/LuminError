@@ -28,7 +28,21 @@ void CGLBManager::LoadGLBFromFile(const std::string& filename){
     // std::cout<<"GLB Texture Size = "<< gltfModel.textures.size()<< std::endl;
     // std::cout<<"GLB Sampler Size = "<<gltfModel.samplers.size()<<std::endl;
 
-    logger->Log("=====GLB General Information=====");
+
+    logger->Log("=====GLB({}) General Information=====", glbObjects.size());
+    int glbId = glbObjects.size();
+    glbObjects.emplace_back();
+
+    if(glbId == 0){
+        glbObjects[glbId].accumulatedMaterialSize = gltfModel.materials.size();
+        glbObjects[glbId].accumulatedMeshSize = gltfModel.meshes.size();
+        glbObjects[glbId].accumulatedTextureSize = gltfModel.textures.size();
+    }else{
+        glbObjects[glbId].accumulatedMaterialSize = glbObjects[glbId-1].accumulatedMaterialSize + gltfModel.materials.size();
+        glbObjects[glbId].accumulatedMeshSize = glbObjects[glbId-1].accumulatedMeshSize + gltfModel.meshes.size();
+        glbObjects[glbId].accumulatedTextureSize = glbObjects[glbId-1].accumulatedTextureSize + gltfModel.textures.size();
+    }
+
     logger->Log("GLB Mesh Size = {}", gltfModel.meshes.size());
     for (size_t i = 0; i < gltfModel.meshes.size(); ++i) 
         logger->Log("\tMesh {}: {}, primitive count: {}", i, gltfModel.meshes[i].name.c_str(), gltfModel.meshes[i].primitives.size());
@@ -39,11 +53,11 @@ void CGLBManager::LoadGLBFromFile(const std::string& filename){
 
 }
 
-void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
+void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
     //bool bVerboseMeshInfo = false;
     //if(bVerboseMeshInfo) std::cout << "====LoadGLBMesh: meshIndex = " << meshIndex << ", primitiveIndex = " << primitiveIndex << "\n";
-    logger->Log("=====GLB Mesh Information=====");
-    logger->Log("LoadGLBMesh: meshIndex = {}, primitiveIndex = {}", meshIndex, primitiveIndex);
+    logger->Log("-----GLB({}) Mesh({}) Primitive({}) Information-----", glbId, meshIndex, primitiveIndex);
+    //logger->Log("LoadGLBMesh: meshIndex = {}, primitiveIndex = {}", meshIndex, primitiveIndex);
 
     auto& mesh = gltfModel.meshes[meshIndex];
     // auto& material = model.materials[0];
@@ -64,6 +78,7 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
     // primitive.material < 0 表示该 primitive 没有显式材质，
     // 应使用 glTF 默认材质。
     int materialId = primitive.material;
+    std::vector<GLBMaterial> &myGlbMaterials =  glbObjects[glbId].materials;
     int textureIndex_baseColor = myGlbMaterials[materialId].baseColorTextureIndex;
     int coordIndex_baseColor = myGlbMaterials[materialId].baseColorTexCoord;
     int textureIndex_normal = myGlbMaterials[materialId].normalTextureIndex;
@@ -245,17 +260,19 @@ void CGLBManager::LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::
             throw std::runtime_error("Unsupported index type.");
         }
     }
-}
+    logger->Log("");
 
-int CGLBManager::GetGLBMeshSize(IN int glbIndex){
+}//end of LoadGLBMesh()
+
+int CGLBManager::GetGLBMeshSize(IN int glbId){
     return gltfModel.meshes.size();//todo: add glbIndex to suppport multiple glb files
 }
-int CGLBManager::GetGLBTextureSize(){
+int CGLBManager::GetGLBTextureSize(int glbId){
     return gltfModel.textures.size();
 }
 
-void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
-    logger->Log("=====GLB Texture Information=====");
+void CGLBManager::LoadGLBTexture(int glbId, VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
+    logger->Log("=====GLB({}) Texture Information=====", glbId);
     logger->Log("GLB Image Size = {}", gltfModel.images.size());
     logger->Log("GLB Texture Size = {}", gltfModel.textures.size());
 
@@ -360,13 +377,16 @@ void CGLBManager::LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampl
         logger->Log("\tmagFilter = {}, minFilter = {}, addressModeU = {}, addressModeV = {}, addressModeW = {}, mipmapMode = {}, maxLod = {}",
             samplerInfo.magFilter, samplerInfo.minFilter, samplerInfo.addressModeU, samplerInfo.addressModeV, samplerInfo.addressModeW, samplerInfo.mipmapMode, samplerInfo.maxLod);
     }
+    logger->Log("");
 
     //std::cout<<"Read from gltfModel.textures: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
 }
 
-void CGLBManager::LoadGLBMaterial(){
-    logger->Log("=====GLB Material Information=====");
+void CGLBManager::LoadGLBMaterial(int glbId){
+    logger->Log("=====GLB({}) Material Information=====", glbId);
     logger->Log("GLB Material Size = {}", gltfModel.materials.size());
+
+    std::vector<GLBMaterial> &myGlbMaterials =  glbObjects[glbId].materials;
 
     myGlbMaterials.clear();
     myGlbMaterials.resize(gltfModel.materials.size());
@@ -537,6 +557,8 @@ void CGLBManager::LoadGLBMaterial(){
     }
     //std::cout << "Loaded material count = " << myGlbMaterials.size() << std::endl;
 
+    logger->Log("");
+
     //print for debug
     // for (size_t imageIndex = 0; imageIndex < imageUsages.size(); ++imageIndex){
     //     const uint32_t usage = imageUsages[imageIndex];
@@ -567,8 +589,9 @@ void CGLBManager::LoadGLBMaterial(){
     // }
 }
 
-GLBMaterial& CGLBManager::getGLBMaterial(int materialId){
-    return myGlbMaterials[materialId];
+GLBMaterial& CGLBManager::getGLBMaterial(int glbId, int materialId){
+    //return myGlbMaterials[materialId];
+    return glbObjects[glbId].materials[materialId];
 }
 
 VkSamplerAddressMode CGLBManager::gltfWrapToVk(int gltfWrap){

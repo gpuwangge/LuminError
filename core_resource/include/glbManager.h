@@ -1,8 +1,9 @@
 #pragma once
 #include <tiny_gltf.h>
 #include "TypeVertex.h"
-#include "TypeRaytracing.h"
+//#include "TypeRaytracing.h"
 #include "ILogCore.h"
+#include "TypeGLB.h"
 
 namespace LEResource{
 
@@ -32,14 +33,15 @@ public:
     //std::vector<int> textureIds_baseColor;
     //std::vector<std::vector<int>> textureIds; //baseColor, normal, metallicRoughness
     std::vector<uint32_t> glbMaterialIds; //决定哪个glb mesh用哪个glb material
-    void LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D);
+    void LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D);
 
     VkSamplerAddressMode gltfWrapToVk(int gltfWrap);
-    void LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers);
+    void LoadGLBTexture(int glbId, VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers);
 
-    std::vector<GLBMaterial> myGlbMaterials;
-    void LoadGLBMaterial();
-    GLBMaterial& getGLBMaterial(int materialId);
+    //std::vector<GLBMaterial> myGlbMaterials;
+    std::vector<GLBStruct> glbObjects;
+    void LoadGLBMaterial(int glbId);
+    GLBMaterial& getGLBMaterial(int glbId, int materialId);
 
     //通过读GLB Material，需要获得每种image的usage
     enum TextureUsage : uint32_t{
@@ -52,8 +54,8 @@ public:
     };
     std::vector<uint32_t> imageUsages;
 
-    int GetGLBMeshSize(IN int glbIndex);
-    int GetGLBTextureSize();
+    int GetGLBMeshSize(IN int glbId);
+    int GetGLBTextureSize(int glbId);
 };
 
 }//namespace

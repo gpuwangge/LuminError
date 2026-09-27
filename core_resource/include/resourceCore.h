@@ -17,16 +17,20 @@ namespace LEResource{
          * GLB Resource
          * ***********************/
         void LoadGLBFromFile(IN const std::string glbName) override;
-        void LoadGLBMesh(IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
-        void LoadGLBTexture(VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) override;
-        void LoadGLBMaterial() override;
+        void LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) override;
+        void LoadGLBTexture(IN int glbId, VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers) override;
+        void LoadGLBMaterial(IN int glbId) override;
         int GetGLBMeshSize(IN int glbIndex) override;
-        int GetGLBTextureSize() override;
+        int GetGLBTextureSize(IN int glbId) override;
         // int GetGLBTextureIndexBaseColor(int meshIndex) override;
         // int GetGLBTextureIndexNormal(int meshIndex) override;
         // int GetGLBTextureIndexMetallic(int meshIndex) override;
-        virtual int GetGLBMaterialId(IN int glbMeshId) override;
-        virtual GLBMaterial& GetGLBMaterial(IN int glbMaterialId) override;
+        int GetGLBMaterialId(IN int glbId, IN int glbMeshId) override;
+        GLBMaterial& GetGLBMaterial(IN int glbId, IN int glbMaterialId) override;
+
+        int GetGLBMaterialOffset(int glbIndex) override;
+        int GetGLBMeshOffset(int glbIndex) override;
+        int GetGLBTextureOffset(int glbIndex) override;
 
         /**************************
          * Shader Resource

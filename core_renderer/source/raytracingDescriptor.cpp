@@ -414,8 +414,11 @@ void CRaytracingDescriptorManager::createDescriptorSets(VkImageView textureImage
                 
                 samplerInfos.resize(glbSamplers.size());
 
-                if (glbTextureImageViews.size() != glbSamplers.size()) 
+                if (glbTextureImageViews.size() != glbSamplers.size()) {
+                    std::cout<<"glbTextureImageViews.size() = "<<glbTextureImageViews.size()<<std::endl;
+                    std::cout<<"glbSamplers.size() = " << glbSamplers.size()<< std::endl;
                     throw std::runtime_error("glbTextureImageViews.size() must equal glbSamplers.size()");
+                }
 
                 for (size_t textureIndex = 0; textureIndex < glbSamplers.size(); ++textureIndex) {
                     samplerInfos[textureIndex].sampler = glbSamplers[textureIndex];

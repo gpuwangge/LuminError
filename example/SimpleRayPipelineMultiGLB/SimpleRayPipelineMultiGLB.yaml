@@ -1,7 +1,7 @@
 Objects:
-  - object_name: Sponza
+  - object_name: TeddyBear
     object_id: 0
-    object_scale: 0.005
+    object_scale: 1
     object_position: [0,0.0,0]
     object_rotation: [0,0,0]
     object_velocity: [0,0,0] #no use
@@ -10,32 +10,31 @@ Objects:
     resource_model_id: 0
     resource_texture_id_list: [1] #no use
     resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Maid
+    object_id: 1
+    object_scale: 2
+    object_position: [-2,0.0,-1]
+    object_rotation: [90,0,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+  - object_name: Bread
+    object_id: 2
+    object_scale: 0.3
+    object_position: [0,1.0,0]
+    object_rotation: [0,0,0]
+    object_velocity: [0,0,0] #no use
+    object_angular_velocity: [0,0,0] #no use
+    object_material_id: 0
+    resource_model_id: 0
+    resource_texture_id_list: [1] #no use
+    resource_default_graphics_pipeline_id: 2 #no use
+
 
 CustomSpheres:
-  # - custom_sphere_name: Sphere
-  #   custom_sphere_id: 0
-  #   custom_sphere_position: [5.6, 0.8, 2]
-  #   custom_sphere_radius: 0.25
-  #   custom_sphere_material_id: 5
-  #   custom_sphere_visibility: true
-  # - custom_sphere_name: Sphere
-  #   custom_sphere_id: 1
-  #   custom_sphere_position: [-6, 0.8, 2]
-  #   custom_sphere_radius: 0.25
-  #   custom_sphere_material_id: 6
-  #   custom_sphere_visibility: true
-  # - custom_sphere_name: Sphere
-  #   custom_sphere_id: 2
-  #   custom_sphere_position: [5.6, 0.8, -2.25]
-  #   custom_sphere_radius: 0.25
-  #   custom_sphere_material_id: 7
-  #   custom_sphere_visibility: true
-  # - custom_sphere_name: Sphere
-  #   custom_sphere_id: 3
-  #   custom_sphere_position: [-6, 0.8, -2.25]
-  #   custom_sphere_radius: 0.25
-  #   custom_sphere_material_id: 5
-  #   custom_sphere_visibility: true
   - custom_sphere_name: Sun
     custom_sphere_id: 0
     custom_sphere_position: [0, 8, 0]
@@ -50,50 +49,6 @@ CustomSpheres:
     custom_sphere_visibility: true    
 
 RTLights: #ray tracing pipeline lights to generate shadow
-  # - rt_light_name: Light0
-  #   rt_light_id: 0
-  #   rt_light_position: [5.6, 0.8, 2]
-  #   rt_light_color: [1, 0, 0]
-  #   rt_light_intensity: 16
-  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
-  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-  #   rt_light_angle: 30 #only for spot light, not used yet
-  #   rt_light_range: 10
-  #   rt_light_falloff: 1
-  # - rt_light_name: Light1
-  #   rt_light_id: 1
-  #   rt_light_position: [-6, 0.8, 2]
-  #   rt_light_color: [0, 1, 0]
-  #   rt_light_intensity: 16
-  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
-  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-  #   rt_light_angle: 30 #only for spot light, not used yet
-  #   rt_light_range: 10
-  #   rt_light_falloff: 1
-  # - rt_light_name: Light2
-  #   rt_light_id: 2
-  #   rt_light_position: [5.6, 0.8, -2.25]
-  #   rt_light_color: [0, 0, 1]
-  #   rt_light_intensity: 16
-  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
-  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-  #   rt_light_angle: 30 #only for spot light, not used yet
-  #   rt_light_range: 10
-  #   rt_light_falloff: 1
-  # - rt_light_name: Light3
-  #   rt_light_id: 3
-  #   rt_light_position: [-6, 0.8, -2.25]
-  #   rt_light_color: [1, 0, 0]
-  #   rt_light_intensity: 16
-  #   rt_light_radius: 0.08 #spot light can use this to create soft shadow
-  #   rt_light_type: 0 #0=point light, 1=directional light, 2=spot light, not used yet
-  #   rt_light_direction: [0, -1, 0] #only for directional light and spot light, not used yet
-  #   rt_light_angle: 30 #only for spot light, not used yet
-  #   rt_light_range: 10
-  #   rt_light_falloff: 1
   - rt_light_name: Light4_Sun
     rt_light_id: 0
     rt_light_position: [0.0, 8, 0.0]
@@ -120,7 +75,11 @@ RTLights: #ray tracing pipeline lights to generate shadow
 
 Resources:
   - Glbs:
-      - resource_glb_name: sponza-palace.glb
+      #- resource_glb_name: sponza-palace.glb
+      - resource_glb_name: teddybear.glb
+      - resource_glb_name: Female_Maid_Facesless.glb
+      - resource_glb_name: bread_roll.glb
+      
     
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
@@ -139,6 +98,10 @@ Uniforms:
   RayTracing:
     uniform_raytracing_swapchain_storage: true
     storage_raytracing_material: true
+  #Compute:
+    #storage_custom_material: true #need enable this if want to use materials, otherwise it won't read material yaml
+    #storage_custom_sphere: false this doesn't matter for rt pipeline. it is for compute pipeline. rt pipeline always enable spheres
+  
 
 Features:
   feature_rendermode: 5 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4， RAYTRACING_SWAPCHAIN=5

@@ -1,5 +1,7 @@
 #include "gameEngine.h"
 #include "TypeVertex.h"
+#include "TypeGLB.h"
+
 namespace LEGameEngine{
 
 void GameEngine::Initialize(){
@@ -260,6 +262,8 @@ void GameEngine::Initialize(){
     ****************************/
     bool bLoadGLB = false;
     //std::cout<<appInfo->Glbs.size()<<" GLB Resources to load."<<std::endl;
+
+    //for(int i = 0; i < 2; i++){//TODO: appInfo->Glbs.size()
     for(int i = 0; i < appInfo->Glbs.size(); i++){
         std::string glbName = appInfo->Glbs[i].resource_glb_name;
         //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<std::endl;
@@ -267,16 +271,22 @@ void GameEngine::Initialize(){
         resourcer->LoadGLBFromFile(glbName);
         bLoadGLB = true;
 
-        resourcer->LoadGLBMaterial();
+        //GLB Step 1
+        resourcer->LoadGLBMaterial(i);
         //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<", mesh size="<<resourcer->GetMeshSize(i)<<std::endl;
+
+        //GLB Step 2
         for(int j = 0; j < resourcer->GetGLBMeshSize(i); j++){    
             modelData.emplace_back();
             int currentModelIndex = modelData.size() - 1;
-            resourcer->LoadGLBMesh(j, 0, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
+            resourcer->LoadGLBMesh(i, j, 0, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
             renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
             renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
         }
-        resourcer->LoadGLBTexture(renderer->GetCommandPool(), renderer->GetGLBSampelrs());
+
+        //GLB Step 3
+        if(i == 0) //TODO: remove later
+        resourcer->LoadGLBTexture(i, renderer->GetCommandPool(), renderer->GetGLBSampelrs());
         
     }
 
@@ -521,49 +531,58 @@ void GameEngine::Initialize(){
             }
         }
     }else{ //use GLB objects:对RT Pipeline来说，GLB Mesh之前读进了buffer，现在mesh注册，之后再rendererCore里面把这里注册的信息放入instance buffer
-        objects.resize(resourcer->GetGLBMeshSize(0) + objectCountControl);
-        std::cout<<"Application: Register "<<objects.size()<<" objects from GLB."<<std::endl;
-        for(int j = 0; j < appInfo->Objects.size(); j++){
-            for(int i = 0; i < resourcer->GetGLBMeshSize(0); i++){
-                objects[i].m_object_id = i;
-                objects[i].m_model_id = i;
-                objects[i].m_material_id = 0;
+        //appInfo->Objects: 有多少个glb fiile
+        //objects: 每个glb里面的mesh全部加起来
+        std::cout<<"Application: Register "<<appInfo->Objects.size()<<" GLB files."<<std::endl;
+        int glbSize = 0;
+        for(int i = 0; i < appInfo->Objects.size(); i++) glbSize += resourcer->GetGLBMeshSize(i);
+        std::cout<<"Application: Mesh size from all GLB files = "<<glbSize<<std::endl;
+        objects.resize(glbSize);
+        //objects.resize(resourcer->GetGLBMeshSize(0) + objectCountControl);
+        //std::cout<<"Application: Register "<<objects.size()<<" objects from GLB."<<std::endl;
+        int objectIndex = 0;
+        for(int glbId = 0; glbId < appInfo->Objects.size(); glbId++){
+            for(int meshId = 0; meshId < resourcer->GetGLBMeshSize(glbId); meshId++){
+                objects[objectIndex].m_object_id = meshId;
+                objects[objectIndex].m_model_id = resourcer->GetGLBMeshOffset(glbId) + meshId;
+                objects[objectIndex].m_material_id = 0;
                 // objects[i].m_texture_ids = std::vector<int>{
                 //     resourcer->GetGLBTextureIndexBaseColor(i),
                 //     resourcer->GetGLBTextureIndexNormal(i),
                 //     resourcer->GetGLBTextureIndexMetallic(i)
                 // };
-                int glbMaterialId = resourcer->GetGLBMaterialId(i);
-                GLBMaterial &glbMat = resourcer->GetGLBMaterial(glbMaterialId);
-                objects[i].m_texture_ids = std::vector<int>{
+                int glbMaterialId = resourcer->GetGLBMaterialId(glbId, meshId);
+                GLBMaterial &glbMat = resourcer->GetGLBMaterial(glbId, glbMaterialId);
+                objects[objectIndex].m_texture_ids = std::vector<int>{
                     glbMat.baseColorTextureIndex, glbMat.normalTextureIndex, glbMat.metallicRoughnessTextureIndex};
             
-                objects[i].metallicFactor = glbMat.metallicFactor;
-                objects[i].roughnessFactor = glbMat.roughnessFactor;
-                objects[i].alphaMode = glbMat.alphaMode;
-                objects[i].alphaCutoff = glbMat.alphaCutoff;
-                objects[i].doubleSided = glbMat.doubleSided;
+                objects[objectIndex].metallicFactor = glbMat.metallicFactor;
+                objects[objectIndex].roughnessFactor = glbMat.roughnessFactor;
+                objects[objectIndex].alphaMode = glbMat.alphaMode;
+                objects[objectIndex].alphaCutoff = glbMat.alphaCutoff;
+                objects[objectIndex].doubleSided = glbMat.doubleSided;
 
                 
-                objects[i].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
-                objects[i].Name = appInfo->Objects[j].object_name;
-                objects[i].bSticker = false;
-                objects[i].SetPosition(appInfo->Objects[j].object_position[0], appInfo->Objects[j].object_position[1], appInfo->Objects[j].object_position[2]);
-                objects[i].SetRotation(appInfo->Objects[j].object_rotation[0], appInfo->Objects[j].object_rotation[1], appInfo->Objects[j].object_rotation[2]);
-                objects[i].SetVelocity(appInfo->Objects[j].object_velocity[0], appInfo->Objects[j].object_velocity[1], appInfo->Objects[j].object_velocity[2]);
-                objects[i].SetAngularVelocity(appInfo->Objects[j].object_angular_velocity[0], appInfo->Objects[j].object_angular_velocity[1], appInfo->Objects[j].object_angular_velocity[2]);
+                objects[objectIndex].m_default_graphics_pipeline_id = 0; //todo: no use for now, because glb only use rt pipeline
+                objects[objectIndex].Name = appInfo->Objects[glbId].object_name;
+                objects[objectIndex].bSticker = false;
+                objects[objectIndex].SetPosition(appInfo->Objects[glbId].object_position[0], appInfo->Objects[glbId].object_position[1], appInfo->Objects[glbId].object_position[2]);
+                objects[objectIndex].SetRotation(appInfo->Objects[glbId].object_rotation[0], appInfo->Objects[glbId].object_rotation[1], appInfo->Objects[glbId].object_rotation[2]);
+                objects[objectIndex].SetVelocity(appInfo->Objects[glbId].object_velocity[0], appInfo->Objects[glbId].object_velocity[1], appInfo->Objects[glbId].object_velocity[2]);
+                objects[objectIndex].SetAngularVelocity(appInfo->Objects[glbId].object_angular_velocity[0], appInfo->Objects[glbId].object_angular_velocity[1], appInfo->Objects[glbId].object_angular_velocity[2]);
 
-                objects[i].SetScale(appInfo->Objects[j].object_scale, appInfo->Objects[j].object_scale, appInfo->Objects[j].object_scale);
-                //objects[i].SetScale(appInfo->Objects[i].object_scale_3[0], appInfo->Objects[i].object_scale_3[1], appInfo->Objects[i].object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
-                //std::cout<<"scale = "<<appInfo->Objects[i].object_scale_3[0]<<", "<<appInfo->Objects[i].object_scale_3[1]<<", "<<appInfo->Objects[i].object_scale_3[2]<<std::endl;
+                objects[objectIndex].SetScale(appInfo->Objects[glbId].object_scale, appInfo->Objects[glbId].object_scale, appInfo->Objects[glbId].object_scale);
+                //objects[objectIndex].SetScale(appInfo->Objects[objectIndex].object_scale_3[0], appInfo->Objects[objectIndex].object_scale_3[1], appInfo->Objects[objectIndex].object_scale_3[2]);//set scale after model is registered, otherwise the length will not be computed correctly
+                //std::cout<<"scale = "<<appInfo->Objects[objectIndex].object_scale_3[0]<<", "<<appInfo->Objects[objectIndex].object_scale_3[1]<<", "<<appInfo->Objects[objectIndex].object_scale_3[2]<<std::endl;
 
                 //must load resources before object register
-                if(objects[i].bRegistered) {
-                    std::cout<<"WARNING: Trying to register a registered Object id("<<i<<")!"<<std::endl;
+                if(objects[objectIndex].bRegistered) {
+                    std::cout<<"WARNING: Trying to register a registered Object id("<<objectIndex<<")!"<<std::endl;
                     continue;
                 }
-                objects[i].Register((GameEngine*)this);
-            }//i: glb mesh
+                objects[objectIndex].Register((GameEngine*)this);
+                objectIndex++;
+            }//glbId
         }//j: object
     }
 
@@ -572,7 +591,7 @@ void GameEngine::Initialize(){
         StructConfigUniformBuffer configUniformBufferObject{};
         configUniformBufferObject.lightCount = GetRTLightSize();
         configUniformBufferObject.materialCount = GetMaterialSize();
-        configUniformBufferObject.textureCount = resourcer->GetGLBTextureSize(); //must be called after LoadGLBTexture, otherwise textureCount = 0
+        configUniformBufferObject.textureCount = resourcer->GetGLBTextureSize(0); //must be called after LoadGLBTexture, otherwise textureCount = 0
         //std::cout<<"[GameEngine] Initialize: configUniformBufferObject.lightCount = "<<configUniformBufferObject.lightCount<<", materialCount = "<<configUniformBufferObject.materialCount<<", textureCount = "<<configUniformBufferObject.textureCount<<"\n";
         //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
         configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
