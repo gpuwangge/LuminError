@@ -607,8 +607,8 @@ void GameEngine::Initialize(){
         }
     }
 
-    for(int i = 0; i < objects.size(); i++){
-        if(!bLoadGLB){
+    if(!bLoadGLB){
+        for(int i = 0; i < objects.size(); i++){
             if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
             logger->Log("Object ID: {}", i);
             logger->Log("\tName: {}", objects[i].Name.c_str());
@@ -619,10 +619,11 @@ void GameEngine::Initialize(){
             logger->LogVec3("\tScale", objects[i].Scale);
             logger->LogVec3("\tLength", objects[i].Length);
             logger->Log("");
-        }else{
-            if(!objects[i].bRegistered) std::cout<<"WARNING: Object id("<<i<<") is not registered!"<<std::endl;
-            logger->Log("Object ID: {}", i);
-            logger->Log("\tName: {}", objects[i].Name.c_str());
+        }
+    }else{
+        for(int i = 0; i < appInfo->Objects.size(); i++){
+            logger->Log("GLB Object ID: {}", i);
+            logger->Log("\tName: {}", appInfo->Objects[i].object_name.c_str());
             logger->LogVec3("\tPosition", objects[i].Position);
             logger->LogVec3("\tLength_original", objects[i].Length_original);
             logger->LogVec3("\tLengthMin_original", objects[i].LengthMin_original);
