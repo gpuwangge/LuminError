@@ -130,34 +130,6 @@ void GameEngine::Initialize(){
         renderer->addRaytracingUniformBuffer_instance();
         renderer->addRaytracingUniformBuffer_config();
         renderer->addStorageImage(RAYTRACING_STORAGEIMAGE_SWAPCHAIN);
-
-        // StructConfigUniformBuffer configUniformBufferObject{};
-        // configUniformBufferObject.lightCount = GetRTLightSize();
-        // configUniformBufferObject.materialCount = GetMaterialSize();
-        // configUniformBufferObject.textureCount = resourcer->GetGLBTextureSize(); //must be called after LoadGLBTexture, otherwise textureCount = 0
-        // std::cout<<"[GameEngine] Initialize: configUniformBufferObject.lightCount = "<<configUniformBufferObject.lightCount<<", materialCount = "<<configUniformBufferObject.materialCount<<", textureCount = "<<configUniformBufferObject.textureCount<<"\n";
-        // //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
-        // configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
-        // configUniformBufferObject.maxBounce = Get_feature_raytracing_pipeline_maximum_bounce();
-        // configUniformBufferObject.maxPath = Get_feature_raytracing_pipeline_maximum_path();
-        // configUniformBufferObject.accumulate = Get_feature_raytracing_pipeline_accumulate();
-        // configUniformBufferObject.enableNEE = Get_feature_raytracing_pipeline_enableNEE();
-        // configUniformBufferObject.NEESampleCount = Get_feature_raytracing_pipeline_NEE_sample_count();
-        // configUniformBufferObject.NEESoftShadow = Get_feature_raytracing_pipeline_NEE_soft_shadow();
-        // configUniformBufferObject.useSky = Get_feature_raytracing_pipeline_use_sky();
-        // configUniformBufferObject.maxRadiance = Get_feature_raytracing_pipeline_maximum_Radiance();
-        // configUniformBufferObject.debugMode = Get_feature_raytracing_pipeline_debug_mode();
-        // configUniformBufferObject.softShadowEnable = Get_feature_raytracing_pipeline_softShadowEnable();
-        // configUniformBufferObject.softShadowSampleNumber = Get_feature_raytracing_pipeline_softShadowSampleNumber();
-        // configUniformBufferObject.maxReflectionDepth = Get_feature_raytracing_pipeline_maxReflectionDepth();
-        // configUniformBufferObject.maxRefractionDepth = Get_feature_raytracing_pipeline_maxRefractionDepth();
-        // configUniformBufferObject.shadowRayIgnoreSphere = Get_feature_raytracing_pipeline_shadowRayIgnoreSphere();
-
-        // for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++){
-        //     renderer->SetCurrentFrame(i);
-        //     renderer->uploadRaytracingUniformBuffer_config(GetCurrentFrame(), &configUniformBufferObject, sizeof(StructConfigUniformBuffer));
-        // }
-        // renderer->SetCurrentFrame(0);
     }
 
     if(appInfo->Samplers.size() > 0){
@@ -276,16 +248,21 @@ void GameEngine::Initialize(){
         //std::cout<<"Application: Load GLB Resource "<<i<<", name="<<glbName<<", mesh size="<<resourcer->GetMeshSize(i)<<std::endl;
 
         //GLB Step 2
-        for(int j = 0; j < resourcer->GetGLBMeshSize(i); j++){    
-            modelData.emplace_back();
-            int currentModelIndex = modelData.size() - 1;
-            resourcer->LoadGLBMesh(i, j, 0, modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
-            renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
-            renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
+        for(int j = 0; j < resourcer->GetGLBMeshSize(i); j++){
+            int primitiveCount = resourcer->GetGLBMeshPrimitiveSize(i,j);
+            for(int k = 0; k < primitiveCount; k++){
+                ModelStruct ms;
+                bool bresult = resourcer->LoadGLBMesh(i, j, k, ms.modelVertices3D, ms.modelIndices3D);
+                if(bresult){
+                    int currentModelIndex = modelData.size();
+                    modelData.push_back(ms);
+                    renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
+                    renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
+                }else std::cout<<"Load GLB Mesh Primitive Failed!!"<<std::endl;
+            }
         }
 
         //GLB Step 3
-        if(i == 0) //TODO: remove later
         resourcer->LoadGLBTexture(i, renderer->GetCommandPool(), renderer->GetGLBSampelrs());
         
     }
@@ -591,7 +568,9 @@ void GameEngine::Initialize(){
         StructConfigUniformBuffer configUniformBufferObject{};
         configUniformBufferObject.lightCount = GetRTLightSize();
         configUniformBufferObject.materialCount = GetMaterialSize();
-        configUniformBufferObject.textureCount = resourcer->GetGLBTextureSize(0); //must be called after LoadGLBTexture, otherwise textureCount = 0
+        if(!bLoadGLB) configUniformBufferObject.textureCount = 0;
+        else configUniformBufferObject.textureCount = resourcer->GetGLBTextureOffset(appInfo->Objects.size());//resourcer->GetGLBTextureSize(0); 
+        std::cout<<"Total glb texture count = "<<configUniformBufferObject.textureCount<<std::endl;
         //std::cout<<"[GameEngine] Initialize: configUniformBufferObject.lightCount = "<<configUniformBufferObject.lightCount<<", materialCount = "<<configUniformBufferObject.materialCount<<", textureCount = "<<configUniformBufferObject.textureCount<<"\n";
         //configUniformBufferObject.renderMode = Get_feature_raytracing_pipeline_render_mode();
         configUniformBufferObject.spp = Get_feature_raytracing_pipeline_sampler_per_pixel();
@@ -730,8 +709,10 @@ void GameEngine::Initialize(){
     if(b_uniform_raytracing) {
         //if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->createRaytracingDescriptorSets(NULL);
         //else renderer->createRaytracingDescriptorSets();
-        std::cout<<"RT Descriptor: textureImageViews.size() = "<<resourcer->GetTextureImageViews().size()<<std::endl;
-        renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas(), resourcer->GetTextureImageViews());
+        //std::cout<<"RT Descriptor: textureImageViews.size() = "<<resourcer->GetTextureImageViews().size()<<std::endl;
+
+        if(!bLoadGLB) renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas(), {});
+        else renderer->createRaytracingDescriptorSets(NULL, renderer->GetTlas(), resourcer->GetTextureImageViews()); //consider GLB
     }
 
     if(bVerboseInitialization) {

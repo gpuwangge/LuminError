@@ -422,7 +422,8 @@ namespace LERenderer{
 
         void createRaytracingDescriptorPool() override { raytracingDescriptorManager.createDescriptorPool(); }
         void createRaytracingDescriptorSetLayout(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { raytracingDescriptorManager.createDescriptorSetLayout(customBinding); }
-        void createRaytracingDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas, const std::vector<VkImageView>& glbTextureImageViews) override { raytracingDescriptorManager.createDescriptorSets(textureImageView, tlas, glbTextureImageViews); }
+        void createRaytracingDescriptorSets(VkImageView textureImageView, VkAccelerationStructureKHR tlas, const std::vector<VkImageView>& glbTextureImageViews) override { 
+            raytracingDescriptorManager.createDescriptorSets(textureImageView, tlas, glbTextureImageViews); }
 
         void addComputeGlobalUniformBuffer() { computeDescriptorManager.addGlobalUniformBuffer(); }
         void uploadComputeGlobalUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) { computeDescriptorManager.uploadGlobalUniformBuffer(currentFrame, data, dataSize); }

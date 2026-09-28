@@ -13,7 +13,7 @@ Objects:
   - object_name: Maid
     object_id: 1
     object_scale: 2
-    object_position: [-2,0.0,-1]
+    object_position: [-1,-0.5,0.5]
     object_rotation: [90,0,0]
     object_velocity: [0,0,0] #no use
     object_angular_velocity: [0,0,0] #no use
@@ -47,6 +47,12 @@ CustomSpheres:
     custom_sphere_radius: 0.075
     custom_sphere_material_id: 4
     custom_sphere_visibility: true    
+  - custom_sphere_name: Earth
+    custom_sphere_id: 2
+    custom_sphere_position: [0, -10.5, 0]
+    custom_sphere_radius: 10
+    custom_sphere_material_id: 1
+    custom_sphere_visibility: true
 
 RTLights: #ray tracing pipeline lights to generate shadow
   - rt_light_name: Light4_Sun
@@ -140,12 +146,8 @@ Attachments:
 
 MainCamera:
   camera_mode: 1
-  camera_position: [-6.5,1,0]
-  camera_rotation: [0,90,0]
-  #camera_position: [-6,1,0.5] #aim to lion
-  #camera_rotation: [0,-110,0] #aim to lion
-  #camera_position: [-3.5,1,-0.5] #aim to curtain
-  #camera_rotation: [0,-0,0] #aim to curtain
+  camera_position: [-2,0.8,4.0]
+  camera_rotation: [0,-200,0]
   object_id_target: 0
   camera_z: [0.1, 256]
   camera_projection_enable_orthographic: false

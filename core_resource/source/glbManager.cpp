@@ -14,50 +14,47 @@
 namespace LEResource{
 
 void CGLBManager::LoadGLBFromFile(const std::string& filename){
+    logger->Log("=====GLB({}) General Information=====", glbObjects.size());
+    int glbId = glbObjects.size();
+    glbObjects.emplace_back();
+
+    tinygltf::Model &gltfModel = glbObjects[glbId].gltfModel;
+
     bool ok = loader.LoadBinaryFromFile(&gltfModel, &err, &warn, GLB_PATH + filename);
 
     if (!warn.empty()) std::cout << warn << std::endl;
     if (!err.empty()) std::cout << err << std::endl;
     if (!ok) std::cout << "Load failed\n";
 
-    // std::cout<<"GLB Mesh Size = "<< gltfModel.meshes.size()<< std::endl;
-    // for (size_t i = 0; i < gltfModel.meshes.size(); ++i) 
-    //     std::cout << "Mesh " << i << ": " << gltfModel.meshes[i].name << ", primitive count: " << gltfModel.meshes[i].primitives.size() << std::endl;
-    // std::cout<<"GLB Material Size = "<< gltfModel.materials.size()<< std::endl;
-    // std::cout<<"GLB Image Size = "<< gltfModel.images.size()<< std::endl;
-    // std::cout<<"GLB Texture Size = "<< gltfModel.textures.size()<< std::endl;
-    // std::cout<<"GLB Sampler Size = "<<gltfModel.samplers.size()<<std::endl;
-
-
-    logger->Log("=====GLB({}) General Information=====", glbObjects.size());
-    int glbId = glbObjects.size();
-    glbObjects.emplace_back();
-
     if(glbId == 0){
-        glbObjects[glbId].accumulatedMaterialSize = gltfModel.materials.size();
+        //glbObjects[glbId].accumulatedMaterialSize = gltfModel.materials.size();
         glbObjects[glbId].accumulatedMeshSize = gltfModel.meshes.size();
         glbObjects[glbId].accumulatedTextureSize = gltfModel.textures.size();
     }else{
-        glbObjects[glbId].accumulatedMaterialSize = glbObjects[glbId-1].accumulatedMaterialSize + gltfModel.materials.size();
+        //glbObjects[glbId].accumulatedMaterialSize = glbObjects[glbId-1].accumulatedMaterialSize + gltfModel.materials.size();
         glbObjects[glbId].accumulatedMeshSize = glbObjects[glbId-1].accumulatedMeshSize + gltfModel.meshes.size();
         glbObjects[glbId].accumulatedTextureSize = glbObjects[glbId-1].accumulatedTextureSize + gltfModel.textures.size();
     }
 
     logger->Log("GLB Mesh Size = {}", gltfModel.meshes.size());
-    for (size_t i = 0; i < gltfModel.meshes.size(); ++i) 
+    for (size_t i = 0; i < gltfModel.meshes.size(); ++i) {
         logger->Log("\tMesh {}: {}, primitive count: {}", i, gltfModel.meshes[i].name.c_str(), gltfModel.meshes[i].primitives.size());
+        glbObjects[glbId].mesh_primitive_size.push_back(gltfModel.meshes[i].primitives.size());
+    }
     logger->Log("GLB Material Size = {}", gltfModel.materials.size());
     logger->Log("GLB Image Size = {}", gltfModel.images.size());
-    logger->Log("GLB Texture Size = {}", gltfModel.textures.size());
-    logger->Log("GLB Sampler Size = {}\n", gltfModel.samplers.size());
+    logger->Log("GLB Sampler Size = {}", gltfModel.samplers.size());
+    logger->Log("GLB Texture Size = {}\n", gltfModel.textures.size());//each texutre has "source" points to image, and "sampler" points to samplers
 
 }
 
-void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
+bool CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D){
     //bool bVerboseMeshInfo = false;
     //if(bVerboseMeshInfo) std::cout << "====LoadGLBMesh: meshIndex = " << meshIndex << ", primitiveIndex = " << primitiveIndex << "\n";
     logger->Log("-----GLB({}) Mesh({}) Primitive({}) Information-----", glbId, meshIndex, primitiveIndex);
     //logger->Log("LoadGLBMesh: meshIndex = {}, primitiveIndex = {}", meshIndex, primitiveIndex);
+
+    tinygltf::Model &gltfModel = glbObjects[glbId].gltfModel;
 
     auto& mesh = gltfModel.meshes[meshIndex];
     // auto& material = model.materials[0];
@@ -67,6 +64,7 @@ void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIn
     if (mesh.primitives.empty()) throw std::runtime_error("Mesh contains no primitives.");
     
     // 这里只读取一个 primitive
+    if(primitiveIndex >= mesh.primitives.size()) return false;
     const tinygltf::Primitive& primitive = mesh.primitives[primitiveIndex];
 
     const tinygltf::Accessor* posAccessor = nullptr;
@@ -79,10 +77,19 @@ void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIn
     // 应使用 glTF 默认材质。
     int materialId = primitive.material;
     std::vector<GLBMaterial> &myGlbMaterials =  glbObjects[glbId].materials;
-    int textureIndex_baseColor = myGlbMaterials[materialId].baseColorTextureIndex;
-    int coordIndex_baseColor = myGlbMaterials[materialId].baseColorTexCoord;
-    int textureIndex_normal = myGlbMaterials[materialId].normalTextureIndex;
-    int coordIndex_normal = myGlbMaterials[materialId].normalTexCoord;
+    int accumualtedTextureSize = (glbId == 0) ? 0 : glbObjects[glbId-1].accumulatedTextureSize;
+    //std::cout<<"glbId="<<glbId<<", meshId="<<meshIndex<<", accumualtedTextureSize="<<accumualtedTextureSize<<std::endl;
+
+    // int textureIndex_baseColor = accumualtedTextureSize + myGlbMaterials[materialId].baseColorTextureIndex;
+    // int coordIndex_baseColor = accumualtedTextureSize + myGlbMaterials[materialId].baseColorTexCoord;
+    // int textureIndex_normal = accumualtedTextureSize + myGlbMaterials[materialId].normalTextureIndex;
+    // int coordIndex_normal = accumualtedTextureSize + myGlbMaterials[materialId].normalTexCoord;
+    // int textureIndex_metalicRoughness = accumualtedTextureSize + myGlbMaterials[materialId].metallicRoughnessTextureIndex;
+    // int coordIndex_metalicRoughness = accumualtedTextureSize + myGlbMaterials[materialId].metallicRoughnessTexCoord;
+    int textureIndex_baseColor =  myGlbMaterials[materialId].baseColorTextureIndex;
+    int coordIndex_baseColor =  myGlbMaterials[materialId].baseColorTexCoord;
+    int textureIndex_normal =  myGlbMaterials[materialId].normalTextureIndex;
+    int coordIndex_normal =  myGlbMaterials[materialId].normalTexCoord;
     int textureIndex_metalicRoughness = myGlbMaterials[materialId].metallicRoughnessTextureIndex;
     int coordIndex_metalicRoughness = myGlbMaterials[materialId].metallicRoughnessTexCoord;
     // if(bVerboseMeshInfo){
@@ -92,10 +99,12 @@ void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIn
     //         << ", textureIndex_metalicRoughness = " << textureIndex_metalicRoughness << ", coordIndex = " << coordIndex_metalicRoughness
     //         << "\n";
     // }
-    logger->Log("meshIndex = {}, materialId = {}, textureIndex_BaseColor = {}, coordIndex = {}, textureIndex_normal = {}, coordIndex = {}, textureIndex_metalicRoughness = {}, coordIndex = {}",
-        meshIndex, materialId, textureIndex_baseColor, coordIndex_baseColor, textureIndex_normal, coordIndex_normal, textureIndex_metalicRoughness, coordIndex_metalicRoughness);
+    logger->Log("materialId = {}, textureIndex_BaseColor = {}, coordIndex = {}, textureIndex_normal = {}, coordIndex = {}, textureIndex_metalicRoughness = {}, coordIndex = {}",
+        materialId, textureIndex_baseColor, coordIndex_baseColor, textureIndex_normal, coordIndex_normal, textureIndex_metalicRoughness, coordIndex_metalicRoughness);
     //textureIds.push_back(std::vector<int>{textureIndex_baseColor,textureIndex_normal,textureIndex_metalicRoughness});
-    glbMaterialIds.push_back(primitive.material);
+    //glbMaterialIds.push_back(primitive.material);
+    glbObjects[glbId].glbMaterialIds.push_back(primitive.material);
+    //std::cout<<"glbId="<<glbId<<", meshId="<<meshIndex<<", glbMaterialIds.push_back="<<primitive.material<<std::endl;
 
     // if(bVerboseMeshInfo){
     //     std::cout << "primitiveIndex = " << primitiveIndex << "\n";
@@ -106,7 +115,7 @@ void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIn
     //     }
     //     else std::cout << "material       = default glTF material\n";
     // }
-    logger->Log("primitiveIndex = {}, materialId = {}", primitiveIndex, materialId);
+    //logger->Log("primitiveIndex = {}, materialId = {}", primitiveIndex, materialId);
 
     // POSITION
     auto it = primitive.attributes.find("POSITION");
@@ -182,7 +191,7 @@ void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIn
     vertices3D.clear();
     size_t vertexCount = posAccessor->count;
     //if(bVerboseMeshInfo) std::cout << "vertexCount = " << vertexCount << "\n";
-    logger->Log("vertexCount = {}", vertexCount);
+    logger->Log("posAccessor->count = {}", posAccessor->count);
 
     for (size_t i = 0; i < vertexCount; ++i){
         Vertex3D vertex{};
@@ -262,21 +271,33 @@ void CGLBManager::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIn
     }
     logger->Log("");
 
+    return true;
 }//end of LoadGLBMesh()
 
 int CGLBManager::GetGLBMeshSize(IN int glbId){
-    return gltfModel.meshes.size();//todo: add glbIndex to suppport multiple glb files
+    tinygltf::Model &gltfModel = glbObjects[glbId].gltfModel;
+    return gltfModel.meshes.size();
 }
 int CGLBManager::GetGLBTextureSize(int glbId){
+    tinygltf::Model &gltfModel = glbObjects[glbId].gltfModel;
     return gltfModel.textures.size();
 }
 
+//本函数：
+//首先读gltfModel的image信息，对每个image，呼叫textureManager建立image，结果存在CTextureManager::textureImages
+//然后读gltfModel的texture和sampler信息，并对每组texture/sampler，生成一个真实sampler，结果存在glbSamplers(输入参数, raytracingDescriptorManager.glbSamplers)
+//外部：
+//raytracingDescriptorManager.glbSamplers的size应该等于所有glbs文件里texture数量的总和
+//在create raytracing pipeline descriptor set的时候，把textureManager.textureImages里面所有view做成一整个views，再跟glbSamplers组合在一起
 void CGLBManager::LoadGLBTexture(int glbId, VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
     logger->Log("=====GLB({}) Texture Information=====", glbId);
+    tinygltf::Model &gltfModel = glbObjects[glbId].gltfModel;
+
     logger->Log("GLB Image Size = {}", gltfModel.images.size());
     logger->Log("GLB Texture Size = {}", gltfModel.textures.size());
 
     for (size_t i = 0; i < gltfModel.images.size(); ++i) {
+        //std::cout<<"LoadGLBTexture: image = "<<i<<std::endl;
         const tinygltf::Image &img = gltfModel.images[i];
 
         const uint32_t imageUsage = imageUsages[i];
@@ -325,41 +346,39 @@ void CGLBManager::LoadGLBTexture(int glbId, VkCommandPool &commandPool, std::vec
             std::cout << std::dec << '\n';
         }*/
     }
-
-    //std::cout<<"textureManager->textureImages.size() = "<<textureManager->textureImages.size()<<std::endl;
     
     // -----------------------------------------------------------
     // 创建 VkSampler（对应 model.textures 中的 sampler）
     // -----------------------------------------------------------
     //std::vector<VkSampler> vkSamplers(gltfModel.textures.size());
-    glbSamplers.resize(gltfModel.textures.size());
+    //glbSamplers.resize(gltfModel.textures.size());//这里不能resize，而是要把新的sampler加在这之后
+    const uint32_t samplerOffset = static_cast<uint32_t>(glbSamplers.size());
+    glbSamplers.resize(glbSamplers.size() + gltfModel.textures.size());
+
+    int textureOffset = 0;
+    if(glbId > 0) textureOffset = glbObjects[glbId-1].accumulatedTextureSize;
 
     for (size_t t = 0; t < gltfModel.textures.size(); ++t) {
         const tinygltf::Texture &tex = gltfModel.textures[t];
         const tinygltf::Sampler *smp = nullptr;
 
-        if (tex.sampler >= 0) {
-        smp = &gltfModel.samplers[tex.sampler];
-        } else {
-        //smp = &defaultSampler; // 如果 glTF 没写 sampler，用默认值
-        }
+        // std::cout<<"t = "<<t<<std::endl;
+        // std::cout<<"    tex.sampler = "<<tex.sampler<<std::endl;
+        // std::cout<<"    tex.source = "<<tex.source<<std::endl;
+        texture_sources.push_back(textureOffset+tex.source);
+
+        if (tex.sampler >= 0) smp = &gltfModel.samplers[tex.sampler];
+        //else smp = &defaultSampler; // 如果 glTF 没写 sampler，用默认值
 
         VkSamplerCreateInfo samplerInfo{};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
         // ---- 填写过滤方式 ----------------------------------------
-        samplerInfo.magFilter =
-        (smp->magFilter == TINYGLTF_TEXTURE_FILTER_NEAREST)
-        ? VK_FILTER_NEAREST
-        : VK_FILTER_LINEAR;
+        samplerInfo.magFilter = (smp->magFilter == TINYGLTF_TEXTURE_FILTER_NEAREST) ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
 
         // minFilter 需要考虑 mipmap，下面是简化的映射
-        samplerInfo.minFilter =
-        (smp->minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST ||
-        smp->minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST ||
-        smp->minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR)
-        ? VK_FILTER_NEAREST
-        : VK_FILTER_LINEAR;
+        samplerInfo.minFilter = (smp->minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST || smp->minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST ||
+            smp->minFilter == TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR) ? VK_FILTER_NEAREST : VK_FILTER_LINEAR;
 
         // ---- 填写包裹方式 ----------------------------------------
         samplerInfo.addressModeU = gltfWrapToVk(smp->wrapS);
@@ -371,19 +390,20 @@ void CGLBManager::LoadGLBTexture(int glbId, VkCommandPool &commandPool, std::vec
         constexpr uint32_t imgMipLevels = 1; //assume no mipmap for now
         samplerInfo.maxLod = static_cast<float>(imgMipLevels - 1);
 
-        vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &glbSamplers[t]); //need destroy with vkDestroySampler
+        vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &glbSamplers[samplerOffset+t]); //need destroy with vkDestroySampler
 
-        logger->Log("Texture {}: {}, sampler created.", t, tex.name.c_str());
+        logger->Log("Texture {}: {}, sampler created. image source: {}", t, tex.name.c_str(), tex.source);
         logger->Log("\tmagFilter = {}, minFilter = {}, addressModeU = {}, addressModeV = {}, addressModeW = {}, mipmapMode = {}, maxLod = {}",
             samplerInfo.magFilter, samplerInfo.minFilter, samplerInfo.addressModeU, samplerInfo.addressModeV, samplerInfo.addressModeW, samplerInfo.mipmapMode, samplerInfo.maxLod);
     }
     logger->Log("");
-
-    //std::cout<<"Read from gltfModel.textures: glbSamplers.size() = "<<glbSamplers.size()<<std::endl;
 }
 
 void CGLBManager::LoadGLBMaterial(int glbId){
     logger->Log("=====GLB({}) Material Information=====", glbId);
+
+    tinygltf::Model &gltfModel = glbObjects[glbId].gltfModel;
+
     logger->Log("GLB Material Size = {}", gltfModel.materials.size());
 
     std::vector<GLBMaterial> &myGlbMaterials =  glbObjects[glbId].materials;
@@ -394,6 +414,9 @@ void CGLBManager::LoadGLBMaterial(int glbId){
     imageUsages.resize(gltfModel.images.size());
     std::fill(imageUsages.begin(), imageUsages.end(), TextureUsage_None);
         
+
+    int textureOffset = 0;
+    if(glbId > 0) textureOffset = glbObjects[glbId-1].accumulatedTextureSize;
 
     for (int materialIndex = 0; materialIndex < static_cast<int>(gltfModel.materials.size()); ++materialIndex){
         if (materialIndex < 0 || materialIndex >= static_cast<int>(gltfModel.materials.size())) throw std::runtime_error("Invalid material index.");
@@ -420,22 +443,22 @@ void CGLBManager::LoadGLBMaterial(int glbId){
 
         myGlbMaterials[materialIndex].metallicFactor = static_cast<float>(pbr.metallicFactor);
         myGlbMaterials[materialIndex].roughnessFactor = static_cast<float>(pbr.roughnessFactor);
-        myGlbMaterials[materialIndex].baseColorTextureIndex = pbr.baseColorTexture.index;
+        myGlbMaterials[materialIndex].baseColorTextureIndex = textureOffset + pbr.baseColorTexture.index; //offset 1
         myGlbMaterials[materialIndex].baseColorTexCoord = pbr.baseColorTexture.texCoord;
-        myGlbMaterials[materialIndex].metallicRoughnessTextureIndex = pbr.metallicRoughnessTexture.index;
+        myGlbMaterials[materialIndex].metallicRoughnessTextureIndex = textureOffset + pbr.metallicRoughnessTexture.index; //offset 2
         myGlbMaterials[materialIndex].metallicRoughnessTexCoord = pbr.metallicRoughnessTexture.texCoord;
 
         //------------------------------------------------------
         // Normal
         //------------------------------------------------------
-        myGlbMaterials[materialIndex].normalTextureIndex = material.normalTexture.index;
+        myGlbMaterials[materialIndex].normalTextureIndex = textureOffset + material.normalTexture.index; //offset 3
         myGlbMaterials[materialIndex].normalTexCoord = material.normalTexture.texCoord;
         myGlbMaterials[materialIndex].normalScale = static_cast<float>(material.normalTexture.scale);
 
         //------------------------------------------------------
         // Occlusion
         //------------------------------------------------------
-        myGlbMaterials[materialIndex].occlusionTextureIndex = material.occlusionTexture.index;
+        myGlbMaterials[materialIndex].occlusionTextureIndex = textureOffset + material.occlusionTexture.index; //offset 4
         myGlbMaterials[materialIndex].occlusionTexCoord = material.occlusionTexture.texCoord;
         myGlbMaterials[materialIndex].occlusionStrength = static_cast<float>(material.occlusionTexture.strength);
 
@@ -449,7 +472,7 @@ void CGLBManager::LoadGLBMaterial(int glbId){
                 static_cast<float>(material.emissiveFactor[2])
             );
         }
-        myGlbMaterials[materialIndex].emissiveTextureIndex = material.emissiveTexture.index;
+        myGlbMaterials[materialIndex].emissiveTextureIndex = textureOffset + material.emissiveTexture.index; //offset 5
         myGlbMaterials[materialIndex].emissiveTexCoord = material.emissiveTexture.texCoord;
 
         //------------------------------------------------------

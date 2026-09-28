@@ -47,3 +47,6 @@ You need a graphics card that supports hardware ray tracing to run these tests.
 |------------------------------------|-----------------------|
 | SimpleRayPipelineDragon <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineDragon2.png" alt="alt text" width="200" height="200">  | Render Stanford Dragon with Whitted style ray tracing. |
 | SimpleRayPipelineSponza <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineSponza1.png" alt="alt text" width="200" height="200">  | Render Sponza with Monte Carlo path tracing. |
+| SimpleRayPipelineMultiGLB <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayPipelineMultiGLB.png" alt="alt text" width="200" height="200">  | Multiple glb resources. |
+
+

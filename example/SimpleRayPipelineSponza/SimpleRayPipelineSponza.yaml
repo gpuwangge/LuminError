@@ -121,6 +121,7 @@ RTLights: #ray tracing pipeline lights to generate shadow
 Resources:
   - Glbs:
       - resource_glb_name: sponza-palace.glb
+      #- resource_glb_name: operation_theater.glb
     
   - RayTracingShaders:
       resource_raytracing_pipeline_raygeneration_shader_name: simpleRayPipeline/raygen.rgen.spv
@@ -177,8 +178,12 @@ Attachments:
 
 MainCamera:
   camera_mode: 1
-  camera_position: [-6.5,1,0]
+  camera_position: [-6.5,1,0] #sponza
   camera_rotation: [0,90,0]
+
+  # camera_position: [3,2,-3] #operation_theater
+  # camera_rotation: [0,-45,0]
+  
   #camera_position: [-6,1,0.5] #aim to lion
   #camera_rotation: [0,-110,0] #aim to lion
   #camera_position: [-3.5,1,-0.5] #aim to curtain

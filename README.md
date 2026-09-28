@@ -51,7 +51,7 @@ LuminEvo includes **35 example programs** across three pipeline types:
 |----------|----------|------------|
 | Graphics | 27 | Triangle, PBR, shadow mapping, MSAA, skybox, particles, environment mapping |
 | Compute | 6 | Path tracing, GEMM, storage buffer/image, texture blur |
-| Ray Tracing | 2 | Whitted-style (Stanford Dragon), Monte Carlo path tracing with NEE (Sponza) |
+| Ray Tracing | 3 | Whitted-style (Stanford Dragon), Monte Carlo path tracing with NEE (Sponza) |
 
 # [Build Instruction](https://github.com/gpuwangge/LuminError/blob/main/BuildInstruction.md)  
 

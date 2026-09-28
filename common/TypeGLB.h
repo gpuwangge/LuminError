@@ -47,14 +47,3 @@ struct GLBMaterial{
 
     std::string name;
 };
-
-struct GLBStruct{
-    std::vector<GLBMaterial> materials;
-
-    //to compute resource offsets for each glb
-    int accumulatedMaterialSize;
-    int accumulatedMeshSize;
-    int accumulatedTextureSize;
-
-    //std::vector<std::vector<int>> glbMaterialIds; //每个mesh对应的material id
-};

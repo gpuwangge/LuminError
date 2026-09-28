@@ -38,8 +38,8 @@ void ResourceCore::SetDevice(VkDevice logicalDevice_, VkPhysicalDevice physicalD
 void ResourceCore::LoadGLBFromFile(IN const std::string glbName) {
     glbManager.LoadGLBFromFile(glbName);
 }
-void ResourceCore::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) {
-    glbManager.LoadGLBMesh(glbId, meshIndex, primitiveIndex, vertices3D, indices3D);
+bool ResourceCore::LoadGLBMesh(IN int glbId, IN int meshIndex, IN int primitiveIndex, OUT std::vector<Vertex3D> &vertices3D, OUT std::vector<uint32_t> &indices3D) {
+    return glbManager.LoadGLBMesh(glbId, meshIndex, primitiveIndex, vertices3D, indices3D);
 }
 
 void ResourceCore::LoadGLBTexture(IN int glbId, VkCommandPool &commandPool, std::vector<VkSampler> &glbSamplers){
@@ -69,7 +69,7 @@ int ResourceCore::GetGLBTextureSize(IN int glbId){
 // }
 
 int ResourceCore::GetGLBMaterialId(IN int glbId, IN int glbMeshId){
-    return glbManager.glbMaterialIds[glbMeshId];
+    return glbManager.glbObjects[glbId].glbMaterialIds[glbMeshId];
 }
 
 GLBMaterial& ResourceCore::GetGLBMaterial(IN int glbId, IN int glbMaterialId){
@@ -77,9 +77,10 @@ GLBMaterial& ResourceCore::GetGLBMaterial(IN int glbId, IN int glbMaterialId){
     return glbManager.getGLBMaterial(glbId, glbMaterialId);
 }
 
-int ResourceCore::GetGLBMaterialOffset(int glbIndex) {
+int ResourceCore::GetGLBMaterialOffset(int glbIndex) { //this function has no use yet
     if(glbIndex == 0) return 0;
-    return glbManager.glbObjects[glbIndex-1].accumulatedMaterialSize;
+    //return glbManager.glbObjects[glbIndex-1].accumulatedMaterialSize;
+    return 0;
 }
 int ResourceCore::GetGLBMeshOffset(int glbIndex){
     if(glbIndex == 0) return 0;
@@ -88,6 +89,10 @@ int ResourceCore::GetGLBMeshOffset(int glbIndex){
 int ResourceCore::GetGLBTextureOffset(int glbIndex){
     if(glbIndex == 0) return 0;
     return glbManager.glbObjects[glbIndex-1].accumulatedTextureSize;
+}
+
+int ResourceCore::GetGLBMeshPrimitiveSize(int glbId, int meshId){
+    return glbManager.GetGLBMeshPrimitiveSize(glbId, meshId);
 }
 
 /**************************
@@ -200,11 +205,23 @@ void ResourceCore::DestroyTextureManager(){
 int ResourceCore::GetTextureImageSize() { return textureManager.textureImages.size(); }
 VkImageView ResourceCore::GetTextureImageView(int index) { return textureManager.textureImages[index].m_textureImageBuffer.view; }
 std::vector<VkImageView> ResourceCore::GetTextureImageViews() { //这里不要返回引用
+    //std::cout<<"textureManager.textureImages.size() = "<<textureManager.textureImages.size()<<std::endl;
     std::vector<VkImageView> views;
-    views.reserve(textureManager.textureImages.size());
-    for(int i = 0; i < textureManager.textureImages.size(); i++ ){
-        views.push_back(textureManager.textureImages[i].m_textureImageBuffer.view);
+
+    // views.reserve(textureManager.textureImages.size());
+    // for(int i = 0; i < textureManager.textureImages.size(); i++ ){
+    //     views.push_back(textureManager.textureImages[i].m_textureImageBuffer.view);
+    // }
+
+    std::vector<int> texture_sources = glbManager.GetGLBTextureSources();
+    //std::cout<<"texture_sources.size() = "<<texture_sources.size()<<std::endl;
+
+    views.reserve(texture_sources.size());
+    for(int i = 0; i < texture_sources.size(); i++){
+        //std::cout<<"texture_sources["<<i<<"] = "<<texture_sources[i]<<std::endl;
+        views.push_back(textureManager.textureImages[texture_sources[i]].m_textureImageBuffer.view);
     }
+    //std::cout<<std::endl;
 
     return views;
 }
