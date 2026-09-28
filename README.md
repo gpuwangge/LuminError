@@ -45,7 +45,7 @@ Ray-tracing algorithm: Monte Carlo Path Tracing with Next Event Estimation (NEE)
 
 
 # [More Examples](https://github.com/gpuwangge/LuminError/blob/main/ExampleLists.md)  
-LuminEvo includes **35 example programs** across three pipeline types:  
+LuminEvo includes **36 example programs** across three pipeline types:  
 
 | Pipeline | Examples | Highlights |
 |----------|----------|------------|
