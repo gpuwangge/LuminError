@@ -1,0 +1,13 @@
+Resources:
+  - ComputeShaders:
+    - resource_computeshader_name: ParallelReduction/shader.comp.spv
+
+Uniforms:
+  Compute:
+    uniform_compute_name: Compute
+    storage_compute_custom: true
+
+Features:
+  feature_rendermode: 1 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
+
+

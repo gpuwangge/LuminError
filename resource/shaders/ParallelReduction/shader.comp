@@ -1,0 +1,29 @@
+#version 450 core
+
+const int DIM = 16;
+
+layout (local_size_x = DIM, local_size_y = DIM, local_size_z = 1) in; 
+
+layout (set = 0, binding = 0) buffer StorageBufferStruct{
+    uint M;
+    uint N;
+    uint K;
+    float MatA[DIM*DIM];
+    float MatB[DIM*DIM];
+    float MatC[DIM*DIM];
+} sbo;
+
+
+
+void main(){
+    const uint globalRow = gl_GlobalInvocationID.x;
+    const uint globalCol = gl_GlobalInvocationID.y;
+
+    float acc = 0;
+    for(uint k = 0; k < sbo.K; k++) 
+        acc += sbo.MatA[k*sbo.M + globalRow] * sbo.MatB[globalCol*sbo.K + k];
+    
+    sbo.MatC[globalCol*sbo.M + globalRow] = acc;
+}
+
+
