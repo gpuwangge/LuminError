@@ -2,6 +2,9 @@
  * A sample to test storage buffer (for compute)	
  * This sample write 1, 2, 3, 4, 5 to storage buffer and read back
  * storage buffer can be used for gemm
+ * 这个test跟particle system一样使用Pingpong buffer(但这并不是必须的，只是测试pingpong buffer的功能)
+ * 对于GEMM，即使每一帧都计算，只要每帧仍然是读取 A、B、写入独立的 C，而不是把上一帧结果作为下一帧输入，就没有必要使用 ping-pong
+ * 所以pingpong buffer目前只用在本例和particle system中
  * *********** */
 #include "IGame.h"
 #include "Enum.h"
