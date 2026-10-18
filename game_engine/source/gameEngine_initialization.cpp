@@ -115,6 +115,7 @@ void GameEngine::Initialize(){
     if(appInfo->Uniform.b_storage_compute_bvhnode) renderer->addStorageBuffer_bvhNode();
     if(appInfo->Uniform.b_storage_compute_sphere) renderer->addStorageBuffer_sphere();
     if(appInfo->Uniform.b_uniform_compute_custom) renderer->addComputeCustomUniformBuffer(appInfo->Uniform.ComputeCustom.Size);
+    if(appInfo->Uniform.b_storage_compute_custom) renderer->addCustomStorageBuffer(appInfo->Uniform.ComputeCustom.Size);
     if(appInfo->Uniform.b_storage_compute_customswap) renderer->addStorageBuffer_customswap(appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Size, appInfo->Uniform.ComputeStorageBufferInfo_CustomSwap.Usage);
 
     if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->addStorageImage(COMPUTE_STORAGEIMAGE_TEXTURE);
@@ -439,7 +440,7 @@ void GameEngine::Initialize(){
     bool b_uniform_graphics = appInfo->Uniform.b_uniform_graphics_custom || appInfo->Uniform.b_uniform_graphics_object_dynamic || appInfo->Uniform.b_uniform_graphics_text_dynamic || appInfo->Uniform.b_uniform_graphics_global;
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_global || appInfo->Uniform.b_storage_compute_windowswap || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_storage_compute_triangle_vertex_attribute || appInfo->Uniform.b_storage_compute_triangle_vertex_index || appInfo->Uniform.b_storage_compute_triangle_reorder_index || appInfo->Uniform.b_storage_compute_bvhnode;
-    b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap;
+    b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap || appInfo->Uniform.b_storage_compute_custom;
     bool b_uniform_raytracing = appInfo->Uniform.b_uniform_raytracing_swapchain_storage;
 
     //UNIFORM STEP 1/3 (Pool)

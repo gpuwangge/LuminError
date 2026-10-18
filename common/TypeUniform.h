@@ -26,10 +26,11 @@ enum UniformTypes {
     COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00008000,
     COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00010000,
     COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00020000,
-    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00040000,
-    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00080000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00100000,
-    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00200000
+    COMPUTE_STORAGEBUFFER_CUSTOM =                                      0x00040000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00080000, //for partile system
+    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00100000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00200000,
+    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00400000
 };
 
 /*********

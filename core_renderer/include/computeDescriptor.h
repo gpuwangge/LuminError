@@ -123,6 +123,16 @@ public:
     void uploadCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
 
     /************
+     * 8.5 COMPUTE_STORAGEBUFFER_CUSTOM
+     ************/
+    static std::vector<CWxjBuffer> customStorageBuffers; 
+	static std::vector<void*> customStorageBuffersMapped;
+    static VkDeviceSize m_customStorageBufferSize;
+    void addCustomStorageBuffer(VkDeviceSize customStorageBufferSize);
+    void uploadCustomStorageBuffer(uint32_t currentFrame, const void* data, size_t dataSize);
+    void downloadCustomStorageBuffer(uint32_t currentFrame, void* data, size_t dataSize);
+
+    /************
      * 9 COMPUTE_STORAGEBUFFER_CUSTOMSWAP
      * Read and Write
      * Need get size from game example

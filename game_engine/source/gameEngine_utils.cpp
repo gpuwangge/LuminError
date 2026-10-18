@@ -408,6 +408,13 @@ void GameEngine::DownloadComputeStorageBuffer_CustomSwap(uint32_t currentFrame, 
     renderer->downloadStorageBuffer_customswap(currentFrame, storageBufferObject, dataSize);
 }
 
+void GameEngine::UploadComputeStorageBuffer(uint32_t currentFrame, const void* customUniformBufferObject, size_t dataSize){
+    renderer->uploadCustomStorageBuffer(currentFrame, customUniformBufferObject, dataSize);
+}
+void GameEngine::DownloadComputeStorageBuffer(uint32_t currentFrame, void* customUniformBufferObject, size_t dataSize){
+    renderer->downloadCustomStorageBuffer(currentFrame, customUniformBufferObject, dataSize);
+}
+
 void GameEngine::SetGraphicsCustomSize(int size) { appInfo->Uniform.GraphicsCustom.Size = size; }
 void GameEngine::SetGraphicsCustomBinding(void* binding) {
     VkDescriptorSetLayoutBinding* bindingPtr = static_cast<VkDescriptorSetLayoutBinding*>(binding);

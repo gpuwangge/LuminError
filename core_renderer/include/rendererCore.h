@@ -430,6 +430,11 @@ namespace LERenderer{
         void addComputeCustomUniformBuffer(VkDeviceSize customUniformBufferSize) override { computeDescriptorManager.addCustomUniformBuffer(customUniformBufferSize); }
         void uploadComputeCustomUniformBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override { computeDescriptorManager.uploadCustomUniformBuffer(currentFrame, data, dataSize); }
         
+        void addCustomStorageBuffer(VkDeviceSize customStorageBufferSize) override {computeDescriptorManager.addCustomStorageBuffer(customStorageBufferSize); }
+        void uploadCustomStorageBuffer(uint32_t currentFrame, const void* data, size_t dataSize) override {computeDescriptorManager.uploadCustomStorageBuffer(currentFrame, data, dataSize); }
+        void downloadCustomStorageBuffer(uint32_t currentFrame, void* data, size_t dataSize) override {computeDescriptorManager.downloadCustomStorageBuffer(currentFrame, data, dataSize); }
+
+
         void addStorageBuffer_windowswap() override { computeDescriptorManager.addStorageBuffer_windowswap(); }
         void uploadStorageBuffer_windowswap(uint32_t currentFrame, const void* data, size_t size) override { computeDescriptorManager.uploadStorageBuffer_windowswap(currentFrame, data, size); }
         void downloadStorageBuffer_windowswap(uint32_t currentFrame, void* data, size_t size) override { computeDescriptorManager.downloadStorageBuffer_windowswap(currentFrame, data, size); }

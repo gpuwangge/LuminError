@@ -23,9 +23,16 @@ namespace LuminError{
         bool bVerbose = true;
 	    bool bVerify = true;
 
+        
+
         void Initialize() override{
-            GameEngine->SetComputeStorageBufferSize_CustomSwap(sizeof(StructStorageBuffer));
-            GameEngine->SetComputeStorageBufferUsage_CustomSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            //GameEngine->SetComputeStorageBufferSize_CustomSwap(sizeof(StructStorageBuffer));
+            //GameEngine->SetComputeStorageBufferUsage_CustomSwap(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+
+            GameEngine->SetComputeCustomSize(sizeof(StructStorageBuffer));
+            //std::cout<<"sizeof(StructCustomUniformBuffer)="<<sizeof(StructCustomUniformBuffer)<<std::endl;
+            //VkDescriptorSetLayoutBinding binding = StructStorageBuffer::GetBinding();
+            //GameEngine->SetComputeCustomBinding(static_cast<void*>(&binding));
         }
 
         void PostInitialize() override{
@@ -49,7 +56,9 @@ namespace LuminError{
             //- computation starts with flight0, so initialize buffer1 only
             //- the result will be downloaded back to SBO(only MatC has value)
             //game->UploadComputeStorageBuffer(game->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer0. because buffer0 will be output for frame0, no need to initialize.
-            GameEngine->UploadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame()+1, &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer1: this is the input for the first flight
+            //GameEngine->UploadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame()+1, &storageBufferObject, sizeof(storageBufferObject)); //upload A/B to buffer1: this is the input for the first flight
+        
+            GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); 
         }
 
         void Update() override {
@@ -76,15 +85,21 @@ namespace LuminError{
                 cpu_result0 = cpu_result[0];
             }
 
-            if(bVerbose) GameEngine->DownloadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //for the first flight, download result from buffer0 back to SBO. SBO.MatC has result, and SBO.MatA/B will be reset to zero.
-            if(bVerbose) GameEngine->LogContext("C: ", storageBufferObject.MatC, DIM_M*DIM_N);
+            //if(bVerbose) GameEngine->DownloadComputeStorageBuffer_CustomSwap(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); //for the first flight, download result from buffer0 back to SBO. SBO.MatC has result, and SBO.MatA/B will be reset to zero.
+            //if(bVerbose) GameEngine->LogContext("C: ", storageBufferObject.MatC, DIM_M*DIM_N);
 
+            if(bVerbose) GameEngine->DownloadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); 
+            
             if(bVerify){
+                
                 std::cout<<"gpu_result[0] = "<<storageBufferObject.MatC[0]<<std::endl;
                 std::cout<<"cpu_result[0] = "<<cpu_result0<<std::endl;
                 std::cout<<"Please manually check validation. "<<std::endl; //TODO: automate verification
-            }
 
+                GameEngine->LogContext("gpu C: ", storageBufferObject.MatC, DIM_M*DIM_N);
+                GameEngine->LogContext("gpu A: ", storageBufferObject.MatA, DIM_M*DIM_N);
+                GameEngine->LogContext("gpu B: ", storageBufferObject.MatB, DIM_M*DIM_N);
+            }
         }
 
         void CPUSingleThreadMatMul(int M, int N, int K, float *matrixA, float *matrixB, float *outputMatrix, int sampleNum){

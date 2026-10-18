@@ -104,6 +104,7 @@ struct UniformConfig {
     bool b_storage_compute_bvhnode = false;
     bool b_storage_compute_sphere = false;
     bool b_uniform_compute_custom = false;
+    bool b_storage_compute_custom = false;
     bool b_storage_compute_customswap = false;
 
     bool b_uniform_compute_swapchain_storage = false;
@@ -149,6 +150,7 @@ struct UniformConfig {
         b_storage_compute_bvhnode                           = getOrDefault(node, "storage_compute_bvhnode", false);
         b_storage_compute_sphere                            = getOrDefault(node, "storage_compute_sphere", false);
         b_uniform_compute_custom                            = getOrDefault(node, "uniform_compute_custom", false);
+        b_storage_compute_custom                            = getOrDefault(node, "storage_compute_custom", false);
         b_storage_compute_customswap                        = getOrDefault(node, "storage_compute_customswap", false);
 
         b_uniform_compute_swapchain_storage           = getOrDefault(node, "uniform_compute_swapchain_storage", false);
