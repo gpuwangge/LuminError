@@ -1,7 +1,10 @@
-// Assume a compute shader with 256 threads per workgroup.
-// Each value is 32 bits (4 bytes).
-// Write a program to sum all values in a 4 KB buffer.
-// Total number of values = 4 KB / 4 B = 1024 values.
+/************
+ * This example is a program to sum all values in a 256 KB buffer.
+ * Each value is 32 bits (4 bytes).
+ * Total number of values = 256 KB / 4 B = 65536 values (64K values).
+ * Assume a compute shader with 64 threads per workgroup. Plan to launch 16 workgroups to process 1024 values. (total 1024 threads)
+ * Each workgroup will compute a partial sum of 64 values, and then the partial sums will be combined to get the final result.
+************ */
 
 #include "IGame.h"
 #include "Enum.h"
@@ -9,6 +12,7 @@
 #include <iostream>
 namespace LuminError{
     class Game : public IGame {
+        static const int BufferSize = 64 * 1024; // 64 KB
         static const int DIM = 1024; //total number of threads
         static const int KernelRunNumber = 1;
 
