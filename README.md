@@ -45,12 +45,12 @@ Ray-tracing algorithm: Monte Carlo Path Tracing with Next Event Estimation (NEE)
 
 
 # [More Examples](https://github.com/gpuwangge/LuminError/blob/main/ExampleLists.md)  
-LuminEvo includes **36 example programs** across three pipeline types:  
+LuminEvo includes **37 example programs** across three pipeline types:  
 
 | Pipeline | Examples | Highlights |
 |----------|----------|------------|
 | Graphics | 27 | Triangle, PBR, shadow mapping, MSAA, skybox, particles, environment mapping |
-| Compute | 6 | Path tracing, GEMM, storage buffer/image, texture blur |
+| Compute | 7 | Path tracing, GEMM, storage buffer/image, texture blur |
 | Ray Tracing | 3 | Whitted-style (Stanford Dragon), Monte Carlo path tracing with NEE (Sponza) |
 
 # [Build Instruction](https://github.com/gpuwangge/LuminError/blob/main/BuildInstruction.md)  
