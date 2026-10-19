@@ -1,29 +1,41 @@
 #version 450 core
 
-const int DIM = 16;
+const int DIM = 256;
 
-layout (local_size_x = DIM, local_size_y = DIM, local_size_z = 1) in; 
+layout (local_size_x = DIM, local_size_y = 1, local_size_z = 1) in; 
 
 layout (set = 0, binding = 0) buffer StorageBufferStruct{
-    uint M;
-    uint N;
-    uint K;
-    float MatA[DIM*DIM];
-    float MatB[DIM*DIM];
-    float MatC[DIM*DIM];
+    float data[1024];
+    float partialSums[4]; //partialSums 数组用于保存不同 Workgroup 的归约结果。
 } sbo;
 
-
+shared float sdata[256]; //shared 数组用于同一个 Workgroup 内的临时归约；
 
 void main(){
-    const uint globalRow = gl_GlobalInvocationID.x;
-    const uint globalCol = gl_GlobalInvocationID.y;
+    uint tid = gl_LocalInvocationID.x; //每个workitem在一个workgroup里的局部ID
+    uint gid = gl_WorkGroupID.x; //每个workgroup的维度(workgroup size)，这个值一般在shader的一开始的layout处设定
+    uint index = gid * 256 + tid;
 
-    float acc = 0;
-    for(uint k = 0; k < sbo.K; k++) 
-        acc += sbo.MatA[k*sbo.M + globalRow] * sbo.MatB[globalCol*sbo.K + k];
+    sdata[tid] = sbo.data[index];
+
+    barrier();
+
+    for (uint stride = 128; stride > 0; stride >>= 1) {
+        if (tid < stride) {
+            sdata[tid] += sdata[tid + stride];
+        }
+        barrier();
+    }
+
+    if (tid == 0) {
+        sbo.partialSums[gid] = sdata[0];
+    }
+
+    //float acc = 0;
+    //for(uint k = 0; k < sbo.K; k++) 
+    //    acc += sbo.MatA[k*sbo.M + globalRow] * sbo.MatB[globalCol*sbo.K + k];
     
-    sbo.MatC[globalCol*sbo.M + globalRow] = acc;
+    //sbo.MatC[globalCol*sbo.M + globalRow] = acc;
 }
 
 

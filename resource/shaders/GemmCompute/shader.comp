@@ -33,7 +33,7 @@ layout (set = 0, binding = 0) buffer StorageBufferStruct{
 
 
 void main(){
-    const uint globalRow = gl_GlobalInvocationID.x;
+    const uint globalRow = gl_GlobalInvocationID.x; //每个workitem的全局ID, 相当于局部ID加上一个Offset
     const uint globalCol = gl_GlobalInvocationID.y;
 
     float acc = 0;

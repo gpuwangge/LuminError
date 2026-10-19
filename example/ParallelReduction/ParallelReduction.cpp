@@ -1,22 +1,20 @@
+// Assume a compute shader with 256 threads per workgroup.
+// Each value is 32 bits (4 bytes).
+// Write a program to sum all values in a 4 KB buffer.
+// Total number of values = 4 KB / 4 B = 1024 values.
+
 #include "IGame.h"
 #include "Enum.h"
 #include <vulkan/vulkan.h>
 #include <iostream>
 namespace LuminError{
     class Game : public IGame {
-        static const int DIM = 16;
-        static const int DIM_M = DIM;
-        static const int DIM_K = DIM;
-        static const int DIM_N = DIM;
+        static const int DIM = 1024; //total number of threads
         static const int KernelRunNumber = 1;
 
-        struct StructStorageBuffer {
-            unsigned int M;
-            unsigned int K;
-            unsigned int N;
-            float MatA[DIM_M * DIM_K];
-            float MatB[DIM_K * DIM_N];
-            float MatC[DIM_M * DIM_N];
+        struct StructStorageBuffer { 
+            float data[1024];
+            float partialSums[4]; //shared 数组用于同一个 Workgroup 内的临时归约；partialSums 数组用于保存不同 Workgroup 的归约结果。
         };
         StructStorageBuffer storageBufferObject;
 
@@ -28,13 +26,8 @@ namespace LuminError{
         }
 
         void PostInitialize() override{
-            storageBufferObject.M = DIM_M;
-            storageBufferObject.N = DIM_N;
-            storageBufferObject.K = DIM_K;
-            for(int i = 0; i < DIM_M*DIM_K; i++) storageBufferObject.MatA[i] = (float)rand() / (float)RAND_MAX;
-            for(int i = 0; i < DIM_K*DIM_N; i++) storageBufferObject.MatB[i] = (float)rand() / (float)RAND_MAX;
-            if(bVerbose) GameEngine->LogContext("A: ", storageBufferObject.MatA, DIM_M*DIM_K);
-            if(bVerbose) GameEngine->LogContext("B: ", storageBufferObject.MatB, DIM_K*DIM_N);
+            for(int i = 0; i < DIM; i++) storageBufferObject.data[i] = (float)rand() / (float)RAND_MAX;
+            if(bVerbose) GameEngine->LogContext("data: ", storageBufferObject.data, DIM);
 
             GameEngine->UploadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); 
         }
@@ -46,57 +39,38 @@ namespace LuminError{
         }
 
         void RecordComputeCommandBuffer() override{
-            GameEngine->ComputeDispatch(1, 1, 1);
+            GameEngine->ComputeDispatch(4, 1, 1);
         }
 
         void PostUpdate() override {
             GameEngine->DeviceWaitIdle();
 
-            float cpu_result0 = 0.0f;
+            float cpu_result = 0.0f;
             if(bVerify){
                 GameEngine->LogContext("Begin verification... ");
-                float cpu_result[DIM_M*DIM_N];
-                CPUSingleThreadMatMul(DIM_M, DIM_N, DIM_K, storageBufferObject.MatA, storageBufferObject.MatB, cpu_result, DIM_M*DIM_N);
-                GameEngine->LogContext("cpu_C: ", cpu_result, DIM_M*DIM_N);
-                cpu_result0 = cpu_result[0];
+                cpu_result = CPUSingleThread(DIM, storageBufferObject.data);
+                //std::cout<<"cpu_result = "<<cpu_result<<std::endl;
+                //GameEngine->LogContext("cpu_result: ", cpu_result);//todo: not work
             }
 
             if(bVerbose) GameEngine->DownloadComputeStorageBuffer(GameEngine->GetCurrentFrame(), &storageBufferObject, sizeof(storageBufferObject)); 
             
             if(bVerify){
-                
-                std::cout<<"gpu_result[0] = "<<storageBufferObject.MatC[0]<<std::endl;
-                std::cout<<"cpu_result[0] = "<<cpu_result0<<std::endl;
-                std::cout<<"Please manually check validation. "<<std::endl; //TODO: automate verification
-
-                GameEngine->LogContext("gpu C: ", storageBufferObject.MatC, DIM_M*DIM_N);
-                GameEngine->LogContext("gpu A: ", storageBufferObject.MatA, DIM_M*DIM_N);
-                GameEngine->LogContext("gpu B: ", storageBufferObject.MatB, DIM_M*DIM_N);
+                std::cout<<"gpu_result[0] = "<<storageBufferObject.partialSums[0]<<std::endl;
+                std::cout<<"gpu_result[1] = "<<storageBufferObject.partialSums[1]<<std::endl;
+                std::cout<<"gpu_result[2] = "<<storageBufferObject.partialSums[2]<<std::endl;
+                std::cout<<"gpu_result[3] = "<<storageBufferObject.partialSums[3]<<std::endl;
+                float sum = storageBufferObject.partialSums[0] + storageBufferObject.partialSums[1] + storageBufferObject.partialSums[2] + storageBufferObject.partialSums[3];
+                std::cout<<"gpu_result = "<<sum<<std::endl;
+                std::cout<<"cpu_result = "<<cpu_result<<std::endl;
             }
         }
 
-        void CPUSingleThreadMatMul(int M, int N, int K, float *matrixA, float *matrixB, float *outputMatrix, int sampleNum){
-            std::cout<<"Running CPU single thread mat mul for verification purpose..."<<std::endl;
-            int count = 0;
-            int printDelta = sampleNum / 1;
-            for(int n = 0; n < N; n++){ //col
-                for(int m = 0; m < M; m++){ //row： fill row first, allign with kernel
-                    //column major matrix multiplication
-                    outputMatrix[n*M + m] = 0;
-                    for(int k = 0; k < K; k++){
-                        outputMatrix[n*M + m] += matrixA[k*M + m] * matrixB[n*K + k];
-                    }
-
-                    count++;
-                    if(count % printDelta == 0){
-                        float completeRate = (count * 100.0)/sampleNum ;
-                        GameEngine->LogContext("Completed: {}%", completeRate);
-                        std::cout<<"Completed: "<<completeRate<<"%"<<" (sampleNum="<<sampleNum<<", count="<<count<<")"<<std::endl;
-                    }
-                    
-                    if(count >= sampleNum) return;
-                }
-            }
+        float CPUSingleThread(int N, float *buffer){
+            std::cout<<"Running CPU single thread for verification purpose..."<<std::endl;
+            float result = 0.0f;
+            for(int i = 0; i < N; i++) result += buffer[i];
+            return result;
         }
     };
 }
