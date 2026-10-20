@@ -1,41 +1,53 @@
 #version 450 core
 
-const int DIM = 256;
+const int NUM_DATA = 65536;
+const int NUM_WORKGROUP = 8;
+const int WORKGROUP_SIZE = 128;
+const int VALUE_NUM_PER_THREAD = 64;
 
-layout (local_size_x = DIM, local_size_y = 1, local_size_z = 1) in; 
+layout (local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in; 
 
 layout (set = 0, binding = 0) buffer StorageBufferStruct{
-    float data[1024];
-    float partialSums[4]; //partialSums 数组用于保存不同 Workgroup 的归约结果。
+    float inputData[NUM_DATA];
+    float partialSums[NUM_WORKGROUP]; //partialSums 数组用于保存不同 Workgroup 的归约结果。
 } sbo;
 
-shared float sdata[256]; //shared 数组用于同一个 Workgroup 内的临时归约；
+shared float sdata[WORKGROUP_SIZE]; //shared 数组用于同一个 Workgroup 内的临时归约；
 
 void main(){
     uint tid = gl_LocalInvocationID.x; //每个workitem在一个workgroup里的局部ID
     uint gid = gl_WorkGroupID.x; //每个workgroup的维度(workgroup size)，这个值一般在shader的一开始的layout处设定
-    uint index = gid * 256 + tid;
 
-    sdata[tid] = sbo.data[index];
+    uint index = gl_GlobalInvocationID.x * VALUE_NUM_PER_THREAD;          //每个workitem的全局ID, 相当于局部ID加上一个Offset
+    //uint index =(gid * WORKGROUP_SIZE + tid) * VALUE_NUM_PER_THREAD;  //这个是自己手算的版本，跟上面哪个一样
+
+    sdata[tid] = 0.0;
+    for(uint i = 0; i < VALUE_NUM_PER_THREAD; i++) {
+        sdata[tid] += sbo.inputData[index + i];
+    }
 
     barrier();
 
-    for (uint stride = 128; stride > 0; stride >>= 1) {
+    //树形归约只需要 \(\log_2(128)=7\) 轮归约，而不是让单个线程串行累加 128 个部分结果，通常更有利于 GPU 并行执行。
+    for (uint stride = WORKGROUP_SIZE / 2; stride > 0; stride >>= 1) {
         if (tid < stride) {
             sdata[tid] += sdata[tid + stride];
         }
         barrier();
     }
-
     if (tid == 0) {
         sbo.partialSums[gid] = sdata[0];
     }
 
-    //float acc = 0;
-    //for(uint k = 0; k < sbo.K; k++) 
-    //    acc += sbo.MatA[k*sbo.M + globalRow] * sbo.MatB[globalCol*sbo.K + k];
-    
-    //sbo.MatC[globalCol*sbo.M + globalRow] = acc;
+    //普通累加
+    // if (tid == 0) {
+    //     float final = 0;
+    //     for (uint i = 0; i < WORKGROUP_SIZE; i++) {
+    //         final += sdata[tid+i];
+    //     }
+    //     sbo.partialSums[gid] = final;
+    // }
+
 }
 
 
