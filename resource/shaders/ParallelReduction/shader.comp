@@ -1,9 +1,8 @@
 #version 450 core
 
 const int NUM_DATA = 65536;
+const int WORKGROUP_SIZE = 128; //number of threads per workgroup
 const int NUM_WORKGROUP = 8;
-const int WORKGROUP_SIZE = 128;
-const int VALUE_NUM_PER_THREAD = 64;
 
 layout (local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in; 
 
@@ -12,23 +11,29 @@ layout (set = 0, binding = 0) buffer StorageBufferStruct{
     float partialSums[NUM_WORKGROUP]; //partialSums 数组用于保存不同 Workgroup 的归约结果。
 } sbo;
 
-shared float sdata[WORKGROUP_SIZE]; //shared 数组用于同一个 Workgroup 内的临时归约；
+shared float sdata[WORKGROUP_SIZE]; //shared 数组用于同一个 Workgroup 内的临时归约；每个thread就是要更新这个值
 
 void main(){
-    uint tid = gl_LocalInvocationID.x; //每个workitem在一个workgroup里的局部ID
-    uint gid = gl_WorkGroupID.x; //每个workgroup的维度(workgroup size)，这个值一般在shader的一开始的layout处设定
+    uint tid = gl_LocalInvocationID.x;  //当前在Workgroup内的ThreadID: 0~127
+    uint gid = gl_WorkGroupID.x;        //当前Workgroup的ID: 0~7
 
-    uint index = gl_GlobalInvocationID.x * VALUE_NUM_PER_THREAD;          //每个workitem的全局ID, 相当于局部ID加上一个Offset
-    //uint index =(gid * WORKGROUP_SIZE + tid) * VALUE_NUM_PER_THREAD;  //这个是自己手算的版本，跟上面哪个一样
+    uint number_of_data_per_thread = NUM_DATA / (NUM_WORKGROUP * WORKGROUP_SIZE); //每个线程需要处理的数据量: 65536/(8*128)=64
 
+    //gl_GlobalInvocationID.x是每个workitem的全局ID, 相当于局部ID加上一个Offset: 0~1023。
+    //input_start_index：0~1023*64=65472
+    uint input_start_index = gl_GlobalInvocationID.x * number_of_data_per_thread;        
+    //uint input_start_index =(gid * WORKGROUP_SIZE + tid) * number_of_data_per_thread;  //这个是自己手算的版本，跟上面哪个一样
+
+    //第一阶段：每个线程计算自己负责的64个数据的和，结果存入shared memory里面。
     sdata[tid] = 0.0;
-    for(uint i = 0; i < VALUE_NUM_PER_THREAD; i++) {
-        sdata[tid] += sbo.inputData[index + i];
+    for(uint i = 0; i < number_of_data_per_thread; i++) {
+        sdata[tid] += sbo.inputData[input_start_index + i];
     }
 
     barrier();
 
-    //树形归约只需要 \(\log_2(128)=7\) 轮归约，而不是让单个线程串行累加 128 个部分结果，通常更有利于 GPU 并行执行。
+    //第二阶段：shared memory里面已经有值了，这个阶段是对shared memory里面的值进行归约，最终得到每个workgroup的部分和。
+    //树形归约只需要 log_2(128)=7 轮归约，而不是让单个线程串行累加 128 个部分结果，通常更有利于 GPU 并行执行。
     for (uint stride = WORKGROUP_SIZE / 2; stride > 0; stride >>= 1) {
         if (tid < stride) {
             sdata[tid] += sdata[tid + stride];
@@ -39,7 +44,7 @@ void main(){
         sbo.partialSums[gid] = sdata[0];
     }
 
-    //普通累加
+    //普通累加：选这个workgroup里面的第一个thread，负责把本workgroup里面的所有thread的结果累加起来，得到本workgroup的部分和。
     // if (tid == 0) {
     //     float final = 0;
     //     for (uint i = 0; i < WORKGROUP_SIZE; i++) {

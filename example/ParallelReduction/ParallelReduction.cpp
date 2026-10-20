@@ -18,7 +18,7 @@
 namespace LuminError{
     class Game : public IGame {
         //static const int BufferSize = 256 * 1024; // 256 KB
-        static const int NUM_THREADS = 1024; //total number of threads
+        //static const int NUM_THREADS = 1024; //total number of threads
         static const int NUM_DATA = 65536;
         static const int NUM_WORKGROUP = 8; //number of threads per workgroup
         static const int KernelRunNumber = 1;
