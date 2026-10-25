@@ -6,11 +6,11 @@
 # LuminEvo 
 **LuminEvo** is a **Vulkan-based rendering framework for real-time graphics, hardware ray tracing, and GPU experimentation**, written in C++.  
 
-The engine directly manages Vulkan GPU resources, synchronization, command submission, descriptor sets, and rendering pipelines. It supports graphics and compute workloads and provides a low-level environment for experimenting with **rasterization, hardware ray tracing, path tracing, GPU resource management, and rendering performance**.  
+The engine directly manages Vulkan GPU resources, synchronization, command submission, descriptor sets, and rendering pipelines. It supports graphics and compute workloads and provides a low-level environment for experimenting with **rasterization, hardware ray tracing/query, path tracing, GPU resource management, and rendering performance**.  
 
 ### Key Features
 * **Vulkan Rendering** — Graphics and compute workloads with explicit GPU resource and synchronization management
-* **Hardware Ray Tracing** — BLAS/TLAS acceleration structures and Vulkan ray-tracing pipelines
+* **Hardware Ray Tracing** — BLAS/TLAS acceleration structures; Vulkan ray-tracing pipelines and rayquery
 * **Path Tracing** — Monte Carlo path tracing with Next Event Estimation (NEE)
 * **PBR Rendering** — Physically based materials and glTF/GLB asset support
 * **GPU Experiments** — Rendering workloads, compute workloads, ray-tracing experiments, and performance analysis
@@ -45,11 +45,11 @@ Ray-tracing algorithm: Monte Carlo Path Tracing with Next Event Estimation (NEE)
 
 
 # [More Examples](https://github.com/gpuwangge/LuminError/blob/main/ExampleLists.md)  
-LuminEvo includes **37 example programs** across three pipeline types:  
+LuminEvo includes **38 example programs** across three pipeline types:  
 
 | Pipeline | Examples | Highlights |
 |----------|----------|------------|
-| Graphics | 27 | Triangle, PBR, shadow mapping, MSAA, skybox, particles, environment mapping |
+| Graphics | 28 | Triangle, PBR, shadow mapping, MSAA, skybox, particles, environment mapping |
 | Compute | 7 | Path tracing, GEMM, storage buffer/image, texture blur |
 | Ray Tracing | 3 | Whitted-style (Stanford Dragon), Monte Carlo path tracing with NEE (Sponza) |
 

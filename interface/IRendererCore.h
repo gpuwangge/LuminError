@@ -102,7 +102,7 @@ namespace LERenderer{
         virtual void LoadRayTracingFunctions() = 0;
         virtual void CreateTriangleBlas() = 0;
         virtual void CreateSphereBlas() = 0;
-        virtual void CreateInstanceBuffer() = 0;
+        virtual void CreateInstanceBuffer(bool enableUpload, int objectOffset, int rtMeshOffset) = 0;
         virtual void CreateTlas() = 0;
         virtual void CreateSBT() = 0;
 
@@ -203,7 +203,7 @@ namespace LERenderer{
         virtual void createGraphicsDescriptorPool(unsigned int object_textbox_count = 0) = 0;
         virtual void createGraphicsDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) = 0;
         virtual void createGraphicsDescriptorSetLayout_TextureImageSampler() = 0;
-        virtual void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) = 0;
+        virtual void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews, VkAccelerationStructureKHR tlas) = 0;
 
         virtual void AddObjectUniformBuffer(std::vector<void*>& objectUniformBuffersMapped) = 0;
         virtual void AddTextUniformBuffer(std::vector<void*>& textUniformBuffersMapped) = 0;
@@ -216,6 +216,8 @@ namespace LERenderer{
         virtual void addDepthImageSamplerUniformBuffer() = 0;
         virtual void addLightDepthImageSamplerUniformBuffer() = 0;
         virtual void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() = 0;
+        
+        virtual void addGraphicsTLASUniformBuffer() = 0;
 
         virtual void GraphicsDescriptorManagerDestroyAndFree() = 0;
 

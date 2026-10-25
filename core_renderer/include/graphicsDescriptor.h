@@ -42,7 +42,7 @@ public:
      ************/
     std::vector<VkDescriptorSet> descriptorSets_general; //one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
     //void createDescriptorSets_General(VkImageView depthImageView, VkImageView lightDepthImageView0, VkImageView lightDepthImageView1);
-    void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews);
+    void createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews, VkAccelerationStructureKHR tlas);
 
     /************
      * 1 GRAPHCIS_UNIFORMBUFFER_GLOBAL
@@ -115,6 +115,8 @@ public:
      ************/
     //static VkSampler lightDepthImageSampler_hardwareDepthBias2;
     //static void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias2();
+
+    void addTLASUniformBuffer();
 
     /************
      * Helper Functions

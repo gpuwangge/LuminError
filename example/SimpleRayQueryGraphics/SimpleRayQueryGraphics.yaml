@@ -1,8 +1,8 @@
 Objects:
   - object_name: skull
     object_id: 0
-    object_scale: 0.05
-    object_position: [0,-0.5,0]
+    object_scale: 0.035
+    object_position: [0,0,0]
     object_rotation: [90,180,0]
     object_velocity: [0,0,0]
     object_angular_velocity: [0,0,0]
@@ -106,6 +106,7 @@ Features:
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: true
   feature_graphics_show_all_metric_controls: true
+  feature_graphics_rayquery_enable: true
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false
@@ -122,7 +123,7 @@ Subpasses:
 
 MainCamera:
   camera_mode: 1
-  camera_position: [0,0,-3]
+  camera_position: [0,0.5,-3]
   camera_rotation: [0,0,0]
   object_id_target: 0
   camera_z: [0.1, 256]

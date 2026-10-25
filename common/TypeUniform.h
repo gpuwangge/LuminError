@@ -13,24 +13,25 @@ enum UniformTypes {
     GRAPHCIS_UNIFORMBUFFER_TEXT_DYNAMIC =                               0x00000004,
     GRAPHCIS_UNIFORMBUFFER_LIGHTING =                                   0x00000008,
     GRAPHCIS_UNIFORMBUFFER_CUSTOM =                                     0x00000010,
-    GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE =                        0x00000020,
-    GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE =                          0x00000040,  //for main camera
-    GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE =                     0x00000080,  //for light camera
-    GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS =   0x00000100,  //for light camera(Hardware depth bias, use two renderpass, dynamic depth bias)
-    COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000200,
-    COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00000400,
-    COMPUTE_UNIFORMBUFFER_MATERIAL =                                    0x00000800,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                     0x00001000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX =                         0x00002000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00004000,
-    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00008000,
-    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00010000,
-    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00020000,
-    COMPUTE_STORAGEBUFFER_CUSTOM =                                      0x00040000,
-    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00080000, //for partile system
-    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00100000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00200000,
-    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00400000
+    GRAPHICS_UNIFORMBUFFER_TLAS =                                       0x00000020,  //for rayquery
+    GRAPHCIS_COMBINEDIMAGESAMPLER_TEXTUREIMAGE =                        0x00000040,
+    GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE =                          0x00000080,  //for main camera
+    GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE =                     0x00000100,  //for light camera
+    GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS =   0x00000200,  //for light camera(Hardware depth bias, use two renderpass, dynamic depth bias)
+    COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000400,
+    COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00000800,
+    COMPUTE_UNIFORMBUFFER_MATERIAL =                                    0x00001000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                     0x00002000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX =                         0x00004000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00008000,
+    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00010000,
+    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00020000,
+    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00040000,
+    COMPUTE_STORAGEBUFFER_CUSTOM =                                      0x00080000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00100000, //for partile system
+    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00200000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00400000,
+    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00800000
 };
 
 /*********

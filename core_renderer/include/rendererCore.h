@@ -195,7 +195,7 @@ namespace LERenderer{
         void LoadRayTracingFunctions() override;
         void CreateTriangleBlas() override;
         void CreateSphereBlas() override;
-        void CreateInstanceBuffer() override;
+        void CreateInstanceBuffer(bool enableUpload, int objectOffset, int rtMeshOffset) override;
         void CreateTlas() override;
         void CreateSBT() override;
 
@@ -383,7 +383,8 @@ namespace LERenderer{
         void createGraphicsDescriptorPool(unsigned int object_textbox_count = 0) override { graphicsDescriptorManager.createDescriptorPool(object_textbox_count); }
         void createGraphicsDescriptorSetLayout_General(VkDescriptorSetLayoutBinding *customBinding = nullptr) override { graphicsDescriptorManager.createDescriptorSetLayout_General(customBinding); }
         void createGraphicsDescriptorSetLayout_TextureImageSampler() override { graphicsDescriptorManager.createDescriptorSetLayout_TextureImageSampler(); }
-        void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews) override { graphicsDescriptorManager.createDescriptorSets_General(depthImageView, depthlight_imageviews); }
+        void createGraphicsDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews, VkAccelerationStructureKHR tlas) override { graphicsDescriptorManager.createDescriptorSets_General(depthImageView, depthlight_imageviews, tlas); }
+
 
         void AddObjectUniformBuffer(std::vector<void*>& objectUniformBuffersMapped) override { graphicsDescriptorManager.addObjectUniformBuffer(objectUniformBuffersMapped); }
         void AddTextUniformBuffer(std::vector<void*>& textUniformBuffersMapped) override { graphicsDescriptorManager.addTextUniformBuffer(textUniformBuffersMapped); }
@@ -396,6 +397,8 @@ namespace LERenderer{
         void addDepthImageSamplerUniformBuffer() override {graphicsDescriptorManager.addDepthImageSamplerUniformBuffer(); }
         void addLightDepthImageSamplerUniformBuffer() override { graphicsDescriptorManager.addLightDepthImageSamplerUniformBuffer(); }
         void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() override { graphicsDescriptorManager.addLightDepthImageSamplerUniformBuffer_hardwareDepthBias(); }
+
+        void addGraphicsTLASUniformBuffer() override { graphicsDescriptorManager.addTLASUniformBuffer(); }
 
         virtual void GraphicsDescriptorManagerDestroyAndFree() override { graphicsDescriptorManager.DestroyAndFree(); }
 

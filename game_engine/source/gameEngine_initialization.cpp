@@ -441,7 +441,10 @@ void GameEngine::Initialize(){
     bool b_uniform_compute = appInfo->Uniform.b_uniform_compute_global || appInfo->Uniform.b_storage_compute_windowswap || appInfo->Uniform.b_uniform_compute_swapchain_storage || appInfo->Uniform.b_uniform_compute_texture_storage;
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_storage_compute_triangle_vertex_attribute || appInfo->Uniform.b_storage_compute_triangle_vertex_index || appInfo->Uniform.b_storage_compute_triangle_reorder_index || appInfo->Uniform.b_storage_compute_bvhnode;
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap || appInfo->Uniform.b_storage_compute_custom;
-    bool b_uniform_raytracing = appInfo->Uniform.b_uniform_raytracing_swapchain_storage;
+    bool b_enable_raytracing_pipeline = appInfo->Uniform.b_uniform_raytracing_swapchain_storage;
+    bool b_enable_rayquery_graphics = appInfo->Feature.feature_graphics_rayquery_enable;
+
+    if(b_enable_rayquery_graphics) renderer->addGraphicsTLASUniformBuffer();
 
     //UNIFORM STEP 1/3 (Pool)
     renderer->createGraphicsDescriptorPool(objects.size()+textManager.m_textBoxes.size());//need size of both objects and textboxes, because each need a sampler
@@ -642,8 +645,16 @@ void GameEngine::Initialize(){
     /****************************
     * Raytracing related
     ****************************/
+    if(b_enable_rayquery_graphics){ //for graphics rayquery
+        //std::cout<<"Application: Initialize RayQuery."<<std::endl;
+        SetupRayTracing(false); //for rayquery only setup rtMeshes
+        renderer->LoadRayTracingFunctions(); //Load auxiliary functions
+        renderer->CreateTriangleBlas(); //create rtMesh.blasAddress
+        renderer->CreateInstanceBuffer(false, 8, 2); //use rtMesh.blasAddress; create instances and instanceBufferAddress
+        renderer->CreateTlas(); //use instances.size() and instanceBufferAddress
+    }
 
-    if(b_uniform_raytracing) {
+    if(b_enable_raytracing_pipeline) { //for raytracing pipeline
         SetupRayTracing(bVerboseInitialization); //must load models and register objects, before this is called； create multi-object, multi-mesh
         //if(bVerboseInitialization) std::cout<<"CreatePipeline: Done setup ray tracing."<<std::endl;
         if(bVerboseInitialization) {
@@ -652,7 +663,7 @@ void GameEngine::Initialize(){
             printElapsed("Application: Initialize time for RT Pipeline: upload object buffer", timePoints[timePoints.size()-2], timePoints.back());
         }
 
-        renderer->LoadRayTracingFunctions(); //Create BLAS, instance and TLAS, TODO: initial ray tracing before description?
+        renderer->LoadRayTracingFunctions(); //Load auxiliary functions
         //if(bVerboseInitialization) std::cout<<"CreatePipeline: Done intiate ray tracing pipeline."<<std::endl;
         if(bVerboseInitialization) {
             timePoints.push_back(now());
@@ -674,7 +685,7 @@ void GameEngine::Initialize(){
             printElapsed("Application: Initialize time for RT Pipeline: Sphere BLAS", timePoints[timePoints.size()-2], timePoints.back());
         }
 
-        renderer->CreateInstanceBuffer();
+        renderer->CreateInstanceBuffer(true, 0, 0);
         if(bVerboseInitialization) {
             timePoints.push_back(now());
             //std::cout<<"Profiling="<<timePoints.size()-2<<", ";
@@ -700,14 +711,14 @@ void GameEngine::Initialize(){
     //UNIFORM STEP 3/3 (Set)
     std::vector<VkImageView> depthlight_imageviews;
     for(int i = 0; i < renderer->GetSwapchain_BufferSize_Depthlight(); i++) depthlight_imageviews.push_back(renderer->GetSwapchain_Buffer_DepthLight_View(i));
-    if(b_uniform_graphics) renderer->createGraphicsDescriptorSets_General(renderer->GetSwapchain_Buffer_DepthCamera_View(), depthlight_imageviews);
+    if(b_uniform_graphics) renderer->createGraphicsDescriptorSets_General(renderer->GetSwapchain_Buffer_DepthCamera_View(), depthlight_imageviews, renderer->GetTlas());
     if(b_uniform_compute){
         if(appInfo->Uniform.b_uniform_compute_swapchain_storage) {
             if(appInfo->Uniform.b_uniform_compute_texture_storage) renderer->createComputeDescriptorSets(resourcer->GetTextureImageView(0));//this must be called after texture resource is loaded
             else renderer->createComputeDescriptorSets(NULL);
         }else renderer->createComputeDescriptorSets();
     }
-    if(b_uniform_raytracing) {
+    if(b_enable_raytracing_pipeline) {
         //if(appInfo->Uniform.b_uniform_raytracing_swapchain_storage) renderer->createRaytracingDescriptorSets(NULL);
         //else renderer->createRaytracingDescriptorSets();
         //std::cout<<"RT Descriptor: textureImageViews.size() = "<<resourcer->GetTextureImageViews().size()<<std::endl;

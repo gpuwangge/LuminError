@@ -185,7 +185,7 @@ VkDeviceAddress GameEngine::GetBufferAddress(VkDevice device, VkBuffer buffer) {
     return fpGetBufferDeviceAddressKHR(device, &info);
 }
 
-void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
+void GameEngine::SetupRayTracing(bool bVerboseRaytracing){ //both rt pipeline and ray query use this function to create BLAS and TLAS, but only rt pipeline use the storage buffer for geometry info
     /****************
     * BLAS for triangles
     * Create buffer address so BLAS(in renderer core) can use
@@ -194,14 +194,14 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
     * storageBufferObject_GeometryInfo里面有一个vertex buffer地址，这个地址也应该指向一个TriangleVertexInfo的数组
     **************/
     rtMeshes.resize(modelData.size());
-    //if(bVerboseRaytracing) std::cout<<"Done resize rtMeshes to: "<<rtMeshes.size()<<std::endl;
+    if(bVerboseRaytracing) std::cout<<"Done resize rtMeshes to: "<<rtMeshes.size()<<std::endl;
     
     for(int i = 0; i < modelData.size(); i++){
         rtMeshes[i].modelId = i;
         rtMeshes[i].vertexCount = static_cast<uint32_t>(modelData[i].modelVertices3D.size());
         rtMeshes[i].indexCount = static_cast<uint32_t>(modelData[i].modelIndices3D.size());
-        //if(bVerboseRaytracing) std::cout << "vertexCount = " << rtMeshes[i].vertexCount << std::endl;
-        //if(bVerboseRaytracing) std::cout << "indexCount = " << rtMeshes[i].indexCount << std::endl;
+        if(bVerboseRaytracing) std::cout << "vertexCount = " << rtMeshes[i].vertexCount << std::endl;
+        if(bVerboseRaytracing) std::cout << "indexCount = " << rtMeshes[i].indexCount << std::endl;
 
         std::vector<TriangleVertexInfo> modelVertexAttribute;
         rtMeshes[i].vertexStride = sizeof(TriangleVertexInfo);
@@ -213,8 +213,6 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
             modelVertexAttribute[j].uv = modelData[i].modelVertices3D[j].texCoord;
             modelVertexAttribute[j].tangent = modelData[i].modelVertices3D[j].tangent;
         }
-        //std::cout<<"test1"<<std::endl;
-        //std::cout.flush();
 
         rtMeshes[i].vertexBuffer.init(
             sizeof(TriangleVertexInfo) * rtMeshes[i].vertexCount,
@@ -225,29 +223,11 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
             renderer->GetPhysicalDevice(),
             true
         );
-        //std::cout<<"test1.5"<<std::endl;
-        //std::cout.flush();
-        //test
-        // if(i == 1){
-        //     std::cout<<"try to print out some position."<<std::endl;
-        //     std::cout.flush();
-        //     TriangleVertexInfo* p = modelVertexAttribute.data();
-        //     std::cout << p[0].position.x << std::endl;
-        //     std::cout.flush();
-        //     std::cout << p[100].position.x << std::endl;
-        //     std::cout << p[1000].position.x << std::endl;
-        //     std::cout << p[10000].position.x << std::endl;
-        //     std::cout << p[100000].position.x << std::endl;
-        //     std::cout << p[437644].position.x << std::endl;
-        //     std::cout.flush();
-        // }
 
         VkResult result = rtMeshes[i].vertexBuffer.fill(modelVertexAttribute.data(), renderer->GetLogicalDevice());
         if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to fill vertex buffer");
         }
-        //std::cout<<"test2"<<std::endl;
-        //std::cout.flush();
 
         rtMeshes[i].indexBuffer.init(
             sizeof(uint32_t) * rtMeshes[i].indexCount,
@@ -260,7 +240,6 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
         );
 
         rtMeshes[i].indexBuffer.fill(modelData[i].modelIndices3D.data(), renderer->GetLogicalDevice());
-        //std::cout<<"test3"<<std::endl;
 
         fpGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>(vkGetDeviceProcAddr(renderer->GetLogicalDevice(), "vkGetBufferDeviceAddressKHR"));
 
@@ -291,15 +270,16 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
         //     logger->Log("modelVertexAttribute[{}].normal = {}, {}, {}", j, modelVertexAttribute[j].normal.x, modelVertexAttribute[j].normal.y, modelVertexAttribute[j].normal.z);
         // }
         //if(bVerboseRaytracing) std::cout<<"Done upload geometry(model): "<<i<<std::endl;
-        std::cout.flush();
+
     }
     //if(bVerboseRaytracing) std::cout<<"Done upload all geometry(model) data to storage buffer objects."<<std::endl;
 
     //static_assert(sizeof(GeometryInfoGPU) == 16);
     //static_assert(alignof(GeometryInfoGPU) >= 8);
-
-    UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame(), &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
-    UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame()+1, &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
+    if(appInfo->Uniform.b_storage_raytracing_material){ //TODO: change to geometry later
+        UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame(), &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
+        UploadRaytracingStorageBuffer_GeometryInfo(GetCurrentFrame()+1, &storageBufferObject_GeometryInfo, sizeof(StructStorageBuffer_GeometryInfo));
+    }
     //if(bVerboseRaytracing) std::cout<<"Done upload geometry info to device."<<std::endl;
 
     // static_assert(sizeof(VkDeviceAddress) == 8);
@@ -363,10 +343,11 @@ void GameEngine::SetupRayTracing(bool bVerboseRaytracing){
         //uniformBufferObject_rtLight.lights[i].type = appInfo->RTLights[i].rt_light_type;
         //storageBufferObject_rtLight.lights[i].rt_light_id = appInfo->RTLights[i].rt_light_id;
     }
-
-    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame(), &uniformBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
-    renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame()+1, &uniformBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
-    //if(bVerboseRaytracing) std::cout<<"Done upload ray tracing light info to device."<<std::endl;
+    if(appInfo->RTLights.size() > 0){
+        renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame(), &uniformBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
+        renderer->uploadRaytracingUniformBuffer_rtLight(GetCurrentFrame()+1, &uniformBufferObject_rtLight, sizeof(StructUniformBuffer_RtLight));
+        //if(bVerboseRaytracing) std::cout<<"Done upload ray tracing light info to device."<<std::endl;
+    }
 }
 
 void GameEngine::Trace(int numWorkGroupsX, int numWorkGroupsY, int numWorkGroupsZ){

@@ -81,6 +81,11 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);//one depth sampler
         counter++; 
     }*/
+   if(graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS){
+        graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++; 
+    }
     
 
 	VkDescriptorPoolCreateInfo poolInfo{};
@@ -104,7 +109,8 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
     //Descriptor Step 2/3
     graphicsBindings.resize(getLayoutSize_General());
 	int bindingCounter = 0;
-    if(bVerbose) std::cout<<"Layout(Graphics General) size = " << graphicsBindings.size()<<std::endl;
+    //if(bVerbose) 
+    //std::cout<<"Layout(Graphics General) size = " << graphicsBindings.size()<<std::endl;
     //std::cout<<"graphicsUniformTypes = " << graphicsUniformTypes<<std::endl;
 
     if(graphicsUniformTypes & GRAPHCIS_UNIFORMBUFFER_GLOBAL){
@@ -181,6 +187,14 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
 		graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindingCounter++;
     }//std::cout<<"!";
+    if(graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS){
+        graphicsBindings[bindingCounter].binding = bindingCounter;
+        graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        graphicsBindings[bindingCounter].descriptorCount = 1;
+        graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
+        bindingCounter++;
+    }
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -221,12 +235,12 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_TextureImageSampler()
 /************
 * Set
 ************/
-void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews){
+void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthImageView, std::vector<VkImageView> &depthlight_imageviews, VkAccelerationStructureKHR tlas){
     //Descriptor Step 3/3
     //HERE_I_AM("wxjCreateDescriptorSets");
 
     int descriptorSize = getSetSize_General();
-    //std::cout<<"Set(Graphics, Non-sampler) size = "<<getSetSize()<<std::endl;
+    //std::cout<<"Set(Graphics, Non-sampler) size = "<<getSetSize_General()<<std::endl;
 
     VkResult result = VK_SUCCESS;
 
@@ -416,6 +430,27 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             descriptorWrites[counter].pImageInfo = &lightDepthImage_hardware_Info2;
             counter++;
         }*/
+       //binding: TLAS
+       if(graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS){
+            VkWriteDescriptorSetAccelerationStructureKHR asInfo{};
+            asInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+            asInfo.pNext = nullptr;
+            asInfo.accelerationStructureCount = 1;
+            asInfo.pAccelerationStructures = &tlas;
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].pNext = &asInfo;
+            descriptorWrites[counter].dstSet = descriptorSets_general[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+            descriptorWrites[counter].pImageInfo = nullptr;
+            descriptorWrites[counter].pBufferInfo = nullptr;
+            descriptorWrites[counter].pTexelBufferView = nullptr;
+            //std::cout<<"createDescriptorSets_General():added TLAS descriptor, binding = "<<counter<<std::endl;
+            counter++;
+       }
 
         //Step 4
         //std::cout<<"vkUpdateDescriptorSets()"<<std::endl;
@@ -711,6 +746,10 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
     VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler_hardwareDepthBias2);
 }*/
 
+void CGraphicsDescriptorManager::addTLASUniformBuffer(){
+    graphicsUniformTypes |= GRAPHICS_UNIFORMBUFFER_TLAS;
+}
+
 /************
 * Helper Functions
 ************/
@@ -725,6 +764,7 @@ int CGraphicsDescriptorManager::getPoolSize(){ //to calculate descriptor pool si
     descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE ? 1:0;
     descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE ? 1:0;
     descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS ? 1:0;
+    descriptorPoolSize += graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS ? 1:0;
     //descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2 ? 1:0;
 
 	return descriptorPoolSize;
@@ -739,6 +779,7 @@ int CGraphicsDescriptorManager::getLayoutSize_General(){ //to get descriptor lay
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS) ? 1:0;
+    descriptorPoolSize += graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS ? 1:0;
     //descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2) ? 1:0;
 
 	return descriptorPoolSize;

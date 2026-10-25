@@ -28,6 +28,7 @@ struct FeatureConfig {
     bool feature_graphics_show_performance_control = true;
     bool feature_graphics_show_all_metric_controls = true;
     bool feature_graphics_enable_controls = false; //this is not read from yaml
+    bool feature_graphics_rayquery_enable = false;
 
     int feature_raytracing_pipeline_render_mode = 0;
     int feature_raytracing_pipeline_interactive_move_mode = 0;
@@ -47,6 +48,8 @@ struct FeatureConfig {
     int feature_raytracing_pipeline_maxReflectionDepth = 0;
     int feature_raytracing_pipeline_maxRefractionDepth = 0;
     bool feature_raytracing_pipeline_shadow_ray_ignore_sphere = false;
+
+    
 
     void loadFromYaml(const YAML::Node& node) {
         feature_rendermode                          = getOrDefault(node, "feature_rendermode", 0);
@@ -78,6 +81,8 @@ struct FeatureConfig {
         feature_raytracing_pipeline_maxReflectionDepth     = getOrDefault(node, "feature_raytracing_pipeline_maxReflectionDepth", 0);
         feature_raytracing_pipeline_maxRefractionDepth     = getOrDefault(node, "feature_raytracing_pipeline_maxRefractionDepth", 0);
         feature_raytracing_pipeline_shadow_ray_ignore_sphere     = getOrDefault(node, "feature_raytracing_pipeline_shadow_ray_ignore_sphere", false);
+
+        feature_graphics_rayquery_enable     = getOrDefault(node, "feature_graphics_rayquery_enable", false);
     }
 };
 

@@ -152,7 +152,9 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
 
     if(enableRaytracingPipeline){
     /////////////////Ray Tracing Related/////////////
-        //createInfo.pNext -> deviceFeatures2 -> rayTracingPipelineFeatures -> accelerationStructureFeatures -> features12 -> nullptr
+        //createInfo.pNext -> deviceFeatures2
+        //              -> rayQueryFeatures(new) 
+        //              -> rayTracingPipelineFeatures -> accelerationStructureFeatures -> features12 -> nullptr
 
         // VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
         // bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
@@ -176,9 +178,15 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
         rayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
         rayTracingPipelineFeatures.pNext = &accelerationStructureFeatures;
 
+        //new: ray query feature
+        VkPhysicalDeviceRayQueryFeaturesKHR rayQueryFeatures{};
+        rayQueryFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+        rayQueryFeatures.rayQuery = VK_TRUE;
+        rayQueryFeatures.pNext = &rayTracingPipelineFeatures;
+
         VkPhysicalDeviceFeatures2 deviceFeatures2{};
         deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-        deviceFeatures2.pNext = &rayTracingPipelineFeatures; //ray tracing related features can be added here
+        deviceFeatures2.pNext = &rayQueryFeatures; //ray tracing related features can be added here
 
         createInfo.pNext = &deviceFeatures2; //ray tracing related features can be added here
         ////////////////////////////////////////////

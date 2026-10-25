@@ -73,7 +73,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     yamler->ReadExampleYAMLFile(exampleName);
     //bool bEnableGraphicsPipleine_raytarcing;
     bool bEnableComputePipeline_raytracing = appInfo->Uniform.b_storage_compute_bvhnode ? true : false;
-    bool bEnableRaytracingPipeline_raytracing = appInfo->Uniform.b_uniform_raytracing_swapchain_storage ? true : false;
+    bool bEnableRaytracingPipeline_raytracing = (appInfo->Uniform.b_uniform_raytracing_swapchain_storage || appInfo->Feature.feature_graphics_rayquery_enable) ? true : false;
     //std::cout<<"bEnableComputePipeline_raytracing: "<<bEnableComputePipeline_raytracing<<std::endl;
     //std::cout<<"bEnableRaytracingPipeline_raytracing: "<<bEnableRaytracingPipeline_raytracing<<std::endl;
 
@@ -118,6 +118,7 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     //VkQueueFlags requiredQueueFamilies = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT; //？
     const std::vector<const char*>  requireDeviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_RAY_QUERY_EXTENSION_NAME, //ray query TODO
         VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME, //ray tracing TODO
         VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME, //ray tracing TODO
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME, //ray tracing TODO

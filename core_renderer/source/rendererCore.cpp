@@ -1205,7 +1205,7 @@ void RendererCore::CreateTriangleBlas(){
 
         rtMesh.blasAddress = fpGetAccelerationStructureDeviceAddressKHR(GetLogicalDevice(), &addressInfo);
 
-        //std::cout << "BLAS created. Device Address: " << blasDeviceAddress << std::endl;
+        //std::cout << "BLAS created. Device Address: " << rtMesh.blasAddress << std::endl;
 
         blas_scratch_buffer.DestroyAndFree(GetLogicalDevice());
     }
@@ -1464,7 +1464,7 @@ void RendererCore::CreateSphereBlas(){
     //}
 }
 
-void RendererCore::CreateInstanceBuffer(){
+void RendererCore::CreateInstanceBuffer(bool enableUpload, int objectOffset, int rtMeshOffset){
     //std::cout << "Creating TLAS instance buffer for one triangle..." << std::endl;
 
     StructUniformBuffer_Instance storageBufferObject_instance{};
@@ -1473,9 +1473,11 @@ void RendererCore::CreateInstanceBuffer(){
     const uint32_t sphereSize = game->GetRtSphereSize();
 
     instances.resize(game->GetObjectSize() + sphereSize);//每个instance就是一个object
+    //目前的问题是object里面混进了很多control object，导致instance数量比实际的mesh数量多很多。以后要优化。
+    //std::cout<<"CreateInstanceBuffer(): total instance count = "<<instances.size()<<std::endl;
     //Step1 for triangle mesh
     int count = 0;
-    for(int i = 0; i < game->GetObjectSize(); i++){
+    for(int i = 0; i < game->GetObjectSize() - objectOffset; i++){
         //VkAccelerationStructureInstanceKHR instance{};
         
         glm::vec3 scale = game->GetObjectScale(i);
@@ -1485,6 +1487,7 @@ void RendererCore::CreateInstanceBuffer(){
         int material_id = game->GetObjectMaterialID(i);
         //std::cout<<"CreateInstanceBuffer(): model_id = "<<model_id<<std::endl;
         glm::vec3 rotation = game->GetObjectRotation(i); //Pitch, Yaw, Roll
+        std::cout<<"CreateInstanceBuffer(): object "<<i<<": rotation = ("<<rotation.x<<", "<<rotation.y<<", "<<rotation.z<<")"<<std::endl;
 
         // 如果 rotation 是角度，要先转弧度
         float pitch = glm::radians(rotation.x);
@@ -1492,7 +1495,8 @@ void RendererCore::CreateInstanceBuffer(){
         float roll  = glm::radians(rotation.z);
 
         glm::mat4 T = glm::translate(glm::mat4(1.0f), position);
-        glm::mat4 R = glm::yawPitchRoll(yaw, pitch, roll); // 注意参数顺序是 yaw, pitch, roll
+        //glm::mat4 R = glm::yawPitchRoll(yaw, pitch, roll); // 注意参数顺序是 yaw, pitch, roll
+        glm::mat4 R = glm::eulerAngleXYZ(pitch, yaw, roll); // 注意参数顺序是 pitch, yaw, roll
         glm::mat4 S = glm::scale(glm::mat4(1.0f), scale);
 
         // 常见模型矩阵：先 scale，再 rotate，再 translate
@@ -1518,28 +1522,29 @@ void RendererCore::CreateInstanceBuffer(){
         instances[i].mask = 0x01; //triangle设置成01，那么在shader中traceRay时，ray的mask也必须cover 01才能命中这个instance
         instances[i].instanceShaderBindingTableRecordOffset = 0;
         instances[i].flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-        instances[i].accelerationStructureReference = game->GetRtMesh(model_id).blasAddress;
-        //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use material_id = "<<material_id<<", use blasAddress="<<game->GetRtMesh(model_id).blasAddress<<std::endl;
+        instances[i].accelerationStructureReference = game->GetRtMesh(model_id - rtMeshOffset).blasAddress;
+        //std::cout<<"instance "<<i<<" : use model_id="<<model_id<<", use material_id = "<<material_id<<", use blasAddress="<<instances[i].accelerationStructureReference<<std::endl;
         count++;
 
-        //每个instance都需要的几何，材质，alpha数据（todo:目前自定义的时使用material id。glb是比较粗暴的拆开传过来的。以后稳定了再优化。）
-        //通用
-        storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id; //每个instance都要有model(mesh)
-        
-        //自定义
-        storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id; //这是自定义的material id; glb不需要这个(都是0)
-        
-        //GLB
-        storageBufferObject_instance.instances[instanceIndex].textureIndex_baseColor = game->GetObjectTextureID_BaseColor(i); //不用材质就不需要这个；glb需要
-        storageBufferObject_instance.instances[instanceIndex].textureIndex_normal = game->GetObjectTextureID_Normal(i); //不用材质就不需要这个；glb需要
-        storageBufferObject_instance.instances[instanceIndex].textureIndex_metallicRoughness = game->GetObjectTextureID_MetallicRoughness(i); //不用材质就不需要这个；glb需要
-        
-        storageBufferObject_instance.instances[instanceIndex].metallicFactor = game->GetObjectTextureID_MetallicFactor(i); //不用材质就不需要这个；glb需要
-        storageBufferObject_instance.instances[instanceIndex].roughnessFactor = game->GetObjectTextureID_RoughnessFactor(i); //不用材质就不需要这个；glb需要
-        storageBufferObject_instance.instances[instanceIndex].alphaMode = game->GetObjectTextureID_alphaMode(i); //不用材质就不需要这个；glb需要
-        storageBufferObject_instance.instances[instanceIndex].alphaCutoff = game->GetObjectTextureID_alphaCutoff(i); //不用材质就不需要这个；glb需要
-        storageBufferObject_instance.instances[instanceIndex].doubleSided = game->GetObjectTextureID_doubleSided(i); //不用材质就不需要这个；glb需要
-        
+        if(enableUpload){
+            //每个instance都需要的几何，材质，alpha数据（todo:目前自定义的时使用material id。glb是比较粗暴的拆开传过来的。以后稳定了再优化。）
+            //通用
+            storageBufferObject_instance.instances[instanceIndex].geometryIndex = model_id; //每个instance都要有model(mesh)
+            
+            //自定义
+            storageBufferObject_instance.instances[instanceIndex].materialIndex = material_id; //这是自定义的material id; glb不需要这个(都是0)
+            
+            //GLB
+            storageBufferObject_instance.instances[instanceIndex].textureIndex_baseColor = game->GetObjectTextureID_BaseColor(i); //不用材质就不需要这个；glb需要
+            storageBufferObject_instance.instances[instanceIndex].textureIndex_normal = game->GetObjectTextureID_Normal(i); //不用材质就不需要这个；glb需要
+            storageBufferObject_instance.instances[instanceIndex].textureIndex_metallicRoughness = game->GetObjectTextureID_MetallicRoughness(i); //不用材质就不需要这个；glb需要
+            
+            storageBufferObject_instance.instances[instanceIndex].metallicFactor = game->GetObjectTextureID_MetallicFactor(i); //不用材质就不需要这个；glb需要
+            storageBufferObject_instance.instances[instanceIndex].roughnessFactor = game->GetObjectTextureID_RoughnessFactor(i); //不用材质就不需要这个；glb需要
+            storageBufferObject_instance.instances[instanceIndex].alphaMode = game->GetObjectTextureID_alphaMode(i); //不用材质就不需要这个；glb需要
+            storageBufferObject_instance.instances[instanceIndex].alphaCutoff = game->GetObjectTextureID_alphaCutoff(i); //不用材质就不需要这个；glb需要
+            storageBufferObject_instance.instances[instanceIndex].doubleSided = game->GetObjectTextureID_doubleSided(i); //不用材质就不需要这个；glb需要
+        }
 
         instanceIndex++;
     }
@@ -1599,9 +1604,10 @@ void RendererCore::CreateInstanceBuffer(){
 
     //std::cout << "TLAS instance buffer created. Device Address: " << instanceBufferAddress << std::endl;
 
-    uploadRaytracingUniformBuffer_instance(GetCurrentFrame(), &storageBufferObject_instance, sizeof(StructUniformBuffer_Instance));
-    uploadRaytracingUniformBuffer_instance(GetCurrentFrame()+1, &storageBufferObject_instance, sizeof(StructUniformBuffer_Instance));
-
+    if(enableUpload){
+        uploadRaytracingUniformBuffer_instance(GetCurrentFrame(), &storageBufferObject_instance, sizeof(StructUniformBuffer_Instance));
+        uploadRaytracingUniformBuffer_instance(GetCurrentFrame()+1, &storageBufferObject_instance, sizeof(StructUniformBuffer_Instance));
+    }
 }
 
 void RendererCore::CreateTlas(){
