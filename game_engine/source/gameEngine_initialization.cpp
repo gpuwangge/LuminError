@@ -364,7 +364,7 @@ void GameEngine::Initialize(){
                     resourcer->LoadModelObj(modelName,  modelData[currentModelIndex].modelVertices3D, modelData[currentModelIndex].modelIndices3D);
                     renderer->CreateVertexBuffer(modelData[currentModelIndex].modelVertices3D.data(), sizeof(Vertex3D), modelData[currentModelIndex].modelVertices3D.size()); 
                     renderer->CreateIndexBuffer(modelData[currentModelIndex].modelIndices3D);
-                    //std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelVertices3D.size()<<", Indices Size: "<<modelIndices3D.size()<<std::endl;
+                    std::cout<<"Model Loaded: "<<modelName<<", Vertices Size: "<<modelData[currentModelIndex].modelVertices3D.size()<<", Indices Size: "<<modelData[currentModelIndex].modelIndices3D.size()<<std::endl;
                 }
             }
 
@@ -443,6 +443,12 @@ void GameEngine::Initialize(){
     b_uniform_compute = b_uniform_compute || appInfo->Uniform.b_uniform_compute_custom || appInfo->Uniform.b_storage_compute_customswap || appInfo->Uniform.b_storage_compute_custom;
     bool b_enable_raytracing_pipeline = appInfo->Uniform.b_uniform_raytracing_swapchain_storage;
     bool b_enable_rayquery_graphics = appInfo->Feature.feature_graphics_rayquery_enable;
+    bool b_enable_meshshader_graphics = appInfo->Feature.feature_graphics_meshshader_enable;
+
+    if(b_enable_meshshader_graphics) {
+        //std::cout<<"Application: Enable Mesh Shader Graphics Pipeline."<<std::endl;
+        renderer->addGraphicsStorageBuffer_meshshader();
+    }
 
     if(b_enable_rayquery_graphics) renderer->addGraphicsTLASUniformBuffer();
 
@@ -759,7 +765,19 @@ void GameEngine::Initialize(){
             //std::cout<<appInfo->GraphicsPipeline[i].graphics_pipeline_vertexshader_name<<std::endl;
             resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_vertexshader_name, VERT);
             resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_fragmentshader_name, FRAG);
+            if(b_enable_meshshader_graphics){
+                std::string shadername_mesh = appInfo->GraphicsPipelines[i].graphics_pipeline_meshshader_name;
+                if(shadername_mesh != "Default") resourcer->CreateShader(shadername_mesh, MESH);
+                std::string shadername_task = appInfo->GraphicsPipelines[i].graphics_pipeline_taskshader_name;
+                if(shadername_task != "Default") resourcer->CreateShader(shadername_task, TASK);
+            }
         }
+        // if(b_enable_meshshader_graphics) {
+        //     for(int i = 0; i < appInfo->GraphicsPipelines.size(); i++){
+        //         resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_meshshader_name, MESH);
+        //         //resourcer->CreateShader(appInfo->GraphicsPipelines[i].graphics_pipeline_taskshader_name, TASK);
+        //     }
+        // }
     }
     if(appInfo->ComputePipelines.size() > 0){
         for(int i = 0; i < appInfo->ComputePipelines.size(); i++){
@@ -849,40 +867,62 @@ void GameEngine::Initialize(){
             int vertexDatatype = appInfo->GraphicsPipelines[i].graphics_pipeline_vertexdatatype;
             //if(bPipelineVerbose) std::cout<<"CreatePipeline: Try Create graphics pipeline: "<<i<<", VertexStructureType="<<vertexDatatype<<std::endl;
 
+            //meshshader
+            std::string shadername_mesh = appInfo->GraphicsPipelines[i].graphics_pipeline_meshshader_name;
+            bool b_enable_meshshader_this_pipeline = b_enable_meshshader_graphics && (shadername_mesh != "Default");
+
+
             switch(vertexDatatype){
                 case VertexStructureTypes::NoType:
                     renderer->CreateGraphicsPipeline(NULL, NULL,
-                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), false, false, 
-                        renderer->GetRenderpass_mainscene(), i, appInfo);
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                        resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), resourcer->GetMeshShaderModule(0), resourcer->GetTaskShaderModule(0),
+                        false, false, 
+                        renderer->GetRenderpass_mainscene(), i, appInfo, false);
                 break;
                 case VertexStructureTypes::ThreeDimension:
+                    //std::cout<<"CreatePipeline: Create 3D pipeline"<<std::endl;
                     //for 2-renderpass case, each pipeline for different renderpass
                     //if((*appInfo->RenderPassShadowmap)[i]) {
                     if(appInfo->GraphicsPipelines[i].graphics_pipeline_renderpasses_shadowmap) {
                         renderer->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
-                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
-                            renderer->GetRenderpass_shadowmap(), i, appInfo); 
+                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                            resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), resourcer->GetMeshShaderModule(0), resourcer->GetTaskShaderModule(0),
+                            true, false, 
+                            renderer->GetRenderpass_shadowmap(), i, appInfo, false); 
                     }else{
                         renderer->CreateGraphicsPipeline(Vertex3D::getBindingDescription, Vertex3D::getAttributeDescriptions, 
-                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
-                            renderer->GetRenderpass_mainscene(), i, appInfo);
-                    }   
+                            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                            resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), resourcer->GetMeshShaderModule(0), resourcer->GetTaskShaderModule(0),
+                            true, false, 
+                            renderer->GetRenderpass_mainscene(), i, appInfo, b_enable_meshshader_this_pipeline);
+                    } 
+                    //std::cout<<"CreatePipeline: Done Create 3D pipeline"<<std::endl;
                 break;
                 case VertexStructureTypes::TwoDimension:
                     //std::cout<<"CreatePipeline: Create 2D pipeline"<<std::endl;
                     renderer->CreateGraphicsPipeline(Vertex2D::getBindingDescription, Vertex2D::getAttributeDescriptions, 
-                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
-                        renderer->GetRenderpass_mainscene(), i, appInfo);
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                        resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), resourcer->GetMeshShaderModule(0), resourcer->GetTaskShaderModule(0),
+                        true, false, 
+                        renderer->GetRenderpass_mainscene(), i, appInfo, false);
+                    //std::cout<<"CreatePipeline: Done Create 2D pipeline"<<std::endl;
                 break;
                 case VertexStructureTypes::ParticleType:
                     renderer->CreateGraphicsPipeline(Particle::getBindingDescription, Particle::getAttributeDescriptions, 
-                        VK_PRIMITIVE_TOPOLOGY_POINT_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, false, 
-                        renderer->GetRenderpass_mainscene(), i, appInfo);
+                        VK_PRIMITIVE_TOPOLOGY_POINT_LIST, 
+                        resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), resourcer->GetMeshShaderModule(0), resourcer->GetTaskShaderModule(0),
+                        true, false, 
+                        renderer->GetRenderpass_mainscene(), i, appInfo, false);
                 break;
                 case VertexStructureTypes::TextQuad:
+                    //std::cout<<"CreatePipeline: Create TextQuad pipeline"<<std::endl;
                     renderer->CreateGraphicsPipeline(NULL, NULL, //TextQuadVertex::getBindingDescription, TextQuadVertex::getAttributeDescriptions, 
-                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), true, true, 
-                        renderer->GetRenderpass_mainscene(), i, appInfo);
+                        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 
+                        resourcer->GetVertexShaderModule(i), resourcer->GetFragmentShaderModule(i), resourcer->GetMeshShaderModule(0), resourcer->GetTaskShaderModule(0),
+                        true, true, 
+                        renderer->GetRenderpass_mainscene(), i, appInfo, false);
+                    //std::cout<<"CreatePipeline: Done Create TextQuad pipeline"<<std::endl;
                 break;
                 default:
                 break;

@@ -3,6 +3,7 @@
 #include <vector>
 #include "TypeUniform.h"
 #include "TypeLight.h"
+#include "TypeVertex.h"
 #include <array>
 
 class CWxjBuffer;
@@ -108,9 +109,23 @@ public:
     static VkSampler lightDepthImageSampler_hardwareDepthBias;
     void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias();
 
+    
+    /************
+     * 10 GRAPHICS_STORAGEBUFFER_MESHSHADER
+     ************/
+    
+
+    //static std::vector<std::vector<float>> storageBuffers_vertexFloatData;
+    static std::vector<CWxjBuffer> storageBuffers_vertexFloatData;
+    static std::vector<void*> storageBuffersMapped_vertexFloatData;
+    //static std::vector<std::vector<unsigned int>> storageBuffers_indexUintData;
+    static std::vector<CWxjBuffer> storageBuffers_indexUintData;
+    static std::vector<void*> storageBuffersMapped_indexUintData;
+    void addStorageBuffer_vertexFloat_indexUint_Data();
+    void uploadStorageBuffer_vertexFloat_indexUint_Data(uint32_t currentFrame, const void* data_vertex, const void* data_index, size_t size_vertex, size_t size_index);
 
     /************
-     * 10 GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2
+     * GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2
      * Test: WIP
      ************/
     //static VkSampler lightDepthImageSampler_hardwareDepthBias2;

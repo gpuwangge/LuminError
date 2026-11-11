@@ -102,7 +102,7 @@ compile_if_newer() {
 
 echo "🔍 Scanning for shaders in: ${search_dir}"
 
-for ext in vert frag comp rgen rmiss rchit rahit rint
+for ext in vert frag comp rgen rmiss rchit rahit rint mesh task
 do
     for entry in ${search_dir}/*.${ext}
     do

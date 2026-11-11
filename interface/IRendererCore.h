@@ -93,6 +93,7 @@ namespace LERenderer{
         virtual void DrawIndexed(int model_id) = 0;
         virtual void Draw(uint32_t n) = 0;
         virtual void DrawInstanceIndexed(int model_id, int instanceCount) = 0;
+        virtual void DrawMeshTasks(int groupCountX, int groupCountY, int groupCountZ) = 0;
 
         virtual void Update() = 0;
 
@@ -164,9 +165,10 @@ namespace LERenderer{
             VkShaderModule &sphereIntersectionModule, VkShaderModule &spherePrimaryRchitModule, VkShaderModule &sphereShadowRchitModule) = 0;
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
-        virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
-            VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
-            VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo) = 0;
+        virtual void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc, VkPrimitiveTopology topology, 
+            VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, VkShaderModule &meshShaderModule, VkShaderModule &taskShaderModule, 
+            bool bUseVertexBuffer, bool bUseInstanceBuffer,
+            VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo, bool bEnableMeshshader) = 0;
 
         virtual void AddColorBlendAttachment(VkBlendOp colorBlendOp, VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, 
 								 VkBlendOp alphaBlendOp, VkBlendFactor srcAlphaBlendFactor, VkBlendFactor dstAlphaBlendFactor) = 0;
@@ -217,6 +219,10 @@ namespace LERenderer{
         virtual void addLightDepthImageSamplerUniformBuffer() = 0;
         virtual void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() = 0;
         
+        virtual void addGraphicsStorageBuffer_meshshader() = 0;
+        virtual void uploadGraphicsStorageBuffer_meshshader(uint32_t currentFrame, const void* data_vertex, const void* data_index, size_t dataSize_vertex, size_t dataSize_index) = 0;
+        virtual bool LoadMeshShaderFunctions() = 0;
+
         virtual void addGraphicsTLASUniformBuffer() = 0;
 
         virtual void GraphicsDescriptorManagerDestroyAndFree() = 0;
@@ -354,7 +360,8 @@ namespace LERenderer{
         virtual void CreateInstance(const std::vector<const char*> &requiredValidationLayers, std::vector<const char*> &requiredExtensions) = 0;
         virtual VkInstance GetInstance() = 0;
 
-        virtual void CreatePhysicalDevice(const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers, const bool enableRaytracingPipeline) = 0;
+        virtual void CreatePhysicalDevice(const std::vector<const char*>  requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers, 
+            const bool enableRaytracingPipeline, const bool enableMeshShader) = 0;
         
         virtual VkDebugUtilsMessengerEXT GetDebugMessenger() = 0;
         virtual void ContextQuit() = 0;

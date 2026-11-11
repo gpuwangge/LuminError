@@ -86,6 +86,15 @@ void CGraphicsDescriptorManager::createDescriptorPool(unsigned int object_textbo
         graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
         counter++; 
     }
+    if(graphicsUniformTypes & GRAPHICS_STORAGEBUFFER_MESHSHADER){
+        graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //for mesh shader vertex (storage buffer)
+        graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++; 
+
+        graphicsDescriptorPoolSizes[counter].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; //for mesh shader index (storage buffer)
+        graphicsDescriptorPoolSizes[counter].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        counter++; 
+    }
     
 
 	VkDescriptorPoolCreateInfo poolInfo{};
@@ -192,6 +201,23 @@ void CGraphicsDescriptorManager::createDescriptorSetLayout_General(VkDescriptorS
         graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
         graphicsBindings[bindingCounter].descriptorCount = 1;
         graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
+        bindingCounter++;
+    }
+    if(graphicsUniformTypes & GRAPHICS_STORAGEBUFFER_MESHSHADER){
+        //std::cout<<"DEBUG: bindingCounter = "<<bindingCounter<<std::endl;
+        graphicsBindings[bindingCounter].binding = bindingCounter; //for mesh shader vertex (storage buffer)
+        graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        graphicsBindings[bindingCounter].descriptorCount = 1;
+        graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_MESH_BIT_NV;
+        graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
+        bindingCounter++;
+
+        //std::cout<<"DEBUG: bindingCounter = "<<bindingCounter<<std::endl;
+        graphicsBindings[bindingCounter].binding = bindingCounter; //for mesh shader index (storage buffer)
+        graphicsBindings[bindingCounter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        graphicsBindings[bindingCounter].descriptorCount = 1;
+        graphicsBindings[bindingCounter].stageFlags = VK_SHADER_STAGE_MESH_BIT_NV;
         graphicsBindings[bindingCounter].pImmutableSamplers = nullptr;
         bindingCounter++;
     }
@@ -449,6 +475,35 @@ void CGraphicsDescriptorManager::createDescriptorSets_General(VkImageView depthI
             descriptorWrites[counter].pBufferInfo = nullptr;
             descriptorWrites[counter].pTexelBufferView = nullptr;
             //std::cout<<"createDescriptorSets_General():added TLAS descriptor, binding = "<<counter<<std::endl;
+            counter++;
+       }
+       if(graphicsUniformTypes & GRAPHICS_STORAGEBUFFER_MESHSHADER){ 
+            VkDescriptorBufferInfo meshShaderStorageBufferInfo1{};  //for mesh shader vertex (storage buffer)
+            meshShaderStorageBufferInfo1.buffer = storageBuffers_vertexFloatData[i].buffer;
+            meshShaderStorageBufferInfo1.offset = 0;
+            meshShaderStorageBufferInfo1.range = sizeof(VertexFloatDataStruct);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets_general[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &meshShaderStorageBufferInfo1;
+            counter++;
+
+            VkDescriptorBufferInfo meshShaderStorageBufferInfo2{};  //for mesh shader index (storage buffer)
+            meshShaderStorageBufferInfo2.buffer = storageBuffers_indexUintData[i].buffer;
+            meshShaderStorageBufferInfo2.offset = 0;
+            meshShaderStorageBufferInfo2.range = sizeof(IndexUintDataStruct);
+
+            descriptorWrites[counter].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[counter].dstSet = descriptorSets_general[i];
+            descriptorWrites[counter].dstBinding = counter;
+            descriptorWrites[counter].dstArrayElement = 0;
+            descriptorWrites[counter].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            descriptorWrites[counter].descriptorCount = 1;
+            descriptorWrites[counter].pBufferInfo = &meshShaderStorageBufferInfo2;
             counter++;
        }
 
@@ -716,8 +771,45 @@ void CGraphicsDescriptorManager::addLightDepthImageSamplerUniformBuffer_hardware
     VkResult result = vkCreateSampler(CContext::GetHandle().GetLogicalDevice(), &samplerInfo, nullptr, &lightDepthImageSampler_hardwareDepthBias);
 }
 
+/************
+ * 10 GRAPHICS_STORAGEBUFFER_MESHSHADER
+ ************/
+std::vector<CWxjBuffer> CGraphicsDescriptorManager::storageBuffers_vertexFloatData;
+std::vector<void*> CGraphicsDescriptorManager::storageBuffersMapped_vertexFloatData;
+std::vector<CWxjBuffer> CGraphicsDescriptorManager::storageBuffers_indexUintData;
+std::vector<void*> CGraphicsDescriptorManager::storageBuffersMapped_indexUintData;
+void CGraphicsDescriptorManager::addStorageBuffer_vertexFloat_indexUint_Data(){
+    CGraphicsDescriptorManager::graphicsUniformTypes |= GRAPHICS_STORAGEBUFFER_MESHSHADER;
+
+    storageBuffers_vertexFloatData.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_vertexFloatData.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffers_indexUintData.resize(MAX_FRAMES_IN_FLIGHT);
+    storageBuffersMapped_indexUintData.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        storageBuffers_vertexFloatData[i].init(sizeof(VertexFloatDataStruct), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_vertexFloatData[i].deviceMemory, 0, sizeof(VertexFloatDataStruct), 0, &storageBuffersMapped_vertexFloatData[i]);
+        storageBuffers_indexUintData[i].init(sizeof(IndexUintDataStruct), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, CContext::GetHandle().GetLogicalDevice(), CContext::GetHandle().GetPhysicalDevice());
+        vkMapMemory(CContext::GetHandle().GetLogicalDevice(), storageBuffers_indexUintData[i].deviceMemory, 0, sizeof(IndexUintDataStruct), 0, &storageBuffersMapped_indexUintData[i]);
+    }
+}
+void CGraphicsDescriptorManager::uploadStorageBuffer_vertexFloat_indexUint_Data(uint32_t currentFrame, const void* data_vertex, const void* data_index, size_t size_vertex, size_t size_index){
+    //std::cout<<"uploadStorageBuffer_vertexFloat_indexUint_Data: currentFrame = "<<currentFrame<<std::endl;
+    std::cout.flush();
+    if (data_vertex && size_vertex > 0) {
+        //std::cout<<"storageBuffersMapped_vertexFloatData: size_vertex = "<<size_vertex<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_vertexFloatData[currentFrame], data_vertex, size_vertex);
+    }
+    if (data_index && size_index > 0) {
+        //std::cout<<"storageBuffersMapped_indexUintData: size_index = "<<size_index<<", currentFrame = "<<currentFrame<<std::endl;
+        memcpy(storageBuffersMapped_indexUintData[currentFrame], data_index, size_index);
+    }
+}
+
+
+
 /*************
- * 10 GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2
+ * GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2
  ************/
 /*
 VkSampler CGraphicsDescriptorManager::lightDepthImageSampler_hardwareDepthBias2;
@@ -765,6 +857,7 @@ int CGraphicsDescriptorManager::getPoolSize(){ //to calculate descriptor pool si
     descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE ? 1:0;
     descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS ? 1:0;
     descriptorPoolSize += graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS ? 1:0;
+    descriptorPoolSize += graphicsUniformTypes & GRAPHICS_STORAGEBUFFER_MESHSHADER ? 2:0; //2 storage buffers for mesh shader
     //descriptorPoolSize += graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2 ? 1:0;
 
 	return descriptorPoolSize;
@@ -780,6 +873,7 @@ int CGraphicsDescriptorManager::getLayoutSize_General(){ //to get descriptor lay
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE) ? 1:0;
     descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS) ? 1:0;
     descriptorPoolSize += graphicsUniformTypes & GRAPHICS_UNIFORMBUFFER_TLAS ? 1:0;
+    descriptorPoolSize += graphicsUniformTypes & GRAPHICS_STORAGEBUFFER_MESHSHADER ? 2:0; //2 storage buffers for mesh shader
     //descriptorPoolSize += (graphicsUniformTypes & GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS2) ? 1:0;
 
 	return descriptorPoolSize;
@@ -808,6 +902,11 @@ void CGraphicsDescriptorManager::DestroyAndFree(){
 
     for (size_t i = 0; i < m_globalUniformBuffers.size(); i++) 
         m_globalUniformBuffers[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+
+    for (size_t i = 0; i < storageBuffers_vertexFloatData.size(); i++) 
+        storageBuffers_vertexFloatData[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
+    for (size_t i = 0; i < storageBuffers_indexUintData.size(); i++) 
+        storageBuffers_indexUintData[i].DestroyAndFree(CContext::GetHandle().GetLogicalDevice());
     
     //no need to destroy descriptorSets, because they are from descriptorPool
     vkDestroyDescriptorPool(CContext::GetHandle().GetLogicalDevice(), graphicsDescriptorPool, nullptr);//to be move to base class

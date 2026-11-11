@@ -18,20 +18,21 @@ enum UniformTypes {
     GRAPHCIS_COMBINEDIMAGESAMPLER_DEPTHIMAGE =                          0x00000080,  //for main camera
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE =                     0x00000100,  //for light camera
     GRAPHCIS_COMBINEDIMAGESAMPLER_LIGHTDEPTHIMAGE_HARDWAREDEPTHBIAS =   0x00000200,  //for light camera(Hardware depth bias, use two renderpass, dynamic depth bias)
-    COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000400,
-    COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00000800,
-    COMPUTE_UNIFORMBUFFER_MATERIAL =                                    0x00001000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                     0x00002000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX =                         0x00004000,
-    COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00008000,
-    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00010000,
-    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00020000,
-    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00040000,
-    COMPUTE_STORAGEBUFFER_CUSTOM =                                      0x00080000,
-    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00100000, //for partile system
-    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00200000,
-    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00400000,
-    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x00800000
+    GRAPHICS_STORAGEBUFFER_MESHSHADER =                                 0x00000400,  //for mesh shader
+    COMPUTE_UNIFORMBUFFER_GLOBAL =                                      0x00000800,
+    COMPUTE_STORAGEBUFFER_WINDOWSWAP =                                  0x00001000,
+    COMPUTE_UNIFORMBUFFER_MATERIAL =                                    0x00002000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXATTRIBUTE =                     0x00004000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEVERTEXINDEX =                         0x00008000,
+    COMPUTE_STORAGEBUFFER_TRIANGLEREORDERINDEX =                        0x00010000,
+    COMPUTE_STORAGEBUFFER_BVHNODE =                                     0x00020000,
+    COMPUTE_STORAGEBUFFER_SPHERE =                                      0x00040000,
+    COMPUTE_UNIFORMBUFFER_CUSTOM =                                      0x00080000,
+    COMPUTE_STORAGEBUFFER_CUSTOM =                                      0x00100000,
+    COMPUTE_STORAGEBUFFER_CUSTOMSWAP =                                  0x00200000, //for partile system
+    COMPUTE_STORAGEIMAGE_TEXTURE =                                      0x00400000,
+    COMPUTE_STORAGEIMAGE_SWAPCHAIN =                                    0x00800000,
+    RAYTRACING_STORAGEIMAGE_SWAPCHAIN =                                 0x01000000
 };
 
 /*********
@@ -252,7 +253,7 @@ struct StructGraphicsGlobalUniformBuffer {
 		binding.descriptorCount = 1;
 		binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		binding.pImmutableSamplers = nullptr;
-		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_NV;
         return binding;
     }
 };
@@ -326,7 +327,7 @@ struct StructObjectUniformBuffer { //used in object.h/cpp and gameEngine_initial
 		binding.descriptorCount = 1;
 		binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 		binding.pImmutableSamplers = nullptr;
-		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_MESH_BIT_NV;
         return binding;
     }
 public:

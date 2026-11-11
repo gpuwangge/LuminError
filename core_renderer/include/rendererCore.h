@@ -106,6 +106,7 @@ namespace LERenderer{
         void DrawIndexed(int model_id) override;//std::vector<uint32_t> &indices3D
         void Draw(uint32_t n) override;
         void DrawInstanceIndexed(int model_id, int instanceCount) override;
+        void DrawMeshTasks(int groupCountX, int groupCountY, int groupCountZ) override;
 
         //End()
         void EndGraphicsRenderPass() override;
@@ -213,8 +214,13 @@ namespace LERenderer{
         PFN_vkDestroyAccelerationStructureKHR          fpDestroyAccelerationStructureKHR          = nullptr; //used in create blas
 
         PFN_vkBuildAccelerationStructuresKHR           fpBuildAccelerationStructuresKHR           = nullptr; //not used yet, this is optional?
-
         bool LoadRayTracingFunctions_core();
+
+
+        //meshshader
+        PFN_vkCmdDrawMeshTasksEXT                      fpCmdDrawMeshTasksEXT                      = nullptr;
+        bool LoadMeshShaderFunctions() override;
+        
 
         VkDeviceAddress GetBufferAddress(VkDevice device, VkBuffer buffer);
 
@@ -337,9 +343,10 @@ namespace LERenderer{
         using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
         using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
         void CreateGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
-            VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
-            VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo) override{
-                renderProcess.createGraphicsPipeline(getBindingDesc, getAttributeDesc, topology, vertShaderModule, fragShaderModule, bUseVertexBuffer, bUseInstanceBuffer, renderPass, graphcisPipeline_id, appInfo);
+            VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, VkShaderModule &meshShaderModule, VkShaderModule &taskShaderModule,
+            bool bUseVertexBuffer, bool bUseInstanceBuffer,
+            VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo, bool bEnableMeshshader) override{
+                renderProcess.createGraphicsPipeline(getBindingDesc, getAttributeDesc, topology, vertShaderModule, fragShaderModule, meshShaderModule, taskShaderModule, bUseVertexBuffer, bUseInstanceBuffer, renderPass, graphcisPipeline_id, appInfo, bEnableMeshshader);
             }
         
         void AddColorBlendAttachment(VkBlendOp colorBlendOp, VkBlendFactor srcColorBlendFactor, VkBlendFactor dstColorBlendFactor, 
@@ -399,6 +406,11 @@ namespace LERenderer{
         void addLightDepthImageSamplerUniformBuffer_hardwareDepthBias() override { graphicsDescriptorManager.addLightDepthImageSamplerUniformBuffer_hardwareDepthBias(); }
 
         void addGraphicsTLASUniformBuffer() override { graphicsDescriptorManager.addTLASUniformBuffer(); }
+        void addGraphicsStorageBuffer_meshshader() override { graphicsDescriptorManager.addStorageBuffer_vertexFloat_indexUint_Data(); }
+        void uploadGraphicsStorageBuffer_meshshader(uint32_t currentFrame, const void* data_vertex, const void* data_index, size_t dataSize_vertex, size_t dataSize_index) override {
+            graphicsDescriptorManager.uploadStorageBuffer_vertexFloat_indexUint_Data(currentFrame, data_vertex, data_index, dataSize_vertex, dataSize_index);
+        }
+
 
         virtual void GraphicsDescriptorManagerDestroyAndFree() override { graphicsDescriptorManager.DestroyAndFree(); }
 
@@ -571,7 +583,8 @@ namespace LERenderer{
         }
         VkInstance GetInstance() override { return instance.get()->getHandle(); }
 
-        void CreatePhysicalDevice(const std::vector<const char*> requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers, const bool enableRaytracingPipeline) override {
+        void CreatePhysicalDevice(const std::vector<const char*> requireDeviceExtensions, VkQueueFlagBits requiredQueueFamilies, const std::vector<const char*> requiredValidationLayers, 
+            const bool bEnableRaytracing, const bool enableMeshShader) override {
             instance->findAllPhysicalDevices();
 
             CContext::GetHandle().physicalDevice = instance->pickSuitablePhysicalDevice(surface, requireDeviceExtensions, requiredQueueFamilies);
@@ -579,7 +592,8 @@ namespace LERenderer{
             //App dev operates logical device, can logical device communicate with physical device by command queues
             //App dev will fill command buffer with commands later
             //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
-            CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions, enableRaytracingPipeline);
+            CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions, 
+                bEnableRaytracing, enableMeshShader);
         }
 
         VkDebugUtilsMessengerEXT GetDebugMessenger() override {

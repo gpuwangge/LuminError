@@ -28,9 +28,6 @@ class CObject : public CEntity {
     //CTextureManager *p_textureManager;
     //CTextImageManager *p_textImageManager;
 
-    //bool bUseTextureSampler;
-    std::vector<VkDescriptorSet> descriptorSets_graphics_texture_image_sampler; //This descritpor is for texture sampler. one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
-
     void CreateDescriptorSets_TextureImageSampler(
         VkDescriptorPool &descriptorPool, 
         VkDescriptorSetLayout &descriptorSetLayout, 
@@ -41,6 +38,9 @@ class CObject : public CEntity {
 
 public:
     CObject(){};
+
+    //bool bUseTextureSampler;
+    std::vector<VkDescriptorSet> descriptorSets_graphics_texture_image_sampler; //This descritpor is for texture sampler. one descriptor set for each host resource (MAX_FRAMES_IN_FLIGHT)
 
     int m_object_id = 0;
     std::vector<int> m_texture_ids;
@@ -81,6 +81,8 @@ public:
     void Draw_NoIndexNoSet(int graphicsPipelineId = -1, uint32_t n = 0);
     //draw with external buffers
     void Draw(std::vector<CWxjBuffer> &buffer, int graphicsPipelineId = -1, uint32_t n = 0); //const VkBuffer *pBuffers
+
+    //void DrawMeshTasks();
 };
 
 class CObjectManager{

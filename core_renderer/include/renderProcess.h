@@ -145,9 +145,10 @@ public:
     
     using GetBindingDescFunc = VkVertexInputBindingDescription(*)();
     using GetAttributeDescFunc = std::vector<VkVertexInputAttributeDescription>(*)();
-    void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
-        VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
-        VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo);
+    void createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc, VkPrimitiveTopology topology, 
+        VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, VkShaderModule &meshShaderModule, VkShaderModule &taskShaderModule,
+        bool bUseVertexBuffer, bool bUseInstanceBuffer,
+        VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo, bool bEnableMeshshader);
     void createComputePipeline(VkShaderModule &computeShaderModule);
     void createRaytracingPipeline(VkShaderModule& rgenModule, VkShaderModule& primaryMissModule, VkShaderModule& shadowMissModule, 
         VkShaderModule& primaryRchitModule, VkShaderModule& shadowRchitModule,

@@ -102,6 +102,9 @@ namespace LEGameEngine{
         //std::vector<Vertex3D> modelVertices3D;
         //std::vector<uint32_t> modelIndices3D;
 
+        VertexFloatDataStruct storageBufferObject_VertexFloatData{};
+        IndexUintDataStruct storageBufferObject_IndexUintData{};
+
 
         /******************
         * Helper Functions
@@ -121,10 +124,13 @@ namespace LEGameEngine{
         void Update(); //base: update time, frame id, camera and ubo
         void RecordGraphicsCommandBuffer_RenderpassMainscene(){ gamer->RecordGraphicsCommandBuffer_RenderpassMainscene(); } //todo: Optimize here
 
+        //----------gameEngine_meshshader---------
+        void SetupMeshShader();
+
+        //----------gameEngine_raytracing---------
         //Compute Ray Tracing
         void InitializeComputeRayTracing(); //for compute ray tracing, not ray tracing pipeline
         void SetupComputeRayTracing(); //for compute ray tracing, not ray tracing pipeline
-
         //Ray Tracing Pipeline
         void SetupRayTracing(bool bVerboseRaytracing); //for ray tracing pipeline
         //CWxjBuffer& GetRaytracingVertexBuffer() override { return allvertex};
@@ -247,6 +253,7 @@ namespace LEGameEngine{
         void CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vector<uint32_t> &indices3D, bool isTextboxImage) override;
 
         void DrawObject(int objectId) override;
+        //void DrawMeshTasksObject(int objectId) override;
         void DrawTexts() override;
         void DrawObjects() override;
         void DrawObjects(int startObjectId, int endObjectId) override;

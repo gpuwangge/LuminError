@@ -33,7 +33,8 @@ public:
     bool checkDeviceExtensionSupport(const std::vector<const char*>  requireDeviceExtensions);
 
     std::vector<std::unique_ptr<CLogicalDevice>> logicalDevices;
-    void createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions, const bool enableRaytracingPipeline);
+    void createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions, 
+        const bool enableRaytracingPipeline, const bool enableMeshShader);
     VkDevice getLogicalDevice() {return logicalDevices.back().get()->logicalDevice; }
     VkQueue getGraphicsQueue()  {return logicalDevices.back().get()->graphicsQueue; }
     VkQueue getPresentQueue()   {return logicalDevices.back().get()->presentQueue;  }

@@ -86,6 +86,8 @@ namespace LEGameEngine{
         virtual void DrawObjects() = 0;
         virtual void DrawObjects(int startObjectId, int endObjectId) = 0;
 
+        //virtual void DrawMeshTasksObject(int objectId) = 0;
+
         //Expose functions for Example(BasicTriangles) to use
         virtual int GetCurrentFrame() = 0;
         virtual double GetElapseTime() = 0;

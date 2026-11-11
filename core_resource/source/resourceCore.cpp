@@ -105,6 +105,22 @@ VkShaderModule& ResourceCore::GetVertexShaderModule(int index) { return shaderMa
 VkShaderModule& ResourceCore::GetFragmentShaderModule(int index) { return shaderManager.fragShaderModules[index]; }
 VkShaderModule& ResourceCore::GetComputeShaderModule(int index) { return shaderManager.compShaderModules[index]; }
 VkShaderModule& ResourceCore::GetRaytracingShaderModule(int index) { return shaderManager.raytShaderModules[index]; }
+VkShaderModule& ResourceCore::GetMeshShaderModule(int index) { 
+    if(index < shaderManager.meshShaderModules.size())
+        return shaderManager.meshShaderModules[index]; 
+
+    //todo: change return value
+    static VkShaderModule nullModule = VK_NULL_HANDLE;
+    return nullModule;
+}
+VkShaderModule& ResourceCore::GetTaskShaderModule(int index) {
+    if(index < shaderManager.taskShaderModules.size())
+        return shaderManager.taskShaderModules[index]; 
+
+    //todo: change return value
+    static VkShaderModule nullModule = VK_NULL_HANDLE;
+    return nullModule;
+}
 void ResourceCore::CreateShaderPushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset, uint32_t size) { shaderManager.CreatePushConstantRange(shaderStageFlagBits, offset, size); }
 bool ResourceCore::GetShaderEnablePushConstant() { return shaderManager.bEnablePushConstant; }
 VkPushConstantRange& ResourceCore::GetShaderPushConstantRange() { return shaderManager.pushConstantRange; }

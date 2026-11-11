@@ -71,11 +71,10 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     gamer->PreInitialize();
 
     yamler->ReadExampleYAMLFile(exampleName);
-    //bool bEnableGraphicsPipleine_raytarcing;
+    
     bool bEnableComputePipeline_raytracing = appInfo->Uniform.b_storage_compute_bvhnode ? true : false;
-    bool bEnableRaytracingPipeline_raytracing = (appInfo->Uniform.b_uniform_raytracing_swapchain_storage || appInfo->Feature.feature_graphics_rayquery_enable) ? true : false;
-    //std::cout<<"bEnableComputePipeline_raytracing: "<<bEnableComputePipeline_raytracing<<std::endl;
-    //std::cout<<"bEnableRaytracingPipeline_raytracing: "<<bEnableRaytracingPipeline_raytracing<<std::endl;
+    bool bEnableRaytracing = (appInfo->Uniform.b_uniform_raytracing_swapchain_storage || appInfo->Feature.feature_graphics_rayquery_enable) ? true : false;
+    bool bEnableMeshShader = appInfo->Feature.feature_graphics_meshshader_enable ? true : false;
 
     /**************** 
     * Five steps with third-party(GLFW or SDL) initialization
@@ -118,11 +117,12 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     //VkQueueFlags requiredQueueFamilies = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT; //？
     const std::vector<const char*>  requireDeviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_KHR_RAY_QUERY_EXTENSION_NAME, //ray query TODO
+        VK_KHR_RAY_QUERY_EXTENSION_NAME, //ray query TODO: should not enable this if no ray query is used
         VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME, //ray tracing TODO
         VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME, //ray tracing TODO
         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME, //ray tracing TODO
-        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME //ray tracing TODO
+        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, //ray tracing TODO
+        VK_EXT_MESH_SHADER_EXTENSION_NAME //mesh shader TODO
     };
 
     // instance->findAllPhysicalDevices();
@@ -133,7 +133,8 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     // //App dev will fill command buffer with commands later
     // //instance->pickedPhysicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
     // CContext::GetHandle().physicalDevice->get()->createLogicalDevices(surface, requiredValidationLayers, requireDeviceExtensions);
-    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers, bEnableRaytracingPipeline_raytracing); //also create logical device and command queues here
+    renderer->CreatePhysicalDevice(requireDeviceExtensions, requiredQueueFamilies, requiredValidationLayers, 
+        bEnableRaytracing, bEnableMeshShader); //also create logical device and command queues here
     
     // if (!LoadRayTracingFunctions(renderer->GetLogicalDevice())) {//ray tracing TODO, load function after logical device is created
     //     logger->Log("Failed to load ray tracing functions\n");
@@ -168,10 +169,17 @@ void GameEngine::Run(std::string exampleName){ //Entrance Function
     if(bEnableComputePipeline_raytracing) InitializeComputeRayTracing();
     Initialize();
     if(bEnableComputePipeline_raytracing) SetupComputeRayTracing();
+    if(bEnableMeshShader) SetupMeshShader();
     gamer->PostInitialize();
 
-    if(renderer->GetRenderMode() == RenderModes::COMPUTE_SWAPCHAIN || renderer->GetRenderMode() == RenderModes::RAYTRACING_SWAPCHAIN)
+    std::cout<<"======End Initialization======="<<std::endl;
+
+    if(renderer->GetRenderMode() == RenderModes::COMPUTE_SWAPCHAIN || renderer->GetRenderMode() == RenderModes::RAYTRACING_SWAPCHAIN){
+        std::cout<<"======Convert Swapchain Image Layout======="<<std::endl;
         ConvertStorageImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+    }
+
+    std::cout<<"======Begin Main Loop======="<<std::endl;
 
     TimePoint T1 = now();
     totalInitTime = printElapsed("Application: Total Initialization cost", T0, T1);
@@ -272,8 +280,13 @@ void GameEngine::Record_Present(){
     /**************************
      * Universial Render Functions
      *************************/
+    std::vector<std::vector<VkDescriptorSet>> dsSets; //mesh shader todo
+    //set = 0 is for general uniform; set = 1 is for texture sampler uniform
+    std::vector<VkDescriptorSet> *p_descriptorSets_graphics_general = &(renderer->GetDescriptorSets_General());
+
     switch(renderer->GetRenderMode()){
         case RenderModes::GRAPHICS:
+        case RenderModes::GRAPHICS_MESHSHADER:
         //case renderer.RENDER_GRAPHICS_Mode:
             //std::cout<<"RENDER_GRAPHICS_Mode"<<std::endl;
 
@@ -290,6 +303,25 @@ void GameEngine::Record_Present(){
                 renderer->GetSwapchainExtent(),
                 renderer->GetClearValues());
             RecordGraphicsCommandBuffer_RenderpassMainscene();
+
+            //mesh shader todo (should only in mesh shader mode)
+            if(renderer->GetRenderMode() == RenderModes::GRAPHICS_MESHSHADER){
+                renderer->BindGraphicsPipeline(renderer->GetGraphicsPipeline(2), VK_PIPELINE_BIND_POINT_GRAPHICS);
+                if(renderer->GetSetSize_General() > 0) dsSets.push_back(*p_descriptorSets_graphics_general); 
+                if(renderer->GetTextureImageSamplersSize() > 0) dsSets.push_back(objects[0].descriptorSets_graphics_texture_image_sampler); 
+                //std::cout<<"dsSets.size()="<<dsSets.size()<<std::endl;
+                //std::cout<<"p_renderer->indices3Ds.size()="<<p_renderer->indices3Ds.size()<<std::endl;
+                //int dynamicObjectOffset = 0;
+                renderer->BindGraphicsDescriptorSets(renderer->GetGraphicsPipelineLayout(2), dsSets, 0, 0);
+                //for viking.obj: number of prims=11484/3, prim/64=59.8
+                //for rock.obj: number of prims=576/3, prim/64=3
+                //std::cout<<"Number of prims="<< modelData[objects[0].GetModelID()-2].modelIndices3D.size()/3<<std::endl;//objects[0].GetModelID()
+                //std::cout<<"objects[0].GetModelID()="<<objects[0].GetModelID()<<std::endl;
+                int numPrims = modelData[objects[0].GetModelID()-2].modelIndices3D.size()/3;
+                int numMeshTasks = (numPrims + 63) / 64; 
+                renderer->DrawMeshTasks(numMeshTasks, 1, 1);
+            }
+
             renderer->EndRecordGraphicsCommandBuffer();
 
             //std::cout<<"DEBUG Application: Finished recording graphics command buffer. currentFrame = "<< renderer->GetCurrentFrame() <<std::endl;

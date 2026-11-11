@@ -186,3 +186,18 @@ struct Particle {
         return attributeDescriptions;
     }
 };
+
+//for Mesh Shader, storage buffer, vertex and index data
+static constexpr size_t maxVertexCount = 8192;
+static constexpr size_t vertexFloatStride = 8; //pos(3) + color(3) + texcoord(2) = 8
+static constexpr size_t vertexFloatDataSize = maxVertexCount * vertexFloatStride;
+
+static constexpr size_t maxTriangleCount = 16384;
+static constexpr size_t indexUintDataSize = maxTriangleCount * 3;
+
+struct VertexFloatDataStruct {
+    float vertexFloatData[vertexFloatDataSize];
+};
+struct IndexUintDataStruct{
+    unsigned int indexUintData[indexUintDataSize];
+};

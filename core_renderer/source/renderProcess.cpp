@@ -662,12 +662,14 @@ void CRenderProcess::createGraphicsPipelineLayout(std::vector<VkDescriptorSetLay
 	//REPORT("vkCreatePipelineLayout");
 }
 
-void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc,
-	VkPrimitiveTopology topology, VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, bool bUseVertexBuffer, bool bUseInstanceBuffer,
-	VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo){
+void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, GetAttributeDescFunc getAttributeDesc, VkPrimitiveTopology topology, 
+	VkShaderModule &vertShaderModule, VkShaderModule &fragShaderModule, VkShaderModule &meshShaderModule, VkShaderModule &taskShaderModule,
+	bool bUseVertexBuffer, bool bUseInstanceBuffer,
+	VkRenderPass renderPass, int graphcisPipeline_id, AppInfo *appInfo, bool bEnableMeshshader){
 	bool bVerbose = false;
 	//HERE_I_AM("CreateGraphicsPipeline");
 	bCreateGraphicsPipeline = true;
+	//std::cout<<"bEnableMeshshader = "<<bEnableMeshshader<<std::endl;
 
 	VkResult result = VK_SUCCESS;
 
@@ -688,8 +690,34 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 	fragShaderStageInfo.module = fragShaderModule;
 	fragShaderStageInfo.pName = "main";
 
-	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
-	pipelineInfo.stageCount = 2;
+	VkPipelineShaderStageCreateInfo meshShaderStageInfo{};
+	VkPipelineShaderStageCreateInfo taskShaderStageInfo{};
+	if(bEnableMeshshader){
+		meshShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		meshShaderStageInfo.stage = VK_SHADER_STAGE_MESH_BIT_NV;
+		meshShaderStageInfo.module = meshShaderModule;
+		meshShaderStageInfo.pName = "main";
+
+		taskShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		taskShaderStageInfo.stage = VK_SHADER_STAGE_TASK_BIT_EXT;
+		taskShaderStageInfo.module = taskShaderModule;
+		taskShaderStageInfo.pName = "main";
+	}
+
+	VkPipelineShaderStageCreateInfo shaderStages[3];
+	int stageCount = 2;
+	if(bEnableMeshshader) {
+		shaderStages[0] = taskShaderStageInfo;
+		shaderStages[1] = meshShaderStageInfo;
+		shaderStages[2] = fragShaderStageInfo;
+		stageCount = 3;
+	}else{
+		shaderStages[0] = vertShaderStageInfo;
+		shaderStages[1] = fragShaderStageInfo;
+	}
+	
+
+	pipelineInfo.stageCount = stageCount;
 	pipelineInfo.pStages = shaderStages;
 	
 	/*********2 Asemble Vertex Info**********/
@@ -734,14 +762,16 @@ void CRenderProcess::createGraphicsPipeline(GetBindingDescFunc getBindingDesc, G
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 	}   
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	if(bEnableMeshshader) pipelineInfo.pVertexInputState = nullptr; //mesh shader does not use vertex input state
+	else pipelineInfo.pVertexInputState = &vertexInputInfo;
 
 	/*********3 Assemble**********/
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	inputAssembly.topology = topology;
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
-	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	if(bEnableMeshshader) pipelineInfo.pInputAssemblyState = nullptr; //mesh shader does not use input assembly state
+	else pipelineInfo.pInputAssemblyState = &inputAssembly;
 
 	/*********4 Viewport**********/
 	VkPipelineViewportStateCreateInfo viewportState{};

@@ -322,6 +322,7 @@ void GameEngine::CreateCustomModel3D(std::vector<Vertex3D> &vertices3D, std::vec
 }
 
 void GameEngine::DrawObject(int objectId) { objects[objectId].Draw(); }
+//void GameEngine::DrawMeshTasksObject(int objectId) { objects[objectId].DrawMeshTasks(); }
 void GameEngine::DrawTexts() { textManager.Draw(); }
 void GameEngine::DrawObjects() { for(int i = 0; i < objects.size(); i++) objects[i].Draw(); }
 void GameEngine::DrawObjects(int startObjectId, int endObjectId) { 

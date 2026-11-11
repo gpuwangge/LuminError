@@ -118,7 +118,8 @@ SwapChainSupportDetails CPhysicalDevice::querySwapChainSupport(VkSurfaceKHR surf
     return details;
 }
 
-void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions, const bool enableRaytracingPipeline){
+void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vector<const char*> requiredValidationLayers, const std::vector<const char*>  requireDeviceExtensions, 
+    const bool enableRaytracingPipeline, const bool enableMeshShader){
     //HERE_I_AM("createLogicalDevices");
     
     //physicalDevices.push_back(std::make_unique<CPhysicalDevice>(physical_device));
@@ -141,9 +142,6 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkPhysicalDeviceFeatures deviceFeatures{};
-    deviceFeatures.samplerAnisotropy = VK_TRUE;
-
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
@@ -151,15 +149,18 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
     if(enableRaytracingPipeline){
-    /////////////////Ray Tracing Related/////////////
-        //createInfo.pNext -> deviceFeatures2
-        //              -> rayQueryFeatures(new) 
-        //              -> rayTracingPipelineFeatures -> accelerationStructureFeatures -> features12 -> nullptr
+        /////////////////Ray Tracing Related/////////////
+        //createInfo.pNext -> 1.deviceFeatures2
+        //              -> 2.rayQueryFeatures(new) 
+        //              -> 3.rayTracingPipelineFeatures 
+        //              -> 4.accelerationStructureFeatures 
+        //              -> 5.features12 -> nullptr
 
         // VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
         // bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
         // bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
 
+        //5
         VkPhysicalDeviceVulkan12Features features12{};
         features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
         features12.runtimeDescriptorArray = VK_TRUE;
@@ -168,31 +169,57 @@ void CPhysicalDevice::createLogicalDevices(VkSurfaceKHR surface, const std::vect
 
         //bufferDeviceAddressFeatures.pNext = &features12;
 
+        //4
         VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
         accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
         accelerationStructureFeatures.accelerationStructure = VK_TRUE;
         accelerationStructureFeatures.pNext = &features12;//bufferDeviceAddressFeatures;
 
+        //3
         VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
         rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
         rayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
         rayTracingPipelineFeatures.pNext = &accelerationStructureFeatures;
 
+        //2
         //new: ray query feature
         VkPhysicalDeviceRayQueryFeaturesKHR rayQueryFeatures{};
         rayQueryFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
         rayQueryFeatures.rayQuery = VK_TRUE;
         rayQueryFeatures.pNext = &rayTracingPipelineFeatures;
 
+        //1
         VkPhysicalDeviceFeatures2 deviceFeatures2{};
         deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
         deviceFeatures2.pNext = &rayQueryFeatures; //ray tracing related features can be added here
 
         createInfo.pNext = &deviceFeatures2; //ray tracing related features can be added here
         ////////////////////////////////////////////
     }else{
         //The Vulkan spec states: If the pNext chain includes a VkPhysicalDeviceFeatures2 structure, then pEnabledFeatures must be NULL
+        std::cout<<"create logical device without ray tracing features"<<std::endl;
+        // 原来的设置始终保留
+        VkPhysicalDeviceFeatures deviceFeatures{};
+        deviceFeatures.samplerAnisotropy = VK_TRUE;
         createInfo.pEnabledFeatures = &deviceFeatures; 
+
+        // 放在 if 外面，保证 vkCreateDevice 调用时结构仍然有效
+        VkPhysicalDeviceMeshShaderFeaturesEXT meshFeatures{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT};
+
+        //向 GPU 驱动询问：“这张显卡支持哪些功能？请把结果写进这些结构体。”
+        // VkPhysicalDeviceFeatures2 supportedFeatures{}; //for task shader
+        // supportedFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        // supportedFeatures.pNext = &meshFeatures;
+        // vkGetPhysicalDeviceFeatures2(handle, &supportedFeatures);
+
+        if (enableMeshShader) {
+            meshFeatures.meshShader = VK_TRUE;
+            meshFeatures.taskShader = VK_TRUE;
+
+            meshFeatures.pNext = const_cast<void*>(createInfo.pNext);
+            createInfo.pNext = &meshFeatures;
+        }
     }
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(requireDeviceExtensions.size());

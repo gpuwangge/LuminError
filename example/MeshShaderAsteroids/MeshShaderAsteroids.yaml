@@ -1,5 +1,5 @@
 Objects:
-  - object_name: Viking
+  - object_name: Rock
     object_id: 0
     object_scale: 1
     object_position: [0,0,0]
@@ -20,13 +20,13 @@ Resources:
   - Models:
     - resource_model_name: TEXTBOXIMAGE
     - resource_model_name: TEXTQUAD
-    - resource_model_name: viking_room.obj
+    - resource_model_name: rock.obj
   - Textures:
     - resource_texture_name: textbox_cyber.png
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
-    - resource_texture_name: viking_room.png
+    - resource_texture_name: rock.png
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
@@ -48,6 +48,8 @@ Resources:
     - resource_graphics_pipeline_name: pipeline
       resource_graphics_pipeline_vertexshader_name: MeshShaderAsteroids/shader.vert.spv
       resource_graphics_pipeline_fragmentshader_name: MeshShaderAsteroids/shader.frag.spv
+      resource_graphics_pipeline_meshshader_name: MeshShaderAsteroids/shader.mesh.spv
+      resource_graphics_pipeline_taskshader_name: MeshShaderAsteroids/shader.task.spv
 
 Uniforms:
   Graphics:
@@ -70,7 +72,7 @@ Uniforms:
     uniform_compute_swapchain_storage: false
       
 Features:
-  feature_rendermode: 0 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4
+  feature_rendermode: 6 #GRAPHICS=0, COMPUTE=1, COMPUTE_SWAPCHAIN=2, COMPUTE_GRAPHICS=3, GRAPHICS_SHADOWMAP=4, RAYTRACING_SWAPCHAIN=5, GRAPHICS_MESHSHADER=6
   feature_graphics_48pbt: false
   feature_graphics_push_constant: false
   feature_graphics_global_blend: true
@@ -78,6 +80,7 @@ Features:
   feature_graphics_observe_attachment_id: -1
   feature_graphics_show_performance_control: true
   feature_graphics_show_all_metric_controls: true
+  feature_graphics_meshshader_enable: true
 
 Attachments:
   ShadowmapRenderpass_attachment_depth_light: false

@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Config.h"
 #include "Enum.h"
+//#include <iostream>
 
 namespace LEResource{
 void CShaderManager::CreateShader(const std::string shaderName, short shaderType){
@@ -30,6 +31,20 @@ void CShaderManager::CreateShader(const std::string shaderName, short shaderType
             VkShaderModule newShaderModule;
             raytShaderModules.push_back(newShaderModule);
             pShaderModule = &raytShaderModules[raytShaderModules.size()-1];
+            break;
+        }
+        case MESH:{
+            VkShaderModule newShaderModule;
+            meshShaderModules.push_back(newShaderModule);
+            pShaderModule = &meshShaderModules[meshShaderModules.size()-1];
+            //std::cout<<"CreateShader: MESH shader module created: "<<shaderName<<std::endl;
+            break;
+        }
+        case TASK:{
+            VkShaderModule newShaderModule;
+            taskShaderModules.push_back(newShaderModule);
+            pShaderModule = &taskShaderModules[taskShaderModules.size()-1];
+            //std::cout<<"CreateShader: Task shader module created: "<<shaderName<<std::endl;
             break;
         }
         default:
@@ -93,6 +108,8 @@ void CShaderManager::Destroy(){
     for(int i = 0; i < fragShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, fragShaderModules[i], nullptr);
     for(int i = 0; i < compShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, compShaderModules[i], nullptr);
     for(int i = 0; i < raytShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, raytShaderModules[i], nullptr);
+    for(int i = 0; i < meshShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, meshShaderModules[i], nullptr);
+    for(int i = 0; i < taskShaderModules.size(); i++) vkDestroyShaderModule(m_logicalDevice, taskShaderModules[i], nullptr);
 }
 
 }//namespace

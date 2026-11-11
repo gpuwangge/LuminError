@@ -144,6 +144,7 @@ void RendererCore::SubmitCompute(bool bVerbose){
     //this code handles compute semaphores
     switch(m_renderMode){
         case GRAPHICS:
+        case GRAPHICS_MESHSHADER:
             //Pure graphics application doesn't use compute pipeline
         break;
         case GRAPHICS_SHADOWMAP:
@@ -238,6 +239,7 @@ void RendererCore::SubmitGraphics(bool bVerbose){
     //this code handles graphics semaphores
     switch(m_renderMode){
         case GRAPHICS:
+        case GRAPHICS_MESHSHADER:
         {
             //pure graphics pipeline, need wait swap image is ready
             if(bVerbose) std::cout<<"WaitSemaphore: imageAvailableSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<<", currentFrame = "<<currentFrame<<std::endl;
@@ -317,6 +319,7 @@ void RendererCore::PresentSwapchainImage(VkSwapchainKHR swapchainHandle, bool bV
     VkSemaphore signalSemaphores[1];// = { computeFinishedSemaphores[currentFrame] }; //can not present until compute/graphics signal is ready renderFinishedSemaphores
     switch(m_renderMode){
         case GRAPHICS:
+        case GRAPHICS_MESHSHADER:
             //present only if render is finished
             if(bVerbose) std::cout<<"signalSemaphores: renderFinishedSemaphores index = "<<semaphoreIndex%swapchain.swapchainImageSize<< renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]<<std::endl;
             signalSemaphores[0] = renderFinishedSemaphores[semaphoreIndex%swapchain.swapchainImageSize]; 
@@ -647,6 +650,10 @@ void RendererCore::Draw(uint32_t n){
 void RendererCore::DrawInstanceIndexed(int model_id, int instanceCount){
     vkCmdDrawIndexed(commandBuffers[graphicsCmdId][currentFrame], static_cast<uint32_t>(indices3Ds[model_id].size()), instanceCount, 0, 0, 0);
 }
+void RendererCore::DrawMeshTasks(int groupCountX, int groupCountY, int groupCountZ){
+    //vkCmdDrawMeshTasksEXT(commandBuffers[graphicsCmdId][currentFrame], groupCountX, groupCountY, groupCountZ);
+    fpCmdDrawMeshTasksEXT(commandBuffers[graphicsCmdId][currentFrame], groupCountX, groupCountY, groupCountZ);
+}
 void RendererCore::EndGraphicsRenderPass(){
 	vkCmdEndRenderPass(commandBuffers[graphicsCmdId][currentFrame]);
 }
@@ -910,6 +917,19 @@ bool RendererCore::LoadRayTracingFunctions_core(){
 	return ok;
 }
 
+bool RendererCore::LoadMeshShaderFunctions(){
+    fpCmdDrawMeshTasksEXT =
+        reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(
+            vkGetDeviceProcAddr(GetLogicalDevice(), "vkCmdDrawMeshTasksEXT"));
+    
+    bool ok = true;
+    if (fpCmdDrawMeshTasksEXT == nullptr) {
+        //throw std::runtime_error("Failed to load vkCmdDrawMeshTasksEXT");
+        logger->Log("Missing vkCmdDrawMeshTasksEXT\n");
+        ok = false;
+    }
+    return ok;
+}
 
 
 VkDeviceAddress RendererCore::GetBufferAddress(VkDevice device, VkBuffer buffer) {

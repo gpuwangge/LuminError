@@ -1,0 +1,28 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+
+// 最简单版本：task 每组只用一个线程。
+// 不需要与 mesh shader 的 local_size_x 相同。
+layout(local_size_x = 1) in;
+
+struct TaskPayload {
+    uint baseTriangle;
+};
+
+taskPayloadSharedEXT TaskPayload payload;
+
+void main(){
+    const uint trianglesPerGroup = 64u;
+
+    // 这里的 gl_WorkGroupID.x 来自 CPU DrawMeshTasks 的派发。
+    payload.baseTriangle = gl_WorkGroupID.x * trianglesPerGroup;
+
+    EmitMeshTasksEXT(1u, 1u, 1u); // 当前 task workgroup 启动一个 mesh workgroup。
+
+    /*
+    uint taskID = gl_WorkGroupID.x;
+    bool visible = (taskID % 2u) == 0u;// 调试筛选：保留偶数 task，剔除奇数 task。
+    uint meshGroupCount = visible ? 1u : 0u;
+    EmitMeshTasksEXT(meshGroupCount, 1u, 1u);
+    */
+}

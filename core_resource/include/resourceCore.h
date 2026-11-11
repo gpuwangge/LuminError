@@ -44,6 +44,8 @@ namespace LEResource{
         VkShaderModule& GetFragmentShaderModule(int index) override;
         VkShaderModule& GetComputeShaderModule(int index) override;
         VkShaderModule& GetRaytracingShaderModule(int index) override;
+        VkShaderModule& GetMeshShaderModule(int index) override;
+        VkShaderModule& GetTaskShaderModule(int index) override;
         bool GetShaderEnablePushConstant() override;
         void CreateShaderPushConstantRange(VkShaderStageFlagBits shaderStageFlagBits, uint32_t offset, uint32_t size) override;
         VkPushConstantRange& GetShaderPushConstantRange() override;

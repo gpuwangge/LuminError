@@ -277,3 +277,16 @@ void CObject::Draw(std::vector<CWxjBuffer> &buffer, int graphicsPipelineId, uint
     renderer->Draw(n);
     //std::cout<<"testdraw3"<<std::endl;
 }
+
+
+//void CObject::DrawMeshTasks(){
+    //std::cout<<"CObject::DrawMeshTasks():"<<" m_object_id="<<m_object_id<<", m_model_id="<<m_model_id<<std::endl;
+
+    //auto pfnDrawMeshTasks = (PFN_vkCmdDrawMeshTasksEXT) vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksEXT");
+    
+    // 删掉 vkCmdBindVertexBuffers / vkCmdBindIndexBuffer / vkCmdDrawIndexed
+
+    //vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, meshPipeline);
+    //vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descSet, 0, nullptr);
+    //pfnDrawMeshTasks(cmd, (indexCount / 3 + 63) / 64, 1, 1);
+//}

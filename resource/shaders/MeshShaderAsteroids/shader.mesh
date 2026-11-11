@@ -1,0 +1,63 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#include "../CommonShaders/constants.glsl"
+#include "../CommonShaders/objectUBO.glsl"
+#include "../CommonShaders/graphicsGlobalUBO.glsl"
+
+layout(local_size_x = 64) in; //Compute shader风格的代码，表示每个工作组有64个线程，gl_WorkGroupID.x表示当前workgroup的index，
+//tid: gl_LocalInvocationIndex表示当前线程在workgroup中的编号
+//gid: gl_GlobalInvocationID.x;
+layout(triangles, max_vertices = 192, max_primitives = 64) out;// Mesh shader风格的代码，表示每个工作组最多输出192个顶点和64个三角形
+
+struct TaskPayload { //for task shader to mesh shader
+    uint baseTriangle;
+};
+taskPayloadSharedEXT TaskPayload payload;
+
+// set / binding 选未被上面两个 UBO 占用的编号
+layout(set = 0, binding = 3) readonly buffer V { float v[];   };
+layout(set = 0, binding = 4) readonly buffer I { uint  idx[]; };
+
+// 和原 VS 输出完全一致，frag 不用改
+layout(location = 0) out vec3 fragColor[];
+layout(location = 1) out vec2 fragTexCoord[];
+
+void main() {
+    uint triCount = uint(idx.length()) / 3; //计算整个模型总共有多少个三角形。
+    //const uint indexCount = 11484u;
+    const uint trianglesPerGroup = gl_WorkGroupSize.x; //64u;
+
+    //uint base = gl_WorkGroupID.x * trianglesPerGroup; //non-task shader
+    uint base = payload.baseTriangle;//task shader
+
+    uint n = base < triCount ? min(trianglesPerGroup, triCount - base) : 0u; //计算当前工作组实际需要处理的三角形数量（处理尾部裁剪）。
+
+    SetMeshOutputsEXT(n * 3, n); //向 GPU 硬件宣告当前工作组最终输出的顶点数和三角形数。
+    //layout(...) 声明的是输出数量的上限，而 SetMeshOutputsEXT(...) 设置的是当前 mesh shader workgroup 的实际数量。两者都需要
+
+    uint t = gl_LocalInvocationIndex;
+    if (t >= n) return; //让没有任务的线程提前退出
+
+    mat4 mvp = graphicsGlobalUBO.mainCameraProj
+             * graphicsGlobalUBO.mainCameraView
+             * objectUBO.model;
+
+    //这段代码从输入索引和顶点数组中取出第 base + t 个三角形的三个顶点，变换其位置并复制颜色、纹理坐标，最后把它们连接成当前 workgroup 输出的第 t 个三角形。
+    uint triangleID = base + t;
+    vec3 debugColor = 0.25 + 0.75 * fract(
+        float(triangleID + 1u) * vec3(0.1031, 0.11369, 0.13787)
+    );
+
+    for (uint k = 0; k < 3; ++k) {
+        uint vertexIndex = idx[(base + t) * 3u + k];
+        uint i = vertexIndex * 8;   // Vertex3D = 8~15 floats
+        uint o = t * 3 + k;
+        gl_MeshVerticesEXT[o].gl_Position = mvp * vec4(v[i], v[i+1], v[i+2], 1.0); //写入第 o 个输出顶点的位置
+        fragColor[o]    = vec3(v[i+3], v[i+4], v[i+5]);
+        fragTexCoord[o] = vec2(v[i+6], v[i+7]);
+        
+        // normal (i+8..10)、tangent (i+11..14) 原 VS 没用，这里也不读
+    }
+    //mesh shader 自己生成了“顶点数据 + 索引数据”。你这段写法让每个三角形独占三个顶点；也可以使用重复的顶点索引，让不同三角形共享顶点。
+    gl_PrimitiveTriangleIndicesEXT[t] = uvec3(t*3, t*3+1, t*3+2); 
+}

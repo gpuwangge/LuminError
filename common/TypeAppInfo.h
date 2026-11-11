@@ -29,6 +29,7 @@ struct FeatureConfig {
     bool feature_graphics_show_all_metric_controls = true;
     bool feature_graphics_enable_controls = false; //this is not read from yaml
     bool feature_graphics_rayquery_enable = false;
+    bool feature_graphics_meshshader_enable = false;
 
     int feature_raytracing_pipeline_render_mode = 0;
     int feature_raytracing_pipeline_interactive_move_mode = 0;
@@ -83,6 +84,7 @@ struct FeatureConfig {
         feature_raytracing_pipeline_shadow_ray_ignore_sphere     = getOrDefault(node, "feature_raytracing_pipeline_shadow_ray_ignore_sphere", false);
 
         feature_graphics_rayquery_enable     = getOrDefault(node, "feature_graphics_rayquery_enable", false);
+        feature_graphics_meshshader_enable   = getOrDefault(node, "feature_graphics_meshshader_enable", false);
     }
 };
 
@@ -337,6 +339,8 @@ struct GraphicsPipelineConfig{
     std::string graphics_pipeline_name = "Default";
     std::string graphics_pipeline_vertexshader_name = "Default";
     std::string graphics_pipeline_fragmentshader_name = "Default";
+    std::string graphics_pipeline_meshshader_name = "Default";
+    std::string graphics_pipeline_taskshader_name = "Default";
     bool graphics_pipeline_renderpasses_shadowmap = 0;
     int graphics_pipeline_subpasses_subpass_id = 0;
     int graphics_pipeline_vertexdatatype = 2;
@@ -349,6 +353,8 @@ struct GraphicsPipelineConfig{
         graphics_pipeline_name                         = getOrDefault(node, "resource_graphics_pipeline_name", std::string{"Default"});
         graphics_pipeline_vertexshader_name            = getOrDefault(node, "resource_graphics_pipeline_vertexshader_name", std::string{"Default"});
         graphics_pipeline_fragmentshader_name          = getOrDefault(node, "resource_graphics_pipeline_fragmentshader_name", std::string{"Default"});
+        graphics_pipeline_meshshader_name              = getOrDefault(node, "resource_graphics_pipeline_meshshader_name", std::string{"Default"});
+        graphics_pipeline_taskshader_name              = getOrDefault(node, "resource_graphics_pipeline_taskshader_name", std::string{"Default"});
         graphics_pipeline_renderpasses_shadowmap       = getOrDefault(node, "renderpasses_shadowmap", false);
         graphics_pipeline_subpasses_subpass_id         = getOrDefault(node, "subpasses_subpass_id", 0);
         graphics_pipeline_vertexdatatype               = getOrDefault(node, "resource_graphics_pipeline_vertexdatatype", 2);
