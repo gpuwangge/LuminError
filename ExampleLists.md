@@ -30,7 +30,7 @@
 | SimpleVertexBuffer <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleVertexBuffer.png" alt="alt text" width="200" height="200">  | Test of vertex buffer. |
 | SimplePushConstant <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimplePushConstant.png" alt="alt text" width="200" height="200">  | Test of push constant. |
 | SimplePhongLighting <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimplePhongLighting.png" alt="alt text" width="200" height="200">  | Test of phong lighting. |
-| SimpleRayQueryGraphics <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayQueryGraphics.png" alt="alt text" width="200" height="200">  | Enable ray query in graphics pipeline. Shoot rays from object to light source to test shadow. |
+| SimpleRayQueryGraphics <br> <img src="https://github.com/gpuwangge/LuminError/blob/main/images/SimpleRayQueryGraphics.png" alt="alt text" width="200" height="200">  | Enable ray query in graphics pipeline. Shoot rays from object to light source to test shadow. Need a graphics card that supports hardware ray tracing to run this test. |
 
 
 ## Compute Pipeline
