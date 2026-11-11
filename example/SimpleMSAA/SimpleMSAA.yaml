@@ -1,11 +1,11 @@
 Objects:
-  - object_name: Spider
+  - object_name: Tree
     object_id: 0
-    object_scale: 0.02
+    object_scale: 0.15
     object_position: [0,0,0]
-    object_rotation: [90,0,135]
+    object_rotation: [0,0,0]
     object_velocity: [0,0,0]
-    object_angular_velocity: [0,0,20]
+    object_angular_velocity: [0,1,0]
     resource_model_id: 2
     resource_texture_id_list: [1]
     resource_default_graphics_pipeline_id: 2
@@ -20,14 +20,14 @@ Resources:
   - Models:
     - resource_model_name: TEXTBOXIMAGE
     - resource_model_name: TEXTQUAD
-    - resource_model_name: spider.obj
+    - resource_model_name: Lowpoly_tree_sample.obj
     #- resource_model_name: viking_room.obj
   - Textures:
     - resource_texture_name: textbox_cyber.png
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
-    - resource_texture_name: metal.jpg
+    - resource_texture_name: tree_leaf.jpg
       resource_texture_miplevels: 1
       resource_texture_cubemap: false
       uniform_sampler_id: 0
@@ -94,8 +94,8 @@ Subpasses:
   mainsceneRenderpass_subpasses_observe: false
 
 MainCamera:
-  camera_mode: 0
-  camera_position: [0,0,-3]
+  camera_mode: 1
+  camera_position: [0,2.6,-3]
   camera_rotation: [0,0,0]
   object_id_target: 0
   camera_z: [0.1, 256]
